@@ -1,0 +1,374 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Logo } from "@/components/ui/Logo";
+import { InputField } from "@/components/ui/InputField";
+import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { User, Briefcase, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type UserType = "client" | "pro" | null;
+
+const weekdays = [
+  { id: "mon", label: "Seg" },
+  { id: "tue", label: "Ter" },
+  { id: "wed", label: "Qua" },
+  { id: "thu", label: "Qui" },
+  { id: "fri", label: "Sex" },
+  { id: "sat", label: "Sáb" },
+];
+
+const periods = [
+  { id: "morning", label: "Manhã" },
+  { id: "afternoon", label: "Tarde" },
+  { id: "evening", label: "Noite" },
+];
+
+export default function Register() {
+  const navigate = useNavigate();
+  const [userType, setUserType] = useState<UserType>(null);
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+
+  // Form fields
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [city, setCity] = useState("");
+  const [radius, setRadius] = useState("10");
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
+
+  const toggleDay = (day: string) => {
+    setSelectedDays(prev => 
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+  };
+
+  const togglePeriod = (period: string) => {
+    setSelectedPeriods(prev => 
+      prev.includes(period) ? prev.filter(p => p !== period) : [...prev, period]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // Simulate registration
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    
+    if (userType === "client") {
+      navigate("/client/home");
+    } else {
+      navigate("/pro/home");
+    }
+  };
+
+  if (!userType) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-sm animate-fade-in">
+          <div className="text-center mb-12">
+            <Logo size="lg" className="justify-center mb-4" />
+            <h1 className="text-xl font-semibold text-foreground mb-2">
+              Criar conta
+            </h1>
+            <p className="text-muted-foreground">
+              Como você quer usar o LimpaJá?
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <button
+              onClick={() => setUserType("client")}
+              className="w-full p-5 bg-card rounded-xl border border-border card-shadow
+                hover:card-shadow-hover hover:border-primary/20 transition-all duration-200
+                flex items-center gap-4 active:scale-[0.98]"
+            >
+              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
+                <User className="w-6 h-6 text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-foreground">Sou Cliente</h3>
+                <p className="text-sm text-muted-foreground">
+                  Quero contratar limpeza
+                </p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setUserType("pro")}
+              className="w-full p-5 bg-card rounded-xl border border-border card-shadow
+                hover:card-shadow-hover hover:border-primary/20 transition-all duration-200
+                flex items-center gap-4 active:scale-[0.98]"
+            >
+              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
+                <Briefcase className="w-6 h-6 text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-foreground">Sou Diarista</h3>
+                <p className="text-sm text-muted-foreground">
+                  Quero oferecer meus serviços
+                </p>
+              </div>
+            </button>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground mt-8">
+            Já tem conta?{" "}
+            <button 
+              onClick={() => navigate("/login")}
+              className="text-primary font-medium hover:underline"
+            >
+              Entrar
+            </button>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col p-6">
+      <div className="w-full max-w-sm mx-auto animate-fade-in">
+        <button
+          onClick={() => step === 1 ? setUserType(null) : setStep(1)}
+          className="text-sm text-muted-foreground hover:text-foreground mb-6"
+        >
+          ← Voltar
+        </button>
+
+        <div className="text-center mb-8">
+          <Logo size="md" className="justify-center mb-4" />
+          <h1 className="text-xl font-semibold text-foreground">
+            {userType === "client" ? "Cadastro Cliente" : "Cadastro Diarista"}
+          </h1>
+          {userType === "pro" && (
+            <div className="flex justify-center gap-2 mt-4">
+              <div className={cn(
+                "w-8 h-1 rounded-full transition-colors",
+                step >= 1 ? "bg-primary" : "bg-border"
+              )} />
+              <div className={cn(
+                "w-8 h-1 rounded-full transition-colors",
+                step >= 2 ? "bg-primary" : "bg-border"
+              )} />
+            </div>
+          )}
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {step === 1 && (
+            <>
+              <InputField
+                label="Nome completo"
+                placeholder="Seu nome"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              
+              <InputField
+                label="Telefone"
+                type="tel"
+                placeholder="(11) 99999-9999"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+              
+              <InputField
+                label="E-mail"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              
+              <InputField
+                label="Senha"
+                type="password"
+                placeholder="Mínimo 8 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+
+              {userType === "client" && (
+                <label className="flex items-start gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setAcceptTerms(!acceptTerms)}
+                    className={cn(
+                      "w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 mt-0.5",
+                      "transition-colors",
+                      acceptTerms 
+                        ? "bg-primary border-primary" 
+                        : "border-input hover:border-primary/50"
+                    )}
+                  >
+                    {acceptTerms && <Check className="w-3 h-3 text-primary-foreground" />}
+                  </button>
+                  <span className="text-sm text-muted-foreground">
+                    Aceito os{" "}
+                    <a href="#" className="text-primary hover:underline">
+                      termos de uso
+                    </a>{" "}
+                    e{" "}
+                    <a href="#" className="text-primary hover:underline">
+                      política de privacidade
+                    </a>
+                  </span>
+                </label>
+              )}
+
+              {userType === "client" ? (
+                <PrimaryButton 
+                  type="submit" 
+                  fullWidth 
+                  loading={loading}
+                  disabled={!acceptTerms}
+                >
+                  Criar conta
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton 
+                  type="button" 
+                  fullWidth 
+                  onClick={() => setStep(2)}
+                >
+                  Continuar
+                </PrimaryButton>
+              )}
+            </>
+          )}
+
+          {step === 2 && userType === "pro" && (
+            <>
+              <InputField
+                label="Cidade"
+                placeholder="São Paulo"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+              />
+              
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-foreground">
+                  Raio de atendimento
+                </label>
+                <select
+                  value={radius}
+                  onChange={(e) => setRadius(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-input bg-background
+                    text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 
+                    focus:border-primary transition-all duration-200"
+                >
+                  <option value="5">5 km</option>
+                  <option value="10">10 km</option>
+                  <option value="15">15 km</option>
+                  <option value="20">20 km</option>
+                  <option value="30">30 km</option>
+                </select>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-foreground">
+                  Dias disponíveis
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {weekdays.map((day) => (
+                    <button
+                      key={day.id}
+                      type="button"
+                      onClick={() => toggleDay(day.id)}
+                      className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        selectedDays.includes(day.id)
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      )}
+                    >
+                      {day.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-foreground">
+                  Turnos disponíveis
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {periods.map((period) => (
+                    <button
+                      key={period.id}
+                      type="button"
+                      onClick={() => togglePeriod(period.id)}
+                      className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        selectedPeriods.includes(period.id)
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      )}
+                    >
+                      {period.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <label className="flex items-start gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAcceptTerms(!acceptTerms)}
+                  className={cn(
+                    "w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 mt-0.5",
+                    "transition-colors",
+                    acceptTerms 
+                      ? "bg-primary border-primary" 
+                      : "border-input hover:border-primary/50"
+                  )}
+                >
+                  {acceptTerms && <Check className="w-3 h-3 text-primary-foreground" />}
+                </button>
+                <span className="text-sm text-muted-foreground">
+                  Aceito os{" "}
+                  <a href="#" className="text-primary hover:underline">
+                    termos de uso
+                  </a>{" "}
+                  e{" "}
+                  <a href="#" className="text-primary hover:underline">
+                    política de privacidade
+                  </a>
+                </span>
+              </label>
+
+              <PrimaryButton 
+                type="submit" 
+                fullWidth 
+                loading={loading}
+                disabled={!acceptTerms}
+              >
+                Criar conta
+              </PrimaryButton>
+            </>
+          )}
+        </form>
+
+        <p className="text-center text-sm text-muted-foreground mt-6">
+          Já tem conta?{" "}
+          <button 
+            onClick={() => navigate("/login")}
+            className="text-primary font-medium hover:underline"
+          >
+            Entrar
+          </button>
+        </p>
+      </div>
+    </div>
+  );
+}
