@@ -1,0 +1,58 @@
+import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+import { forwardRef } from "react";
+
+interface PrimaryButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
+  loading?: boolean;
+  fullWidth?: boolean;
+}
+
+export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
+  ({ 
+    children, 
+    variant = "primary", 
+    size = "md", 
+    loading, 
+    fullWidth,
+    className, 
+    disabled,
+    ...props 
+  }, ref) => {
+    const variants = {
+      primary: "bg-primary text-primary-foreground button-shadow hover:opacity-90",
+      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      outline: "border border-border bg-transparent text-foreground hover:bg-secondary",
+      ghost: "bg-transparent text-foreground hover:bg-secondary",
+    };
+
+    const sizes = {
+      sm: "px-4 py-2 text-sm",
+      md: "px-6 py-3 text-base",
+      lg: "px-8 py-4 text-lg",
+    };
+
+    return (
+      <button
+        ref={ref}
+        disabled={disabled || loading}
+        className={cn(
+          "inline-flex items-center justify-center gap-2 rounded-lg font-medium",
+          "transition-all duration-200 active:scale-[0.98]",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
+          variants[variant],
+          sizes[size],
+          fullWidth && "w-full",
+          className
+        )}
+        {...props}
+      >
+        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+        {children}
+      </button>
+    );
+  }
+);
+
+PrimaryButton.displayName = "PrimaryButton";
