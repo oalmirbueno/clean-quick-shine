@@ -27,6 +27,9 @@ import ClientOrderDetail from "./pages/client/ClientOrderDetail";
 import ClientProfile from "./pages/client/ClientProfile";
 import ClientSupport from "./pages/client/ClientSupport";
 import ClientCancel from "./pages/client/ClientCancel";
+import ClientLocation from "./pages/client/ClientLocation";
+import ClientSubscription from "./pages/client/ClientSubscription";
+import ClientReferral from "./pages/client/ClientReferral";
 
 // Pro Pages
 import ProHome from "./pages/pro/ProHome";
@@ -39,6 +42,8 @@ import ProVerification from "./pages/pro/ProVerification";
 import ProPlan from "./pages/pro/ProPlan";
 import ProWithdraw from "./pages/pro/ProWithdraw";
 import ProSupport from "./pages/pro/ProSupport";
+import ProQuality from "./pages/pro/ProQuality";
+import ProAvailability from "./pages/pro/ProAvailability";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -84,6 +89,9 @@ const App = () => (
           <Route path="/client/profile" element={<ClientProfile />} />
           <Route path="/client/support" element={<ClientSupport />} />
           <Route path="/client/cancel/:id" element={<ClientCancel />} />
+          <Route path="/client/location" element={<ClientLocation />} />
+          <Route path="/client/subscription" element={<ClientSubscription />} />
+          <Route path="/client/referral" element={<ClientReferral />} />
 
           {/* Pro Routes */}
           <Route path="/pro/home" element={<ProHome />} />
@@ -96,6 +104,8 @@ const App = () => (
           <Route path="/pro/plan" element={<ProPlan />} />
           <Route path="/pro/withdraw" element={<ProWithdraw />} />
           <Route path="/pro/support" element={<ProSupport />} />
+          <Route path="/pro/quality" element={<ProQuality />} />
+          <Route path="/pro/availability" element={<ProAvailability />} />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
