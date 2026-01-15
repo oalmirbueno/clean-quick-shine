@@ -8,6 +8,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Onboarding from "./pages/Onboarding";
+import OnboardingClient from "./pages/OnboardingClient";
+import OnboardingPro from "./pages/OnboardingPro";
 import NotFound from "./pages/NotFound";
 
 // Client Pages
@@ -22,6 +25,8 @@ import ClientRating from "./pages/client/ClientRating";
 import ClientOrders from "./pages/client/ClientOrders";
 import ClientOrderDetail from "./pages/client/ClientOrderDetail";
 import ClientProfile from "./pages/client/ClientProfile";
+import ClientSupport from "./pages/client/ClientSupport";
+import ClientCancel from "./pages/client/ClientCancel";
 
 // Pro Pages
 import ProHome from "./pages/pro/ProHome";
@@ -30,6 +35,23 @@ import ProAgenda from "./pages/pro/ProAgenda";
 import ProEarnings from "./pages/pro/ProEarnings";
 import ProRanking from "./pages/pro/ProRanking";
 import ProProfile from "./pages/pro/ProProfile";
+import ProVerification from "./pages/pro/ProVerification";
+import ProPlan from "./pages/pro/ProPlan";
+import ProWithdraw from "./pages/pro/ProWithdraw";
+import ProSupport from "./pages/pro/ProSupport";
+
+// Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
+import AdminPros from "./pages/admin/AdminPros";
+import AdminProDetail from "./pages/admin/AdminProDetail";
+import AdminClients from "./pages/admin/AdminClients";
+import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminSupport from "./pages/admin/AdminSupport";
+import AdminSupportDetail from "./pages/admin/AdminSupportDetail";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +66,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/onboarding/client" element={<OnboardingClient />} />
+          <Route path="/onboarding/pro" element={<OnboardingPro />} />
 
           {/* Client Routes */}
           <Route path="/client/home" element={<ClientHome />} />
@@ -57,6 +82,8 @@ const App = () => (
           <Route path="/client/orders" element={<ClientOrders />} />
           <Route path="/client/orders/:id" element={<ClientOrderDetail />} />
           <Route path="/client/profile" element={<ClientProfile />} />
+          <Route path="/client/support" element={<ClientSupport />} />
+          <Route path="/client/cancel/:id" element={<ClientCancel />} />
 
           {/* Pro Routes */}
           <Route path="/pro/home" element={<ProHome />} />
@@ -65,6 +92,23 @@ const App = () => (
           <Route path="/pro/earnings" element={<ProEarnings />} />
           <Route path="/pro/ranking" element={<ProRanking />} />
           <Route path="/pro/profile" element={<ProProfile />} />
+          <Route path="/pro/verification" element={<ProVerification />} />
+          <Route path="/pro/plan" element={<ProPlan />} />
+          <Route path="/pro/withdraw" element={<ProWithdraw />} />
+          <Route path="/pro/support" element={<ProSupport />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
+          <Route path="/admin/pros" element={<AdminPros />} />
+          <Route path="/admin/pros/:id" element={<AdminProDetail />} />
+          <Route path="/admin/clients" element={<AdminClients />} />
+          <Route path="/admin/coupons" element={<AdminCoupons />} />
+          <Route path="/admin/support" element={<AdminSupport />} />
+          <Route path="/admin/support/:id" element={<AdminSupportDetail />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
 
           {/* Catch all */}
           <Route path="*" element={<NotFound />} />
