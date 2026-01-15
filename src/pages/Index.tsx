@@ -8,7 +8,7 @@ export default function Index() {
   useEffect(() => {
     // Splash screen - redirect after animation
     const timer = setTimeout(() => {
-      navigate("/login");
+      navigate("/onboarding");
     }, 2000);
 
     return () => clearTimeout(timer);
