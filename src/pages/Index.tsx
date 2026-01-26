@@ -15,7 +15,7 @@ export default function Index() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
       <div className="animate-scale-in">
         <Logo size="lg" className="justify-center mb-6" />
         <p className="text-center text-muted-foreground animate-fade-in">
@@ -24,7 +24,7 @@ export default function Index() {
       </div>
       
       {/* Loading indicator */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 safe-bottom">
         <div className="flex gap-1">
           {[0, 1, 2].map((i) => (
             <div

@@ -150,12 +150,12 @@ export default function AppSettings() {
   };
 
   return (
-    <div className="min-h-screen bg-background safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
+        className="flex-shrink-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
       >
         <div className="flex items-center gap-4 p-4">
           <button
@@ -170,7 +170,7 @@ export default function AppSettings() {
         </div>
       </motion.header>
 
-      <main className="p-4 space-y-6 pb-8">
+      <main className="flex-1 overflow-y-auto p-4 space-y-6 pb-8 safe-bottom">
         {/* App Info */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}

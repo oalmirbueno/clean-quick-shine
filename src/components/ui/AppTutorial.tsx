@@ -228,7 +228,7 @@ export function AppTutorial({ variant, onComplete }: AppTutorialProps) {
           </main>
 
           {/* Footer */}
-          <footer className="p-6 pb-10 safe-bottom">
+          <footer className="flex-shrink-0 p-6 safe-bottom">
             {/* Step indicators */}
             <div className="flex justify-center gap-2 mb-6">
               {steps.map((_, index) => (
