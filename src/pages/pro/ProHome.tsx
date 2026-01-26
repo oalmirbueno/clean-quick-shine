@@ -106,10 +106,16 @@ export default function ProHome() {
         transition={{ duration: 0.4 }}
         className="bg-card border-b border-border p-4"
       >
+        {/* Centered Large Logo */}
+        <div className="flex justify-center mb-4">
+          <Logo size="xl" />
+        </div>
+        
         <div className="flex items-center justify-between mb-4">
-          <Logo size="md" />
           <div className="flex items-center gap-2">
             {getPlanBadge()}
+          </div>
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             <motion.button 
               whileTap={{ scale: 0.95 }}
@@ -122,7 +128,7 @@ export default function ProHome() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
-              className="w-8 h-8 rounded-full overflow-hidden bg-muted"
+              className="w-10 h-10 rounded-full overflow-hidden bg-muted"
             >
               {proAvatar ? (
                 <img 
