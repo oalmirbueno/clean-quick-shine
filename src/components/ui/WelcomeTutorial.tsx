@@ -1,38 +1,74 @@
 import { useState, useEffect } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { Sparkles, Shield, Clock, Star, ChevronRight } from "lucide-react";
+import { Download, Share, PlusSquare, Smartphone, ChevronRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
-const tutorialSteps = [
+const TUTORIAL_STORAGE_KEY = "cleanquick_pwa_tutorial_completed";
+
+// Detect platform
+const getDeviceInfo = () => {
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches 
+    || (window.navigator as any).standalone === true;
+  
+  return { isIOS, isAndroid, isStandalone };
+};
+
+interface TutorialStep {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  action?: string;
+}
+
+const getIOSSteps = (): TutorialStep[] => [
   {
-    icon: Sparkles,
-    title: "Bem-vindo ao CleanQuick!",
-    description: "O jeito mais fácil de contratar limpeza profissional para sua casa ou escritório.",
-    highlight: "Vamos te mostrar como funciona",
+    icon: Share,
+    title: "Toque no botão Compartilhar",
+    description: "Na barra inferior do Safari, toque no ícone de compartilhamento (quadrado com seta para cima).",
+    action: "Passo 1 de 3",
   },
   {
-    icon: Clock,
-    title: "Agende em segundos",
-    description: "Escolha o serviço, data e horário. Nós encontramos a melhor profissional disponível.",
-    highlight: "Sem complicação",
+    icon: PlusSquare,
+    title: "Adicionar à Tela de Início",
+    description: "Role as opções e toque em \"Adicionar à Tela de Início\".",
+    action: "Passo 2 de 3",
   },
   {
-    icon: Shield,
-    title: "Pagamento seguro",
-    description: "Seu pagamento fica protegido até o serviço ser concluído e aprovado por você.",
-    highlight: "100% garantido",
-  },
-  {
-    icon: Star,
-    title: "Profissionais verificadas",
-    description: "Todas as diaristas são avaliadas e verificadas. Veja reviews reais de outros clientes.",
-    highlight: "Qualidade garantida",
+    icon: Check,
+    title: "Confirme a instalação",
+    description: "Toque em \"Adicionar\" no canto superior direito. Pronto! O app estará na sua tela inicial.",
+    action: "Passo 3 de 3",
   },
 ];
 
-const TUTORIAL_STORAGE_KEY = "cleanquick_tutorial_completed";
+const getAndroidSteps = (): TutorialStep[] => [
+  {
+    icon: Download,
+    title: "Menu do navegador",
+    description: "Toque nos três pontos (⋮) no canto superior direito do Chrome.",
+    action: "Passo 1 de 2",
+  },
+  {
+    icon: PlusSquare,
+    title: "Instalar aplicativo",
+    description: "Toque em \"Instalar aplicativo\" ou \"Adicionar à tela inicial\" e confirme.",
+    action: "Passo 2 de 2",
+  },
+];
+
+const getGenericSteps = (): TutorialStep[] => [
+  {
+    icon: Download,
+    title: "Instale o app",
+    description: "Use o menu do seu navegador para adicionar este site à tela inicial do seu dispositivo.",
+    action: "Instalação",
+  },
+];
 
 interface WelcomeTutorialProps {
   onComplete: () => void;
@@ -41,9 +77,22 @@ interface WelcomeTutorialProps {
 export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
+  const [deviceInfo] = useState(getDeviceInfo);
+  const [showIntro, setShowIntro] = useState(true);
+
+  const steps = deviceInfo.isIOS 
+    ? getIOSSteps() 
+    : deviceInfo.isAndroid 
+      ? getAndroidSteps() 
+      : getGenericSteps();
 
   const handleNext = () => {
-    if (currentStep < tutorialSteps.length - 1) {
+    if (showIntro) {
+      setShowIntro(false);
+      return;
+    }
+    
+    if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       handleComplete();
@@ -62,8 +111,16 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
     }, 300);
   };
 
-  const step = tutorialSteps[currentStep];
-  const isLastStep = currentStep === tutorialSteps.length - 1;
+  // If already installed as PWA, skip tutorial
+  useEffect(() => {
+    if (deviceInfo.isStandalone) {
+      handleComplete();
+    }
+  }, [deviceInfo.isStandalone]);
+
+  const step = steps[currentStep];
+  const isLastStep = currentStep === steps.length - 1;
+  const totalSteps = steps.length;
 
   return (
     <AnimatePresence>
@@ -77,7 +134,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
         >
           {/* Header */}
           <header className="p-4 flex items-center justify-between">
-            <div className="w-10" /> {/* Spacer */}
+            <div className="w-10" />
             <Logo size="sm" iconOnly />
             <button
               onClick={handleSkip}
@@ -89,95 +146,169 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
 
           {/* Content */}
           <main className="flex-1 flex flex-col items-center justify-center p-6">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="w-full max-w-sm text-center"
-            >
-              {/* Icon */}
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                className="w-28 h-28 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-8 shadow-lg"
-              >
-                <step.icon className="w-14 h-14 text-primary" />
-              </motion.div>
+            <AnimatePresence mode="wait">
+              {showIntro ? (
+                <motion.div
+                  key="intro"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full max-w-sm text-center"
+                >
+                  {/* Phone icon */}
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                    className="w-28 h-28 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-8 shadow-lg"
+                  >
+                    <Smartphone className="w-14 h-14 text-primary" />
+                  </motion.div>
 
-              {/* Highlight badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4"
-              >
-                <Sparkles className="w-3 h-3" />
-                {step.highlight}
-              </motion.div>
+                  {/* Badge */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4"
+                  >
+                    <Download className="w-3 h-3" />
+                    Instalação rápida
+                  </motion.div>
 
-              {/* Title */}
-              <motion.h1
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="text-2xl font-bold text-foreground mb-4"
-              >
-                {step.title}
-              </motion.h1>
+                  <motion.h1
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                    className="text-2xl font-bold text-foreground mb-4"
+                  >
+                    Instale o Já Limpo
+                  </motion.h1>
 
-              {/* Description */}
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-muted-foreground leading-relaxed"
-              >
-                {step.description}
-              </motion.p>
-            </motion.div>
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-muted-foreground leading-relaxed mb-6"
+                  >
+                    Adicione o app à sua tela inicial para acesso rápido, notificações e funcionamento offline.
+                  </motion.p>
+
+                  {/* Device indicator */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-xs text-muted-foreground/70"
+                  >
+                    {deviceInfo.isIOS && "Detectamos que você está no iPhone/iPad"}
+                    {deviceInfo.isAndroid && "Detectamos que você está no Android"}
+                    {!deviceInfo.isIOS && !deviceInfo.isAndroid && "Siga as instruções do seu navegador"}
+                  </motion.div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={`step-${currentStep}`}
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -30 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full max-w-sm text-center"
+                >
+                  {/* Step icon */}
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                    className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6 shadow-lg"
+                  >
+                    <step.icon className="w-12 h-12 text-primary" />
+                  </motion.div>
+
+                  {/* Step indicator */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium mb-4"
+                  >
+                    {step.action}
+                  </motion.div>
+
+                  <motion.h2
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-xl font-bold text-foreground mb-3"
+                  >
+                    {step.title}
+                  </motion.h2>
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                    className="text-muted-foreground leading-relaxed"
+                  >
+                    {step.description}
+                  </motion.p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </main>
 
           {/* Footer */}
           <footer className="p-6 pb-8">
             {/* Progress dots */}
-            <div className="flex justify-center gap-2 mb-6">
-              {tutorialSteps.map((_, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ scale: 0.8 }}
-                  animate={{ 
-                    scale: index === currentStep ? 1.2 : 1,
-                    backgroundColor: index === currentStep 
-                      ? "hsl(var(--primary))" 
-                      : index < currentStep 
-                        ? "hsl(var(--primary) / 0.5)" 
-                        : "hsl(var(--border))"
-                  }}
-                  transition={{ duration: 0.2 }}
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-all"
-                  )}
-                />
-              ))}
-            </div>
+            {!showIntro && (
+              <div className="flex justify-center gap-2 mb-6">
+                {steps.map((_, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ scale: 0.8 }}
+                    animate={{
+                      scale: index === currentStep ? 1.2 : 1,
+                      backgroundColor:
+                        index === currentStep
+                          ? "hsl(var(--primary))"
+                          : index < currentStep
+                          ? "hsl(var(--primary) / 0.5)"
+                          : "hsl(var(--border))",
+                    }}
+                    transition={{ duration: 0.2 }}
+                    className="w-2 h-2 rounded-full"
+                  />
+                ))}
+              </div>
+            )}
 
-            <PrimaryButton 
-              fullWidth 
-              onClick={handleNext}
-              className="group"
-            >
-              {isLastStep ? (
-                "Começar a usar"
+            <PrimaryButton fullWidth onClick={handleNext} className="group">
+              {showIntro ? (
+                <span className="flex items-center justify-center gap-2">
+                  Ver como instalar
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              ) : isLastStep ? (
+                "Entendi, continuar"
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  Continuar
+                  Próximo
                   <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               )}
             </PrimaryButton>
+
+            {showIntro && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-center text-xs text-muted-foreground mt-4"
+              >
+                Leva menos de 30 segundos
+              </motion.p>
+            )}
           </footer>
         </motion.div>
       )}

@@ -99,7 +99,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const TUTORIAL_STORAGE_KEY = "cleanquick_tutorial_completed";
+const TUTORIAL_STORAGE_KEY = "cleanquick_pwa_tutorial_completed";
 
 const App = () => {
   const [tutorialComplete, setTutorialComplete] = useState<boolean | null>(null);
