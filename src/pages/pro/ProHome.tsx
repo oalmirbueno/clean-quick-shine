@@ -167,7 +167,7 @@ export default function ProHome() {
         )}
       </motion.header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-24 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-4">
         {/* Live Availability Toggle */}
         <AnimatedSection delay={1} className="p-4 bg-card rounded-xl border border-border">
           <div className="flex items-center justify-between">

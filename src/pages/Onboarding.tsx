@@ -8,7 +8,7 @@ export default function Onboarding() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top safe-bottom">
+    <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/5 to-transparent" />
@@ -44,7 +44,7 @@ export default function Onboarding() {
       </motion.div>
 
       {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-8 lg:items-start lg:w-[45%]">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-4 lg:items-start lg:w-[45%]">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -56,7 +56,7 @@ export default function Onboarding() {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="flex justify-center lg:justify-start mb-8"
+            className="flex justify-center lg:justify-start mb-5"
           >
             <Logo size="2xl" />
           </motion.div>
@@ -66,7 +66,7 @@ export default function Onboarding() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="mb-8"
+            className="mb-5"
           >
             <h1 className="text-3xl font-bold text-foreground mb-2">
               Comece agora
@@ -81,7 +81,7 @@ export default function Onboarding() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.25 }}
-            className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 mb-8 text-sm text-muted-foreground"
+            className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 mb-5 text-sm text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
               <Shield className="w-4 h-4 text-primary" />
@@ -151,7 +151,7 @@ export default function Onboarding() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-sm text-muted-foreground mt-8"
+            className="text-sm text-muted-foreground mt-5"
           >
             Já tem conta?{" "}
             <button 

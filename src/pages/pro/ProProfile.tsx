@@ -118,7 +118,7 @@ export default function ProProfile() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-24 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-20 animate-fade-in">
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-card rounded-xl border border-border p-3 text-center card-shadow">
