@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { User, Briefcase, ChevronLeft, Sparkles, Star } from "lucide-react";
-import heroCleanerImg from "@/assets/hero-cleaner-bg.png";
+import heroCleanerImg from "@/assets/hero-cleaner-new.png";
 import { motion } from "framer-motion";
 
 export default function Onboarding() {
