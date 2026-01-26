@@ -73,6 +73,9 @@ import AdminQuotes from "./pages/admin/AdminQuotes";
 import CompanyOnboarding from "./pages/company/CompanyOnboarding";
 import CompanyRequestQuote from "./pages/company/CompanyRequestQuote";
 
+// Dev Pages
+import ComponentShowcase from "./pages/dev/ComponentShowcase";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -148,6 +151,9 @@ const App = () => (
             {/* Company Routes */}
             <Route path="/company/onboarding" element={<CompanyOnboarding />} />
             <Route path="/company/request-quote" element={<CompanyRequestQuote />} />
+
+            {/* Dev Routes */}
+            <Route path="/dev/components" element={<ComponentShowcase />} />
 
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
