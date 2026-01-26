@@ -56,7 +56,7 @@ export default function AdminQuotes() {
   const totalValue = quotes.filter(q => q.status === "approved" || q.status === "active").reduce((sum, q) => sum + q.estimatedValue, 0);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex safe-top">
       <AdminSidebar />
       
       <main className="flex-1 lg:ml-64">

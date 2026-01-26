@@ -96,7 +96,7 @@ export default function Register() {
 
   if (!userType) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top">
         <div className="w-full max-w-sm animate-fade-in">
           <div className="text-center mb-12">
             <Logo size="lg" className="justify-center mb-4" />
@@ -159,7 +159,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col p-6">
+    <div className="min-h-screen bg-background flex flex-col p-6 safe-top">
       <div className="w-full max-w-sm mx-auto animate-fade-in">
         <button
           onClick={() => step === 1 ? setUserType(null) : setStep(1)}

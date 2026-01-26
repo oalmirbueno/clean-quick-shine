@@ -17,7 +17,7 @@ export default function AdminSettings() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background safe-top">
       <AdminSidebar />
       
       <main className="lg:ml-64 pt-14 lg:pt-0">

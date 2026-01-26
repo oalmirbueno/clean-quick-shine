@@ -15,7 +15,7 @@ export default function Index() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top">
       <div className="animate-scale-in">
         <Logo size="lg" className="justify-center mb-6" />
         <p className="text-center text-muted-foreground animate-fade-in">

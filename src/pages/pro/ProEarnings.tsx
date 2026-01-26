@@ -32,7 +32,7 @@ export default function ProEarnings() {
   const weekChange = earnings?.weekChange || 0;
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 safe-top">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <h1 className="text-xl font-semibold text-foreground">
