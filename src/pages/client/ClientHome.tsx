@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { NotificationsDropdown } from "@/components/ui/NotificationsDropdown";
 import { AnimatedSection } from "@/components/ui/AnimatedCard";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
+import { AppTutorial, useAppTutorial } from "@/components/ui/AppTutorial";
 import { motion } from "framer-motion";
 import { Search, Home, Sparkles, HardHat, Building2, Sun, Sunrise, CalendarClock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +29,7 @@ const quickSuggestions = [
 export default function ClientHome() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showTutorial, completeTutorial } = useAppTutorial("client");
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -46,8 +48,13 @@ export default function ClientHome() {
   const userName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Usuário";
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
-      {/* Header */}
+    <>
+      {showTutorial && (
+        <AppTutorial variant="client" onComplete={completeTutorial} />
+      )}
+      
+      <div className="min-h-screen bg-background pb-20 safe-top">
+        {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -174,5 +181,6 @@ export default function ClientHome() {
 
       <BottomNav variant="client" />
     </div>
+    </>
   );
 }
