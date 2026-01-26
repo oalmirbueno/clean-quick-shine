@@ -107,7 +107,7 @@ export default function ProHome() {
         className="bg-card border-b border-border p-4"
       >
         <div className="flex items-center justify-between mb-4">
-          <Logo size="sm" />
+          <Logo size="md" />
           <div className="flex items-center gap-2">
             {getPlanBadge()}
             <ThemeToggle />
