@@ -19,11 +19,13 @@ import {
   Database,
   RefreshCw,
   Check,
-  Loader2
+  Loader2,
+  RotateCcw
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/ui/Logo";
+import { useTutorialComplete } from "@/components/ui/WelcomeTutorial";
 
 interface SettingItemProps {
   icon: React.ReactNode;
@@ -80,6 +82,7 @@ export default function AppSettings() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user, signOut, roles } = useAuth();
+  const { reset: resetTutorial } = useTutorialComplete();
   
   const userRole = roles[0] || "client";
   
@@ -88,6 +91,7 @@ export default function AppSettings() {
   const [isClearing, setIsClearing] = useState(false);
   const [cleared, setCleared] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
+  const [tutorialReset, setTutorialReset] = useState(false);
 
   useEffect(() => {
     // Calculate cache size (approximate)
@@ -274,6 +278,18 @@ export default function AppSettings() {
               label="Atualizar app"
               description="Verificar nova versão"
               onClick={() => window.location.reload()}
+            />
+            <SettingItem
+              icon={tutorialReset ? <Check className="w-5 h-5 text-success" /> : <RotateCcw className="w-5 h-5" />}
+              label="Resetar tutorial PWA"
+              description="Ver instruções de instalação novamente"
+              onClick={() => {
+                resetTutorial();
+                setTutorialReset(true);
+                setTimeout(() => {
+                  window.location.reload();
+                }, 500);
+              }}
             />
           </div>
         </motion.section>
