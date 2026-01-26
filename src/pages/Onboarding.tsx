@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { User, Briefcase } from "lucide-react";
+import heroCleanerImg from "@/assets/hero-cleaner.jpg";
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -8,11 +9,22 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 overflow-hidden fixed inset-0">
       <div className="w-full max-w-sm animate-fade-in">
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-6">
-            <Logo size="2xl" />
+        {/* Hero Image */}
+        <div className="flex justify-center mb-4">
+          <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg">
+            <img 
+              src={heroCleanerImg} 
+              alt="Profissional de limpeza" 
+              className="w-full h-full object-cover"
+            />
           </div>
-          <p className="text-muted-foreground text-lg">
+        </div>
+        
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <Logo size="xl" />
+          </div>
+          <p className="text-muted-foreground">
             Limpeza de qualidade a um clique
           </p>
         </div>
