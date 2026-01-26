@@ -3,9 +3,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { MoneyBreakdown } from "@/components/ui/MoneyBreakdown";
 import { CouponInput } from "@/components/ui/CouponInput";
-import { ChevronLeft, Calendar, Clock, MapPin, CreditCard, Smartphone, Wallet, Shield, Check } from "lucide-react";
+import { ChevronLeft, Calendar, Clock, MapPin, CreditCard, Smartphone, Wallet, Shield, Check, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { services, addresses, pros, coupons, adminSettings, calculateOrderValues } from "@/lib/mockDataV2";
+import { useService } from "@/hooks/useServices";
+import { useAddress } from "@/hooks/useAddresses";
+import { useCreateOrder, useValidateCoupon } from "@/hooks/useCreateOrder";
+import { useAuth } from "@/contexts/AuthContext";
 
 const paymentMethods = [
   { id: "pix", icon: Smartphone, label: "Pix", description: "Aprovação instantânea" },
@@ -16,61 +19,104 @@ const paymentMethods = [
 export default function ClientCheckout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { serviceId, date, time, addressId } = location.state || {};
+  const { user } = useAuth();
+  const { serviceId, date, time, addressId, proId, proName, proRating } = location.state || {};
   
-  const service = services.find(s => s.id === serviceId) || services[0];
-  const address = addresses.find(a => a.id === addressId) || addresses[0];
-  const pro = pros[0];
+  const { data: service, isLoading: isLoadingService } = useService(serviceId);
+  const { data: address, isLoading: isLoadingAddress } = useAddress(addressId);
+  
+  const createOrderMutation = useCreateOrder();
+  const validateCouponMutation = useValidateCoupon();
   
   const [selectedPayment, setSelectedPayment] = useState<string | null>("pix");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [notes, setNotes] = useState("");
 
-  // Calculate values
-  const coupon = appliedCoupon ? coupons.find(c => c.code === appliedCoupon.code) : undefined;
-  const values = calculateOrderValues(service.basePrice, coupon);
+  const isLoading = isLoadingService || isLoadingAddress;
+  const basePrice = Number(service?.base_price || 0);
+  const serviceFee = basePrice * 0.1; // 10% service fee
+  const discount = appliedCoupon?.discount || 0;
+  const totalPrice = Math.max(0, basePrice + serviceFee - discount);
 
   const handleApplyCoupon = async (code: string): Promise<{ success: boolean; message: string }> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const coupon = coupons.find(c => c.code === code && c.active);
-    
-    if (!coupon) {
-      return { success: false, message: "Cupom inválido ou expirado" };
+    try {
+      const result = await validateCouponMutation.mutateAsync({
+        code,
+        orderValue: basePrice,
+      });
+      
+      setAppliedCoupon({ code: result.code, discount: result.discount });
+      return { success: true, message: "" };
+    } catch (error: any) {
+      return { success: false, message: error.message || "Cupom inválido" };
     }
-    
-    if (service.basePrice < coupon.minOrderValue) {
-      return { success: false, message: `Valor mínimo: R$ ${coupon.minOrderValue.toFixed(2)}` };
-    }
-    
-    const discount = coupon.type === "percent" 
-      ? service.basePrice * (coupon.value / 100) 
-      : coupon.value;
-    
-    setAppliedCoupon({ code: coupon.code, discount });
-    return { success: true, message: "" };
   };
 
   const formatDate = (d: Date | string) => {
+    if (!d) return "Data não selecionada";
     const dateObj = d instanceof Date ? d : new Date(d);
     return dateObj.toLocaleDateString("pt-BR", {
+      weekday: "long",
       day: "2-digit",
-      month: "2-digit",
+      month: "long",
       year: "numeric",
     });
   };
 
+  const formatDateForDB = (d: Date | string): string => {
+    if (!d) return "";
+    const dateObj = d instanceof Date ? d : new Date(d);
+    return dateObj.toISOString().split("T")[0];
+  };
+
   const handlePayment = async () => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    navigate("/client/order-tracking", { state: { orderId: "1001" } });
+    if (!user?.id || !serviceId || !addressId || !date || !time) {
+      return;
+    }
+
+    try {
+      const result = await createOrderMutation.mutateAsync({
+        serviceId,
+        addressId,
+        scheduledDate: formatDateForDB(date),
+        scheduledTime: time,
+        proId: proId || null,
+        couponCode: appliedCoupon?.code || null,
+        notes: notes || undefined,
+      });
+
+      navigate("/client/order-tracking", { 
+        state: { orderId: result.orderId } 
+      });
+    } catch (error) {
+      // Error handled by mutation
+    }
   };
 
   const breakdownItems = [
-    { label: "Subtotal", value: values.subtotal },
-    ...(values.discount > 0 ? [{ label: `Cupom (${appliedCoupon?.code})`, value: values.discount, negative: true }] : []),
-    { label: "Taxa de serviço", value: values.fee },
+    { label: "Subtotal", value: basePrice },
+    ...(discount > 0 ? [{ label: `Cupom (${appliedCoupon?.code})`, value: discount, negative: true }] : []),
+    { label: "Taxa de serviço", value: serviceFee },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!service || !address) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <p className="text-muted-foreground mb-4">Dados do pedido não encontrados</p>
+        <PrimaryButton onClick={() => navigate("/client/home")}>
+          Voltar ao início
+        </PrimaryButton>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -91,19 +137,23 @@ export default function ClientCheckout() {
 
       <main className="flex-1 overflow-y-auto animate-fade-in">
         {/* Pro Info */}
-        <section className="p-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <img
-              src={pro.avatar}
-              alt={pro.name}
-              className="w-12 h-12 rounded-full object-cover"
-            />
-            <div>
-              <p className="font-medium text-foreground">{pro.name}</p>
-              <p className="text-sm text-muted-foreground">Profissional verificada</p>
+        {proName && (
+          <section className="p-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-lg font-semibold text-primary">
+                  {proName.charAt(0)}
+                </span>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">{proName}</p>
+                <p className="text-sm text-muted-foreground">
+                  ⭐ {proRating?.toFixed(1) || "5.0"} • Profissional verificado(a)
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Order Summary */}
         <section className="p-4 border-b border-border">
@@ -117,6 +167,9 @@ export default function ClientCheckout() {
               <div>
                 <p className="font-medium text-foreground">{service.name}</p>
                 <p className="text-muted-foreground">{service.description}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Duração: ~{service.duration_hours}h
+                </p>
               </div>
             </div>
 
@@ -138,13 +191,26 @@ export default function ClientCheckout() {
                 <MapPin className="w-4 h-4 text-muted-foreground" />
               </div>
               <div>
-                <p className="font-medium text-foreground">{address?.label || "Casa"}</p>
+                <p className="font-medium text-foreground">{address.label}</p>
                 <p className="text-muted-foreground">
-                  {address?.street}, {address?.number} - {address?.city}
+                  {address.street}, {address.number} - {address.neighborhood}, {address.city}
                 </p>
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Notes */}
+        <section className="p-4 border-b border-border">
+          <h2 className="font-medium text-foreground mb-3">Observações (opcional)</h2>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Ex: Tenho um cachorro amigável, a chave está embaixo do tapete..."
+            className="w-full p-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+            rows={3}
+            maxLength={500}
+          />
         </section>
 
         {/* Coupon */}
@@ -201,7 +267,7 @@ export default function ClientCheckout() {
         <section className="p-4">
           <MoneyBreakdown
             items={breakdownItems}
-            total={values.totalPrice}
+            total={totalPrice}
           />
         </section>
       </main>
@@ -210,39 +276,17 @@ export default function ClientCheckout() {
       <div className="p-4 bg-card border-t border-border space-y-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
           <Shield className="w-4 h-4" />
-          <span>Você está protegido. Pagamento só é liberado após confirmação.</span>
+          <span>Pagamento seguro. Liberado após confirmação do serviço.</span>
         </div>
         <PrimaryButton
           fullWidth
-          loading={loading}
+          loading={createOrderMutation.isPending}
+          disabled={!selectedPayment || createOrderMutation.isPending}
           onClick={handlePayment}
         >
-          Pagar e confirmar
+          Pagar R$ {totalPrice.toFixed(2).replace(".", ",")}
         </PrimaryButton>
       </div>
     </div>
-  );
-}
-
-function Sparkles(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-      <path d="M5 3v4" />
-      <path d="M19 17v4" />
-      <path d="M3 5h4" />
-      <path d="M17 19h4" />
-    </svg>
   );
 }
