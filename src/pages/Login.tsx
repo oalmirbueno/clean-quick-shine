@@ -59,7 +59,7 @@ export default function Login() {
   if (!userType) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0">
+        <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
           {/* Background Image - Right Side */}
           <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none">
             <img 
@@ -137,7 +137,7 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0">
+      <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
         {/* Background Image - Right Side */}
         <div className="absolute right-0 bottom-0 opacity-15 pointer-events-none">
           <img 

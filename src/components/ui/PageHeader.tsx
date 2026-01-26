@@ -35,7 +35,7 @@ export function PageHeader({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "sticky top-0 bg-background/95 backdrop-blur-md border-b border-border z-10",
+        "sticky top-0 bg-background/95 backdrop-blur-md border-b border-border z-10 safe-top",
         className
       )}
     >
