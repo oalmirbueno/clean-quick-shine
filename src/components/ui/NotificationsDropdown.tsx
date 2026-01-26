@@ -67,23 +67,23 @@ export function NotificationsDropdown() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-2 w-80 max-h-[70vh] bg-card border border-border rounded-xl shadow-lg overflow-hidden z-50"
+              className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-16 sm:top-full sm:mt-2 sm:w-80 max-h-[70vh] bg-card border border-border rounded-xl shadow-lg overflow-hidden z-50"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <h3 className="font-semibold text-foreground">Notificações</h3>
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border">
+                <h3 className="font-semibold text-foreground text-sm sm:text-base">Notificações</h3>
+                <div className="flex items-center gap-1 sm:gap-2">
                   {unreadCount > 0 && (
                     <button
                       onClick={() => markAllAsRead()}
-                      className="text-xs text-primary hover:underline"
+                      className="text-xs text-primary hover:underline whitespace-nowrap"
                     >
-                      Marcar todas como lidas
+                      Marcar lidas
                     </button>
                   )}
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-1 rounded hover:bg-secondary"
+                    className="p-1.5 rounded-lg hover:bg-secondary"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -91,14 +91,14 @@ export function NotificationsDropdown() {
               </div>
 
               {/* Notifications List */}
-              <div className="overflow-y-auto max-h-[50vh]">
+              <div className="overflow-y-auto max-h-[calc(70vh-60px)] sm:max-h-[50vh]">
                 {isLoading ? (
-                  <div className="p-8 text-center">
+                  <div className="p-6 sm:p-8 text-center">
                     <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <Bell className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                  <div className="p-6 sm:p-8 text-center">
+                    <Bell className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground mx-auto mb-2" />
                     <p className="text-muted-foreground text-sm">
                       Nenhuma notificação
                     </p>
@@ -113,29 +113,29 @@ export function NotificationsDropdown() {
                         key={notification.id}
                         onClick={() => handleNotificationClick(notification)}
                         className={cn(
-                          "w-full p-4 flex gap-3 text-left hover:bg-secondary/50 transition-colors border-b border-border last:border-0",
+                          "w-full p-3 sm:p-4 flex gap-3 text-left hover:bg-secondary/50 transition-colors border-b border-border last:border-0",
                           !notification.read && "bg-accent/30"
                         )}
                       >
-                        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0", colorClass)}>
-                          <Icon className="w-5 h-5" />
+                        <div className={cn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0", colorClass)}>
+                          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <p className={cn(
-                              "text-sm",
+                              "text-sm leading-tight",
                               !notification.read ? "font-semibold text-foreground" : "text-foreground"
                             )}>
                               {notification.title}
                             </p>
                             {!notification.read && (
-                              <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                              <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1" />
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-[11px] text-muted-foreground/70 mt-1">
                             {formatDistanceToNow(new Date(notification.created_at), {
                               addSuffix: true,
                               locale: ptBR,
