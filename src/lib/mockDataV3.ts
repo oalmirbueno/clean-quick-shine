@@ -576,28 +576,32 @@ const orderStatuses: OrderStatus[] = ["confirmed", "en_route", "in_progress", "c
 const neighborhoods = ["Jardins", "Pinheiros", "Moema", "Vila Mariana", "Itaim Bibi", "Brooklin", "Centro", "Batel", "Água Verde", "Champagnat", "Ecoville", "Santa Felicidade"];
 
 export const orders: Order[] = Array.from({ length: 200 }, (_, i) => {
-  const clientIndex = i % 80;
-  const proIndex = i % 30;
-  const serviceIndex = i % 4;
+  const clientIndex = i % Math.min(80, clients.length);
+  const proIndex = i % Math.min(30, pros.length);
+  const serviceIndex = i % Math.min(4, services.length);
   const statusIndex = i % orderStatuses.length;
   const isSP = i < 100;
   const dayOffset = Math.floor(i / 8);
   
-  const subtotal = services[serviceIndex].basePrice;
+  const service = services[serviceIndex];
+  const subtotal = service?.basePrice ?? 129.90;
   const discount = i % 5 === 0 ? 20 : i % 7 === 0 ? 30 : 0;
   const fee = 9.90;
   const zoneFee = i % 10 === 0 ? 5 : 0;
   const total = subtotal - discount + fee + zoneFee;
   const commission = total * 0.20;
   
+  const client = clients[clientIndex];
+  const pro = pros[proIndex];
+  
   return {
     id: String(1000 + i + 1),
     clientId: `c${clientIndex + 1}`,
-    clientName: clients[clientIndex].name,
+    clientName: client?.name ?? "Cliente",
     proId: statusIndex > 0 ? String(proIndex + 1) : undefined,
-    proName: statusIndex > 0 ? pros[proIndex].name : undefined,
+    proName: statusIndex > 0 ? (pro?.name ?? "Profissional") : undefined,
     serviceId: String(serviceIndex + 1),
-    serviceName: services[serviceIndex].name,
+    serviceName: service?.name ?? "Limpeza",
     addressId: `a${clientIndex + 1}`,
     address: `Rua ${["das Flores", "Paulista", "Augusta", "Oscar Freire", "Consolação", "Brasil"][i % 6]}, ${100 + i}`,
     neighborhood: neighborhoods[i % neighborhoods.length],
@@ -721,17 +725,21 @@ export const quotes: Quote[] = [
 ];
 
 // ============= 30 REFERRALS =============
-export const referrals: Referral[] = Array.from({ length: 30 }, (_, i) => ({
-  id: `ref${i + 1}`,
-  referrerUserId: `c${(i % 40) + 1}`,
-  referrerName: clients[(i % 40)].name,
-  refereeUserId: `c${40 + (i % 40) + 1}`,
-  refereeName: clients[40 + (i % 40)]?.name || "Novo Usuário",
-  role: i % 4 === 0 ? "pro" as UserRole : "client" as UserRole,
-  status: i < 10 ? "rewarded" : i < 20 ? "qualified" : "pending" as ReferralStatus,
-  rewardValue: i % 4 === 0 ? 50 : 20,
-  createdAt: new Date(2024, 11, 1 + i).toISOString().split("T")[0]
-}));
+export const referrals: Referral[] = Array.from({ length: 30 }, (_, i) => {
+  const referrerIdx = i % Math.min(40, clients.length);
+  const refereeIdx = Math.min(40 + (i % 40), clients.length - 1);
+  return {
+    id: `ref${i + 1}`,
+    referrerUserId: `c${referrerIdx + 1}`,
+    referrerName: clients[referrerIdx]?.name || "Usuário",
+    refereeUserId: `c${refereeIdx + 1}`,
+    refereeName: clients[refereeIdx]?.name || "Novo Usuário",
+    role: i % 4 === 0 ? "pro" as UserRole : "client" as UserRole,
+    status: i < 10 ? "rewarded" : i < 20 ? "qualified" : "pending" as ReferralStatus,
+    rewardValue: i % 4 === 0 ? 50 : 20,
+    createdAt: new Date(2024, 11, 1 + i).toISOString().split("T")[0]
+  };
+});
 
 export const referralRewards: ReferralReward[] = referrals.filter(r => r.status === "rewarded").map((r, i) => ({
   id: `rr${i + 1}`,
