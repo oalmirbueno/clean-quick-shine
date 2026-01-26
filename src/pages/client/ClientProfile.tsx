@@ -1,21 +1,56 @@
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ChevronRight, MapPin, CreditCard, Settings, LogOut, HelpCircle } from "lucide-react";
-import { mockUser, mockAddresses } from "@/lib/mockData";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const menuItems = [
-  { icon: MapPin, label: "Endereços salvos", path: "#addresses", count: mockAddresses.length },
+  { icon: MapPin, label: "Endereços salvos", path: "/client/location" },
   { icon: CreditCard, label: "Formas de pagamento", path: "#payment" },
   { icon: Settings, label: "Preferências", path: "#settings" },
-  { icon: HelpCircle, label: "Ajuda e suporte", path: "#help" },
+  { icon: HelpCircle, label: "Ajuda e suporte", path: "/client/support" },
 ];
 
 export default function ClientProfile() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
-  const handleLogout = () => {
+  // Fetch user profile
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch addresses count
+  const { data: addresses } = useQuery({
+    queryKey: ["addresses", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data } = await supabase
+        .from("addresses")
+        .select("id")
+        .eq("user_id", user.id);
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  const handleLogout = async () => {
+    await signOut();
     navigate("/login");
   };
+
+  const userName = profile?.full_name || user?.email?.split("@")[0] || "Usuário";
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -23,13 +58,13 @@ export default function ClientProfile() {
       <header className="bg-card border-b border-border p-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
-            {mockUser.name.charAt(0)}
+            {userName.charAt(0).toUpperCase()}
           </div>
           <div>
             <h1 className="text-xl font-semibold text-foreground">
-              {mockUser.name}
+              {userName}
             </h1>
-            <p className="text-muted-foreground">{mockUser.email}</p>
+            <p className="text-muted-foreground">{user?.email}</p>
           </div>
         </div>
       </header>
@@ -40,6 +75,7 @@ export default function ClientProfile() {
           {menuItems.map((item, index) => (
             <button
               key={item.label}
+              onClick={() => item.path.startsWith("/") && navigate(item.path)}
               className={`w-full p-4 flex items-center gap-4 hover:bg-secondary transition-colors
                 ${index !== menuItems.length - 1 ? "border-b border-border" : ""}`}
             >
@@ -49,9 +85,9 @@ export default function ClientProfile() {
               <span className="flex-1 text-left font-medium text-foreground">
                 {item.label}
               </span>
-              {item.count && (
+              {item.path === "/client/location" && addresses && addresses.length > 0 && (
                 <span className="px-2 py-0.5 bg-secondary rounded-full text-xs text-muted-foreground">
-                  {item.count}
+                  {addresses.length}
                 </span>
               )}
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -73,7 +109,7 @@ export default function ClientProfile() {
 
         {/* App Version */}
         <p className="text-center text-sm text-muted-foreground mt-8">
-          LimpaJá v1.0.0
+          JáLimpo v1.0.0
         </p>
       </main>
 

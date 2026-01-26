@@ -3,7 +3,9 @@ import { Logo } from "@/components/ui/Logo";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ServiceCard } from "@/components/ui/ServiceCard";
 import { Search, Home, Sparkles, HardHat, Building2, Sun, Sunrise, CalendarClock } from "lucide-react";
-import { mockUser } from "@/lib/mockData";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const serviceCategories = [
   { icon: Home, title: "Residencial", description: "Limpeza de casa" },
@@ -20,6 +22,24 @@ const quickSuggestions = [
 
 export default function ClientHome() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Fetch user profile
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const userName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Usuário";
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -28,11 +48,11 @@ export default function ClientHome() {
         <div className="flex items-center justify-between mb-4">
           <Logo size="sm" iconOnly />
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium text-sm">
-            {mockUser.name.charAt(0)}
+            {userName.charAt(0).toUpperCase()}
           </div>
         </div>
         <h1 className="text-xl font-semibold text-foreground">
-          Olá, {mockUser.name} 👋
+          Olá, {userName} 👋
         </h1>
       </header>
 
@@ -103,15 +123,15 @@ export default function ClientHome() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Próximo agendamento</p>
-              <p className="font-semibold text-foreground">Limpeza Pesada</p>
-              <p className="text-sm text-primary">20/01 às 14:00</p>
+              <p className="font-semibold text-foreground">Nenhum agendamento</p>
+              <p className="text-sm text-primary">Agende seu primeiro serviço</p>
             </div>
             <button
-              onClick={() => navigate("/client/orders/1")}
+              onClick={() => navigate("/client/service")}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium
                 hover:opacity-90 transition-opacity"
             >
-              Ver detalhes
+              Agendar
             </button>
           </div>
         </section>
