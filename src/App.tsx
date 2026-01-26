@@ -90,8 +90,8 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <InstallPrompt />
           <BrowserRouter>
+            <InstallPrompt />
           <Routes>
             {/* Splash & Auth */}
             <Route path="/" element={<Index />} />
