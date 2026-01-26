@@ -26,7 +26,7 @@ export default function ClientHome() {
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
-          <Logo size="sm" />
+          <Logo size="sm" iconOnly />
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium text-sm">
             {mockUser.name.charAt(0)}
           </div>

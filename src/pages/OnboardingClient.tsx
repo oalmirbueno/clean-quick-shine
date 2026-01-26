@@ -47,7 +47,7 @@ export default function OnboardingClient() {
         >
           <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
-        <Logo size="sm" />
+        <Logo size="sm" iconOnly />
         <button
           onClick={() => navigate("/register")}
           className="text-sm text-muted-foreground hover:text-foreground"
