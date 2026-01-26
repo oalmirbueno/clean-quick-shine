@@ -1,276 +1,92 @@
 
-# Plano Completo: Transformação PWA
+# Plano: Melhorar Tutorial PWA com Bordas Arredondadas Maiores
 
-## Visão Geral
-
-O projeto já possui uma base sólida de PWA com `vite-plugin-pwa`, `manifest.json`, ícones básicos, meta tags iOS e componentes `InstallPrompt` e `Install`. Este plano irá **expandir e aprimorar** o que já existe para entregar um PWA completo, instalável e com experiência real de aplicativo.
-
----
-
-## Fase 1: Manifest e Ícones Completos
-
-### 1.1 Atualizar manifest.json
-- Alterar `name` e `short_name` para "Já Limpo" (consistente com index.html)
-- Adicionar ícones em todos os tamanhos: 72, 96, 128, 144, 152, 192, 384, 512
-- Adicionar `shortcuts` para acesso rápido (Início, Pedidos, Suporte)
-- Adicionar `id` para identificação única do app
-- Configurar `scope` corretamente
-
-### 1.2 Gerar Ícones Faltantes
-Criar ícones nos tamanhos: 72x72, 96x96, 128x128, 144x144, 152x152, 384x384 (normal e maskable)
-
-### 1.3 Apple Splash Screens
-Gerar splash screens para diferentes dispositivos iOS
+## Resumo
+Vou atualizar o tutorial de instalação PWA para ter um visual mais suave e moderno, aumentando os cantos arredondados de todos os elementos (botões, cards de ícones, badges) e garantindo que tudo esteja funcionando perfeitamente.
 
 ---
 
-## Fase 2: Service Worker Robusto
+## Alterações Visuais
 
-### 2.1 Configurar Workbox no Vite
-Expandir configuração do `vite-plugin-pwa` com:
-- **Precache**: Todos os assets estáticos (JS, CSS, HTML, ícones, fontes)
-- **Runtime Caching**:
-  - Cache-First para imagens e assets
-  - Stale-While-Revalidate para páginas HTML
-  - Network-First para requisições API (Supabase)
-- Fallback offline para navegação
+### 1. Ícones Principais (Cards de Step)
+| Elemento | Atual | Novo |
+|----------|-------|------|
+| Ícone introdução (Smartphone) | `rounded-3xl` | `rounded-[2rem]` |
+| Ícone dos passos | `rounded-2xl` | `rounded-3xl` |
 
-### 2.2 Página Offline
-Criar página de fallback bonita quando não há conexão (já existe estrutura, apenas melhorar)
+### 2. Botão Principal (PrimaryButton)
+| Elemento | Atual | Novo |
+|----------|-------|------|
+| Border radius | `rounded-lg` | `rounded-2xl` |
 
-### 2.3 Sistema de Atualização
-Criar componente `UpdatePrompt` que:
-- Detecta novas versões do Service Worker
-- Mostra notificação discreta "Atualização disponível"
-- Botão para atualizar imediatamente
-- Evita o problema clássico de PWA travado em versão antiga
+### 3. Badges e Indicadores
+| Elemento | Atual | Novo |
+|----------|-------|------|
+| Badge "Instalação rápida" | `rounded-full` | Manter (já está ótimo) |
+| Badge "Passo X de Y" | `rounded-full` | Manter (já está ótimo) |
+| Progress dots | `rounded-full` | Manter + aumentar tamanho |
 
----
-
-## Fase 3: App Shell e Navegação
-
-### 3.1 Estrutura Atual
-O projeto já possui:
-- `BottomNav` com 3-4 itens para Client e Pro
-- Headers fixos leves
-- Transições com Framer Motion
-
-### 3.2 Melhorias no BottomNav
-- Adicionar aba de "Suporte" (opcional, baseado no checklist)
-- Garantir `safe-area-inset-bottom` (já implementado via classe `safe-bottom`)
-- Animação de feedback tátil ao tocar
-
-### 3.3 Transições de Tela
-Adicionar transições suaves entre rotas usando `AnimatePresence` do Framer Motion
+### 4. Botão "Pular" no Header
+| Elemento | Atual | Novo |
+|----------|-------|------|
+| Estilo | Texto simples | `rounded-xl` com background sutil |
 
 ---
 
-## Fase 4: Ajustes iOS (Safe Area + Splash)
+## Arquivos a Modificar
 
-### 4.1 Meta Tags (Já Implementadas)
-Verificar e confirmar:
-- `apple-mobile-web-app-capable`: yes
-- `apple-mobile-web-app-status-bar-style`: black-translucent
-- `viewport`: viewport-fit=cover
+### `src/components/ui/WelcomeTutorial.tsx`
+- Aumentar `rounded-3xl` para `rounded-[2rem]` no ícone da intro
+- Aumentar `rounded-2xl` para `rounded-3xl` nos ícones dos passos
+- Melhorar botão "Pular" com background arredondado
+- Aumentar progress dots de `w-2 h-2` para `w-2.5 h-2.5`
+- Adicionar mais padding e espaçamento para visual mais "arejado"
 
-### 4.2 Safe Area CSS
-Expandir utilitários CSS para:
-- `safe-top`: padding-top com safe-area-inset-top
-- `safe-bottom`: já existe
-- `safe-left`, `safe-right`: para dispositivos com notch lateral
-
-### 4.3 Remover Scroll Bounce
-Adicionar CSS para desabilitar overscroll em dispositivos iOS
-
----
-
-## Fase 5: Performance
-
-### 5.1 Lazy Loading de Imagens
-- Adicionar `loading="lazy"` em todas as imagens
-- Implementar component wrapper para imagens com loading state
-
-### 5.2 Code Splitting
-- Já implementado via React Router (cada página é lazy loaded pelo Vite)
-- Verificar se rotas admin podem ser separadas em chunk diferente
-
-### 5.3 Prefetch de Rotas Críticas
-Adicionar prefetch para rotas principais baseado no role do usuário
-
----
-
-## Fase 6: UX Mobile-First
-
-### 6.1 Estados de Loading
-Criar componentes `Skeleton` reutilizáveis para:
-- Lista de pedidos
-- Cards de serviço
-- Perfil do usuário
-
-### 6.2 Estados Vazios
-Criar componente `EmptyState` bonito para:
-- Sem pedidos
-- Sem endereços
-- Sem resultados de busca
-
-### 6.3 Feedback Visual
-- Toast/Sonner já implementado
-- Adicionar feedback tátil com `navigator.vibrate()` onde aplicável
-
-### 6.4 Inputs Otimizados
-Verificar e adicionar atributos:
-- `inputMode="email"` para campos de email
-- `inputMode="numeric"` para campos numéricos
-- `inputMode="tel"` para telefone
-
----
-
-## Fase 7: Notificações Push (Base)
-
-### 7.1 Estrutura de Push Notifications
-Criar hook `usePushNotifications` com:
-- Verificação de suporte do navegador
-- Fluxo de permissão
-- Subscribe/Unsubscribe
-- Armazenamento do device token (mock ou integração real)
-
-### 7.2 UI de Permissão
-Criar modal bonito para pedir permissão de notificações (não usar o prompt nativo direto)
-
----
-
-## Fase 8: Modo Offline
-
-### 8.1 Detector de Conexão
-Criar hook `useNetworkStatus` que:
-- Monitora `navigator.onLine`
-- Mostra banner quando offline
-- Notifica quando a conexão é restaurada
-
-### 8.2 Cache de Dados
-Usar `react-query` (já instalado) com:
-- `staleTime` apropriado
-- `cacheTime` longo para dados importantes
-- `refetchOnReconnect: true`
-
----
-
-## Fase 9: Sistema de Atualização
-
-### 9.1 Componente UpdatePrompt
-Criar componente que:
-- Usa `useRegisterSW` do vite-plugin-pwa
-- Detecta atualizações do Service Worker
-- Mostra UI discreta com opção de atualizar
-
----
-
-## Fase 10: Validação Final
-
-### 10.1 Lighthouse PWA Audit
-- Installable
-- Works offline
-- Fast and reliable
-- Has icons and manifest
-
----
-
-## Arquivos a Criar/Modificar
-
-| Arquivo | Ação |
-|---------|------|
-| `public/manifest.json` | Atualizar com ícones completos e shortcuts |
-| `public/pwa-*.png` | Gerar ícones faltantes (72, 96, 128, 144, 152, 384) |
-| `vite.config.ts` | Expandir configuração do VitePWA |
-| `src/hooks/useRegisterSW.ts` | Criar hook para controle do Service Worker |
-| `src/hooks/useNetworkStatus.ts` | Criar hook para status de conexão |
-| `src/hooks/usePushNotifications.ts` | Criar hook base para push |
-| `src/components/ui/UpdatePrompt.tsx` | Criar componente de atualização |
-| `src/components/ui/OfflineBanner.tsx` | Criar banner de offline |
-| `src/components/ui/EmptyState.tsx` | Criar componente de estado vazio |
-| `src/pages/Offline.tsx` | Criar página de fallback offline |
-| `src/index.css` | Adicionar utilitários safe-area e overscroll |
-| `index.html` | Adicionar splash screens iOS |
-| `src/App.tsx` | Integrar UpdatePrompt e OfflineBanner |
+### `src/components/ui/PrimaryButton.tsx`
+- Alterar `rounded-lg` para `rounded-2xl` para bordas mais suaves
 
 ---
 
 ## Detalhes Técnicos
 
-### Configuração VitePWA Expandida
-```typescript
-VitePWA({
-  registerType: "prompt", // Mudança para controle manual
-  includeAssets: ["favicon.ico", "robots.txt", "pwa-*.png"],
-  manifest: false,
-  workbox: {
-    globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-    navigateFallback: "/offline.html",
-    navigateFallbackDenylist: [/^\/api/, /^\/supabase/],
-    runtimeCaching: [
-      // Imagens - Cache First
-      {
-        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-        handler: "CacheFirst",
-        options: {
-          cacheName: "images-cache",
-          expiration: { maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 }
-        }
-      },
-      // API Supabase - Network First
-      {
-        urlPattern: /^https:\/\/.*\.supabase\.co\/.*/,
-        handler: "NetworkFirst",
-        options: {
-          cacheName: "api-cache",
-          expiration: { maxEntries: 50, maxAgeSeconds: 5 * 60 },
-          networkTimeoutSeconds: 10
-        }
-      },
-      // Páginas HTML - Stale While Revalidate
-      {
-        urlPattern: /^https:\/\/.*\/(client|pro|admin)\/.*/,
-        handler: "StaleWhileRevalidate",
-        options: { cacheName: "pages-cache" }
-      }
-    ]
-  }
-})
+```text
+Antes:
+┌──────────────────────┐
+│  rounded-lg (8px)    │  <- Botão
+└──────────────────────┘
+
+Depois:
+╭──────────────────────╮
+│  rounded-2xl (16px)  │  <- Botão mais suave
+╰──────────────────────╯
 ```
 
-### Estrutura do Manifest Final
-```json
-{
-  "id": "ja-limpo-app",
-  "name": "Já Limpo - Limpeza Profissional",
-  "short_name": "Já Limpo",
-  "description": "Precisa de Limpeza? Baixa o Já Limpo",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "theme_color": "#3b82f6",
-  "background_color": "#ffffff",
-  "icons": [/* 72, 96, 128, 144, 152, 192, 384, 512 - normal e maskable */],
-  "shortcuts": [
-    { "name": "Início", "url": "/client/home", "icons": [...] },
-    { "name": "Meus Pedidos", "url": "/client/orders", "icons": [...] },
-    { "name": "Suporte", "url": "/client/support", "icons": [...] }
-  ],
-  "categories": ["lifestyle", "utilities"],
-  "lang": "pt-BR"
-}
-```
+### Mudanças Específicas no WelcomeTutorial:
+
+1. **Ícone da Intro (Smartphone)**
+   - De: `w-28 h-28 rounded-3xl`
+   - Para: `w-32 h-32 rounded-[2rem]` (maior e mais arredondado)
+
+2. **Ícone dos Passos**
+   - De: `w-24 h-24 rounded-2xl`
+   - Para: `w-28 h-28 rounded-3xl` (mais arredondado)
+
+3. **Botão Pular**
+   - De: `text-sm text-muted-foreground`
+   - Para: `px-4 py-2 rounded-xl bg-muted/50 text-sm` (com fundo sutil)
+
+4. **Progress Dots**
+   - De: `w-2 h-2 rounded-full`
+   - Para: `w-2.5 h-2.5 rounded-full` (ligeiramente maior)
+
+5. **Footer**
+   - De: `p-6 pb-8`
+   - Para: `p-6 pb-10` (mais espaço inferior)
 
 ---
 
-## Ordem de Implementação
-
-1. **Manifest e Ícones** - Base necessária
-2. **Service Worker robusto** - Core do PWA
-3. **Sistema de Atualização** - Evita bugs clássicos
-4. **Detector de Conexão** - UX offline
-5. **Safe Area CSS** - Polimento iOS
-6. **Página Offline** - Fallback gracioso
-7. **Push Notifications (base)** - Estrutura para futuro
-8. **Performance tweaks** - Otimizações finais
+## Resultado Esperado
+- Visual mais moderno e "app-like"
+- Bordas super suaves em todos os elementos interativos
+- Consistência com o design system minimalista do app
+- Melhor experiência tátil em dispositivos móveis
