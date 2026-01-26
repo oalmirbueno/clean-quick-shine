@@ -22,49 +22,39 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     
-    const { error, roles } = await signIn(email, password);
-    
-    if (error) {
-      toast.error(error.message === "Invalid login credentials" 
-        ? "Email ou senha incorretos" 
-        : error.message);
-      setLoading(false);
-      return;
-    }
-
-    toast.success("Login realizado com sucesso!");
-    
-    // Se não tem role, adicionar baseado na seleção do usuário
-    let finalRoles = roles || [];
-    if (finalRoles.length === 0 && userType) {
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData.user) {
-        const selectedRole = userType as "client" | "pro";
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({ user_id: userData.user.id, role: selectedRole });
-        
-        if (!roleError) {
-          finalRoles = [selectedRole];
-          await refreshRoles();
-        }
+    try {
+      const { error, roles } = await signIn(email, password);
+      
+      if (error) {
+        toast.error(error.message === "Invalid login credentials" 
+          ? "Email ou senha incorretos" 
+          : error.message);
+        return;
       }
+
+      toast.success("Login realizado com sucesso!");
+      
+      const userRoles = roles || [];
+      
+      // Navegar baseado na role retornada
+      if (userRoles.includes("admin")) {
+        navigate("/admin/dashboard");
+      } else if (userRoles.includes("client")) {
+        navigate("/client/home");
+      } else if (userRoles.includes("pro")) {
+        navigate("/pro/home");
+      } else if (userType) {
+        // Fallback: navegar baseado na seleção
+        navigate(userType === "client" ? "/client/home" : "/pro/home");
+      } else {
+        toast.error("Erro ao determinar tipo de conta");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error("Erro ao fazer login. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
-    
-    // Navegar baseado na role real ou seleção
-    if (finalRoles.includes("admin")) {
-      navigate("/admin/dashboard");
-    } else if (finalRoles.includes("client")) {
-      navigate("/client/home");
-    } else if (finalRoles.includes("pro")) {
-      navigate("/pro/home");
-    } else if (userType) {
-      // Fallback para seleção do usuário
-      navigate(userType === "client" ? "/client/home" : "/pro/home");
-    } else {
-      toast.error("Erro ao determinar tipo de conta");
-    }
-    setLoading(false);
   };
 
   if (!userType) {
