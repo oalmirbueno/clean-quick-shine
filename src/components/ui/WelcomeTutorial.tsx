@@ -130,7 +130,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[9999] bg-background flex flex-col safe-top"
+          className="fixed inset-0 z-[9999] bg-background flex flex-col safe-top overflow-hidden"
         >
           {/* Header */}
           <header className="p-4 flex items-center justify-between">
