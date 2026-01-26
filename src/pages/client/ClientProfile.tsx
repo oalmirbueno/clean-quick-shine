@@ -53,9 +53,9 @@ export default function ClientProfile() {
   const userName = profile?.full_name || user?.email?.split("@")[0] || "Usuário";
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-6">
+      <header className="flex-shrink-0 bg-card border-b border-border p-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
             {userName.charAt(0).toUpperCase()}
@@ -69,7 +69,7 @@ export default function ClientProfile() {
         </div>
       </header>
 
-      <main className="p-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-24 animate-fade-in">
         {/* Menu Items */}
         <div className="bg-card rounded-xl border border-border overflow-hidden card-shadow">
           {menuItems.map((item, index) => (
