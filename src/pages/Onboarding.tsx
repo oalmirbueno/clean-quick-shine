@@ -6,7 +6,7 @@ export default function Onboarding() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 overflow-hidden fixed inset-0">
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">

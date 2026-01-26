@@ -60,7 +60,7 @@ export default function Login() {
   if (!userType) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 overflow-hidden fixed inset-0">
           <div className="w-full max-w-sm animate-fade-in">
             <div className="text-center mb-12">
               <div className="flex justify-center mb-6">
@@ -124,7 +124,7 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 overflow-hidden fixed inset-0">
         <div className="w-full max-w-sm animate-fade-in">
           <button
             onClick={() => setUserType(null)}
