@@ -7,7 +7,7 @@ import { MapMock } from "@/components/ui/MapMock";
 import { Calendar, Trophy, MapPin, Clock, Check, X, Shield, Crown, Bell, Sparkles, Radio, Activity, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useCurrentProData, useAvailableOrdersForPro, useToggleProAvailability } from "@/hooks/useProData";
+import { useCurrentProData, useAvailableOrdersForPro, useToggleProAvailability, useAcceptOrder, useDeclineOrder } from "@/hooks/useProData";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -16,10 +16,13 @@ export default function ProHome() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [showMap, setShowMap] = useState(false);
+  const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
 
   const { data: proData, isLoading: isLoadingPro } = useCurrentProData();
   const { data: availableOrders = [], isLoading: isLoadingOrders } = useAvailableOrdersForPro();
   const { toggleAvailability } = useToggleProAvailability();
+  const acceptOrderMutation = useAcceptOrder();
+  const declineOrderMutation = useDeclineOrder();
 
   const isAvailable = proData?.proProfile?.available_now || false;
   const isVerified = proData?.proProfile?.verified || false;
@@ -36,6 +39,25 @@ export default function ProHome() {
       toast.success(isAvailable ? "Você está offline agora" : "Você está disponível para pedidos!");
     } catch (error) {
       toast.error("Erro ao alterar disponibilidade");
+    }
+  };
+
+  const handleAcceptOrder = async (orderId: string) => {
+    setProcessingOrderId(orderId);
+    try {
+      await acceptOrderMutation.mutateAsync(orderId);
+      navigate(`/pro/order/${orderId}`);
+    } finally {
+      setProcessingOrderId(null);
+    }
+  };
+
+  const handleDeclineOrder = async (orderId: string) => {
+    setProcessingOrderId(orderId);
+    try {
+      await declineOrderMutation.mutateAsync(orderId);
+    } finally {
+      setProcessingOrderId(null);
     }
   };
 
@@ -373,20 +395,34 @@ export default function ProHome() {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 py-2.5 px-4 rounded-lg border border-border text-muted-foreground font-medium
-                      hover:bg-secondary transition-colors flex items-center justify-center gap-2">
-                      <X className="w-4 h-4" />
+                    <button 
+                      onClick={() => handleDeclineOrder(order.id)}
+                      disabled={processingOrderId === order.id}
+                      className="flex-1 py-2.5 px-4 rounded-lg border border-border text-muted-foreground font-medium
+                        hover:bg-secondary transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {processingOrderId === order.id && declineOrderMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <X className="w-4 h-4" />
+                      )}
                       Recusar
                     </button>
                     <button 
-                      onClick={() => navigate(`/pro/order/${order.id}`)}
+                      onClick={() => handleAcceptOrder(order.id)}
+                      disabled={processingOrderId === order.id}
                       className={cn(
-                        "flex-1 py-2.5 px-4 rounded-lg font-medium button-shadow hover:opacity-90 transition-opacity flex items-center justify-center gap-2",
+                        "flex-1 py-2.5 px-4 rounded-lg font-medium button-shadow hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50",
                         order.eliteOnly
                           ? "bg-warning text-warning-foreground"
                           : "bg-primary text-primary-foreground"
-                      )}>
-                      <Check className="w-4 h-4" />
+                      )}
+                    >
+                      {processingOrderId === order.id && acceptOrderMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
                       Aceitar
                     </button>
                   </div>
