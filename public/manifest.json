@@ -1,16 +1,54 @@
 {
-  "name": "CleanQuick - Limpeza Profissional",
-  "short_name": "CleanQuick",
-  "description": "Agende serviços de limpeza profissional de forma rápida e fácil",
+  "id": "ja-limpo-app",
+  "name": "Já Limpo - Limpeza Profissional",
+  "short_name": "Já Limpo",
+  "description": "Precisa de Limpeza? Baixa o Já Limpo",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#10b981",
+  "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
   "icons": [
     {
+      "src": "/pwa-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/pwa-192x192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-384x384.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
@@ -21,8 +59,44 @@
       "purpose": "any"
     },
     {
+      "src": "/pwa-maskable-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-maskable-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-maskable-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-maskable-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-maskable-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/pwa-maskable-192x192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-maskable-384x384.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "maskable"
     },
@@ -31,6 +105,26 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Início",
+      "short_name": "Início",
+      "url": "/client/home",
+      "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Meus Pedidos",
+      "short_name": "Pedidos",
+      "url": "/client/orders",
+      "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Suporte",
+      "short_name": "Suporte",
+      "url": "/client/support",
+      "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }]
     }
   ],
   "screenshots": [
