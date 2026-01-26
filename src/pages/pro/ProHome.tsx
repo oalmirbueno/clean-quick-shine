@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AnimatedSection } from "@/components/ui/AnimatedCard";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
 import { NotificationsDropdown } from "@/components/ui/NotificationsDropdown";
+import { AppTutorial, useAppTutorial } from "@/components/ui/AppTutorial";
 import { motion } from "framer-motion";
 import { Calendar, Trophy, MapPin, Clock, Check, X, Shield, Crown, Sparkles, Radio, Activity, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export default function ProHome() {
   const queryClient = useQueryClient();
   const [showMap, setShowMap] = useState(false);
   const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
+  const { showTutorial, completeTutorial } = useAppTutorial("pro");
 
   const { data: proData, isLoading: isLoadingPro } = useCurrentProData();
   const { data: availableOrders = [], isLoading: isLoadingOrders } = useAvailableOrdersForPro();
@@ -99,8 +101,13 @@ export default function ProHome() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
-      {/* Header */}
+    <>
+      {showTutorial && (
+        <AppTutorial variant="pro" onComplete={completeTutorial} />
+      )}
+      
+      <div className="min-h-screen bg-background pb-20 safe-top">
+        {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -473,5 +480,6 @@ export default function ProHome() {
 
       <BottomNav variant="pro" />
     </div>
+    </>
   );
 }
