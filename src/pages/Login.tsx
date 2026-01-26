@@ -7,7 +7,7 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { User, Briefcase, ChevronLeft, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import heroCleanerImg from "@/assets/hero-cleaner-bg.png";
+import heroCleanerImg from "@/assets/hero-cleaner-new.png";
 import { motion } from "framer-motion";
 
 type UserType = "client" | "pro" | null;
