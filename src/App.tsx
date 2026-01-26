@@ -79,6 +79,7 @@ import CompanyRequestQuote from "./pages/company/CompanyRequestQuote";
 import ComponentShowcase from "./pages/dev/ComponentShowcase";
 import ProjectDocumentation from "./pages/dev/ProjectDocumentation";
 import Install from "./pages/Install";
+import AppSettings from "./pages/AppSettings";
 
 const queryClient = new QueryClient();
 
@@ -162,8 +163,9 @@ const App = () => (
             <Route path="/dev/components" element={<ComponentShowcase />} />
             <Route path="/dev/documentation" element={<ProjectDocumentation />} />
             
-            {/* Install Route */}
+            {/* Install & Settings Routes */}
             <Route path="/install" element={<Install />} />
+            <Route path="/settings" element={<AppSettings />} />
 
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />

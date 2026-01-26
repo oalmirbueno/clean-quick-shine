@@ -26,7 +26,7 @@ const menuItems = [
   { icon: Calendar, label: "Disponibilidade", path: "/pro/availability" },
   { icon: Wallet, label: "Saque", path: "/pro/withdraw" },
   { icon: HelpCircle, label: "Suporte", path: "/pro/support" },
-  { icon: Settings, label: "Configurações", path: "#settings" },
+  { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 
 export default function ProProfile() {
@@ -183,7 +183,7 @@ export default function ProProfile() {
 
         {/* App Version */}
         <p className="text-center text-sm text-muted-foreground mt-8">
-          JáLimpo v2.0.0
+          CleanQuick v1.0.0
         </p>
       </main>
 

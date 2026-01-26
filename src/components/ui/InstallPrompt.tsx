@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, X, Smartphone, Share, Plus } from "lucide-react";
+import { Download, X, Smartphone, Share, Plus, ExternalLink } from "lucide-react";
 import { Logo } from "./Logo";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -9,6 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function InstallPrompt() {
+  const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -68,6 +70,11 @@ export function InstallPrompt() {
   const handleDismiss = () => {
     setShowPrompt(false);
     localStorage.setItem("pwa-prompt-dismissed", Date.now().toString());
+  };
+
+  const handleViewInstructions = () => {
+    setShowPrompt(false);
+    navigate("/install");
   };
 
   if (isInstalled || !showPrompt) return null;
@@ -136,15 +143,6 @@ export function InstallPrompt() {
                       <p className="text-xs text-muted-foreground">Role e selecione esta opção</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Smartphone className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">3. Pronto!</p>
-                      <p className="text-xs text-muted-foreground">O app estará na sua tela inicial</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             ) : (
@@ -155,57 +153,44 @@ export function InstallPrompt() {
                   <div>
                     <p className="font-medium text-foreground">Acesso instantâneo</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Instale o app para ter acesso rápido direto da sua tela inicial, sem precisar abrir o navegador.
+                      Instale o app para ter acesso rápido direto da sua tela inicial.
                     </p>
                   </div>
                 </div>
-
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    Funciona offline
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    Carregamento mais rápido
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    Experiência como app nativo
-                  </li>
-                </ul>
               </div>
             )}
           </div>
 
           {/* Actions */}
-          <div className="p-6 pt-0 flex gap-3">
-            <button
-              onClick={handleDismiss}
-              className="flex-1 py-3 px-4 rounded-xl border border-border text-muted-foreground font-medium
-                hover:bg-muted/50 transition-colors"
-            >
-              Depois
-            </button>
+          <div className="p-6 pt-0 space-y-3">
             {!isIOS && deferredPrompt && (
               <button
                 onClick={handleInstall}
-                className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium
+                className="w-full py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium
                   hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Instalar
+                Instalar Agora
               </button>
             )}
-            {isIOS && (
+            
+            <div className="flex gap-3">
               <button
                 onClick={handleDismiss}
-                className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium
-                  hover:opacity-90 transition-opacity"
+                className="flex-1 py-3 px-4 rounded-xl border border-border text-muted-foreground font-medium
+                  hover:bg-muted/50 transition-colors"
               >
-                Entendi
+                Depois
               </button>
-            )}
+              <button
+                onClick={handleViewInstructions}
+                className="flex-1 py-3 px-4 rounded-xl bg-muted text-foreground font-medium
+                  hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Ver instruções
+              </button>
+            </div>
           </div>
         </motion.div>
       </motion.div>
