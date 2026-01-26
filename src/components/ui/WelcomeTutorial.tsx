@@ -64,9 +64,15 @@ const getAndroidSteps = (): TutorialStep[] => [
 const getGenericSteps = (): TutorialStep[] => [
   {
     icon: Download,
-    title: "Instale o app",
-    description: "Use o menu do seu navegador para adicionar este site à tela inicial do seu dispositivo.",
-    action: "Instalação",
+    title: "Abra o menu do navegador",
+    description: "No Chrome, Edge ou Firefox, clique nos três pontos (⋮) no canto superior direito da tela.",
+    action: "Passo 1 de 2",
+  },
+  {
+    icon: PlusSquare,
+    title: "Instalar como aplicativo",
+    description: "Selecione \"Instalar aplicativo\" ou \"Adicionar à tela inicial\". No Chrome, também pode usar Ctrl+Shift+A.",
+    action: "Passo 2 de 2",
   },
 ];
 
@@ -108,7 +114,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
     localStorage.setItem(TUTORIAL_STORAGE_KEY, "true");
     setTimeout(() => {
       onComplete();
-    }, 300);
+    }, 500);
   };
 
   // If already installed as PWA, skip tutorial
@@ -128,8 +134,8 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          exit={{ opacity: 0, filter: "blur(4px)" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className="fixed inset-0 z-[9999] bg-background flex flex-col safe-top overflow-hidden"
         >
           {/* Header */}
@@ -138,6 +144,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
             <Logo size="sm" iconOnly />
             <button
               onClick={handleSkip}
+              aria-label="Pular tutorial de instalação"
               className="text-sm text-muted-foreground hover:text-foreground px-4 py-2 rounded-xl bg-muted/50 transition-colors"
             >
               Pular
@@ -183,7 +190,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
                     transition={{ delay: 0.25 }}
                     className="text-2xl font-bold text-foreground mb-4"
                   >
-                    Instale o Já Limpo
+                    Instale o CleanQuick
                   </motion.h1>
 
                   <motion.p
@@ -259,7 +266,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
           </main>
 
           {/* Footer */}
-          <footer className="p-6 pb-10">
+          <footer className="p-6 pb-10 safe-bottom">
             {/* Progress dots */}
             {!showIntro && (
               <div className="flex justify-center gap-2 mb-6">

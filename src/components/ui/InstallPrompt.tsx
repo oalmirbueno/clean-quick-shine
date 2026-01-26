@@ -23,6 +23,12 @@ export function InstallPrompt() {
       return;
     }
 
+    // Check if tutorial was completed - if not, don't show InstallPrompt
+    const tutorialCompleted = localStorage.getItem("cleanquick_pwa_tutorial_completed") === "true";
+    if (!tutorialCompleted) {
+      return;
+    }
+
     // Check if dismissed recently (24h cooldown)
     const dismissed = localStorage.getItem("pwa-prompt-dismissed");
     if (dismissed) {
