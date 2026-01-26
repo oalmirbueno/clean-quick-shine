@@ -1,40 +1,51 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Logo } from "@/components/ui/Logo";
+import { motion, AnimatePresence } from "framer-motion";
+import logoIcon from "@/assets/logo-icon.png";
 
 export default function Index() {
   const navigate = useNavigate();
+  const [show, setShow] = useState(true);
 
   useEffect(() => {
-    // Splash screen - redirect after animation
+    // Quick brand vignette - 800ms
     const timer = setTimeout(() => {
-      navigate("/onboarding");
-    }, 2000);
+      setShow(false);
+    }, 800);
 
-    return () => clearTimeout(timer);
+    const navigateTimer = setTimeout(() => {
+      navigate("/onboarding", { replace: true });
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(navigateTimer);
+    };
   }, [navigate]);
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
-      <div className="animate-scale-in">
-        <Logo size="lg" className="justify-center mb-6" />
-        <p className="text-center text-muted-foreground animate-fade-in">
-          Limpeza de qualidade a um clique
-        </p>
-      </div>
-      
-      {/* Loading indicator */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 safe-bottom">
-        <div className="flex gap-1">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-2 h-2 rounded-full bg-primary animate-pulse"
-              style={{ animationDelay: `${i * 0.2}s` }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+    <AnimatePresence>
+      {show && (
+        <motion.div 
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="fixed inset-0 bg-background flex items-center justify-center"
+        >
+          <motion.img
+            src={logoIcon}
+            alt="Já Limpo"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.1, opacity: 0 }}
+            transition={{ 
+              duration: 0.4, 
+              ease: [0.4, 0, 0.2, 1]
+            }}
+            className="w-20 h-20"
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
