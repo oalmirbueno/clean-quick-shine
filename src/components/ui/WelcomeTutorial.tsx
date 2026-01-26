@@ -190,7 +190,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
                     transition={{ delay: 0.25 }}
                     className="text-2xl font-bold text-foreground mb-4"
                   >
-                    Instale o CleanQuick
+                    Instale o Já Limpo
                   </motion.h1>
 
                   <motion.p
