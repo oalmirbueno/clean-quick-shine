@@ -4,7 +4,9 @@ import { BottomNav } from "@/components/ui/BottomNav";
 import { OrderCard } from "@/components/ui/OrderCard";
 import { cn } from "@/lib/utils";
 import { useClientOrders } from "@/hooks/useOrders";
-import { Loader2, ClipboardList } from "lucide-react";
+import { useClientOrdersRealtime } from "@/hooks/useOrderRealtime";
+import { useAuth } from "@/contexts/AuthContext";
+import { Loader2, ClipboardList, Radio } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -12,8 +14,12 @@ type Tab = "upcoming" | "completed";
 
 export default function ClientOrders() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("upcoming");
   const { data: orders, isLoading } = useClientOrders();
+
+  // Enable realtime updates for client orders
+  useClientOrdersRealtime(user?.id || null);
 
   const upcomingStatuses = ["draft", "scheduled", "matching", "confirmed", "en_route", "in_progress"];
   const completedStatuses = ["completed", "rated", "paid_out", "cancelled"];
@@ -60,9 +66,15 @@ export default function ClientOrders() {
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
-        <h1 className="text-xl font-semibold text-foreground">
-          Meus pedidos
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">
+            Meus pedidos
+          </h1>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Radio className="w-3 h-3 text-success animate-pulse" />
+            <span>Ao vivo</span>
+          </div>
+        </div>
       </header>
 
       {/* Tabs */}
