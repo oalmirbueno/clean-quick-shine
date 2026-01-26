@@ -1,12 +1,51 @@
 import { Logo } from "@/components/ui/Logo";
 
-// Screenshot imports
+// Screenshot imports - Auth Module
 import splashScreen from "@/assets/screenshots/splash.png";
-import clientHomeScreen from "@/assets/screenshots/client-home.png";
-import proHomeScreen from "@/assets/screenshots/pro-home.png";
-import adminDashboardScreen from "@/assets/screenshots/admin-dashboard.png";
 import loginScreen from "@/assets/screenshots/login.png";
+import registerScreen from "@/assets/screenshots/register.png";
+import forgotPasswordScreen from "@/assets/screenshots/forgot-password.png";
+import onboardingScreen from "@/assets/screenshots/onboarding.png";
+
+// Screenshot imports - Client Module
+import clientHomeScreen from "@/assets/screenshots/client-home.png";
+import clientServiceScreen from "@/assets/screenshots/client-service.png";
+import clientScheduleScreen from "@/assets/screenshots/client-schedule.png";
+import clientLocationScreen from "@/assets/screenshots/client-location.png";
+import clientMatchingScreen from "@/assets/screenshots/client-matching.png";
+import clientOfferScreen from "@/assets/screenshots/client-offer.png";
+import clientCheckoutScreen from "@/assets/screenshots/client-checkout.png";
 import orderTrackingScreen from "@/assets/screenshots/order-tracking.png";
+import clientRatingScreen from "@/assets/screenshots/client-rating.png";
+import clientOrdersScreen from "@/assets/screenshots/client-orders.png";
+import clientProfileScreen from "@/assets/screenshots/client-profile.png";
+
+// Screenshot imports - Pro Module
+import proHomeScreen from "@/assets/screenshots/pro-home.png";
+import proAgendaScreen from "@/assets/screenshots/pro-agenda.png";
+import proEarningsScreen from "@/assets/screenshots/pro-earnings.png";
+import proRankingScreen from "@/assets/screenshots/pro-ranking.png";
+import proProfileScreen from "@/assets/screenshots/pro-profile.png";
+import proVerificationScreen from "@/assets/screenshots/pro-verification.png";
+import proPlanScreen from "@/assets/screenshots/pro-plan.png";
+import proWithdrawScreen from "@/assets/screenshots/pro-withdraw.png";
+import proSupportScreen from "@/assets/screenshots/pro-support.png";
+import proAvailabilityScreen from "@/assets/screenshots/pro-availability.png";
+
+// Screenshot imports - Admin Module
+import adminDashboardScreen from "@/assets/screenshots/admin-dashboard.png";
+import adminOrdersScreen from "@/assets/screenshots/admin-orders.png";
+import adminProsScreen from "@/assets/screenshots/admin-pros.png";
+import adminClientsScreen from "@/assets/screenshots/admin-clients.png";
+import adminCouponsScreen from "@/assets/screenshots/admin-coupons.png";
+import adminSupportScreen from "@/assets/screenshots/admin-support.png";
+import adminZonesScreen from "@/assets/screenshots/admin-zones.png";
+import adminAnalyticsScreen from "@/assets/screenshots/admin-analytics.png";
+
+// Screenshot imports - Company Module
+import companyOnboardingScreen from "@/assets/screenshots/company-onboarding.png";
+import companyQuoteScreen from "@/assets/screenshots/company-quote.png";
+
 export default function ProjectDocumentation() {
   return (
     <div className="bg-white text-gray-900 min-h-screen print:bg-white">
@@ -99,54 +138,135 @@ export default function ProjectDocumentation() {
         </div>
       </section>
 
-      {/* Screenshots Gallery */}
+      {/* Screenshots Gallery - Auth Module */}
       <section className="page-break p-12">
-        <SectionHeader number="1.1" title="Galeria de Telas" />
+        <SectionHeader number="1.1" title="Galeria de Telas - Autenticação" />
+        <p className="text-gray-700 mb-6">Módulo de autenticação e onboarding do aplicativo.</p>
         
-        <p className="text-gray-700 mb-8">
-          Visão geral das principais interfaces do aplicativo nos três módulos: Cliente, Profissional e Administrativo.
-        </p>
-
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          <ScreenshotCard 
-            image={splashScreen} 
-            title="Tela Inicial" 
-            description="Splash screen com opções de login e cadastro"
-          />
-          <ScreenshotCard 
-            image={loginScreen} 
-            title="Login" 
-            description="Autenticação de usuários"
-          />
-          <ScreenshotCard 
-            image={clientHomeScreen} 
-            title="Home Cliente" 
-            description="Dashboard principal do cliente"
-          />
+        <div className="grid grid-cols-4 gap-4">
+          <ScreenshotCard image={splashScreen} title="Splash" description="Tela inicial" />
+          <ScreenshotCard image={loginScreen} title="Login" description="Autenticação" />
+          <ScreenshotCard image={registerScreen} title="Cadastro" description="Criar conta" />
+          <ScreenshotCard image={forgotPasswordScreen} title="Recuperar Senha" description="Reset password" />
         </div>
+        <div className="grid grid-cols-4 gap-4 mt-4">
+          <ScreenshotCard image={onboardingScreen} title="Onboarding" description="Seleção de perfil" />
+        </div>
+      </section>
 
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          <ScreenshotCard 
-            image={proHomeScreen} 
-            title="Home Pro" 
-            description="Dashboard do profissional"
-          />
-          <ScreenshotCard 
-            image={orderTrackingScreen} 
-            title="Tracking" 
-            description="Acompanhamento em tempo real"
-          />
-          <div className="flex items-center justify-center">
-            <img 
-              src={adminDashboardScreen} 
-              alt="Admin Dashboard" 
-              className="w-full rounded-xl shadow-lg border border-gray-200"
-            />
+      {/* Screenshots Gallery - Client Module */}
+      <section className="page-break p-12">
+        <SectionHeader number="1.2" title="Galeria de Telas - Módulo Cliente" />
+        <p className="text-gray-700 mb-6">Interface completa do cliente para agendamento de serviços.</p>
+        
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          <ScreenshotCard image={clientHomeScreen} title="Home" description="Dashboard principal" />
+          <ScreenshotCard image={clientServiceScreen} title="Serviços" description="Seleção de tipo" />
+          <ScreenshotCard image={clientScheduleScreen} title="Agenda" description="Data e horário" />
+          <ScreenshotCard image={clientLocationScreen} title="Endereço" description="Local do serviço" />
+        </div>
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          <ScreenshotCard image={clientMatchingScreen} title="Matching" description="Buscando profissional" />
+          <ScreenshotCard image={clientOfferScreen} title="Oferta" description="Pro encontrado" />
+          <ScreenshotCard image={clientCheckoutScreen} title="Checkout" description="Pagamento" />
+          <ScreenshotCard image={orderTrackingScreen} title="Tracking" description="Acompanhamento" />
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+          <ScreenshotCard image={clientRatingScreen} title="Avaliação" description="Avaliar serviço" />
+          <ScreenshotCard image={clientOrdersScreen} title="Pedidos" description="Histórico" />
+          <ScreenshotCard image={clientProfileScreen} title="Perfil" description="Dados do usuário" />
+        </div>
+      </section>
+
+      {/* Screenshots Gallery - Pro Module */}
+      <section className="page-break p-12">
+        <SectionHeader number="1.3" title="Galeria de Telas - Módulo Profissional" />
+        <p className="text-gray-700 mb-6">Interface do profissional para gerenciar sua operação.</p>
+        
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          <ScreenshotCard image={proHomeScreen} title="Home Pro" description="Dashboard" />
+          <ScreenshotCard image={proAgendaScreen} title="Agenda" description="Serviços agendados" />
+          <ScreenshotCard image={proEarningsScreen} title="Ganhos" description="Receita e histórico" />
+          <ScreenshotCard image={proRankingScreen} title="Ranking" description="Métricas SLA" />
+        </div>
+        <div className="grid grid-cols-4 gap-4 mb-4">
+          <ScreenshotCard image={proProfileScreen} title="Perfil" description="Dados do Pro" />
+          <ScreenshotCard image={proVerificationScreen} title="Verificação" description="Documentos" />
+          <ScreenshotCard image={proPlanScreen} title="Planos" description="Assinatura" />
+          <ScreenshotCard image={proWithdrawScreen} title="Saque" description="Retirada de saldo" />
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+          <ScreenshotCard image={proSupportScreen} title="Suporte" description="Central de ajuda" />
+          <ScreenshotCard image={proAvailabilityScreen} title="Disponibilidade" description="Horários" />
+        </div>
+      </section>
+
+      {/* Screenshots Gallery - Admin Module */}
+      <section className="page-break p-12">
+        <SectionHeader number="1.4" title="Galeria de Telas - Módulo Administrativo" />
+        <p className="text-gray-700 mb-6">Painel de controle para gestão da plataforma (Desktop).</p>
+        
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <img src={adminDashboardScreen} alt="Admin Dashboard" className="w-full rounded-lg shadow border border-gray-200" />
+            <p className="text-center text-sm mt-2 font-medium">Dashboard</p>
+          </div>
+          <div>
+            <img src={adminOrdersScreen} alt="Admin Orders" className="w-full rounded-lg shadow border border-gray-200" />
+            <p className="text-center text-sm mt-2 font-medium">Gestão de Pedidos</p>
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <img src={adminProsScreen} alt="Admin Pros" className="w-full rounded-lg shadow border border-gray-200" />
+            <p className="text-center text-sm mt-2 font-medium">Gestão de Profissionais</p>
+          </div>
+          <div>
+            <img src={adminClientsScreen} alt="Admin Clients" className="w-full rounded-lg shadow border border-gray-200" />
+            <p className="text-center text-sm mt-2 font-medium">Gestão de Clientes</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <img src={adminAnalyticsScreen} alt="Admin Analytics" className="w-full rounded-lg shadow border border-gray-200" />
+            <p className="text-center text-sm mt-2 font-medium">Analytics</p>
+          </div>
+          <div>
+            <img src={adminZonesScreen} alt="Admin Zones" className="w-full rounded-lg shadow border border-gray-200" />
+            <p className="text-center text-sm mt-2 font-medium">Zonas de Atendimento</p>
+          </div>
+        </div>
+      </section>
 
-        <div className="text-center text-gray-500 text-sm mt-4">
+      {/* Screenshots Gallery - Admin Module Page 2 */}
+      <section className="page-break p-12">
+        <h3 className="text-xl font-bold text-gray-700 mb-6">Módulo Administrativo (continuação)</h3>
+        
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <img src={adminCouponsScreen} alt="Admin Coupons" className="w-full rounded-lg shadow border border-gray-200" />
+            <p className="text-center text-sm mt-2 font-medium">Gestão de Cupons</p>
+          </div>
+          <div>
+            <img src={adminSupportScreen} alt="Admin Support" className="w-full rounded-lg shadow border border-gray-200" />
+            <p className="text-center text-sm mt-2 font-medium">Tickets de Suporte</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Screenshots Gallery - Company Module */}
+      <section className="page-break p-12">
+        <SectionHeader number="1.5" title="Galeria de Telas - Módulo Empresa (B2B)" />
+        <p className="text-gray-700 mb-6">Interface para empresas solicitarem orçamentos.</p>
+        
+        <div className="grid grid-cols-4 gap-4">
+          <ScreenshotCard image={companyOnboardingScreen} title="Onboarding" description="Cadastro empresa" />
+          <ScreenshotCard image={companyQuoteScreen} title="Orçamento" description="Solicitar cotação" />
+        </div>
+
+        <div className="mt-8 text-center text-gray-500 text-sm">
           <p>* Mockups representativos do design final do aplicativo</p>
+          <p className="mt-1">Total: 54 telas documentadas</p>
         </div>
       </section>
 
