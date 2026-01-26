@@ -298,7 +298,7 @@ export default function Install() {
 
   if (isInstalled) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -337,12 +337,12 @@ export default function Install() {
   }
 
   return (
-    <div className="min-h-screen bg-background safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
+        className="flex-shrink-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
       >
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <Logo size="sm" />
@@ -355,7 +355,7 @@ export default function Install() {
         </div>
       </motion.header>
 
-      <main className="max-w-2xl mx-auto px-4 py-8 space-y-8">
+      <main className="flex-1 overflow-y-auto max-w-2xl mx-auto px-4 py-8 space-y-8 safe-bottom">
         {/* Hero */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}

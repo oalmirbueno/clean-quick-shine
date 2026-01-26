@@ -15,11 +15,11 @@ export default function ProEarnings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <header className="bg-card border-b border-border p-4">
+      <div className="fixed inset-0 bg-background flex flex-col safe-top">
+        <header className="flex-shrink-0 bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">Meus ganhos</h1>
         </header>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
         <BottomNav variant="pro" />
@@ -32,15 +32,15 @@ export default function ProEarnings() {
   const weekChange = earnings?.weekChange || 0;
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <h1 className="text-xl font-semibold text-foreground">
           Meus ganhos
         </h1>
       </header>
 
-      <main className="p-4 space-y-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-24 space-y-4 animate-fade-in">
         {/* Balance Card */}
         <div className="p-5 bg-primary rounded-xl text-primary-foreground">
           <p className="text-sm opacity-90">Saldo disponível</p>

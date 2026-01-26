@@ -106,13 +106,13 @@ export default function ProHome() {
         <AppTutorial variant="pro" onComplete={completeTutorial} />
       )}
       
-      <div className="min-h-screen bg-background pb-20 safe-top">
+      <div className="fixed inset-0 bg-background flex flex-col safe-top">
         {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-card border-b border-border p-4"
+        className="flex-shrink-0 bg-card border-b border-border p-4"
       >
         <div className="flex items-center justify-between mb-4">
           <Logo size="lg" iconOnly />
@@ -167,7 +167,7 @@ export default function ProHome() {
         )}
       </motion.header>
 
-      <main className="p-4 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 pb-24 space-y-4">
         {/* Live Availability Toggle */}
         <AnimatedSection delay={1} className="p-4 bg-card rounded-xl border border-border">
           <div className="flex items-center justify-between">

@@ -55,9 +55,9 @@ export default function ClientSchedule() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -197,7 +197,7 @@ export default function ClientSchedule() {
       </main>
 
       {/* Bottom Action */}
-      <div className="p-4 bg-card border-t border-border">
+      <div className="flex-shrink-0 p-4 bg-card border-t border-border safe-bottom">
         <PrimaryButton
           fullWidth
           disabled={!isComplete}
