@@ -96,7 +96,7 @@ export default function Login() {
           </motion.div>
 
           {/* Content */}
-          <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-4 lg:items-start lg:w-[45%]">
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pt-4 lg:items-start lg:w-[45%]">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -202,7 +202,7 @@ export default function Login() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-sm text-muted-foreground mt-6"
+                className="text-sm text-muted-foreground mt-4"
               >
                 Não tem conta?{" "}
                 <button 
@@ -256,7 +256,7 @@ export default function Login() {
         </motion.div>
 
         {/* Content */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 py-12 lg:w-[45%]">
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 pt-4 lg:w-[45%]">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -331,7 +331,7 @@ export default function Login() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-sm text-muted-foreground mt-8"
+              className="text-sm text-muted-foreground mt-4"
             >
               Não tem conta?{" "}
               <button 
