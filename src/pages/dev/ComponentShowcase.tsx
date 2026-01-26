@@ -72,7 +72,7 @@ export default function ComponentShowcase() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background safe-top">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

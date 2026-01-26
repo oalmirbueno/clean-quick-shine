@@ -89,10 +89,9 @@ export default function ForgotPassword() {
         <div className="w-full max-w-sm animate-fade-in">
           <button
             onClick={() => navigate("/login")}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors mb-6"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
+            <ArrowLeft className="w-5 h-5" />
           </button>
 
           <div className="text-center mb-8">
