@@ -5,13 +5,14 @@ import { InputField } from "@/components/ui/InputField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { User, Briefcase } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 type UserType = "client" | "pro" | null;
 
 export default function Login() {
   const navigate = useNavigate();
-  const { signIn, hasRole } = useAuth();
+  const { signIn, refreshRoles } = useAuth();
   const [userType, setUserType] = useState<UserType>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,16 +34,35 @@ export default function Login() {
 
     toast.success("Login realizado com sucesso!");
     
-    // Navigate based on actual role from database, fallback to selected type
-    if (roles?.includes("admin")) {
+    // Se não tem role, adicionar baseado na seleção do usuário
+    let finalRoles = roles || [];
+    if (finalRoles.length === 0 && userType) {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user) {
+        const selectedRole = userType as "client" | "pro";
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({ user_id: userData.user.id, role: selectedRole });
+        
+        if (!roleError) {
+          finalRoles = [selectedRole];
+          await refreshRoles();
+        }
+      }
+    }
+    
+    // Navegar baseado na role real ou seleção
+    if (finalRoles.includes("admin")) {
       navigate("/admin/dashboard");
-    } else if (roles?.includes("client") || userType === "client") {
+    } else if (finalRoles.includes("client")) {
       navigate("/client/home");
-    } else if (roles?.includes("pro") || userType === "pro") {
+    } else if (finalRoles.includes("pro")) {
       navigate("/pro/home");
-    } else {
-      // Fallback based on selection
+    } else if (userType) {
+      // Fallback para seleção do usuário
       navigate(userType === "client" ? "/client/home" : "/pro/home");
+    } else {
+      toast.error("Erro ao determinar tipo de conta");
     }
     setLoading(false);
   };
