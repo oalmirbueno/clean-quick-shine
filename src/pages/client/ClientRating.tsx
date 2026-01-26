@@ -137,7 +137,7 @@ export default function ClientRating() {
         </div>
 
         <h1 className="text-2xl font-bold text-foreground mb-2">
-          Serviço concluído ✅
+          Serviço concluído
         </h1>
         <p className="text-muted-foreground text-center mb-8">
           Como foi a sua experiência com {proName}?

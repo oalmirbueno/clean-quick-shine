@@ -52,8 +52,9 @@ export default function ClientHome() {
           </div>
         </div>
         <h1 className="text-xl font-semibold text-foreground">
-          Olá, {userName} 👋
+          Olá, {userName}
         </h1>
+        <p className="text-sm text-muted-foreground mt-0.5">O que você precisa hoje?</p>
       </header>
 
       <main className="p-4 space-y-6 animate-fade-in">

@@ -32,21 +32,21 @@ export function MetricCard({
 
   return (
     <div className={cn(
-      "p-4 bg-card rounded-xl border border-border card-shadow",
+      "p-5 bg-card rounded-2xl border border-border shadow-sm",
       className
     )}>
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-sm text-muted-foreground">{title}</span>
+      <div className="flex items-start justify-between mb-3">
+        <span className="text-sm font-medium text-muted-foreground">{title}</span>
         {Icon && (
-          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
             <Icon className="w-4 h-4 text-primary" />
           </div>
         )}
       </div>
-      <p className="text-2xl font-bold text-foreground">{formatValue()}</p>
+      <p className="text-3xl font-bold text-foreground tracking-tight">{formatValue()}</p>
       {trend !== undefined && (
         <div className={cn(
-          "flex items-center gap-1 mt-2 text-sm",
+          "flex items-center gap-1.5 mt-3 text-sm font-medium",
           trend >= 0 ? "text-success" : "text-destructive"
         )}>
           {trend >= 0 ? (
@@ -55,7 +55,7 @@ export function MetricCard({
             <TrendingDown className="w-4 h-4" />
           )}
           <span>{trend >= 0 ? "+" : ""}{trend}%</span>
-          {trendLabel && <span className="text-muted-foreground">{trendLabel}</span>}
+          {trendLabel && <span className="text-muted-foreground font-normal">{trendLabel}</span>}
         </div>
       )}
     </div>

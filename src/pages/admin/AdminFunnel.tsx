@@ -181,7 +181,7 @@ export default function AdminFunnel() {
 
           {/* Recommendations */}
           <div className="mt-6 p-4 bg-accent rounded-xl border border-border">
-            <h3 className="font-semibold text-foreground mb-3">💡 Recomendações</h3>
+            <h3 className="font-semibold text-foreground mb-3">Recomendações</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>• <strong>Cadastro → Pedido:</strong> Melhorar visibilidade de horários alternativos quando não há disponibilidade imediata</li>
               <li>• <strong>Checkout:</strong> Implementar recuperação de carrinho abandonado com desconto</li>

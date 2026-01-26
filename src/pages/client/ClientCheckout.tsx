@@ -147,8 +147,8 @@ export default function ClientCheckout() {
               </div>
               <div>
                 <p className="font-medium text-foreground">{proName}</p>
-                <p className="text-sm text-muted-foreground">
-                  ⭐ {proRating?.toFixed(1) || "5.0"} • Profissional verificado(a)
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <span className="text-warning">★</span> {proRating?.toFixed(1) || "5.0"} · Profissional verificado(a)
                 </p>
               </div>
             </div>

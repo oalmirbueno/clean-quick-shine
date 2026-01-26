@@ -20,19 +20,19 @@ export function ServiceCard({
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center p-4 bg-card rounded-xl border border-border",
-        "card-shadow hover:card-shadow-hover transition-all duration-200",
-        "hover:border-primary/20 active:scale-[0.98]",
-        "min-h-[100px] w-full text-center",
+        "flex flex-col items-center justify-center p-5 bg-card rounded-2xl border border-border",
+        "shadow-sm hover:shadow-md transition-all duration-200",
+        "hover:border-primary/30 hover:bg-accent/50 active:scale-[0.98]",
+        "min-h-[110px] w-full text-center group",
         className
       )}
     >
-      <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center mb-2">
+      <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
         <Icon className="w-5 h-5 text-primary" />
       </div>
-      <span className="text-sm font-medium text-foreground">{title}</span>
+      <span className="text-sm font-semibold text-foreground">{title}</span>
       {description && (
-        <span className="text-xs text-muted-foreground mt-1">{description}</span>
+        <span className="text-xs text-muted-foreground mt-0.5">{description}</span>
       )}
     </button>
   );
