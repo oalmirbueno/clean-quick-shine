@@ -1,205 +1,276 @@
 
-# Plano de Correção: Login Travado no Carregamento
+# Plano Completo: Transformação PWA
 
-## Problema Identificado
+## Visão Geral
 
-Analisando o código e os logs, identifiquei uma **condição de corrida (race condition)** no fluxo de autenticação:
-
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  FLUXO ATUAL (PROBLEMÁTICO)                                         │
-├─────────────────────────────────────────────────────────────────────┤
-│  1. handleLogin() → signIn()                                        │
-│  2. signInWithPassword() ✓ (sucesso)                                │
-│  3. fetchRoles() no signIn() → retorna ['client']                   │
-│  4. setRoles(['client']) ✓                                          │
-│  5. DISPARA onAuthStateChange() → await fetchRoles() (DUPLICADO!)   │
-│  6. navigate('/client/home')                                        │
-│  7. ProtectedRoute verifica loading/rolesLoaded                     │
-│  8. onAuthStateChange ainda está processando... TRAVA!              │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-O `onAuthStateChange` é disparado automaticamente pelo Supabase quando o login acontece, e ele também busca roles. Isso causa:
-- Busca de roles **duplicada**
-- Estados intermediários inconsistentes
-- O loading fica true enquanto a segunda busca acontece
-
-## Solução em 3 Partes
+O projeto já possui uma base sólida de PWA com `vite-plugin-pwa`, `manifest.json`, ícones básicos, meta tags iOS e componentes `InstallPrompt` e `Install`. Este plano irá **expandir e aprimorar** o que já existe para entregar um PWA completo, instalável e com experiência real de aplicativo.
 
 ---
 
-### Parte 1: Otimizar AuthContext.tsx
+## Fase 1: Manifest e Ícones Completos
 
-**Mudanças principais:**
-1. Usar `setTimeout` com 0ms no `onAuthStateChange` para evitar blocking
-2. Não refazer fetch de roles se já foram carregadas recentemente
-3. Adicionar flag para indicar que o signIn está em progresso
+### 1.1 Atualizar manifest.json
+- Alterar `name` e `short_name` para "Já Limpo" (consistente com index.html)
+- Adicionar ícones em todos os tamanhos: 72, 96, 128, 144, 152, 192, 384, 512
+- Adicionar `shortcuts` para acesso rápido (Início, Pedidos, Suporte)
+- Adicionar `id` para identificação única do app
+- Configurar `scope` corretamente
 
-```typescript
-// AuthContext.tsx - Evitar race condition
-const [signingIn, setSigningIn] = useState(false);
+### 1.2 Gerar Ícones Faltantes
+Criar ícones nos tamanhos: 72x72, 96x96, 128x128, 144x144, 152x152, 384x384 (normal e maskable)
 
-// No onAuthStateChange, não buscar roles se signIn está em progresso
-const { data: { subscription } } = supabase.auth.onAuthStateChange(
-  async (event, session) => {
-    setSession(session);
-    setUser(session?.user ?? null);
-    
-    if (session?.user && !signingIn) {
-      // Usar setTimeout para não bloquear
-      setTimeout(async () => {
-        const fetchedRoles = await fetchRoles(session.user.id);
-        setRoles(fetchedRoles);
-        setRolesLoaded(true);
-      }, 0);
-    } else if (!session) {
-      setRoles([]);
-      setRolesLoaded(false);
-    }
-    
-    setLoading(false);
-  }
-);
-
-// No signIn, marcar que está em progresso
-const signIn = async (...) => {
-  setSigningIn(true);
-  const { data, error } = await supabase.auth.signInWithPassword(...);
-  
-  if (!error && data.user) {
-    const fetchedRoles = await fetchRoles(data.user.id);
-    setRoles(fetchedRoles);
-    setRolesLoaded(true);
-    setLoading(false); // IMPORTANTE: garantir loading = false
-  }
-  
-  setSigningIn(false);
-  return { error: null, roles: fetchedRoles };
-};
-```
+### 1.3 Apple Splash Screens
+Gerar splash screens para diferentes dispositivos iOS
 
 ---
 
-### Parte 2: Simplificar Login.tsx
+## Fase 2: Service Worker Robusto
 
-**Mudanças:**
-1. Remover lógica redundante de inserção de role (já existe no banco)
-2. Garantir que `setLoading(false)` é chamado em TODOS os casos
-3. Usar try-catch para evitar erros silenciosos
+### 2.1 Configurar Workbox no Vite
+Expandir configuração do `vite-plugin-pwa` com:
+- **Precache**: Todos os assets estáticos (JS, CSS, HTML, ícones, fontes)
+- **Runtime Caching**:
+  - Cache-First para imagens e assets
+  - Stale-While-Revalidate para páginas HTML
+  - Network-First para requisições API (Supabase)
+- Fallback offline para navegação
 
-```typescript
-const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  
-  try {
-    const { error, roles } = await signIn(email, password);
-    
-    if (error) {
-      toast.error(error.message === "Invalid login credentials" 
-        ? "Email ou senha incorretos" 
-        : error.message);
-      return;
-    }
+### 2.2 Página Offline
+Criar página de fallback bonita quando não há conexão (já existe estrutura, apenas melhorar)
 
-    toast.success("Login realizado com sucesso!");
-    
-    // Navegar imediatamente baseado nas roles retornadas
-    const userRoles = roles || [];
-    
-    if (userRoles.includes("admin")) {
-      navigate("/admin/dashboard");
-    } else if (userRoles.includes("client")) {
-      navigate("/client/home");
-    } else if (userRoles.includes("pro")) {
-      navigate("/pro/home");
-    } else if (userType) {
-      // Fallback: inserir role e navegar
-      navigate(userType === "client" ? "/client/home" : "/pro/home");
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    toast.error("Erro ao fazer login. Tente novamente.");
-  } finally {
-    setLoading(false);
-  }
-};
-```
+### 2.3 Sistema de Atualização
+Criar componente `UpdatePrompt` que:
+- Detecta novas versões do Service Worker
+- Mostra notificação discreta "Atualização disponível"
+- Botão para atualizar imediatamente
+- Evita o problema clássico de PWA travado em versão antiga
 
 ---
 
-### Parte 3: Melhorar ProtectedRoute.tsx
+## Fase 3: App Shell e Navegação
 
-**Mudanças:**
-1. Adicionar timeout para evitar loading infinito
-2. Verificar se já está na rota correta para evitar re-renders
+### 3.1 Estrutura Atual
+O projeto já possui:
+- `BottomNav` com 3-4 itens para Client e Pro
+- Headers fixos leves
+- Transições com Framer Motion
 
-```typescript
-// ProtectedRoute.tsx - Com timeout de segurança
-const [timedOut, setTimedOut] = useState(false);
+### 3.2 Melhorias no BottomNav
+- Adicionar aba de "Suporte" (opcional, baseado no checklist)
+- Garantir `safe-area-inset-bottom` (já implementado via classe `safe-bottom`)
+- Animação de feedback tátil ao tocar
 
-useEffect(() => {
-  // Timeout de 5 segundos para evitar loading infinito
-  const timeout = setTimeout(() => {
-    if (loading || (user && !rolesLoaded)) {
-      setTimedOut(true);
-    }
-  }, 5000);
-  
-  return () => clearTimeout(timeout);
-}, [loading, user, rolesLoaded]);
-
-if (timedOut) {
-  return <Navigate to="/login" replace />;
-}
-```
+### 3.3 Transições de Tela
+Adicionar transições suaves entre rotas usando `AnimatePresence` do Framer Motion
 
 ---
 
-## Arquivos a Modificar
+## Fase 4: Ajustes iOS (Safe Area + Splash)
 
-| Arquivo | Mudança |
-|---------|---------|
-| `src/contexts/AuthContext.tsx` | Adicionar flag `signingIn`, evitar fetch duplicado, garantir loading=false |
-| `src/pages/Login.tsx` | Simplificar, adicionar try-catch, usar finally |
-| `src/components/ProtectedRoute.tsx` | Adicionar timeout de segurança |
+### 4.1 Meta Tags (Já Implementadas)
+Verificar e confirmar:
+- `apple-mobile-web-app-capable`: yes
+- `apple-mobile-web-app-status-bar-style`: black-translucent
+- `viewport`: viewport-fit=cover
+
+### 4.2 Safe Area CSS
+Expandir utilitários CSS para:
+- `safe-top`: padding-top com safe-area-inset-top
+- `safe-bottom`: já existe
+- `safe-left`, `safe-right`: para dispositivos com notch lateral
+
+### 4.3 Remover Scroll Bounce
+Adicionar CSS para desabilitar overscroll em dispositivos iOS
+
+---
+
+## Fase 5: Performance
+
+### 5.1 Lazy Loading de Imagens
+- Adicionar `loading="lazy"` em todas as imagens
+- Implementar component wrapper para imagens com loading state
+
+### 5.2 Code Splitting
+- Já implementado via React Router (cada página é lazy loaded pelo Vite)
+- Verificar se rotas admin podem ser separadas em chunk diferente
+
+### 5.3 Prefetch de Rotas Críticas
+Adicionar prefetch para rotas principais baseado no role do usuário
+
+---
+
+## Fase 6: UX Mobile-First
+
+### 6.1 Estados de Loading
+Criar componentes `Skeleton` reutilizáveis para:
+- Lista de pedidos
+- Cards de serviço
+- Perfil do usuário
+
+### 6.2 Estados Vazios
+Criar componente `EmptyState` bonito para:
+- Sem pedidos
+- Sem endereços
+- Sem resultados de busca
+
+### 6.3 Feedback Visual
+- Toast/Sonner já implementado
+- Adicionar feedback tátil com `navigator.vibrate()` onde aplicável
+
+### 6.4 Inputs Otimizados
+Verificar e adicionar atributos:
+- `inputMode="email"` para campos de email
+- `inputMode="numeric"` para campos numéricos
+- `inputMode="tel"` para telefone
+
+---
+
+## Fase 7: Notificações Push (Base)
+
+### 7.1 Estrutura de Push Notifications
+Criar hook `usePushNotifications` com:
+- Verificação de suporte do navegador
+- Fluxo de permissão
+- Subscribe/Unsubscribe
+- Armazenamento do device token (mock ou integração real)
+
+### 7.2 UI de Permissão
+Criar modal bonito para pedir permissão de notificações (não usar o prompt nativo direto)
+
+---
+
+## Fase 8: Modo Offline
+
+### 8.1 Detector de Conexão
+Criar hook `useNetworkStatus` que:
+- Monitora `navigator.onLine`
+- Mostra banner quando offline
+- Notifica quando a conexão é restaurada
+
+### 8.2 Cache de Dados
+Usar `react-query` (já instalado) com:
+- `staleTime` apropriado
+- `cacheTime` longo para dados importantes
+- `refetchOnReconnect: true`
+
+---
+
+## Fase 9: Sistema de Atualização
+
+### 9.1 Componente UpdatePrompt
+Criar componente que:
+- Usa `useRegisterSW` do vite-plugin-pwa
+- Detecta atualizações do Service Worker
+- Mostra UI discreta com opção de atualizar
+
+---
+
+## Fase 10: Validação Final
+
+### 10.1 Lighthouse PWA Audit
+- Installable
+- Works offline
+- Fast and reliable
+- Has icons and manifest
+
+---
+
+## Arquivos a Criar/Modificar
+
+| Arquivo | Ação |
+|---------|------|
+| `public/manifest.json` | Atualizar com ícones completos e shortcuts |
+| `public/pwa-*.png` | Gerar ícones faltantes (72, 96, 128, 144, 152, 384) |
+| `vite.config.ts` | Expandir configuração do VitePWA |
+| `src/hooks/useRegisterSW.ts` | Criar hook para controle do Service Worker |
+| `src/hooks/useNetworkStatus.ts` | Criar hook para status de conexão |
+| `src/hooks/usePushNotifications.ts` | Criar hook base para push |
+| `src/components/ui/UpdatePrompt.tsx` | Criar componente de atualização |
+| `src/components/ui/OfflineBanner.tsx` | Criar banner de offline |
+| `src/components/ui/EmptyState.tsx` | Criar componente de estado vazio |
+| `src/pages/Offline.tsx` | Criar página de fallback offline |
+| `src/index.css` | Adicionar utilitários safe-area e overscroll |
+| `index.html` | Adicionar splash screens iOS |
+| `src/App.tsx` | Integrar UpdatePrompt e OfflineBanner |
 
 ---
 
 ## Detalhes Técnicos
 
-### Por que trava no carregamento?
-
-O problema acontece porque:
-
-1. `signIn()` faz login + busca roles
-2. `onAuthStateChange` também busca roles (duplicado)
-3. Durante a segunda busca, o estado fica inconsistente
-4. `ProtectedRoute` vê `loading=true` e mostra spinner
-5. A segunda busca termina, mas o componente já foi desmontado/remontado
-
-### Por que a solução funciona?
-
-1. Flag `signingIn` previne busca duplicada no `onAuthStateChange`
-2. `setTimeout(0)` move a busca para fora do fluxo síncrono
-3. `finally` garante que `setLoading(false)` sempre executa
-4. Timeout de 5s no ProtectedRoute previne loading infinito
-
-### Fluxo corrigido:
-
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  FLUXO CORRIGIDO                                                    │
-├─────────────────────────────────────────────────────────────────────┤
-│  1. handleLogin() → signIn()                                        │
-│  2. setSigningIn(true)                                              │
-│  3. signInWithPassword() ✓                                          │
-│  4. fetchRoles() → ['client']                                       │
-│  5. setRoles(['client']), setRolesLoaded(true), setLoading(false)  │
-│  6. setSigningIn(false)                                             │
-│  7. onAuthStateChange dispara → vê signingIn=false, mas rolesLoaded │
-│  8. navigate('/client/home')                                        │
-│  9. ProtectedRoute: loading=false, rolesLoaded=true → SUCESSO! ✓   │
-└─────────────────────────────────────────────────────────────────────┘
+### Configuração VitePWA Expandida
+```typescript
+VitePWA({
+  registerType: "prompt", // Mudança para controle manual
+  includeAssets: ["favicon.ico", "robots.txt", "pwa-*.png"],
+  manifest: false,
+  workbox: {
+    globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+    navigateFallback: "/offline.html",
+    navigateFallbackDenylist: [/^\/api/, /^\/supabase/],
+    runtimeCaching: [
+      // Imagens - Cache First
+      {
+        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "images-cache",
+          expiration: { maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 }
+        }
+      },
+      // API Supabase - Network First
+      {
+        urlPattern: /^https:\/\/.*\.supabase\.co\/.*/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "api-cache",
+          expiration: { maxEntries: 50, maxAgeSeconds: 5 * 60 },
+          networkTimeoutSeconds: 10
+        }
+      },
+      // Páginas HTML - Stale While Revalidate
+      {
+        urlPattern: /^https:\/\/.*\/(client|pro|admin)\/.*/,
+        handler: "StaleWhileRevalidate",
+        options: { cacheName: "pages-cache" }
+      }
+    ]
+  }
+})
 ```
+
+### Estrutura do Manifest Final
+```json
+{
+  "id": "ja-limpo-app",
+  "name": "Já Limpo - Limpeza Profissional",
+  "short_name": "Já Limpo",
+  "description": "Precisa de Limpeza? Baixa o Já Limpo",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#3b82f6",
+  "background_color": "#ffffff",
+  "icons": [/* 72, 96, 128, 144, 152, 192, 384, 512 - normal e maskable */],
+  "shortcuts": [
+    { "name": "Início", "url": "/client/home", "icons": [...] },
+    { "name": "Meus Pedidos", "url": "/client/orders", "icons": [...] },
+    { "name": "Suporte", "url": "/client/support", "icons": [...] }
+  ],
+  "categories": ["lifestyle", "utilities"],
+  "lang": "pt-BR"
+}
+```
+
+---
+
+## Ordem de Implementação
+
+1. **Manifest e Ícones** - Base necessária
+2. **Service Worker robusto** - Core do PWA
+3. **Sistema de Atualização** - Evita bugs clássicos
+4. **Detector de Conexão** - UX offline
+5. **Safe Area CSS** - Polimento iOS
+6. **Página Offline** - Fallback gracioso
+7. **Push Notifications (base)** - Estrutura para futuro
+8. **Performance tweaks** - Otimizações finais
