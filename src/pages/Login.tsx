@@ -60,7 +60,7 @@ export default function Login() {
   if (!userType) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0">
+        <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top safe-bottom">
           {/* Background Pattern */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/5 to-transparent" />
@@ -84,31 +84,31 @@ export default function Login() {
           {/* Mobile Hero Image */}
           <motion.div 
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.12 }}
+            animate={{ opacity: 0.1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="absolute right-0 bottom-0 lg:hidden pointer-events-none"
           >
             <img 
               src={heroCleanerImg} 
               alt="" 
-              className="h-[55vh] w-auto object-contain object-bottom"
+              className="h-[50vh] w-auto object-contain object-bottom"
             />
           </motion.div>
 
           {/* Content */}
-          <div className="relative z-10 flex-1 flex flex-col justify-center px-6 py-12 lg:w-[45%]">
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-8 lg:items-start lg:w-[45%]">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto lg:mr-12"
+              className="w-full max-w-sm text-center lg:text-left lg:ml-auto lg:mr-12"
             >
               {/* Logo */}
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                className="mb-8"
+                className="flex justify-center lg:justify-start mb-8"
               >
                 <Logo size="2xl" />
               </motion.div>
@@ -133,7 +133,7 @@ export default function Login() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25 }}
-                className="flex items-center gap-6 mb-8 text-sm text-muted-foreground"
+                className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 mb-8 text-sm text-muted-foreground"
               >
                 <div className="flex items-center gap-1.5">
                   <Shield className="w-4 h-4 text-primary" />
@@ -141,7 +141,7 @@ export default function Login() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Star className="w-4 h-4 text-warning fill-warning" />
-                  <span>4.9 estrelas</span>
+                  <span>4.9</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-success" />

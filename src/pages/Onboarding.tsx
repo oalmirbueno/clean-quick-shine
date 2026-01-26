@@ -8,7 +8,7 @@ export default function Onboarding() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0">
+    <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top safe-bottom">
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/5 to-transparent" />
@@ -32,31 +32,31 @@ export default function Onboarding() {
       {/* Mobile Hero Image */}
       <motion.div 
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.12 }}
+        animate={{ opacity: 0.1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
         className="absolute right-0 bottom-0 lg:hidden pointer-events-none"
       >
         <img 
           src={heroCleanerImg} 
           alt="" 
-          className="h-[55vh] w-auto object-contain object-bottom"
+          className="h-[50vh] w-auto object-contain object-bottom"
         />
       </motion.div>
 
       {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center px-6 py-12 lg:w-[45%]">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-8 lg:items-start lg:w-[45%]">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto lg:mr-12"
+          className="w-full max-w-sm text-center lg:text-left lg:ml-auto lg:mr-12"
         >
           {/* Logo */}
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="mb-8"
+            className="flex justify-center lg:justify-start mb-8"
           >
             <Logo size="2xl" />
           </motion.div>
@@ -66,7 +66,7 @@ export default function Onboarding() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="mb-10"
+            className="mb-8"
           >
             <h1 className="text-3xl font-bold text-foreground mb-2">
               Comece agora
@@ -81,7 +81,7 @@ export default function Onboarding() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.25 }}
-            className="flex items-center gap-6 mb-8 text-sm text-muted-foreground"
+            className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 mb-8 text-sm text-muted-foreground"
           >
             <div className="flex items-center gap-1.5">
               <Shield className="w-4 h-4 text-primary" />
@@ -89,7 +89,7 @@ export default function Onboarding() {
             </div>
             <div className="flex items-center gap-1.5">
               <Star className="w-4 h-4 text-warning fill-warning" />
-              <span>4.9 estrelas</span>
+              <span>4.9</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-success" />
@@ -106,15 +106,15 @@ export default function Onboarding() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               onClick={() => navigate("/onboarding/client")}
-              className="w-full p-5 bg-card rounded-2xl border border-border
+              className="w-full p-4 bg-card rounded-2xl border border-border
                 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300
                 flex items-center gap-4 group"
             >
-              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
-                <User className="w-7 h-7 text-primary" />
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                <User className="w-6 h-6 text-primary" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="font-semibold text-foreground text-lg">Quero contratar limpeza</h3>
+                <h3 className="font-semibold text-foreground">Quero contratar limpeza</h3>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <Star className="w-3 h-3 text-warning fill-warning" />
                   Profissionais verificadas
@@ -130,15 +130,15 @@ export default function Onboarding() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               onClick={() => navigate("/onboarding/pro")}
-              className="w-full p-5 bg-card rounded-2xl border border-border
+              className="w-full p-4 bg-card rounded-2xl border border-border
                 hover:border-success/40 hover:shadow-lg hover:shadow-success/5 transition-all duration-300
                 flex items-center gap-4 group"
             >
-              <div className="w-14 h-14 rounded-xl bg-success/10 flex items-center justify-center group-hover:bg-success/15 transition-colors">
-                <Briefcase className="w-7 h-7 text-success" />
+              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:bg-success/15 transition-colors">
+                <Briefcase className="w-6 h-6 text-success" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="font-semibold text-foreground text-lg">Quero trabalhar como diarista</h3>
+                <h3 className="font-semibold text-foreground">Quero trabalhar como diarista</h3>
                 <p className="text-sm text-muted-foreground">
                   Ganhe dinheiro com seus serviços
                 </p>
@@ -151,7 +151,7 @@ export default function Onboarding() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-sm text-muted-foreground mt-10"
+            className="text-sm text-muted-foreground mt-8"
           >
             Já tem conta?{" "}
             <button 
