@@ -2,49 +2,52 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { BottomNav } from "@/components/ui/BottomNav";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { QualityBadge } from "@/components/ui/QualityBadge";
 import { MapMock } from "@/components/ui/MapMock";
-import { Calendar, Trophy, Wallet, MapPin, Clock, Check, X, Shield, Crown, Bell, Sparkles, Radio, Activity, Star } from "lucide-react";
-import { pros, orders as allOrders, proPlans } from "@/lib/mockDataV3";
+import { Calendar, Trophy, MapPin, Clock, Check, X, Shield, Crown, Bell, Sparkles, Radio, Activity, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useCurrentProData, useAvailableOrdersForPro, useToggleProAvailability } from "@/hooks/useProData";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProHome() {
   const navigate = useNavigate();
-  const pro = pros[0]; // Mock current pro (Ana Paula - ELITE)
-  const [isAvailable, setIsAvailable] = useState(pro.isAvailableNow || false);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [showMap, setShowMap] = useState(false);
 
-  // Get plan details
-  const currentPlan = proPlans.find(p => p.name.toLowerCase() === pro.plan);
+  const { data: proData, isLoading: isLoadingPro } = useCurrentProData();
+  const { data: availableOrders = [], isLoading: isLoadingOrders } = useAvailableOrdersForPro();
+  const { toggleAvailability } = useToggleProAvailability();
 
-  // Filter available orders (scheduled, not assigned)
-  const mockAvailableOrders = [
-    { id: "new1", serviceName: "Limpeza Padrão", city: "Jardim Paulista", date: "Hoje", time: "15:00", proEarning: 103.92, distance: 1.2 },
-    { id: "new2", serviceName: "Limpeza Pesada", city: "Pinheiros", date: "Amanhã", time: "09:00", proEarning: 143.92, distance: 2.8 },
-    { id: "new3", serviceName: "Comercial", city: "Itaim Bibi", date: "Amanhã", time: "14:00", proEarning: 159.92, distance: 3.5, eliteOnly: true },
-  ];
+  const isAvailable = proData?.proProfile?.available_now || false;
+  const isVerified = proData?.proProfile?.verified || false;
+  const proName = proData?.profile?.full_name || "Profissional";
+  const proAvatar = proData?.profile?.avatar_url;
+  const balance = proData?.balance || 0;
+  const planType = proData?.plan?.type || "free";
+  const metrics = proData?.metrics;
 
-  // Filter orders based on plan
-  const availableForPlan = mockAvailableOrders.filter(o => 
-    pro.plan === "elite" || !o.eliteOnly
-  );
-
-  const handleToggleAvailability = () => {
-    setIsAvailable(!isAvailable);
-    toast.success(isAvailable ? "Você está offline agora" : "Você está disponível para pedidos!");
+  const handleToggleAvailability = async () => {
+    try {
+      await toggleAvailability(isAvailable);
+      queryClient.invalidateQueries({ queryKey: ["current_pro_data"] });
+      toast.success(isAvailable ? "Você está offline agora" : "Você está disponível para pedidos!");
+    } catch (error) {
+      toast.error("Erro ao alterar disponibilidade");
+    }
   };
 
   const getPlanBadge = () => {
-    if (pro.plan === "elite") {
+    if (planType === "elite") {
       return (
         <span className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-white rounded-full text-xs font-medium flex items-center gap-1">
           <Sparkles className="w-3 h-3" /> ELITE
         </span>
       );
     }
-    if (pro.plan === "pro") {
+    if (planType === "pro") {
       return (
         <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium flex items-center gap-1">
           <Crown className="w-3 h-3" /> PRO
@@ -53,6 +56,14 @@ export default function ProHome() {
     }
     return null;
   };
+
+  if (isLoadingPro) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -66,24 +77,30 @@ export default function ProHome() {
               <Bell className="w-5 h-5 text-muted-foreground" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
             </button>
-            <div className="w-8 h-8 rounded-full overflow-hidden">
-              <img 
-                src={pro.avatar} 
-                alt={pro.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-muted">
+              {proAvatar ? (
+                <img 
+                  src={proAvatar} 
+                  alt={proName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm font-medium">
+                  {proName.charAt(0)}
+                </div>
+              )}
             </div>
           </div>
         </div>
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">
-            Olá, {pro.name.split(" ")[0]} 👋
+            Olá, {proName.split(" ")[0]} 👋
           </h1>
-          {pro.metrics && (
-            <QualityBadge level={pro.metrics.qualityLevel} size="sm" />
+          {metrics?.quality_level && (
+            <QualityBadge level={metrics.quality_level} size="sm" />
           )}
         </div>
-        {pro.verifiedStatus === "pending" && (
+        {!isVerified && (
           <button 
             onClick={() => navigate("/pro/verification")}
             className="mt-2 flex items-center gap-2 text-sm text-warning"
@@ -144,11 +161,11 @@ export default function ProHome() {
                 <div className="mt-3 h-40 rounded-lg overflow-hidden">
                   <MapMock 
                     markers={[{
-                      lat: pro.currentLat || -23.5634,
-                      lng: pro.currentLng || -46.6542,
+                      lat: Number(proData?.proProfile?.current_lat) || -23.5634,
+                      lng: Number(proData?.proProfile?.current_lng) || -46.6542,
                       label: "Você"
                     }]}
-                    radiusKm={pro.radiusKm}
+                    radiusKm={Number(proData?.proProfile?.radius_km) || 10}
                     height="100%"
                   />
                 </div>
@@ -163,7 +180,7 @@ export default function ProHome() {
           onClick={() => navigate("/pro/earnings")}
         >
           <p className="text-sm opacity-90">Saldo disponível</p>
-          <p className="text-3xl font-bold mt-1">R$ {pro.balance.toFixed(2).replace(".", ",")}</p>
+          <p className="text-3xl font-bold mt-1">R$ {balance.toFixed(2).replace(".", ",")}</p>
           <button className="mt-3 text-sm font-medium underline underline-offset-2 opacity-90 hover:opacity-100">
             Ver ganhos →
           </button>
@@ -213,26 +230,26 @@ export default function ProHome() {
         </div>
 
         {/* SLA Quality Card */}
-        {pro.metrics && (
+        {metrics && (
           <div 
             onClick={() => navigate("/pro/quality")}
             className="p-4 bg-card rounded-xl border border-border cursor-pointer hover:bg-accent/50 transition-colors"
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium text-foreground">Sua qualidade hoje</h3>
-              <QualityBadge level={pro.metrics.qualityLevel} />
+              {metrics.quality_level && <QualityBadge level={metrics.quality_level} />}
             </div>
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-lg font-bold text-foreground">{pro.metrics.onTimeRate}%</p>
+                <p className="text-lg font-bold text-foreground">{Number(metrics.on_time_rate || 0).toFixed(0)}%</p>
                 <p className="text-xs text-muted-foreground">Pontualidade</p>
               </div>
               <div>
-                <p className="text-lg font-bold text-foreground">{pro.metrics.responseTimeAvg}min</p>
+                <p className="text-lg font-bold text-foreground">{metrics.response_time_avg || 0}min</p>
                 <p className="text-xs text-muted-foreground">Resposta</p>
               </div>
               <div>
-                <p className="text-lg font-bold text-foreground">{pro.metrics.cancelRate}%</p>
+                <p className="text-lg font-bold text-foreground">{Number(metrics.cancel_rate || 0).toFixed(0)}%</p>
                 <p className="text-xs text-muted-foreground">Cancelamentos</p>
               </div>
             </div>
@@ -240,17 +257,17 @@ export default function ProHome() {
         )}
 
         {/* Plan Upgrade Banner */}
-        {pro.plan !== "elite" && (
+        {planType !== "elite" && (
           <button
             onClick={() => navigate("/pro/plan")}
             className={cn(
               "w-full p-4 rounded-xl border flex items-center gap-3 transition-colors",
-              pro.plan === "free" 
+              planType === "free" 
                 ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
-                : "border-amber-400/50 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100"
+                : "border-warning/50 bg-warning/5 hover:bg-warning/10"
             )}
           >
-            {pro.plan === "free" ? (
+            {planType === "free" ? (
               <>
                 <Crown className="w-6 h-6 text-primary" />
                 <div className="flex-1 text-left">
@@ -260,7 +277,7 @@ export default function ProHome() {
               </>
             ) : (
               <>
-                <Sparkles className="w-6 h-6 text-amber-500" />
+                <Sparkles className="w-6 h-6 text-warning" />
                 <div className="flex-1 text-left">
                   <p className="font-medium text-foreground">Upgrade para ELITE</p>
                   <p className="text-sm text-muted-foreground">Máxima prioridade + comercial</p>
@@ -277,14 +294,14 @@ export default function ProHome() {
             <h2 className="text-lg font-semibold text-foreground">
               Pedidos disponíveis
             </h2>
-            {pro.plan === "elite" && (
-              <span className="text-xs text-amber-600 font-medium">
+            {planType === "elite" && (
+              <span className="text-xs text-warning font-medium">
                 ✨ Acesso a comercial
               </span>
             )}
           </div>
           
-          {pro.verifiedStatus !== "approved" ? (
+          {!isVerified ? (
             <div className="p-6 bg-card rounded-xl border border-border text-center">
               <Shield className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">
@@ -298,7 +315,11 @@ export default function ProHome() {
                 Ative sua disponibilidade para ver pedidos
               </p>
             </div>
-          ) : availableForPlan.length === 0 ? (
+          ) : isLoadingOrders ? (
+            <div className="p-6 bg-card rounded-xl border border-border text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+            </div>
+          ) : availableOrders.length === 0 ? (
             <div className="p-6 bg-card rounded-xl border border-border text-center">
               <p className="text-muted-foreground">
                 Não há pedidos disponíveis no momento
@@ -306,13 +327,13 @@ export default function ProHome() {
             </div>
           ) : (
             <div className="space-y-3">
-              {availableForPlan.map((order) => (
+              {availableOrders.map((order) => (
                 <div 
                   key={order.id}
                   className={cn(
                     "p-4 bg-card rounded-xl border card-shadow",
                     order.eliteOnly 
-                      ? "border-amber-300 bg-gradient-to-r from-amber-50/50 to-yellow-50/50" 
+                      ? "border-warning bg-warning/5" 
                       : "border-border"
                   )}
                 >
@@ -321,14 +342,14 @@ export default function ProHome() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-foreground">{order.serviceName}</h3>
                         {order.eliteOnly && (
-                          <span className="px-1.5 py-0.5 bg-amber-500 text-white rounded text-xs font-medium">
+                          <span className="px-1.5 py-0.5 bg-warning text-warning-foreground rounded text-xs font-medium">
                             ELITE
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                         <MapPin className="w-4 h-4" />
-                        <span>{order.city}</span>
+                        <span>{order.neighborhood}, {order.city}</span>
                         <span className="text-xs">• {order.distance} km</span>
                       </div>
                     </div>
@@ -362,7 +383,7 @@ export default function ProHome() {
                       className={cn(
                         "flex-1 py-2.5 px-4 rounded-lg font-medium button-shadow hover:opacity-90 transition-opacity flex items-center justify-center gap-2",
                         order.eliteOnly
-                          ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-white"
+                          ? "bg-warning text-warning-foreground"
                           : "bg-primary text-primary-foreground"
                       )}>
                       <Check className="w-4 h-4" />
