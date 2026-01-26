@@ -1,152 +1,137 @@
 
-# Plano: Otimização de Layout e Remoção de Scroll Desnecessário
+# Plano: Otimização de Espaçamentos e Margens
 
-## Contexto
-Após análise completa do aplicativo, identifiquei diversos pontos onde há scroll desnecessário ou layouts que não estão otimizados para ocupar a tela de forma "fixa". O objetivo é criar uma experiência mais nativa, onde os elementos se ajustam ao tamanho da tela sem precisar de rolagem desnecessária.
+## Problema Identificado
 
----
+Baseado na imagem enviada e análise do código, identifiquei os seguintes problemas:
 
-## Problemas Identificados
-
-### 1. Telas de Entrada (Login/Onboarding)
-- **Problema**: Telas já estão com `overflow-hidden` e `fixed inset-0`, mas o conteúdo interno pode ultrapassar em telas muito pequenas
-- **Status**: Parcialmente correto, mas precisa de ajustes finos no espaçamento
-
-### 2. Telas de Onboarding Client/Pro
-- **Problema**: Usam `min-h-screen` sem `overflow-hidden`, podendo causar scroll mínimo
-- **Solução**: Adicionar `fixed inset-0 overflow-hidden` para garantir layout fixo
-
-### 3. Página de Registro (Register.tsx)
-- **Problema**: Usa `min-h-screen` sem controle de overflow
-- **Solução**: Para o step 1, criar layout fixo. O step 2 (formulário longo para diarista) precisa manter scroll
-
-### 4. Forgot Password / Reset Password
-- **Problema**: Usa `min-h-screen` - pode ter scroll mínimo
-- **Solução**: Mudar para layout fixo com `fixed inset-0 overflow-hidden`
-
-### 5. Tutorial (AppTutorial.tsx)
-- **Problema**: Já usa `fixed inset-0` mas tem `overflow-hidden` - está correto
-- **Ajuste**: Verificar padding do footer para respeitar safe-area
-
-### 6. Client/Pro Home
-- **Problema**: Páginas com conteúdo dinâmico que precisam de scroll
-- **Solução**: Manter scroll, mas otimizar o layout do header para ser mais compacto
-
-### 7. Páginas de Perfil (ClientProfile/ProProfile)
-- **Problema**: Conteúdo pode caber na tela sem scroll em alguns dispositivos
-- **Solução**: Ajustar espaçamentos e usar layout flexível
-
-### 8. Splash Screen (Index.tsx)
-- **Problema**: Usa `min-h-screen` sem `fixed`
-- **Solução**: Mudar para `fixed inset-0` para tela fixa
+1. **ClientHome**: O card "Próximo agendamento" está sendo cortado pelo BottomNav. O `pb-24` (96px) na área de conteúdo é excessivo
+2. **BottomNav**: Já tem `safe-bottom` que adiciona margem, então o conteúdo acima não precisa de tanto padding
+3. **Login/Onboarding**: O `safe-bottom` combinado com `py-8` cria muito espaço inferior
+4. **Espaçamentos internos**: Muitos `mb-8`, `mb-10`, `space-y-6` que criam áreas vazias desnecessárias
 
 ---
 
-## Alterações por Arquivo
+## Alterações Planejadas
 
-### 1. `src/pages/Index.tsx` (Splash)
-- Mudar container de `min-h-screen` para `fixed inset-0 overflow-hidden`
-- Garantir centralização perfeita
+### 1. `src/index.css` - Reduzir Safe-Area Mínimo
 
-### 2. `src/pages/OnboardingClient.tsx`
-- Adicionar `fixed inset-0 overflow-hidden` ao container principal
-- Ajustar footer com `safe-bottom`
+Reduzir o padding mínimo de `safe-bottom` de 1rem para praticamente zero:
 
-### 3. `src/pages/OnboardingPro.tsx`
-- Mesmas alterações do OnboardingClient
-
-### 4. `src/pages/Register.tsx`
-- Step 1 (seleção de tipo): Layout fixo
-- Step 2 (formulário): Manter scroll interno apenas no formulário, não na página toda
-- Usar estrutura flex com `flex-1 overflow-y-auto` apenas para a área do formulário
-
-### 5. `src/pages/ForgotPassword.tsx`
-- Mudar para `fixed inset-0 overflow-hidden`
-- Ambos os estados (formulário e sucesso)
-
-### 6. `src/components/ui/AppTutorial.tsx`
-- Verificar se footer respeita `safe-bottom` corretamente
-- Ajustar padding para evitar scroll
-
-### 7. `src/pages/client/ClientService.tsx`
-- Estrutura já boa, mas ajustar para scroll apenas na lista de serviços
-- Header e footer fixos, conteúdo com scroll interno
-
-### 8. `src/pages/client/ClientCheckout.tsx`
-- Já tem estrutura correta (`flex-1 overflow-y-auto` na main)
-- Apenas verificar se está funcionando corretamente
-
-### 9. `src/pages/AppSettings.tsx`
-- Manter scroll pois tem muito conteúdo
-- Ajustar header para ficar fixo e conteúdo com scroll interno
-
----
-
-## Padrão de Layout Recomendado
-
-### Para telas que NÃO precisam de scroll:
-```tsx
-<div className="fixed inset-0 bg-background flex flex-col overflow-hidden safe-top safe-bottom">
-  {/* Header */}
-  <header className="flex-shrink-0">...</header>
-  
-  {/* Content - centralizado */}
-  <main className="flex-1 flex flex-col items-center justify-center px-6">
-    ...
-  </main>
-  
-  {/* Footer - fixo embaixo */}
-  <footer className="flex-shrink-0 p-6">...</footer>
-</div>
+**Antes:**
+```css
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
 ```
 
-### Para telas que PRECISAM de scroll:
-```tsx
-<div className="fixed inset-0 bg-background flex flex-col safe-top">
-  {/* Header - fixo */}
-  <header className="flex-shrink-0 bg-card border-b">...</header>
-  
-  {/* Content - scrollável */}
-  <main className="flex-1 overflow-y-auto pb-20">
-    ...
-  </main>
-  
-  {/* Bottom Nav ou Action - fixo */}
-  <nav className="fixed bottom-0 left-0 right-0">...</nav>
-</div>
+**Depois:**
+```css
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
 ```
 
 ---
 
-## Resumo das Alterações
+### 2. `src/components/ui/BottomNav.tsx` - Altura Mais Compacta
 
-| Arquivo | Tipo de Alteração |
-|---------|-------------------|
-| `Index.tsx` | Container fixo |
-| `OnboardingClient.tsx` | Container fixo |
-| `OnboardingPro.tsx` | Container fixo |
-| `Register.tsx` | Layout híbrido (fixo + scroll interno) |
-| `ForgotPassword.tsx` | Container fixo |
-| `AppTutorial.tsx` | Ajuste de padding |
-| `ClientService.tsx` | Scroll interno na lista |
-| `AppSettings.tsx` | Header fixo + scroll interno |
-| `Login.tsx` | Pequenos ajustes de espaçamento |
-| `Onboarding.tsx` | Pequenos ajustes de espaçamento |
+Reduzir altura de `h-16` para `h-14` e ajustar padding:
+
+**Antes:** `h-16` (64px)
+**Depois:** `h-14` (56px)
+
+---
+
+### 3. `src/pages/client/ClientHome.tsx` - Otimizar Espaçamentos
+
+- Reduzir `pb-24` para `pb-16` (adequado para BottomNav menor)
+- Reduzir `space-y-6` para `space-y-4`
+- Reduzir `mb-4` do header para `mb-3`
+- Compactar gaps e margens dos cards de serviço
+
+---
+
+### 4. `src/pages/Login.tsx` - Remover Espaços Excessivos
+
+- Remover `safe-bottom` do container (não precisa, é tela fixa)
+- Reduzir `py-8` para `py-4`
+- Reduzir `mb-8` da logo para `mb-5`
+- Reduzir `mb-10` do título para `mb-6`
+- Reduzir `mt-10` do link para `mt-6`
+- Compactar padding dos botões de `p-5` para `p-4`
+
+---
+
+### 5. `src/pages/Onboarding.tsx` - Mesmas Otimizações do Login
+
+- Remover `safe-bottom` do container
+- Reduzir `py-8` para `py-4`
+- Reduzir `mb-8` da logo e badges para `mb-5`
+- Reduzir `mt-8` do link para `mt-5`
+- Compactar padding dos botões
+
+---
+
+### 6. Outras Páginas com BottomNav
+
+Todas as páginas que usam BottomNav devem ter o padding inferior ajustado de `pb-24` para `pb-16`:
+
+- `ClientOrders.tsx`
+- `ClientProfile.tsx`
+- `ProHome.tsx`
+- `ProAgenda.tsx`
+- `ProEarnings.tsx`
+- `ProProfile.tsx`
+
+---
+
+## Resumo das Mudanças
+
+| Arquivo | Mudança |
+|---------|---------|
+| `index.css` | `safe-bottom`: remover padding mínimo, usar apenas safe-area real |
+| `BottomNav.tsx` | Altura: `h-16` → `h-14` |
+| `ClientHome.tsx` | `pb-24` → `pb-16`, `space-y-6` → `space-y-4`, compactar header |
+| `Login.tsx` | Remover `safe-bottom`, reduzir todos os margins/paddings em ~30% |
+| `Onboarding.tsx` | Mesmas otimizações do Login |
+| 6+ páginas com BottomNav | Ajustar `pb-24` → `pb-16` |
 
 ---
 
 ## Seção Técnica
 
-### CSS Utilities Utilizados
-- `fixed inset-0`: Posiciona o elemento ocupando toda a viewport
-- `overflow-hidden`: Previne qualquer scroll
-- `flex-1 overflow-y-auto`: Permite scroll apenas nesse elemento
-- `flex-shrink-0`: Impede que o elemento seja comprimido
-- `safe-top safe-bottom`: Respeita safe areas de dispositivos com notch
+### CSS Utilities Atualizadas
+```css
+/* Antes - padding mínimo forçado */
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
 
-### Considerações
-- Telas com conteúdo dinâmico (listas de pedidos, agenda) devem manter scroll
-- Telas de entrada/escolha devem ser fixas
-- O padrão de header fixo + conteúdo scrollável + footer fixo funciona bem para a maioria das páginas
-- O `pb-20` no conteúdo garante espaço para o BottomNav
+/* Depois - apenas safe-area real, sem padding extra */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+```
 
+### Padrão de Espaçamento para Páginas com BottomNav
+```tsx
+<main className="flex-1 overflow-y-auto p-4 pb-16 space-y-4">
+  {/* Conteúdo */}
+</main>
+<BottomNav variant="client" /> {/* h-14 = 56px */}
+```
+
+### Padrão de Espaçamento para Telas de Entrada
+```tsx
+<div className="fixed inset-0 bg-background flex flex-col overflow-hidden safe-top">
+  <div className="flex-1 flex flex-col items-center justify-center px-6 py-4">
+    {/* Logo com mb-5 */}
+    {/* Título com mb-6 */}
+    {/* Botões com p-4 */}
+    {/* Link final com mt-5 */}
+  </div>
+</div>
+```
+
+Isso vai criar uma interface mais compacta, profissional e que respeita as safe-areas apenas quando realmente necessário (dispositivos com notch), sem adicionar espaços vazios desnecessários.
