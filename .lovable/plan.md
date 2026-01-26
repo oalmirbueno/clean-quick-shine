@@ -1,125 +1,156 @@
 
-# Plano de Correção: Login e Entrada ao App
+# Plano de Correção: Login Travado no Carregamento
 
-## Problema Principal Identificado
+## Problema Identificado
 
-Ao analisar os logs e o banco de dados, descobri que:
+Analisando o código e os logs, identifiquei uma **condição de corrida (race condition)** no fluxo de autenticação:
 
-1. **A tabela `user_roles` está VAZIA** - o usuário "Almir" foi registrado, mas sua role nunca foi salva
-2. Isso aconteceu porque houve um erro de RLS no momento do cadastro (a policy de INSERT foi adicionada depois)
-3. Quando o usuário tenta fazer login, o sistema busca roles, não encontra nenhuma, e redireciona de volta para `/login`
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│  FLUXO ATUAL (PROBLEMÁTICO)                                         │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. handleLogin() → signIn()                                        │
+│  2. signInWithPassword() ✓ (sucesso)                                │
+│  3. fetchRoles() no signIn() → retorna ['client']                   │
+│  4. setRoles(['client']) ✓                                          │
+│  5. DISPARA onAuthStateChange() → await fetchRoles() (DUPLICADO!)   │
+│  6. navigate('/client/home')                                        │
+│  7. ProtectedRoute verifica loading/rolesLoaded                     │
+│  8. onAuthStateChange ainda está processando... TRAVA!              │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+O `onAuthStateChange` é disparado automaticamente pelo Supabase quando o login acontece, e ele também busca roles. Isso causa:
+- Busca de roles **duplicada**
+- Estados intermediários inconsistentes
+- O loading fica true enquanto a segunda busca acontece
 
 ## Solução em 3 Partes
 
 ---
 
-### Parte 1: Corrigir Usuários Existentes (Migration SQL)
+### Parte 1: Otimizar AuthContext.tsx
 
-Criar uma migration para adicionar a role manualmente ao usuário existente que não tem role:
+**Mudanças principais:**
+1. Usar `setTimeout` com 0ms no `onAuthStateChange` para evitar blocking
+2. Não refazer fetch de roles se já foram carregadas recentemente
+3. Adicionar flag para indicar que o signIn está em progresso
 
-```sql
--- Adicionar role 'client' para o usuário Almir que está sem role
-INSERT INTO public.user_roles (user_id, role)
-SELECT p.user_id, 'client'::app_role
-FROM public.profiles p
-LEFT JOIN public.user_roles ur ON p.user_id = ur.user_id
-WHERE ur.id IS NULL
-ON CONFLICT (user_id, role) DO NOTHING;
+```typescript
+// AuthContext.tsx - Evitar race condition
+const [signingIn, setSigningIn] = useState(false);
+
+// No onAuthStateChange, não buscar roles se signIn está em progresso
+const { data: { subscription } } = supabase.auth.onAuthStateChange(
+  async (event, session) => {
+    setSession(session);
+    setUser(session?.user ?? null);
+    
+    if (session?.user && !signingIn) {
+      // Usar setTimeout para não bloquear
+      setTimeout(async () => {
+        const fetchedRoles = await fetchRoles(session.user.id);
+        setRoles(fetchedRoles);
+        setRolesLoaded(true);
+      }, 0);
+    } else if (!session) {
+      setRoles([]);
+      setRolesLoaded(false);
+    }
+    
+    setLoading(false);
+  }
+);
+
+// No signIn, marcar que está em progresso
+const signIn = async (...) => {
+  setSigningIn(true);
+  const { data, error } = await supabase.auth.signInWithPassword(...);
+  
+  if (!error && data.user) {
+    const fetchedRoles = await fetchRoles(data.user.id);
+    setRoles(fetchedRoles);
+    setRolesLoaded(true);
+    setLoading(false); // IMPORTANTE: garantir loading = false
+  }
+  
+  setSigningIn(false);
+  return { error: null, roles: fetchedRoles };
+};
 ```
 
 ---
 
-### Parte 2: Melhorar o Fluxo de Login (Login.tsx)
-
-Atualizar a lógica de navegação para lidar com usuários sem role de forma mais robusta:
+### Parte 2: Simplificar Login.tsx
 
 **Mudanças:**
-- Se o login for bem-sucedido mas não houver roles, navegar baseado na seleção do tipo de usuário
-- Adicionar a role automaticamente se estiver faltando (fallback de segurança)
-- Mostrar mensagem de erro mais clara se algo der errado
+1. Remover lógica redundante de inserção de role (já existe no banco)
+2. Garantir que `setLoading(false)` é chamado em TODOS os casos
+3. Usar try-catch para evitar erros silenciosos
 
 ```typescript
 const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
   setLoading(true);
   
-  const { error, roles } = await signIn(email, password);
-  
-  if (error) {
-    toast.error(error.message === "Invalid login credentials" 
-      ? "Email ou senha incorretos" 
-      : error.message);
-    setLoading(false);
-    return;
-  }
+  try {
+    const { error, roles } = await signIn(email, password);
+    
+    if (error) {
+      toast.error(error.message === "Invalid login credentials" 
+        ? "Email ou senha incorretos" 
+        : error.message);
+      return;
+    }
 
-  toast.success("Login realizado com sucesso!");
-  
-  // Se não tem role, adicionar baseado na seleção
-  if (!roles || roles.length === 0) {
-    const selectedRole = userType as "client" | "pro";
-    // Inserir role que está faltando
-    await supabase.from("user_roles").insert({
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      role: selectedRole
-    });
+    toast.success("Login realizado com sucesso!");
+    
+    // Navegar imediatamente baseado nas roles retornadas
+    const userRoles = roles || [];
+    
+    if (userRoles.includes("admin")) {
+      navigate("/admin/dashboard");
+    } else if (userRoles.includes("client")) {
+      navigate("/client/home");
+    } else if (userRoles.includes("pro")) {
+      navigate("/pro/home");
+    } else if (userType) {
+      // Fallback: inserir role e navegar
+      navigate(userType === "client" ? "/client/home" : "/pro/home");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    toast.error("Erro ao fazer login. Tente novamente.");
+  } finally {
+    setLoading(false);
   }
-  
-  // Navegar baseado na role real ou seleção
-  if (roles?.includes("admin")) {
-    navigate("/admin/dashboard");
-  } else if (roles?.includes("client")) {
-    navigate("/client/home");
-  } else if (roles?.includes("pro")) {
-    navigate("/pro/home");
-  } else {
-    // Fallback para seleção do usuário
-    navigate(userType === "client" ? "/client/home" : "/pro/home");
-  }
-  
-  setLoading(false);
 };
 ```
 
 ---
 
-### Parte 3: Melhorar o AuthContext (AuthContext.tsx)
-
-Adicionar tratamento de erro na inserção de role e atualizar roles após inserção tardia:
+### Parte 3: Melhorar ProtectedRoute.tsx
 
 **Mudanças:**
-1. Adicionar tratamento de erro mais robusto no `signUp`
-2. Adicionar função para inserir role manualmente caso esteja faltando
-3. Atualizar `rolesLoaded` mesmo quando a lista está vazia para evitar loading infinito
+1. Adicionar timeout para evitar loading infinito
+2. Verificar se já está na rota correta para evitar re-renders
 
 ```typescript
-// Nova função para inserir role caso esteja faltando
-const ensureUserRole = useCallback(async (userId: string, role: AppRole) => {
-  const { error } = await supabase
-    .from("user_roles")
-    .upsert({ user_id: userId, role }, { onConflict: 'user_id,role' });
+// ProtectedRoute.tsx - Com timeout de segurança
+const [timedOut, setTimedOut] = useState(false);
+
+useEffect(() => {
+  // Timeout de 5 segundos para evitar loading infinito
+  const timeout = setTimeout(() => {
+    if (loading || (user && !rolesLoaded)) {
+      setTimedOut(true);
+    }
+  }, 5000);
   
-  if (!error) {
-    setRoles([role]);
-    setRolesLoaded(true);
-  }
-  return error;
-}, []);
-```
+  return () => clearTimeout(timeout);
+}, [loading, user, rolesLoaded]);
 
----
-
-### Parte 4: Atualizar ProtectedRoute (ProtectedRoute.tsx)
-
-Melhorar a lógica de redirecionamento quando não há roles:
-
-**Mudanças:**
-- Não bloquear indefinidamente se não houver roles
-- Redirecionar para login se rolesLoaded for true mas não houver roles compatíveis
-
-```typescript
-// Se roles carregadas mas vazias, redirecionar para login
-if (rolesLoaded && roles.length === 0 && requiredRole) {
+if (timedOut) {
   return <Navigate to="/login" replace />;
 }
 ```
@@ -128,32 +159,47 @@ if (rolesLoaded && roles.length === 0 && requiredRole) {
 
 ## Arquivos a Modificar
 
-| Arquivo | Ação |
-|---------|------|
-| `supabase/migrations/` | Criar migration para adicionar roles faltantes |
-| `src/pages/Login.tsx` | Adicionar fallback de inserção de role |
-| `src/contexts/AuthContext.tsx` | Adicionar função `ensureUserRole` e melhorar tratamento |
-| `src/components/ProtectedRoute.tsx` | Melhorar lógica de redirecionamento |
+| Arquivo | Mudança |
+|---------|---------|
+| `src/contexts/AuthContext.tsx` | Adicionar flag `signingIn`, evitar fetch duplicado, garantir loading=false |
+| `src/pages/Login.tsx` | Simplificar, adicionar try-catch, usar finally |
+| `src/components/ProtectedRoute.tsx` | Adicionar timeout de segurança |
 
 ---
 
 ## Detalhes Técnicos
 
-### Por que o bug aconteceu?
+### Por que trava no carregamento?
 
-1. Usuário se cadastrou ANTES da policy de INSERT ser criada
-2. A inserção na tabela `user_roles` falhou silenciosamente com erro RLS
-3. O login funciona (autenticação OK) mas não encontra roles
-4. `ProtectedRoute` vê que não tem a role necessária e redireciona para login
-5. Loop infinito de login -> protected route -> login
+O problema acontece porque:
 
-### Por que demora para carregar?
+1. `signIn()` faz login + busca roles
+2. `onAuthStateChange` também busca roles (duplicado)
+3. Durante a segunda busca, o estado fica inconsistente
+4. `ProtectedRoute` vê `loading=true` e mostra spinner
+5. A segunda busca termina, mas o componente já foi desmontado/remontado
 
-1. `AuthContext` faz `getSession()` + `fetchRoles()` sequencialmente
-2. `ProtectedRoute` espera `rolesLoaded` ser true
-3. Se roles não existem, há delay enquanto busca e processa
+### Por que a solução funciona?
 
-### Solução de performance:
+1. Flag `signingIn` previne busca duplicada no `onAuthStateChange`
+2. `setTimeout(0)` move a busca para fora do fluxo síncrono
+3. `finally` garante que `setLoading(false)` sempre executa
+4. Timeout de 5s no ProtectedRoute previne loading infinito
 
-- Definir `rolesLoaded = true` mesmo quando array está vazio
-- Isso já está implementado, mas o fluxo atual causa re-renders desnecessários
+### Fluxo corrigido:
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│  FLUXO CORRIGIDO                                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│  1. handleLogin() → signIn()                                        │
+│  2. setSigningIn(true)                                              │
+│  3. signInWithPassword() ✓                                          │
+│  4. fetchRoles() → ['client']                                       │
+│  5. setRoles(['client']), setRolesLoaded(true), setLoading(false)  │
+│  6. setSigningIn(false)                                             │
+│  7. onAuthStateChange dispara → vê signingIn=false, mas rolesLoaded │
+│  8. navigate('/client/home')                                        │
+│  9. ProtectedRoute: loading=false, rolesLoaded=true → SUCESSO! ✓   │
+└─────────────────────────────────────────────────────────────────────┘
+```
