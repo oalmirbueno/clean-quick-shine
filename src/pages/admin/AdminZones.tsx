@@ -24,8 +24,10 @@ export default function AdminZones() {
 
   // Get zone markers for map
   const mapMarkers = filteredZones.map(zone => ({
+    id: zone.id,
     lat: zone.centerLat,
     lng: zone.centerLng,
+    type: "address" as const,
     label: zone.name
   }));
 

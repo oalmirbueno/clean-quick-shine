@@ -57,6 +57,17 @@ import AdminCoupons from "./pages/admin/AdminCoupons";
 import AdminSupport from "./pages/admin/AdminSupport";
 import AdminSupportDetail from "./pages/admin/AdminSupportDetail";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminZones from "./pages/admin/AdminZones";
+import AdminRisk from "./pages/admin/AdminRisk";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminFunnel from "./pages/admin/AdminFunnel";
+import AdminCohorts from "./pages/admin/AdminCohorts";
+import AdminMatchingDebug from "./pages/admin/AdminMatchingDebug";
+import AdminQuotes from "./pages/admin/AdminQuotes";
+
+// Company Pages
+import CompanyOnboarding from "./pages/company/CompanyOnboarding";
+import CompanyRequestQuote from "./pages/company/CompanyRequestQuote";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +130,17 @@ const App = () => (
           <Route path="/admin/support" element={<AdminSupport />} />
           <Route path="/admin/support/:id" element={<AdminSupportDetail />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/zones" element={<AdminZones />} />
+          <Route path="/admin/risk" element={<AdminRisk />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/funnel" element={<AdminFunnel />} />
+          <Route path="/admin/cohorts" element={<AdminCohorts />} />
+          <Route path="/admin/matching-debug" element={<AdminMatchingDebug />} />
+          <Route path="/admin/quotes" element={<AdminQuotes />} />
+
+          {/* Company Routes */}
+          <Route path="/company/onboarding" element={<CompanyOnboarding />} />
+          <Route path="/company/request-quote" element={<CompanyRequestQuote />} />
 
           {/* Catch all */}
           <Route path="*" element={<NotFound />} />
