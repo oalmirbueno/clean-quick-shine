@@ -26,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [rolesLoaded, setRolesLoaded] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
 
   const fetchRoles = useCallback(async (userId: string): Promise<AppRole[]> => {
     const { data: userRoles } = await supabase
@@ -44,18 +45,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.id, fetchRoles]);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
-          // Defer role fetching to avoid blocking
-          const fetchedRoles = await fetchRoles(session.user.id);
-          setRoles(fetchedRoles);
-          setRolesLoaded(true);
-        } else {
+        if (session?.user && !signingIn) {
+          // Defer role fetching to prevent blocking and race conditions
+          setTimeout(async () => {
+            const fetchedRoles = await fetchRoles(session.user.id);
+            setRoles(fetchedRoles);
+            setRolesLoaded(true);
+          }, 0);
+        } else if (!session) {
           setRoles([]);
           setRolesLoaded(false);
         }
@@ -64,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN get initial session
+    // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -78,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchRoles]);
+  }, [fetchRoles, signingIn]);
 
   const signUp = async (
     email: string, 
@@ -126,22 +128,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null; roles?: AppRole[] }> => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    setSigningIn(true);
     
-    if (error) return { error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        setSigningIn(false);
+        return { error };
+      }
 
-    // Fetch roles immediately after sign in
-    if (data.user) {
-      const fetchedRoles = await fetchRoles(data.user.id);
-      setRoles(fetchedRoles);
-      setRolesLoaded(true);
-      return { error: null, roles: fetchedRoles };
+      // Fetch roles immediately after sign in
+      if (data.user) {
+        const fetchedRoles = await fetchRoles(data.user.id);
+        setRoles(fetchedRoles);
+        setRolesLoaded(true);
+        setLoading(false);
+        setSigningIn(false);
+        return { error: null, roles: fetchedRoles };
+      }
+      
+      setSigningIn(false);
+      return { error: null };
+    } catch (err) {
+      setSigningIn(false);
+      throw err;
     }
-    
-    return { error: null };
   };
 
   const signOut = async () => {

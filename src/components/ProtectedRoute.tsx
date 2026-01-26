@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -19,6 +19,30 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading, hasRole, rolesLoaded, roles } = useAuth();
   const location = useLocation();
+  const [timedOut, setTimedOut] = useState(false);
+
+  // Timeout de segurança para evitar loading infinito
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading || (user && !rolesLoaded)) {
+        console.warn("ProtectedRoute: Timeout reached, redirecting to login");
+        setTimedOut(true);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeout);
+  }, [loading, user, rolesLoaded]);
+
+  // Reset timeout when state changes
+  useEffect(() => {
+    if (!loading && rolesLoaded) {
+      setTimedOut(false);
+    }
+  }, [loading, rolesLoaded]);
+
+  if (timedOut) {
+    return <Navigate to="/login" replace />;
+  }
 
   // Show loading while auth or roles are being fetched
   if (loading || (user && !rolesLoaded)) {
