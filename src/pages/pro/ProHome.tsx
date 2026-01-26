@@ -106,16 +106,10 @@ export default function ProHome() {
         transition={{ duration: 0.4 }}
         className="bg-card border-b border-border p-4"
       >
-        {/* Centered Large Logo */}
-        <div className="flex justify-center mb-4">
-          <Logo size="xl" />
-        </div>
-        
         <div className="flex items-center justify-between mb-4">
+          <Logo size="md" />
           <div className="flex items-center gap-2">
             {getPlanBadge()}
-          </div>
-          <div className="flex items-center gap-2">
             <ThemeToggle />
             <motion.button 
               whileTap={{ scale: 0.95 }}

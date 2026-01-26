@@ -9,8 +9,10 @@ export default function Onboarding() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-12">
-          <Logo size="lg" className="justify-center mb-4" />
-          <p className="text-muted-foreground">
+          <div className="flex justify-center mb-6">
+            <Logo size="xl" />
+          </div>
+          <p className="text-muted-foreground text-lg">
             Limpeza de qualidade a um clique
           </p>
         </div>
