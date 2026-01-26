@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -10,10 +10,12 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   roles: AppRole[];
+  rolesLoaded: boolean;
   signUp: (email: string, password: string, fullName: string, phone: string, role: AppRole) => Promise<{ error: AuthError | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null; roles?: AppRole[] }>;
   signOut: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
+  refreshRoles: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +25,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<AppRole[]>([]);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
+
+  const fetchRoles = useCallback(async (userId: string): Promise<AppRole[]> => {
+    const { data: userRoles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    
+    return userRoles?.map((r) => r.role) || [];
+  }, []);
+
+  const refreshRoles = useCallback(async () => {
+    if (!user?.id) return;
+    const fetchedRoles = await fetchRoles(user.id);
+    setRoles(fetchedRoles);
+    setRolesLoaded(true);
+  }, [user?.id, fetchRoles]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -32,19 +51,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user roles
-          setTimeout(async () => {
-            const { data: userRoles } = await supabase
-              .from("user_roles")
-              .select("role")
-              .eq("user_id", session.user.id);
-            
-            if (userRoles) {
-              setRoles(userRoles.map((r) => r.role));
-            }
-          }, 0);
+          // Defer role fetching to avoid blocking
+          const fetchedRoles = await fetchRoles(session.user.id);
+          setRoles(fetchedRoles);
+          setRolesLoaded(true);
         } else {
           setRoles([]);
+          setRolesLoaded(false);
         }
         
         setLoading(false);
@@ -52,28 +65,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     // THEN get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .then(({ data: userRoles }) => {
-            if (userRoles) {
-              setRoles(userRoles.map((r) => r.role));
-            }
-            setLoading(false);
-          });
-      } else {
-        setLoading(false);
+        const fetchedRoles = await fetchRoles(session.user.id);
+        setRoles(fetchedRoles);
+        setRolesLoaded(true);
       }
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchRoles]);
 
   const signUp = async (
     email: string, 
@@ -95,28 +100,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) return { error };
 
-    // Update profile with phone
+    // Update profile with phone and add role
     if (data.user) {
+      // Update profile
       await supabase
         .from("profiles")
         .update({ phone })
         .eq("user_id", data.user.id);
 
       // Add user role
-      await supabase
+      const { error: roleError } = await supabase
         .from("user_roles")
         .insert({ user_id: data.user.id, role });
+
+      if (roleError) {
+        console.error("Error inserting role:", roleError);
+      }
+
+      // Update local state immediately
+      setRoles([role]);
+      setRolesLoaded(true);
     }
 
     return { error: null };
   };
 
-  const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
-    const { error } = await supabase.auth.signInWithPassword({
+  const signIn = async (email: string, password: string): Promise<{ error: AuthError | null; roles?: AppRole[] }> => {
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    return { error };
+    
+    if (error) return { error };
+
+    // Fetch roles immediately after sign in
+    if (data.user) {
+      const fetchedRoles = await fetchRoles(data.user.id);
+      setRoles(fetchedRoles);
+      setRolesLoaded(true);
+      return { error: null, roles: fetchedRoles };
+    }
+    
+    return { error: null };
   };
 
   const signOut = async () => {
@@ -124,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setRoles([]);
+    setRolesLoaded(false);
   };
 
   const hasRole = (role: AppRole): boolean => {
@@ -137,10 +163,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         loading,
         roles,
+        rolesLoaded,
         signUp,
         signIn,
         signOut,
         hasRole,
+        refreshRoles,
       }}
     >
       {children}

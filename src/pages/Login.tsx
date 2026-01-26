@@ -21,7 +21,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     
-    const { error } = await signIn(email, password);
+    const { error, roles } = await signIn(email, password);
     
     if (error) {
       toast.error(error.message === "Invalid login credentials" 
@@ -33,12 +33,18 @@ export default function Login() {
 
     toast.success("Login realizado com sucesso!");
     
-    // Navigate based on selected user type
-    if (userType === "client") {
+    // Navigate based on actual role from database, fallback to selected type
+    if (roles?.includes("admin")) {
+      navigate("/admin/dashboard");
+    } else if (roles?.includes("client") || userType === "client") {
       navigate("/client/home");
-    } else {
+    } else if (roles?.includes("pro") || userType === "pro") {
       navigate("/pro/home");
+    } else {
+      // Fallback based on selection
+      navigate(userType === "client" ? "/client/home" : "/pro/home");
     }
+    setLoading(false);
   };
 
   if (!userType) {

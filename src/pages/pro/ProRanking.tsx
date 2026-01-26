@@ -1,12 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Star, CheckCircle2, TrendingUp, Award } from "lucide-react";
-import { mockProProfile } from "@/lib/mockData";
-
-const stats = [
-  { label: "Nota média", value: mockProProfile.ratingAvg.toFixed(1), icon: Star, color: "text-warning" },
-  { label: "Total serviços", value: mockProProfile.jobsDone.toString(), icon: Award, color: "text-primary" },
-  { label: "Taxa de aceitação", value: `${mockProProfile.acceptanceRate}%`, icon: TrendingUp, color: "text-success" },
-];
+import { ChevronLeft, Star, CheckCircle2, TrendingUp, Award, Loader2, Users } from "lucide-react";
+import { useProRanking } from "@/hooks/useProMetrics";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const tips = [
   "Responda rapidamente aos pedidos para aumentar sua taxa de aceitação",
@@ -17,6 +14,60 @@ const tips = [
 
 export default function ProRanking() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: rankingData, isLoading } = useProRanking();
+
+  // Fetch profile data
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  const proProfile = rankingData?.profile;
+  const metrics = rankingData?.metrics;
+
+  const stats = [
+    { 
+      label: "Nota média", 
+      value: (proProfile?.rating ?? 5.0).toFixed(1), 
+      icon: Star, 
+      color: "text-warning" 
+    },
+    { 
+      label: "Total serviços", 
+      value: (proProfile?.jobs_done ?? 0).toString(), 
+      icon: Award, 
+      color: "text-primary" 
+    },
+    { 
+      label: "Taxa de aceitação", 
+      value: `${(metrics?.acceptance_rate ?? 100).toFixed(0)}%`, 
+      icon: TrendingUp, 
+      color: "text-success" 
+    },
+  ];
+
+  // Calculate progress to next level (based on jobs done)
+  const jobsForNextLevel = Math.ceil((proProfile?.jobs_done ?? 0) / 100) * 100;
+  const progress = ((proProfile?.jobs_done ?? 0) / jobsForNextLevel) * 100;
+  const jobsRemaining = jobsForNextLevel - (proProfile?.jobs_done ?? 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -40,25 +91,37 @@ export default function ProRanking() {
         <div className="bg-card rounded-xl border border-border p-6 text-center card-shadow">
           <div className="relative inline-block mb-4">
             <img
-              src={mockProProfile.avatar}
-              alt={mockProProfile.name}
+              src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name || "Pro"}`}
+              alt={profile?.full_name || "Profissional"}
               className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
             />
-            {mockProProfile.verified && (
+            {proProfile?.verified && (
               <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-success rounded-full flex items-center justify-center border-2 border-background">
                 <CheckCircle2 className="w-5 h-5 text-success-foreground" />
               </div>
             )}
           </div>
           
-          <h2 className="text-xl font-bold text-foreground">{mockProProfile.name}</h2>
+          <h2 className="text-xl font-bold text-foreground">{profile?.full_name || "Profissional"}</h2>
           
-          {mockProProfile.verified && (
+          {proProfile?.verified && (
             <div className="inline-flex items-center gap-1 px-3 py-1 bg-success/10 rounded-full mt-2">
               <CheckCircle2 className="w-4 h-4 text-success" />
               <span className="text-sm font-medium text-success">Profissional verificada</span>
             </div>
           )}
+
+          {/* Ranking Position */}
+          <div className="mt-4 p-3 bg-accent rounded-lg">
+            <div className="flex items-center justify-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              <span className="text-sm text-muted-foreground">Você está no</span>
+              <span className="text-lg font-bold text-primary">top {rankingData?.percentile ?? 100}%</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Posição #{rankingData?.rank ?? 1} de {rankingData?.totalPros ?? 1} profissionais
+            </p>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -98,13 +161,13 @@ export default function ProRanking() {
         <div className="bg-card rounded-xl border border-border p-4 card-shadow">
           <div className="flex items-center justify-between mb-2">
             <span className="font-medium text-foreground">Próximo nível</span>
-            <span className="text-sm text-muted-foreground">87%</span>
+            <span className="text-sm text-muted-foreground">{progress.toFixed(0)}%</span>
           </div>
           <div className="h-2 bg-secondary rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full" style={{ width: "87%" }} />
+            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Complete mais 13 serviços para alcançar o nível Ouro ⭐
+            Complete mais {jobsRemaining} serviços para alcançar o próximo nível ⭐
           </p>
         </div>
       </main>

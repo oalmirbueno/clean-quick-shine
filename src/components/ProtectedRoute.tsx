@@ -17,10 +17,11 @@ export function ProtectedRoute({
   requiredRole,
   redirectTo = "/login" 
 }: ProtectedRouteProps) {
-  const { user, loading, hasRole } = useAuth();
+  const { user, loading, hasRole, rolesLoaded, roles } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  // Show loading while auth or roles are being fetched
+  if (loading || (user && !rolesLoaded)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -34,6 +35,13 @@ export function ProtectedRoute({
 
   if (requiredRole && !hasRole(requiredRole)) {
     // Redirect based on their actual role
+    if (roles.includes("admin")) {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else if (roles.includes("client")) {
+      return <Navigate to="/client/home" replace />;
+    } else if (roles.includes("pro")) {
+      return <Navigate to="/pro/home" replace />;
+    }
     return <Navigate to="/login" replace />;
   }
 
