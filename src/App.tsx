@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { InstallPrompt } from "@/components/ui/InstallPrompt";
+import { UpdatePrompt } from "@/components/ui/UpdatePrompt";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 
 
 // Pages
@@ -81,8 +83,19 @@ import ComponentShowcase from "./pages/dev/ComponentShowcase";
 import ProjectDocumentation from "./pages/dev/ProjectDocumentation";
 import Install from "./pages/Install";
 import AppSettings from "./pages/AppSettings";
+import Offline from "./pages/Offline";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      retry: 2,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -91,6 +104,8 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <OfflineBanner />
+          <UpdatePrompt />
           <BrowserRouter>
             <InstallPrompt />
           <Routes>
@@ -167,6 +182,7 @@ const App = () => (
             {/* Install & Settings Routes */}
             <Route path="/install" element={<Install />} />
             <Route path="/settings" element={<AppSettings />} />
+            <Route path="/offline" element={<Offline />} />
 
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
