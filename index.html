@@ -1,31 +1,120 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Já Limpo App</title>
     <meta name="description" content="Precisa de Limpeza? Baixa o Já Limpo">
     <meta name="author" content="Lovable" />
 
-    <!-- TODO: Update og:title to match your application name -->
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10b981" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Já Limpo" />
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
     
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/pwa-192x192.png" />
+    
+    <!-- Apple Splash Screens -->
+    <link rel="apple-touch-startup-image" href="/pwa-512x512.png" />
+    
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
+    <meta property="og:title" content="Já Limpo App">
+    <meta property="og:description" content="Precisa de Limpeza? Baixa o Já Limpo">
     <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/woQiEs6XmTdOszaxVrKSgl5LDYl2/social-images/social-1769450512553-JÁ LIMPO SEM FUNDO.png">
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:title" content="Já Limpo App">
+    <meta name="twitter:description" content="Precisa de Limpeza? Baixa o Já Limpo">
     <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/woQiEs6XmTdOszaxVrKSgl5LDYl2/social-images/social-1769450512553-JÁ LIMPO SEM FUNDO.png">
-    <meta property="og:title" content="Já Limpo App">
-  <meta name="twitter:title" content="Já Limpo App">
-  <meta property="og:description" content="Precisa de Limpeza? Baixa o Já Limpo">
-  <meta name="twitter:description" content="Precisa de Limpeza? Baixa o Já Limpo">
-  <link rel="icon" type="image/png" href="https://storage.googleapis.com/gpt-engineer-file-uploads/woQiEs6XmTdOszaxVrKSgl5LDYl2/uploads/1769450433746-JÁ LIMPO SEM FUNDO (1).png">
-</head>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://storage.googleapis.com/gpt-engineer-file-uploads/woQiEs6XmTdOszaxVrKSgl5LDYl2/uploads/1769450433746-JÁ LIMPO SEM FUNDO (1).png">
+    
+    <!-- Prevent flash of unstyled content -->
+    <style>
+      #splash-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+      }
+      #splash-screen.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+      #splash-logo {
+        width: 120px;
+        height: 120px;
+        animation: pulse-logo 1.5s ease-in-out infinite;
+      }
+      #splash-text {
+        margin-top: 24px;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: white;
+        letter-spacing: -0.5px;
+      }
+      #splash-loader {
+        margin-top: 32px;
+        width: 48px;
+        height: 48px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes pulse-logo {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
 
   <body>
+    <!-- Native Splash Screen -->
+    <div id="splash-screen">
+      <img id="splash-logo" src="/pwa-512x512.png" alt="Já Limpo" />
+      <div id="splash-text">Já Limpo</div>
+      <div id="splash-loader"></div>
+    </div>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <script>
+      // Hide splash screen when app is ready
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var splash = document.getElementById('splash-screen');
+          if (splash) {
+            splash.classList.add('hidden');
+            setTimeout(function() {
+              splash.remove();
+            }, 500);
+          }
+        }, 1500);
+      });
+    </script>
   </body>
 </html>
