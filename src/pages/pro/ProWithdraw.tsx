@@ -92,7 +92,7 @@ export default function ProWithdraw() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ export default function ProWithdraw() {
         </div>
       </header>
 
-      <main className="p-4 space-y-6 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-24 space-y-6 animate-fade-in">
         {/* Balance Card */}
         <div className="p-5 bg-primary rounded-xl text-primary-foreground">
           <div className="flex items-center gap-3 mb-2">

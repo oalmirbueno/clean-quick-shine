@@ -30,8 +30,8 @@ export default function AdminOrderDetail() {
     <div className="min-h-screen bg-background">
       <AdminSidebar />
       
-      <main className="lg:ml-64 pt-14 lg:pt-0">
-        <div className="p-4 lg:p-6 space-y-6 animate-fade-in">
+      <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen flex flex-col">
+        <div className="flex-1 p-4 lg:p-6 space-y-6 animate-fade-in">
           {/* Header */}
           <div className="flex items-center gap-4">
             <button

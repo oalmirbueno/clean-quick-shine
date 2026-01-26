@@ -63,7 +63,7 @@ export default function ClientOrderDetail() {
   const proName = order.pro_profile?.full_name || "Profissional";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
@@ -83,7 +83,7 @@ export default function ClientOrderDetail() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto animate-fade-in">
+      <main className="flex-1 overflow-y-auto pb-4 animate-fade-in">
         {/* Pro Info */}
         {order.pro_id && (
           <section className="p-4 border-b border-border">
