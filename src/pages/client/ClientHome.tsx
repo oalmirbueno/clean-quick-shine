@@ -3,6 +3,7 @@ import { Logo } from "@/components/ui/Logo";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ServiceCard } from "@/components/ui/ServiceCard";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { NotificationsDropdown } from "@/components/ui/NotificationsDropdown";
 import { AnimatedSection } from "@/components/ui/AnimatedCard";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
 import { motion } from "framer-motion";
@@ -56,6 +57,7 @@ export default function ClientHome() {
         <div className="flex items-center justify-between mb-4">
           <Logo size="lg" iconOnly />
           <div className="flex items-center gap-2">
+            <NotificationsDropdown />
             <ThemeToggle />
             <motion.div 
               initial={{ scale: 0 }}
