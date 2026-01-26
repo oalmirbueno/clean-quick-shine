@@ -33,6 +33,11 @@ export function ProtectedRoute({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
+  // Se roles carregadas mas vazias, redirecionar para login
+  if (rolesLoaded && roles.length === 0) {
+    return <Navigate to="/login" replace />;
+  }
+
   if (requiredRole && !hasRole(requiredRole)) {
     // Redirect based on their actual role
     if (roles.includes("admin")) {
