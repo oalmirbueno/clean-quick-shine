@@ -71,9 +71,9 @@ export function SplashScreen({ onComplete, minDuration = 2000 }: SplashScreenPro
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="w-28 h-28 bg-white rounded-3xl shadow-2xl flex items-center justify-center"
+              className="w-40 h-40 bg-white rounded-3xl shadow-2xl flex items-center justify-center p-4"
             >
-              <Logo size="lg" iconOnly />
+              <img src="/pwa-512x512.png" alt="Já Limpo" className="w-full h-full object-contain" />
             </motion.div>
           </motion.div>
 
