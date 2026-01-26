@@ -38,19 +38,19 @@ export default function OnboardingPro() {
   const step = steps[currentStep];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="p-4 flex items-center justify-between">
         <button
           onClick={() => currentStep === 0 ? navigate("/onboarding") : setCurrentStep(currentStep - 1)}
-          className="p-2 rounded-lg hover:bg-secondary transition-colors"
+          className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
         >
           <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
         <Logo size="sm" iconOnly />
         <button
           onClick={() => navigate("/register")}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="text-sm text-muted-foreground hover:text-foreground px-2"
         >
           Pular
         </button>

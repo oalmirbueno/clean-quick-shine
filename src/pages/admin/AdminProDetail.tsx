@@ -48,7 +48,7 @@ export default function AdminProDetail() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors shrink-0"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>

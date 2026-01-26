@@ -43,7 +43,7 @@ export default function AdminFunnel() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex safe-top">
       <AdminSidebar />
       
       <main className="flex-1 lg:ml-64">
@@ -52,9 +52,9 @@ export default function AdminFunnel() {
           <div className="flex items-center gap-4 mb-6">
             <button
               onClick={() => navigate("/admin/analytics")}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+              className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors shrink-0"
             >
-              <ChevronLeft className="w-6 h-6 text-foreground" />
+              <ChevronLeft className="w-5 h-5 text-foreground" />
             </button>
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

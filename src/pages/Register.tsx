@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { InputField } from "@/components/ui/InputField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { User, Briefcase, Check } from "lucide-react";
+import { User, Briefcase, Check, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -163,9 +163,9 @@ export default function Register() {
       <div className="w-full max-w-sm mx-auto animate-fade-in">
         <button
           onClick={() => step === 1 ? setUserType(null) : setStep(1)}
-          className="text-sm text-muted-foreground hover:text-foreground mb-6"
+          className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors mb-6"
         >
-          ← Voltar
+          <ChevronLeft className="w-5 h-5" />
         </button>
 
         <div className="text-center mb-8">

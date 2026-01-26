@@ -42,7 +42,7 @@ export default function CompanyRequestQuote() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center safe-top">
         <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mb-6 animate-fade-in">
           <CheckCircle className="w-8 h-8 text-success" />
         </div>
@@ -67,19 +67,17 @@ export default function CompanyRequestQuote() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 safe-top">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors shrink-0"
           >
-            <ChevronLeft className="w-6 h-6 text-foreground" />
+            <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
-          <div>
-            <Logo size="sm" />
-          </div>
+          <Logo size="sm" iconOnly />
         </div>
       </header>
 

@@ -12,7 +12,7 @@ export default function ProjectDocumentation() {
   };
 
   return (
-    <div className="bg-background text-foreground min-h-screen print:bg-white">
+    <div className="bg-background text-foreground min-h-screen print:bg-white safe-top">
       {/* Print Styles */}
       <style>{`
         @media print {
