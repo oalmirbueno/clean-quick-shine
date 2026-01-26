@@ -31,7 +31,7 @@ export function BottomNav({ variant }: BottomNavProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border safe-bottom z-50">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+      <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
         {items.map((item) => {
           const isActive = location.pathname === item.path;
           return (

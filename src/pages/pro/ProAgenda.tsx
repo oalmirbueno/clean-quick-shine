@@ -134,7 +134,7 @@ export default function ProAgenda() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-24 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-20 animate-fade-in">
         {/* Calendar Header */}
         <div className="flex items-center justify-between mb-4">
           <button
