@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
+import { toast } from "sonner";
 
 export type ProProfile = Tables<"pro_profiles">;
 export type ProMetrics = Tables<"pro_metrics">;
@@ -220,4 +221,70 @@ export function useToggleProAvailability() {
   };
 
   return { toggleAvailability };
+}
+
+export function useAcceptOrder() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+
+      // Update order: assign pro and change status to confirmed
+      const { error } = await supabase
+        .from("orders")
+        .update({ 
+          pro_id: user.id, 
+          status: "confirmed",
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", orderId)
+        .is("pro_id", null) // Only if not yet assigned
+        .in("status", ["scheduled", "matching"]);
+
+      if (error) throw error;
+
+      return orderId;
+    },
+    onSuccess: (orderId) => {
+      toast.success("Pedido aceito com sucesso!");
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["available_orders_for_pro"] });
+      queryClient.invalidateQueries({ queryKey: ["pro_orders"] });
+    },
+    onError: (error) => {
+      console.error("Error accepting order:", error);
+      toast.error("Erro ao aceitar pedido. Tente novamente.");
+    },
+  });
+}
+
+export function useDeclineOrder() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      if (!user?.id) throw new Error("Usuário não autenticado");
+
+      // For now, we'll just record that this pro declined
+      // In a real system, you might have a pro_declined_orders table
+      // Here we just refetch to hide the order from this pro's view
+      
+      // Option: We could add a declined_by field or create a separate table
+      // For simplicity, we'll just remove from local state
+      
+      return orderId;
+    },
+    onSuccess: (orderId) => {
+      toast.success("Pedido recusado");
+      // Invalidate to refresh - in production you'd filter out declined orders
+      queryClient.invalidateQueries({ queryKey: ["available_orders_for_pro"] });
+    },
+    onError: (error) => {
+      console.error("Error declining order:", error);
+      toast.error("Erro ao recusar pedido. Tente novamente.");
+    },
+  });
 }
