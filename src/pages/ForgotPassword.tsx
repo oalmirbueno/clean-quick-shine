@@ -47,7 +47,7 @@ export default function ForgotPassword() {
   if (sent) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top">
           <div className="w-full max-w-sm animate-fade-in">
             <div className="text-center mb-8">
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
@@ -85,7 +85,7 @@ export default function ForgotPassword() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top">
         <div className="w-full max-w-sm animate-fade-in">
           <button
             onClick={() => navigate("/login")}

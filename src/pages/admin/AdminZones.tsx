@@ -34,7 +34,7 @@ export default function AdminZones() {
   const selectedCityData = cities.find(c => c.id === selectedCity);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex safe-top">
       <AdminSidebar />
       
       <main className="flex-1 lg:ml-64">

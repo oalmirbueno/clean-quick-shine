@@ -7,7 +7,7 @@ export default function Onboarding() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0">
+    <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
       {/* Background Image - Right Side */}
       <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none">
         <img 

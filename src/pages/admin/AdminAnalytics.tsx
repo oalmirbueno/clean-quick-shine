@@ -52,7 +52,7 @@ export default function AdminAnalytics() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex safe-top">
       <AdminSidebar />
       
       <main className="flex-1 lg:ml-64">

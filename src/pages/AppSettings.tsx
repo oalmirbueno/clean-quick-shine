@@ -146,7 +146,7 @@ export default function AppSettings() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background safe-top">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
