@@ -119,9 +119,9 @@ export default function ClientCheckout() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -273,7 +273,7 @@ export default function ClientCheckout() {
       </main>
 
       {/* Bottom Action */}
-      <div className="p-4 bg-card border-t border-border space-y-3">
+      <div className="flex-shrink-0 p-4 bg-card border-t border-border space-y-3 safe-bottom">
         <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
           <Shield className="w-4 h-4" />
           <span>Pagamento seguro. Liberado após confirmação do serviço.</span>

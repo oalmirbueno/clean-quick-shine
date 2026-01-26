@@ -50,11 +50,11 @@ export default function ClientOrders() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <header className="bg-card border-b border-border p-4">
+      <div className="fixed inset-0 bg-background flex flex-col safe-top">
+        <header className="flex-shrink-0 bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">Meus pedidos</h1>
         </header>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex-1 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
         <BottomNav variant="client" />
@@ -63,9 +63,9 @@ export default function ClientOrders() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">
             Meus pedidos
@@ -78,7 +78,7 @@ export default function ClientOrders() {
       </header>
 
       {/* Tabs */}
-      <div className="flex border-b border-border bg-card">
+      <div className="flex-shrink-0 flex border-b border-border bg-card">
         <button
           onClick={() => setActiveTab("upcoming")}
           className={cn(
@@ -115,7 +115,7 @@ export default function ClientOrders() {
         </button>
       </div>
 
-      <main className="p-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-24 animate-fade-in">
         {displayedOrders.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">

@@ -108,16 +108,16 @@ export default function ProAgenda() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20 flex items-center justify-center">
+      <div className="fixed inset-0 bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold text-foreground">
@@ -134,7 +134,7 @@ export default function ProAgenda() {
         </div>
       </header>
 
-      <main className="p-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-24 animate-fade-in">
         {/* Calendar Header */}
         <div className="flex items-center justify-between mb-4">
           <button

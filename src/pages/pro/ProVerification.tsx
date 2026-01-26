@@ -60,9 +60,9 @@ export default function ProVerification() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -77,7 +77,7 @@ export default function ProVerification() {
         </div>
       </header>
 
-      <main className="p-4 space-y-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-24 space-y-4 animate-fade-in">
         {/* Status Banner */}
         <div className={cn(
           "p-4 rounded-xl border",
