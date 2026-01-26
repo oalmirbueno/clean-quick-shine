@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { InstallPrompt } from "@/components/ui/InstallPrompt";
+import { SplashScreen } from "@/components/ui/SplashScreen";
 
 // Pages
 import Index from "./pages/Index";
@@ -83,13 +84,19 @@ import AppSettings from "./pages/AppSettings";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+interface AppProps {
+  showSplash?: boolean;
+  onSplashComplete?: () => void;
+}
+
+const App = ({ showSplash = false, onSplashComplete }: AppProps) => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          {showSplash && <SplashScreen onComplete={onSplashComplete} />}
           <BrowserRouter>
             <InstallPrompt />
           <Routes>
