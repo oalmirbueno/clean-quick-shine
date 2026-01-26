@@ -61,11 +61,11 @@ export default function Login() {
       <PageTransition>
         <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
           {/* Background Image - Right Side */}
-          <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none">
+          <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none overflow-hidden">
             <img 
               src={heroCleanerImg} 
               alt="" 
-              className="h-[70vh] w-auto object-contain"
+              className="h-[70vh] w-auto object-contain object-bottom"
             />
           </div>
 
@@ -139,11 +139,11 @@ export default function Login() {
     <PageTransition>
       <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
         {/* Background Image - Right Side */}
-        <div className="absolute right-0 bottom-0 opacity-15 pointer-events-none">
+        <div className="absolute right-0 bottom-0 opacity-15 pointer-events-none overflow-hidden">
           <img 
             src={heroCleanerImg} 
             alt="" 
-            className="h-[60vh] w-auto object-contain"
+            className="h-[60vh] w-auto object-contain object-bottom"
           />
         </div>
 

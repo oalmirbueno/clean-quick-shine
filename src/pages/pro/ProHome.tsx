@@ -7,8 +7,9 @@ import { MapMock } from "@/components/ui/MapMock";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AnimatedSection } from "@/components/ui/AnimatedCard";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
+import { NotificationsDropdown } from "@/components/ui/NotificationsDropdown";
 import { motion } from "framer-motion";
-import { Calendar, Trophy, MapPin, Clock, Check, X, Shield, Crown, Bell, Sparkles, Radio, Activity, Loader2 } from "lucide-react";
+import { Calendar, Trophy, MapPin, Clock, Check, X, Shield, Crown, Sparkles, Radio, Activity, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useCurrentProData, useAvailableOrdersForPro, useToggleProAvailability, useAcceptOrder, useDeclineOrder } from "@/hooks/useProData";
@@ -111,13 +112,7 @@ export default function ProHome() {
           <div className="flex items-center gap-2">
             {getPlanBadge()}
             <ThemeToggle />
-            <motion.button 
-              whileTap={{ scale: 0.95 }}
-              className="relative p-2 rounded-full hover:bg-secondary transition-colors"
-            >
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-            </motion.button>
+            <NotificationsDropdown />
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
