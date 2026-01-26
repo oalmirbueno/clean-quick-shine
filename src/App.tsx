@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { InstallPrompt } from "@/components/ui/InstallPrompt";
 import { UpdatePrompt } from "@/components/ui/UpdatePrompt";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import { WelcomeTutorial } from "@/components/ui/WelcomeTutorial";
 
 
 // Pages
@@ -97,18 +99,42 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <OfflineBanner />
-          <UpdatePrompt />
-          <BrowserRouter>
-            <InstallPrompt />
-          <Routes>
+const TUTORIAL_STORAGE_KEY = "cleanquick_tutorial_completed";
+
+const App = () => {
+  const [tutorialComplete, setTutorialComplete] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const completed = localStorage.getItem(TUTORIAL_STORAGE_KEY) === "true";
+    setTutorialComplete(completed);
+  }, []);
+
+  // Wait for localStorage check
+  if (tutorialComplete === null) {
+    return null;
+  }
+
+  // Show tutorial if not completed
+  if (!tutorialComplete) {
+    return (
+      <ThemeProvider>
+        <WelcomeTutorial onComplete={() => setTutorialComplete(true)} />
+      </ThemeProvider>
+    );
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <OfflineBanner />
+            <UpdatePrompt />
+            <BrowserRouter>
+              <InstallPrompt />
+            <Routes>
             {/* Splash & Auth */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
@@ -186,12 +212,13 @@ const App = () => (
 
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+          </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
