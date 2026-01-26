@@ -38,7 +38,7 @@ export default function OnboardingPro() {
   const step = steps[currentStep];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col overflow-hidden safe-top safe-bottom">
       {/* Header */}
       <header className="p-4 flex items-center justify-between">
         <button
@@ -74,7 +74,7 @@ export default function OnboardingPro() {
       </main>
 
       {/* Footer */}
-      <footer className="p-6">
+      <footer className="flex-shrink-0 p-6">
         {/* Progress dots */}
         <div className="flex justify-center gap-2 mb-6">
           {steps.map((_, index) => (

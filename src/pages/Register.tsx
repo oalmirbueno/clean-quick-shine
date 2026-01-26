@@ -96,7 +96,7 @@ export default function Register() {
 
   if (!userType) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top">
+      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
         <div className="w-full max-w-sm animate-fade-in">
           <div className="text-center mb-12">
             <Logo size="lg" className="justify-center mb-4" />
@@ -159,35 +159,42 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col p-6 safe-top">
-      <div className="w-full max-w-sm mx-auto animate-fade-in">
-        <button
-          onClick={() => step === 1 ? setUserType(null) : setStep(1)}
-          className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors mb-6"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+    <div className="fixed inset-0 bg-background flex flex-col safe-top safe-bottom">
+      {/* Header */}
+      <header className="flex-shrink-0 p-6 pb-0">
+        <div className="w-full max-w-sm mx-auto">
+          <button
+            onClick={() => step === 1 ? setUserType(null) : setStep(1)}
+            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors mb-6"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
 
-        <div className="text-center mb-8">
-          <Logo size="md" className="justify-center mb-4" />
-          <h1 className="text-xl font-semibold text-foreground">
-            {userType === "client" ? "Cadastro Cliente" : "Cadastro Diarista"}
-          </h1>
-          {userType === "pro" && (
-            <div className="flex justify-center gap-2 mt-4">
-              <div className={cn(
-                "w-8 h-1 rounded-full transition-colors",
-                step >= 1 ? "bg-primary" : "bg-border"
-              )} />
-              <div className={cn(
-                "w-8 h-1 rounded-full transition-colors",
-                step >= 2 ? "bg-primary" : "bg-border"
-              )} />
-            </div>
-          )}
+          <div className="text-center mb-6">
+            <Logo size="md" className="justify-center mb-4" />
+            <h1 className="text-xl font-semibold text-foreground">
+              {userType === "client" ? "Cadastro Cliente" : "Cadastro Diarista"}
+            </h1>
+            {userType === "pro" && (
+              <div className="flex justify-center gap-2 mt-4">
+                <div className={cn(
+                  "w-8 h-1 rounded-full transition-colors",
+                  step >= 1 ? "bg-primary" : "bg-border"
+                )} />
+                <div className={cn(
+                  "w-8 h-1 rounded-full transition-colors",
+                  step >= 2 ? "bg-primary" : "bg-border"
+                )} />
+              </div>
+            )}
+          </div>
         </div>
+      </header>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Scrollable Form Area */}
+      <main className="flex-1 overflow-y-auto px-6">
+        <div className="w-full max-w-sm mx-auto animate-fade-in py-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
           {step === 1 && (
             <>
               <InputField
@@ -385,18 +392,19 @@ export default function Register() {
               </PrimaryButton>
             </>
           )}
-        </form>
+          </form>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Já tem conta?{" "}
-          <button 
-            onClick={() => navigate("/login")}
-            className="text-primary font-medium hover:underline"
-          >
-            Entrar
-          </button>
-        </p>
-      </div>
+          <p className="text-center text-sm text-muted-foreground mt-6 pb-6">
+            Já tem conta?{" "}
+            <button 
+              onClick={() => navigate("/login")}
+              className="text-primary font-medium hover:underline"
+            >
+              Entrar
+            </button>
+          </p>
+        </div>
+      </main>
     </div>
   );
 }
