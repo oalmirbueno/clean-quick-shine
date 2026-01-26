@@ -116,7 +116,7 @@ export default function ProHome() {
         </div>
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">
-            Olá, {proName.split(" ")[0]} 👋
+            Olá, {proName.split(" ")[0]}
           </h1>
           {metrics?.quality_level && (
             <QualityBadge level={metrics.quality_level} size="sm" />
@@ -317,8 +317,8 @@ export default function ProHome() {
               Pedidos disponíveis
             </h2>
             {planType === "elite" && (
-              <span className="text-xs text-warning font-medium">
-                ✨ Acesso a comercial
+              <span className="text-xs text-warning font-medium flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> Acesso comercial
               </span>
             )}
           </div>

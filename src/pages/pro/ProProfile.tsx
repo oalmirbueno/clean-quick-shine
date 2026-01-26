@@ -122,7 +122,7 @@ export default function ProProfile() {
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-card rounded-xl border border-border p-3 text-center card-shadow">
-            <p className="text-xl font-bold text-foreground">⭐ {rating.toFixed(1)}</p>
+            <p className="text-xl font-bold text-foreground">{rating.toFixed(1)}</p>
             <p className="text-xs text-muted-foreground">Nota</p>
           </div>
           <div className="bg-card rounded-xl border border-border p-3 text-center card-shadow">

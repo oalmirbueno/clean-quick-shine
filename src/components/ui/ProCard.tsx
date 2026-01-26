@@ -29,7 +29,7 @@ export function ProCard({
   return (
     <div
       className={cn(
-        "p-5 bg-card rounded-xl border border-border card-shadow",
+        "p-5 bg-card rounded-2xl border border-border shadow-sm",
         "animate-scale-in",
         className
       )}
@@ -39,10 +39,10 @@ export function ProCard({
           <img
             src={avatar}
             alt={name}
-            className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+            className="w-16 h-16 rounded-2xl object-cover border-2 border-border"
           />
           {verified && (
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-full flex items-center justify-center">
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-full flex items-center justify-center shadow-sm">
               <CheckCircle2 className="w-4 h-4 text-success-foreground" />
             </div>
           )}
@@ -50,11 +50,11 @@ export function ProCard({
         
         <div className="flex-1">
           <h3 className="font-semibold text-foreground text-lg">{name}</h3>
-          <div className="flex items-center gap-1 mt-1">
+          <div className="flex items-center gap-1.5 mt-1">
             <Star className="w-4 h-4 fill-warning text-warning" />
             <span className="text-sm font-medium">{rating.toFixed(1)}</span>
             <span className="text-sm text-muted-foreground">
-              ({reviews} avaliações)
+              · {reviews} avaliações
             </span>
           </div>
           {verified && (
@@ -66,27 +66,27 @@ export function ProCard({
         </div>
       </div>
       
-      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-        <div className="flex items-center gap-1">
+      <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4 bg-muted/50 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-1.5">
           <MapPin className="w-4 h-4" />
           <span>{distance}</span>
         </div>
-        <span>•</span>
+        <span className="text-border">|</span>
         <span>Chega em {arrivalTime}</span>
       </div>
       
       <div className="flex gap-3">
         <button
           onClick={onDetails}
-          className="flex-1 py-3 px-4 rounded-lg border border-border text-foreground font-medium
-            hover:bg-secondary transition-colors"
+          className="flex-1 py-3 px-4 rounded-xl border border-input bg-background text-foreground font-medium
+            hover:bg-accent transition-colors"
         >
           Ver detalhes
         </button>
         <button
           onClick={onConfirm}
-          className="flex-1 py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium
-            button-shadow hover:opacity-90 transition-opacity"
+          className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium
+            shadow-sm hover:bg-primary/90 transition-colors"
         >
           Confirmar
         </button>

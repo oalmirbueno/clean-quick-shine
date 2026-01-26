@@ -167,7 +167,7 @@ export default function ProRanking() {
             <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Complete mais {jobsRemaining} serviços para alcançar o próximo nível ⭐
+            Complete mais {jobsRemaining} serviços para alcançar o próximo nível
           </p>
         </div>
       </main>
