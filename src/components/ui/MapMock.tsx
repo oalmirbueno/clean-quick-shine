@@ -5,11 +5,13 @@ interface MapMockProps {
   centerLat?: number;
   centerLng?: number;
   zoom?: number;
+  height?: string;
+  radiusKm?: number;
   markers?: Array<{
-    id: string;
+    id?: string;
     lat: number;
     lng: number;
-    type: "user" | "pro" | "address";
+    type?: "user" | "pro" | "address";
     label?: string;
   }>;
   radius?: number;
@@ -23,18 +25,23 @@ export function MapMock({
   centerLng = -46.6542,
   markers = [],
   radius = 5,
+  radiusKm,
   showRadius = false,
+  height,
   className,
   onClick,
 }: MapMockProps) {
+  const effectiveRadius = radiusKm || radius;
   return (
     <div
       onClick={onClick}
       className={cn(
-        "relative w-full aspect-[16/10] bg-secondary/30 rounded-xl overflow-hidden border border-border",
+        "relative w-full bg-secondary/30 rounded-xl overflow-hidden border border-border",
         "cursor-pointer hover:border-primary/30 transition-colors",
+        !height && "aspect-[16/10]",
         className
       )}
+      style={height ? { height } : undefined}
     >
       {/* Grid pattern to simulate map */}
       <div className="absolute inset-0 opacity-20">
@@ -58,11 +65,11 @@ export function MapMock({
       </div>
 
       {/* Radius circle */}
-      {showRadius && (
+      {(showRadius || radiusKm) && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
           <div 
             className="rounded-full border-2 border-primary/30 bg-primary/5"
-            style={{ width: `${radius * 30}px`, height: `${radius * 30}px` }}
+            style={{ width: `${effectiveRadius * 30}px`, height: `${effectiveRadius * 30}px` }}
           />
         </div>
       )}
@@ -80,10 +87,11 @@ export function MapMock({
         // Simple positioning based on relative lat/lng difference
         const offsetX = (marker.lng - centerLng) * 500;
         const offsetY = (centerLat - marker.lat) * 500;
+        const markerType = marker.type || "user";
         
         return (
           <div
-            key={marker.id}
+            key={marker.id || `marker-${index}`}
             className="absolute z-20"
             style={{
               left: `calc(50% + ${offsetX}px)`,
@@ -91,7 +99,7 @@ export function MapMock({
               transform: "translate(-50%, -50%)",
             }}
           >
-            {marker.type === "pro" ? (
+            {markerType === "pro" ? (
               <div className="relative group">
                 <div className="w-8 h-8 bg-success rounded-full flex items-center justify-center shadow-lg border-2 border-white">
                   <User className="w-4 h-4 text-white" />
@@ -102,7 +110,7 @@ export function MapMock({
                   </span>
                 )}
               </div>
-            ) : marker.type === "address" ? (
+            ) : markerType === "address" ? (
               <div className="relative">
                 <MapPin className="w-8 h-8 text-destructive drop-shadow-lg" />
               </div>
