@@ -38,7 +38,7 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         className={cn(
-          "inline-flex items-center justify-center gap-2 rounded-lg font-medium",
+          "inline-flex items-center justify-center gap-2 rounded-2xl font-medium",
           "transition-all duration-200 active:scale-[0.98]",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
           variants[variant],
