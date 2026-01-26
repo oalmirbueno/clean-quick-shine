@@ -4,9 +4,12 @@ import { Logo } from "@/components/ui/Logo";
 import { InputField } from "@/components/ui/InputField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const { signIn, hasRole } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,16 +20,22 @@ export default function AdminLogin() {
     setLoading(true);
     setError("");
 
-    // Simulate login
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const { error: signInError } = await signIn(email, password);
 
-    if (email === "admin@limpaja.com" && password === "admin123") {
-      navigate("/admin/dashboard");
-    } else {
-      setError("Email ou senha incorretos");
+    if (signInError) {
+      setError(signInError.message === "Invalid login credentials" 
+        ? "Email ou senha incorretos" 
+        : signInError.message);
+      setLoading(false);
+      return;
     }
-    
-    setLoading(false);
+
+    // Small delay to allow roles to load
+    setTimeout(() => {
+      toast.success("Login realizado com sucesso!");
+      navigate("/admin/dashboard");
+      setLoading(false);
+    }, 500);
   };
 
   return (
@@ -44,7 +53,7 @@ export default function AdminLogin() {
           <InputField
             label="E-mail"
             type="email"
-            placeholder="admin@limpaja.com"
+            placeholder="admin@jalimpo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             error={error}
@@ -66,7 +75,7 @@ export default function AdminLogin() {
         </form>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          Use: admin@limpaja.com / admin123
+          Para criar um admin, cadastre um usuário e adicione a role 'admin' no banco.
         </p>
       </div>
     </div>

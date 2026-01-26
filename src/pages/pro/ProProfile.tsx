@@ -14,14 +14,16 @@ import {
   Crown,
   Wallet
 } from "lucide-react";
-import { pros } from "@/lib/mockDataV2";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const menuItems = [
   { icon: User, label: "Dados pessoais", path: "#personal" },
   { icon: Shield, label: "Verificação", path: "/pro/verification" },
   { icon: Crown, label: "Plano", path: "/pro/plan" },
   { icon: MapPin, label: "Área de atendimento", path: "#area" },
-  { icon: Calendar, label: "Disponibilidade", path: "#availability" },
+  { icon: Calendar, label: "Disponibilidade", path: "/pro/availability" },
   { icon: Wallet, label: "Saque", path: "/pro/withdraw" },
   { icon: HelpCircle, label: "Suporte", path: "/pro/support" },
   { icon: Settings, label: "Configurações", path: "#settings" },
@@ -29,11 +31,63 @@ const menuItems = [
 
 export default function ProProfile() {
   const navigate = useNavigate();
-  const pro = pros[0];
+  const { user, signOut } = useAuth();
 
-  const handleLogout = () => {
+  // Fetch user profile
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch pro profile
+  const { data: proProfile } = useQuery({
+    queryKey: ["pro_profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("pro_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch pro metrics
+  const { data: metrics } = useQuery({
+    queryKey: ["pro_metrics", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("pro_metrics")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const handleLogout = async () => {
+    await signOut();
     navigate("/login");
   };
+
+  const userName = profile?.full_name || user?.email?.split("@")[0] || "Profissional";
+  const isVerified = proProfile?.verified || false;
+  const rating = proProfile?.rating || 5.0;
+  const jobsDone = proProfile?.jobs_done || 0;
+  const acceptanceRate = metrics?.acceptance_rate || 100;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -41,12 +95,10 @@ export default function ProProfile() {
       <header className="bg-card border-b border-border p-6">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <img
-              src={pro.avatar}
-              alt={pro.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
-            />
-            {pro.verifiedStatus === "approved" && (
+            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold border-2 border-primary/20">
+              {userName.charAt(0).toUpperCase()}
+            </div>
+            {isVerified && (
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-full flex items-center justify-center border-2 border-background">
                 <CheckCircle2 className="w-4 h-4 text-success-foreground" />
               </div>
@@ -55,17 +107,12 @@ export default function ProProfile() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold text-foreground">
-                {pro.name}
+                {userName}
               </h1>
-              {pro.plan === "pro" && (
-                <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
-                  PRO
-                </span>
-              )}
             </div>
-            <p className="text-muted-foreground">{pro.email}</p>
+            <p className="text-muted-foreground">{user?.email}</p>
             <div className="flex items-center gap-2 mt-1">
-              <StatusBadge status={pro.verifiedStatus} />
+              <StatusBadge status={isVerified ? "approved" : "pending"} />
             </div>
           </div>
         </div>
@@ -75,15 +122,15 @@ export default function ProProfile() {
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-card rounded-xl border border-border p-3 text-center card-shadow">
-            <p className="text-xl font-bold text-foreground">⭐ {pro.ratingAvg.toFixed(1)}</p>
+            <p className="text-xl font-bold text-foreground">⭐ {rating.toFixed(1)}</p>
             <p className="text-xs text-muted-foreground">Nota</p>
           </div>
           <div className="bg-card rounded-xl border border-border p-3 text-center card-shadow">
-            <p className="text-xl font-bold text-foreground">{pro.jobsDone}</p>
+            <p className="text-xl font-bold text-foreground">{jobsDone}</p>
             <p className="text-xs text-muted-foreground">Serviços</p>
           </div>
           <div className="bg-card rounded-xl border border-border p-3 text-center card-shadow">
-            <p className="text-xl font-bold text-foreground">{pro.acceptanceRate}%</p>
+            <p className="text-xl font-bold text-foreground">{acceptanceRate}%</p>
             <p className="text-xs text-muted-foreground">Aceitação</p>
           </div>
         </div>
@@ -98,7 +145,7 @@ export default function ProProfile() {
             <span className="font-medium text-foreground">Saldo disponível</span>
           </div>
           <span className="font-bold text-primary">
-            R$ {pro.balance.toFixed(2).replace(".", ",")}
+            R$ 0,00
           </span>
         </button>
 
@@ -136,7 +183,7 @@ export default function ProProfile() {
 
         {/* App Version */}
         <p className="text-center text-sm text-muted-foreground mt-8">
-          LimpaJá v2.0.0
+          JáLimpo v2.0.0
         </p>
       </main>
 

@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Pages
 import Index from "./pages/Index";
@@ -73,80 +75,82 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Splash & Auth */}
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/onboarding/client" element={<OnboardingClient />} />
-          <Route path="/onboarding/pro" element={<OnboardingPro />} />
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Splash & Auth */}
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/onboarding/client" element={<OnboardingClient />} />
+            <Route path="/onboarding/pro" element={<OnboardingPro />} />
 
-          {/* Client Routes */}
-          <Route path="/client/home" element={<ClientHome />} />
-          <Route path="/client/service" element={<ClientService />} />
-          <Route path="/client/schedule" element={<ClientSchedule />} />
-          <Route path="/client/matching" element={<ClientMatching />} />
-          <Route path="/client/offer" element={<ClientOffer />} />
-          <Route path="/client/checkout" element={<ClientCheckout />} />
-          <Route path="/client/order-tracking" element={<ClientOrderTracking />} />
-          <Route path="/client/rating" element={<ClientRating />} />
-          <Route path="/client/orders" element={<ClientOrders />} />
-          <Route path="/client/orders/:id" element={<ClientOrderDetail />} />
-          <Route path="/client/profile" element={<ClientProfile />} />
-          <Route path="/client/support" element={<ClientSupport />} />
-          <Route path="/client/cancel/:id" element={<ClientCancel />} />
-          <Route path="/client/location" element={<ClientLocation />} />
-          <Route path="/client/subscription" element={<ClientSubscription />} />
-          <Route path="/client/referral" element={<ClientReferral />} />
+            {/* Client Routes */}
+            <Route path="/client/home" element={<ProtectedRoute requiredRole="client"><ClientHome /></ProtectedRoute>} />
+            <Route path="/client/service" element={<ProtectedRoute requiredRole="client"><ClientService /></ProtectedRoute>} />
+            <Route path="/client/schedule" element={<ProtectedRoute requiredRole="client"><ClientSchedule /></ProtectedRoute>} />
+            <Route path="/client/matching" element={<ProtectedRoute requiredRole="client"><ClientMatching /></ProtectedRoute>} />
+            <Route path="/client/offer" element={<ProtectedRoute requiredRole="client"><ClientOffer /></ProtectedRoute>} />
+            <Route path="/client/checkout" element={<ProtectedRoute requiredRole="client"><ClientCheckout /></ProtectedRoute>} />
+            <Route path="/client/order-tracking" element={<ProtectedRoute requiredRole="client"><ClientOrderTracking /></ProtectedRoute>} />
+            <Route path="/client/rating" element={<ProtectedRoute requiredRole="client"><ClientRating /></ProtectedRoute>} />
+            <Route path="/client/orders" element={<ProtectedRoute requiredRole="client"><ClientOrders /></ProtectedRoute>} />
+            <Route path="/client/orders/:id" element={<ProtectedRoute requiredRole="client"><ClientOrderDetail /></ProtectedRoute>} />
+            <Route path="/client/profile" element={<ProtectedRoute requiredRole="client"><ClientProfile /></ProtectedRoute>} />
+            <Route path="/client/support" element={<ProtectedRoute requiredRole="client"><ClientSupport /></ProtectedRoute>} />
+            <Route path="/client/cancel/:id" element={<ProtectedRoute requiredRole="client"><ClientCancel /></ProtectedRoute>} />
+            <Route path="/client/location" element={<ProtectedRoute requiredRole="client"><ClientLocation /></ProtectedRoute>} />
+            <Route path="/client/subscription" element={<ProtectedRoute requiredRole="client"><ClientSubscription /></ProtectedRoute>} />
+            <Route path="/client/referral" element={<ProtectedRoute requiredRole="client"><ClientReferral /></ProtectedRoute>} />
 
-          {/* Pro Routes */}
-          <Route path="/pro/home" element={<ProHome />} />
-          <Route path="/pro/order/:id" element={<ProOrderDetail />} />
-          <Route path="/pro/agenda" element={<ProAgenda />} />
-          <Route path="/pro/earnings" element={<ProEarnings />} />
-          <Route path="/pro/ranking" element={<ProRanking />} />
-          <Route path="/pro/profile" element={<ProProfile />} />
-          <Route path="/pro/verification" element={<ProVerification />} />
-          <Route path="/pro/plan" element={<ProPlan />} />
-          <Route path="/pro/withdraw" element={<ProWithdraw />} />
-          <Route path="/pro/support" element={<ProSupport />} />
-          <Route path="/pro/quality" element={<ProQuality />} />
-          <Route path="/pro/availability" element={<ProAvailability />} />
+            {/* Pro Routes */}
+            <Route path="/pro/home" element={<ProtectedRoute requiredRole="pro"><ProHome /></ProtectedRoute>} />
+            <Route path="/pro/order/:id" element={<ProtectedRoute requiredRole="pro"><ProOrderDetail /></ProtectedRoute>} />
+            <Route path="/pro/agenda" element={<ProtectedRoute requiredRole="pro"><ProAgenda /></ProtectedRoute>} />
+            <Route path="/pro/earnings" element={<ProtectedRoute requiredRole="pro"><ProEarnings /></ProtectedRoute>} />
+            <Route path="/pro/ranking" element={<ProtectedRoute requiredRole="pro"><ProRanking /></ProtectedRoute>} />
+            <Route path="/pro/profile" element={<ProtectedRoute requiredRole="pro"><ProProfile /></ProtectedRoute>} />
+            <Route path="/pro/verification" element={<ProtectedRoute requiredRole="pro"><ProVerification /></ProtectedRoute>} />
+            <Route path="/pro/plan" element={<ProtectedRoute requiredRole="pro"><ProPlan /></ProtectedRoute>} />
+            <Route path="/pro/withdraw" element={<ProtectedRoute requiredRole="pro"><ProWithdraw /></ProtectedRoute>} />
+            <Route path="/pro/support" element={<ProtectedRoute requiredRole="pro"><ProSupport /></ProtectedRoute>} />
+            <Route path="/pro/quality" element={<ProtectedRoute requiredRole="pro"><ProQuality /></ProtectedRoute>} />
+            <Route path="/pro/availability" element={<ProtectedRoute requiredRole="pro"><ProAvailability /></ProtectedRoute>} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
-          <Route path="/admin/pros" element={<AdminPros />} />
-          <Route path="/admin/pros/:id" element={<AdminProDetail />} />
-          <Route path="/admin/clients" element={<AdminClients />} />
-          <Route path="/admin/coupons" element={<AdminCoupons />} />
-          <Route path="/admin/support" element={<AdminSupport />} />
-          <Route path="/admin/support/:id" element={<AdminSupportDetail />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
-          <Route path="/admin/zones" element={<AdminZones />} />
-          <Route path="/admin/risk" element={<AdminRisk />} />
-          <Route path="/admin/analytics" element={<AdminAnalytics />} />
-          <Route path="/admin/funnel" element={<AdminFunnel />} />
-          <Route path="/admin/cohorts" element={<AdminCohorts />} />
-          <Route path="/admin/matching-debug" element={<AdminMatchingDebug />} />
-          <Route path="/admin/quotes" element={<AdminQuotes />} />
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/orders" element={<ProtectedRoute requiredRole="admin"><AdminOrders /></ProtectedRoute>} />
+            <Route path="/admin/orders/:id" element={<ProtectedRoute requiredRole="admin"><AdminOrderDetail /></ProtectedRoute>} />
+            <Route path="/admin/pros" element={<ProtectedRoute requiredRole="admin"><AdminPros /></ProtectedRoute>} />
+            <Route path="/admin/pros/:id" element={<ProtectedRoute requiredRole="admin"><AdminProDetail /></ProtectedRoute>} />
+            <Route path="/admin/clients" element={<ProtectedRoute requiredRole="admin"><AdminClients /></ProtectedRoute>} />
+            <Route path="/admin/coupons" element={<ProtectedRoute requiredRole="admin"><AdminCoupons /></ProtectedRoute>} />
+            <Route path="/admin/support" element={<ProtectedRoute requiredRole="admin"><AdminSupport /></ProtectedRoute>} />
+            <Route path="/admin/support/:id" element={<ProtectedRoute requiredRole="admin"><AdminSupportDetail /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>} />
+            <Route path="/admin/zones" element={<ProtectedRoute requiredRole="admin"><AdminZones /></ProtectedRoute>} />
+            <Route path="/admin/risk" element={<ProtectedRoute requiredRole="admin"><AdminRisk /></ProtectedRoute>} />
+            <Route path="/admin/analytics" element={<ProtectedRoute requiredRole="admin"><AdminAnalytics /></ProtectedRoute>} />
+            <Route path="/admin/funnel" element={<ProtectedRoute requiredRole="admin"><AdminFunnel /></ProtectedRoute>} />
+            <Route path="/admin/cohorts" element={<ProtectedRoute requiredRole="admin"><AdminCohorts /></ProtectedRoute>} />
+            <Route path="/admin/matching-debug" element={<ProtectedRoute requiredRole="admin"><AdminMatchingDebug /></ProtectedRoute>} />
+            <Route path="/admin/quotes" element={<ProtectedRoute requiredRole="admin"><AdminQuotes /></ProtectedRoute>} />
 
-          {/* Company Routes */}
-          <Route path="/company/onboarding" element={<CompanyOnboarding />} />
-          <Route path="/company/request-quote" element={<CompanyRequestQuote />} />
+            {/* Company Routes */}
+            <Route path="/company/onboarding" element={<CompanyOnboarding />} />
+            <Route path="/company/request-quote" element={<CompanyRequestQuote />} />
 
-          {/* Catch all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            {/* Catch all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

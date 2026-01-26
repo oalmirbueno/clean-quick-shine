@@ -5,6 +5,9 @@ import { InputField } from "@/components/ui/InputField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { User, Briefcase, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 type UserType = "client" | "pro" | null;
 
@@ -25,6 +28,7 @@ const periods = [
 
 export default function Register() {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [userType, setUserType] = useState<UserType>(null);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -56,8 +60,32 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate registration
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const role = userType === "client" ? "client" : "pro";
+    const { error } = await signUp(email, password, name, phone, role);
+    
+    if (error) {
+      if (error.message.includes("already registered")) {
+        toast.error("Este email já está cadastrado");
+      } else {
+        toast.error(error.message);
+      }
+      setLoading(false);
+      return;
+    }
+
+    // For pro users, create pro_profile
+    if (userType === "pro") {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("pro_profiles").insert({
+          user_id: user.id,
+          radius_km: parseInt(radius),
+          bio: `Disponível: ${selectedDays.join(", ")} - ${selectedPeriods.join(", ")}`,
+        });
+      }
+    }
+
+    toast.success("Conta criada com sucesso!");
     
     if (userType === "client") {
       navigate("/client/home");
@@ -76,7 +104,7 @@ export default function Register() {
               Criar conta
             </h1>
             <p className="text-muted-foreground">
-              Como você quer usar o LimpaJá?
+              Como você quer usar o JáLimpo?
             </p>
           </div>
 
