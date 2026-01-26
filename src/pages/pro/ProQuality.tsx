@@ -1,19 +1,49 @@
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
-import { MapMock } from "@/components/ui/MapMock";
 import { QualityCard } from "@/components/ui/QualityBadge";
-import { ChevronRight, Clock, Target, TrendingUp, AlertCircle } from "lucide-react";
-import { mockPro, slaRules } from "@/lib/mockDataV3";
+import { ChevronRight, Clock, Target, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
+import { useProMetrics, useSlaRules } from "@/hooks/useProMetrics";
 
 export default function ProQuality() {
   const navigate = useNavigate();
-  const pro = mockPro;
-  const metrics = pro.metrics!;
+  const { metrics, loading, error } = useProMetrics();
+  const { data: slaRules } = useSlaRules();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  // Default values when no metrics exist yet
+  const displayMetrics = {
+    onTimeRate: metrics?.on_time_rate ?? 100,
+    cancelRate: metrics?.cancel_rate ?? 0,
+    responseTimeAvg: metrics?.response_time_avg ?? 0,
+    qualityLevel: metrics?.quality_level ?? "A",
+    last30dJobs: metrics?.last_30d_jobs ?? 0,
+    last7dCancels: metrics?.last_7d_cancels ?? 0,
+    acceptanceRate: metrics?.acceptance_rate ?? 100,
+  };
 
   const tips = [
-    { icon: Clock, text: "Responda aos pedidos em até 5 minutos", met: metrics.responseTimeAvg <= 5 },
-    { icon: Target, text: "Mantenha pontualidade acima de 95%", met: metrics.onTimeRate >= 95 },
-    { icon: TrendingUp, text: "Taxa de cancelamento abaixo de 5%", met: metrics.cancelRate <= 5 },
+    { 
+      icon: Clock, 
+      text: `Responda aos pedidos em até ${slaRules?.response_time_target_min ?? 15} minutos`, 
+      met: displayMetrics.responseTimeAvg <= (slaRules?.response_time_target_min ?? 15) 
+    },
+    { 
+      icon: Target, 
+      text: `Mantenha pontualidade acima de ${slaRules?.on_time_target_percent ?? 95}%`, 
+      met: displayMetrics.onTimeRate >= (slaRules?.on_time_target_percent ?? 95) 
+    },
+    { 
+      icon: TrendingUp, 
+      text: `Taxa de cancelamento abaixo de ${slaRules?.cancel_rate_max_percent ?? 5}%`, 
+      met: displayMetrics.cancelRate <= (slaRules?.cancel_rate_max_percent ?? 5) 
+    },
   ];
 
   return (
@@ -29,11 +59,11 @@ export default function ProQuality() {
 
       <main className="p-4 space-y-6 animate-fade-in">
         <QualityCard
-          level={metrics.qualityLevel}
+          level={displayMetrics.qualityLevel as "A" | "B" | "C" | "D"}
           metrics={{
-            onTimeRate: metrics.onTimeRate,
-            cancelRate: metrics.cancelRate,
-            responseTimeAvg: metrics.responseTimeAvg,
+            onTimeRate: displayMetrics.onTimeRate,
+            cancelRate: displayMetrics.cancelRate,
+            responseTimeAvg: displayMetrics.responseTimeAvg,
           }}
         />
 
@@ -77,12 +107,28 @@ export default function ProQuality() {
           <h3 className="font-semibold text-foreground mb-3">Histórico (últimos 30 dias)</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="p-4 bg-card rounded-xl border border-border text-center">
-              <p className="text-3xl font-bold text-foreground">{metrics.last30dJobs}</p>
+              <p className="text-3xl font-bold text-foreground">{displayMetrics.last30dJobs}</p>
               <p className="text-sm text-muted-foreground">Serviços</p>
             </div>
             <div className="p-4 bg-card rounded-xl border border-border text-center">
-              <p className="text-3xl font-bold text-foreground">{metrics.last7dCancels}</p>
+              <p className="text-3xl font-bold text-foreground">{displayMetrics.last7dCancels}</p>
               <p className="text-sm text-muted-foreground">Cancelamentos (7d)</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Acceptance Rate Card */}
+        <section>
+          <div className="p-4 bg-card rounded-xl border border-border">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-medium text-foreground">Taxa de aceitação</span>
+              <span className="text-lg font-bold text-primary">{displayMetrics.acceptanceRate.toFixed(1)}%</span>
+            </div>
+            <div className="h-2 bg-secondary rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary rounded-full transition-all" 
+                style={{ width: `${Math.min(displayMetrics.acceptanceRate, 100)}%` }} 
+              />
             </div>
           </div>
         </section>
