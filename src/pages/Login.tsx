@@ -64,7 +64,7 @@ export default function Login() {
           <div className="w-full max-w-sm animate-fade-in">
             <div className="text-center mb-12">
               <div className="flex justify-center mb-6">
-                <Logo size="xl" />
+                <Logo size="2xl" />
               </div>
               <p className="text-muted-foreground text-lg">
                 Limpeza de qualidade a um clique
