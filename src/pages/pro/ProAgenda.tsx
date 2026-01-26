@@ -1,15 +1,21 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
-import { ChevronLeft, ChevronRight, MapPin, Clock, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Clock, Loader2, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProOrders } from "@/hooks/useOrders";
+import { useProOrdersRealtime } from "@/hooks/useOrderRealtime";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProAgenda() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   
   const { data: orders = [], isLoading } = useProOrders();
+
+  // Enable realtime updates for pro orders
+  useProOrdersRealtime(user?.id || null);
 
   // Filter only confirmed/active orders
   const activeOrders = useMemo(() => {
@@ -112,12 +118,20 @@ export default function ProAgenda() {
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
-        <h1 className="text-xl font-semibold text-foreground">
-          Minha agenda
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {activeOrders.length} {activeOrders.length === 1 ? "serviço agendado" : "serviços agendados"}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">
+              Minha agenda
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {activeOrders.length} {activeOrders.length === 1 ? "serviço agendado" : "serviços agendados"}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Radio className="w-3 h-3 text-success animate-pulse" />
+            <span>Ao vivo</span>
+          </div>
+        </div>
       </header>
 
       <main className="p-4 animate-fade-in">

@@ -73,3 +73,41 @@ export function useClientOrdersRealtime(userId: string | null) {
     };
   }, [userId, queryClient]);
 }
+
+export function useProOrdersRealtime(userId: string | null) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`pro-orders-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: `pro_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log("Pro orders updated via realtime:", payload);
+          
+          // Invalidate and refetch pro orders
+          queryClient.invalidateQueries({ queryKey: ["pro_orders", userId] });
+          queryClient.invalidateQueries({ queryKey: ["pro_earnings", userId] });
+          
+          // Also invalidate the specific order if it was updated
+          if (payload.eventType === "UPDATE" && payload.new) {
+            const order = payload.new as Order;
+            queryClient.invalidateQueries({ queryKey: ["order", order.id] });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, queryClient]);
+}
