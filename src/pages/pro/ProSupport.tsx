@@ -34,7 +34,7 @@ export default function ProSupport() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
@@ -56,7 +56,7 @@ export default function ProSupport() {
         </div>
       </header>
 
-      <main className="p-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-24 animate-fade-in">
         {proTickets.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">Você não tem tickets abertos</p>

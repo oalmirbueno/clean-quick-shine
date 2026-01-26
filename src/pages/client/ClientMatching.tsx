@@ -32,7 +32,7 @@ export default function ClientMatching() {
   }, [navigate, location.state]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
       <div className="text-center animate-fade-in">
         <Logo size="lg" className="justify-center mb-8" />
         

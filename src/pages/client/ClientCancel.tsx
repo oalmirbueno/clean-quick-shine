@@ -130,7 +130,7 @@ export default function ClientCancel() {
   const totalPrice = Number(order.total_price);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
@@ -144,7 +144,7 @@ export default function ClientCancel() {
         </div>
       </header>
 
-      <main className="flex-1 p-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 animate-fade-in">
         {/* Warning */}
         <div className={`p-4 rounded-xl border mb-6 ${
           isFreeCancel 

@@ -70,7 +70,7 @@ export default function ProRanking() {
   const jobsRemaining = jobsForNextLevel - (proProfile?.jobs_done ?? 0);
 
   return (
-    <div className="min-h-screen bg-background safe-top">
+    <div className="fixed inset-0 bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
@@ -86,7 +86,7 @@ export default function ProRanking() {
         </div>
       </header>
 
-      <main className="p-4 space-y-6 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-4 space-y-6 animate-fade-in">
         {/* Profile Card */}
         <div className="bg-card rounded-xl border border-border p-6 text-center card-shadow">
           <div className="relative inline-block mb-4">
