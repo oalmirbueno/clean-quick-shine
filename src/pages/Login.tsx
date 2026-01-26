@@ -7,7 +7,7 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { User, Briefcase } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import heroCleanerImg from "@/assets/hero-cleaner.jpg";
+import heroCleanerImg from "@/assets/hero-cleaner-bg.png";
 
 type UserType = "client" | "pro" | null;
 
@@ -61,37 +61,37 @@ export default function Login() {
   if (!userType) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 overflow-hidden fixed inset-0">
-          <div className="w-full max-w-sm animate-fade-in">
-            {/* Hero Image */}
-            <div className="flex justify-center mb-4">
-              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary/20 shadow-lg">
-                <img 
-                  src={heroCleanerImg} 
-                  alt="Profissional de limpeza" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-            
-            <div className="text-center mb-8">
-              <div className="flex justify-center mb-4">
-                <Logo size="xl" />
-              </div>
-              <p className="text-muted-foreground">
+        <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0">
+          {/* Hero Section with Image */}
+          <div className="relative flex-shrink-0 bg-gradient-to-b from-primary/10 to-background pt-8 pb-2">
+            <div className="flex flex-col items-center">
+              <Logo size="xl" className="mb-2" />
+              <p className="text-muted-foreground text-sm">
                 Limpeza de qualidade a um clique
               </p>
             </div>
+            
+            {/* Hero Image */}
+            <div className="flex justify-center mt-2">
+              <img 
+                src={heroCleanerImg} 
+                alt="Profissional de limpeza" 
+                className="h-40 w-auto object-contain drop-shadow-lg"
+              />
+            </div>
+          </div>
 
-            <div className="space-y-4">
+          {/* Content Section */}
+          <div className="flex-1 flex flex-col justify-center px-6 pb-6">
+            <div className="w-full max-w-sm mx-auto animate-fade-in space-y-3">
               <button
                 onClick={() => setUserType("client")}
-                className="w-full p-5 bg-card rounded-xl border border-border card-shadow
+                className="w-full p-4 bg-card rounded-xl border border-border card-shadow
                   hover:card-shadow-hover hover:border-primary/20 transition-all duration-200
                   flex items-center gap-4 active:scale-[0.98]"
               >
-                <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                  <User className="w-6 h-6 text-primary" />
+                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-left">
                   <h3 className="font-semibold text-foreground">Sou Cliente</h3>
@@ -103,12 +103,12 @@ export default function Login() {
 
               <button
                 onClick={() => setUserType("pro")}
-                className="w-full p-5 bg-card rounded-xl border border-border card-shadow
+                className="w-full p-4 bg-card rounded-xl border border-border card-shadow
                   hover:card-shadow-hover hover:border-primary/20 transition-all duration-200
                   flex items-center gap-4 active:scale-[0.98]"
               >
-                <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                  <Briefcase className="w-6 h-6 text-primary" />
+                <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-left">
                   <h3 className="font-semibold text-foreground">Sou Diarista</h3>
@@ -117,17 +117,17 @@ export default function Login() {
                   </p>
                 </div>
               </button>
-            </div>
 
-            <p className="text-center text-sm text-muted-foreground mt-8">
-              Não tem conta?{" "}
-              <button 
-                onClick={() => navigate("/register")}
-                className="text-primary font-medium hover:underline"
-              >
-                Cadastre-se
-              </button>
-            </p>
+              <p className="text-center text-sm text-muted-foreground pt-4">
+                Não tem conta?{" "}
+                <button 
+                  onClick={() => navigate("/register")}
+                  className="text-primary font-medium hover:underline"
+                >
+                  Cadastre-se
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </PageTransition>
@@ -146,7 +146,9 @@ export default function Login() {
           </button>
 
           <div className="text-center mb-8">
-            <Logo size="md" className="justify-center mb-4" />
+            <div className="flex justify-center mb-4">
+              <Logo size="lg" />
+            </div>
             <h1 className="text-xl font-semibold text-foreground">
               {userType === "client" ? "Entrar como Cliente" : "Entrar como Diarista"}
             </h1>
