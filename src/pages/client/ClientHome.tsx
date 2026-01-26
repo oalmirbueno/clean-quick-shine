@@ -2,6 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ServiceCard } from "@/components/ui/ServiceCard";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { AnimatedSection } from "@/components/ui/AnimatedCard";
+import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
+import { motion } from "framer-motion";
 import { Search, Home, Sparkles, HardHat, Building2, Sun, Sunrise, CalendarClock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +28,6 @@ export default function ClientHome() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Fetch user profile
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -44,64 +47,91 @@ export default function ClientHome() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <motion.header 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-card border-b border-border p-4"
+      >
         <div className="flex items-center justify-between mb-4">
           <Logo size="sm" iconOnly />
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium text-sm">
-            {userName.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
+              className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium text-sm"
+            >
+              {userName.charAt(0).toUpperCase()}
+            </motion.div>
           </div>
         </div>
-        <h1 className="text-xl font-semibold text-foreground">
-          Olá, {userName}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">O que você precisa hoje?</p>
-      </header>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <h1 className="text-xl font-semibold text-foreground">
+            Olá, {userName}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">O que você precisa hoje?</p>
+        </motion.div>
+      </motion.header>
 
-      <main className="p-4 space-y-6 animate-fade-in">
+      <main className="p-4 space-y-6">
         {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="O que você precisa limpar?"
-            className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-border bg-card
-              text-foreground placeholder:text-muted-foreground card-shadow
-              focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
-              transition-all duration-200"
-          />
-        </div>
+        <AnimatedSection delay={1}>
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="O que você precisa limpar?"
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-border bg-card
+                text-foreground placeholder:text-muted-foreground card-shadow
+                focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
+                transition-all duration-200"
+            />
+          </div>
+        </AnimatedSection>
 
         {/* Service Categories */}
-        <section>
+        <AnimatedSection delay={2}>
           <h2 className="text-lg font-semibold text-foreground mb-3">
             Serviços
           </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {serviceCategories.map((service) => (
-              <ServiceCard
-                key={service.title}
-                icon={service.icon}
-                title={service.title}
-                description={service.description}
-                onClick={() => navigate("/client/service")}
-              />
+          <AnimatedList className="grid grid-cols-2 gap-3">
+            {serviceCategories.map((service, index) => (
+              <AnimatedListItem key={service.title}>
+                <ServiceCard
+                  icon={service.icon}
+                  title={service.title}
+                  description={service.description}
+                  onClick={() => navigate("/client/service")}
+                />
+              </AnimatedListItem>
             ))}
-          </div>
-        </section>
+          </AnimatedList>
+        </AnimatedSection>
 
         {/* Quick Suggestions */}
-        <section>
+        <AnimatedSection delay={3}>
           <h2 className="text-lg font-semibold text-foreground mb-3">
             Sugestões rápidas
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
-            {quickSuggestions.map((suggestion) => (
-              <button
+            {quickSuggestions.map((suggestion, index) => (
+              <motion.button
                 key={suggestion.label}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/client/service")}
                 className="flex items-center gap-3 px-4 py-3 bg-card rounded-xl border border-border
                   card-shadow hover:card-shadow-hover hover:border-primary/20 
-                  transition-all duration-200 flex-shrink-0 active:scale-[0.98]"
+                  transition-all duration-200 flex-shrink-0"
               >
                 <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
                   <suggestion.icon className="w-5 h-5 text-primary" />
@@ -114,28 +144,30 @@ export default function ClientHome() {
                     {suggestion.time}
                   </p>
                 </div>
-              </button>
+              </motion.button>
             ))}
           </div>
-        </section>
+        </AnimatedSection>
 
         {/* Recent Order Banner */}
-        <section className="bg-accent rounded-xl p-4 border border-primary/10">
+        <AnimatedSection delay={4} className="bg-accent rounded-xl p-4 border border-primary/10">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Próximo agendamento</p>
               <p className="font-semibold text-foreground">Nenhum agendamento</p>
               <p className="text-sm text-primary">Agende seu primeiro serviço</p>
             </div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/client/service")}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium
                 hover:opacity-90 transition-opacity"
             >
               Agendar
-            </button>
+            </motion.button>
           </div>
-        </section>
+        </AnimatedSection>
       </main>
 
       <BottomNav variant="client" />

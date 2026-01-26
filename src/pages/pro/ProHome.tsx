@@ -4,6 +4,10 @@ import { Logo } from "@/components/ui/Logo";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { QualityBadge } from "@/components/ui/QualityBadge";
 import { MapMock } from "@/components/ui/MapMock";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { AnimatedSection } from "@/components/ui/AnimatedCard";
+import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
+import { motion } from "framer-motion";
 import { Calendar, Trophy, MapPin, Clock, Check, X, Shield, Crown, Bell, Sparkles, Radio, Activity, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -82,7 +86,13 @@ export default function ProHome() {
   if (isLoadingPro) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </motion.div>
       </div>
     );
   }
@@ -90,16 +100,30 @@ export default function ProHome() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <motion.header 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="bg-card border-b border-border p-4"
+      >
         <div className="flex items-center justify-between mb-4">
           <Logo size="sm" />
           <div className="flex items-center gap-2">
             {getPlanBadge()}
-            <button className="relative p-2 rounded-full hover:bg-secondary transition-colors">
+            <ThemeToggle />
+            <motion.button 
+              whileTap={{ scale: 0.95 }}
+              className="relative p-2 rounded-full hover:bg-secondary transition-colors"
+            >
               <Bell className="w-5 h-5 text-muted-foreground" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-            </button>
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-muted">
+            </motion.button>
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
+              className="w-8 h-8 rounded-full overflow-hidden bg-muted"
+            >
               {proAvatar ? (
                 <img 
                   src={proAvatar} 
@@ -111,42 +135,54 @@ export default function ProHome() {
                   {proName.charAt(0)}
                 </div>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
-        <div className="flex items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex items-center justify-between"
+        >
           <h1 className="text-xl font-semibold text-foreground">
             Olá, {proName.split(" ")[0]}
           </h1>
           {metrics?.quality_level && (
             <QualityBadge level={metrics.quality_level} size="sm" />
           )}
-        </div>
+        </motion.div>
         {!isVerified && (
-          <button 
+          <motion.button 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
             onClick={() => navigate("/pro/verification")}
             className="mt-2 flex items-center gap-2 text-sm text-warning"
           >
             <Shield className="w-4 h-4" />
             Complete sua verificação para receber pedidos
-          </button>
+          </motion.button>
         )}
-      </header>
+      </motion.header>
 
-      <main className="p-4 space-y-4 animate-fade-in">
+      <main className="p-4 space-y-4">
         {/* Live Availability Toggle */}
-        <div className="p-4 bg-card rounded-xl border border-border">
+        <AnimatedSection delay={1} className="p-4 bg-card rounded-xl border border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
-                isAvailable ? "bg-success/20" : "bg-muted"
-              )}>
+              <motion.div 
+                animate={{ scale: isAvailable ? [1, 1.1, 1] : 1 }}
+                transition={{ repeat: isAvailable ? Infinity : 0, duration: 2 }}
+                className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                  isAvailable ? "bg-success/20" : "bg-muted"
+                )}
+              >
                 <Radio className={cn(
                   "w-5 h-5 transition-colors",
-                  isAvailable ? "text-success animate-pulse" : "text-muted-foreground"
+                  isAvailable ? "text-success" : "text-muted-foreground"
                 )} />
-              </div>
+              </motion.div>
               <div>
                 <p className="font-medium text-foreground">
                   {isAvailable ? "Disponível agora" : "Offline"}
@@ -156,7 +192,9 @@ export default function ProHome() {
                 </p>
               </div>
             </div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleToggleAvailability}
               className={cn(
                 "px-4 py-2 rounded-lg font-medium transition-all",
@@ -166,12 +204,15 @@ export default function ProHome() {
               )}
             >
               {isAvailable ? "Desativar" : "Ativar"}
-            </button>
+            </motion.button>
           </div>
           
-          {/* Mini Map Toggle */}
           {isAvailable && (
-            <div className="mt-3 pt-3 border-t border-border">
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mt-3 pt-3 border-t border-border"
+            >
               <button
                 onClick={() => setShowMap(!showMap)}
                 className="flex items-center gap-2 text-sm text-primary"
@@ -180,7 +221,11 @@ export default function ProHome() {
                 {showMap ? "Ocultar mapa" : "Ver minha posição no mapa"}
               </button>
               {showMap && (
-                <div className="mt-3 h-40 rounded-lg overflow-hidden">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mt-3 h-40 rounded-lg overflow-hidden"
+                >
                   <MapMock 
                     markers={[{
                       lat: Number(proData?.proProfile?.current_lat) || -23.5634,
@@ -190,128 +235,122 @@ export default function ProHome() {
                     radiusKm={Number(proData?.proProfile?.radius_km) || 10}
                     height="100%"
                   />
-                </div>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatedSection>
 
         {/* Balance Card */}
-        <div 
-          className="p-5 bg-primary rounded-xl text-primary-foreground cursor-pointer hover:opacity-95 transition-opacity"
-          onClick={() => navigate("/pro/earnings")}
-        >
-          <p className="text-sm opacity-90">Saldo disponível</p>
-          <p className="text-3xl font-bold mt-1">R$ {balance.toFixed(2).replace(".", ",")}</p>
-          <button className="mt-3 text-sm font-medium underline underline-offset-2 opacity-90 hover:opacity-100">
-            Ver ganhos →
-          </button>
-        </div>
+        <AnimatedSection delay={2}>
+          <motion.div 
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className="p-5 bg-primary rounded-xl text-primary-foreground cursor-pointer"
+            onClick={() => navigate("/pro/earnings")}
+          >
+            <p className="text-sm opacity-90">Saldo disponível</p>
+            <p className="text-3xl font-bold mt-1">R$ {balance.toFixed(2).replace(".", ",")}</p>
+            <button className="mt-3 text-sm font-medium underline underline-offset-2 opacity-90 hover:opacity-100">
+              Ver ganhos
+            </button>
+          </motion.div>
+        </AnimatedSection>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-4 gap-2">
-          <button 
-            onClick={() => navigate("/pro/quality")}
-            className="flex flex-col items-center p-3 bg-card rounded-xl border border-border hover:bg-accent transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center mb-2">
-              <Activity className="w-5 h-5 text-success" />
-            </div>
-            <span className="text-xs font-medium text-foreground text-center">SLA</span>
-          </button>
-          
-          <button 
-            onClick={() => navigate("/pro/agenda")}
-            className="flex flex-col items-center p-3 bg-card rounded-xl border border-border hover:bg-accent transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center mb-2">
-              <Calendar className="w-5 h-5 text-primary" />
-            </div>
-            <span className="text-xs font-medium text-foreground text-center">Agenda</span>
-          </button>
-          
-          <button 
-            onClick={() => navigate("/pro/ranking")}
-            className="flex flex-col items-center p-3 bg-card rounded-xl border border-border hover:bg-accent transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center mb-2">
-              <Trophy className="w-5 h-5 text-warning" />
-            </div>
-            <span className="text-xs font-medium text-foreground text-center">Ranking</span>
-          </button>
-
-          <button 
-            onClick={() => navigate("/pro/plan")}
-            className="flex flex-col items-center p-3 bg-card rounded-xl border border-border hover:bg-accent transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-              <Crown className="w-5 h-5 text-primary" />
-            </div>
-            <span className="text-xs font-medium text-foreground text-center">Planos</span>
-          </button>
-        </div>
+        <AnimatedSection delay={3}>
+          <AnimatedList className="grid grid-cols-4 gap-2">
+            {[
+              { icon: Activity, label: "SLA", path: "/pro/quality", color: "bg-success/10", iconColor: "text-success" },
+              { icon: Calendar, label: "Agenda", path: "/pro/agenda", color: "bg-accent", iconColor: "text-primary" },
+              { icon: Trophy, label: "Ranking", path: "/pro/ranking", color: "bg-warning/10", iconColor: "text-warning" },
+              { icon: Crown, label: "Planos", path: "/pro/plan", color: "bg-primary/10", iconColor: "text-primary" },
+            ].map((action) => (
+              <AnimatedListItem key={action.label}>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate(action.path)}
+                  className="flex flex-col items-center p-3 bg-card rounded-xl border border-border hover:bg-accent transition-colors w-full"
+                >
+                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center mb-2", action.color)}>
+                    <action.icon className={cn("w-5 h-5", action.iconColor)} />
+                  </div>
+                  <span className="text-xs font-medium text-foreground text-center">{action.label}</span>
+                </motion.button>
+              </AnimatedListItem>
+            ))}
+          </AnimatedList>
+        </AnimatedSection>
 
         {/* SLA Quality Card */}
         {metrics && (
-          <div 
-            onClick={() => navigate("/pro/quality")}
-            className="p-4 bg-card rounded-xl border border-border cursor-pointer hover:bg-accent/50 transition-colors"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-foreground">Sua qualidade hoje</h3>
-              {metrics.quality_level && <QualityBadge level={metrics.quality_level} />}
-            </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <p className="text-lg font-bold text-foreground">{Number(metrics.on_time_rate || 0).toFixed(0)}%</p>
-                <p className="text-xs text-muted-foreground">Pontualidade</p>
+          <AnimatedSection delay={4}>
+            <motion.div 
+              whileHover={{ scale: 1.01 }}
+              onClick={() => navigate("/pro/quality")}
+              className="p-4 bg-card rounded-xl border border-border cursor-pointer"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-foreground">Sua qualidade hoje</h3>
+                {metrics.quality_level && <QualityBadge level={metrics.quality_level} />}
               </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">{metrics.response_time_avg || 0}min</p>
-                <p className="text-xs text-muted-foreground">Resposta</p>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <p className="text-lg font-bold text-foreground">{Number(metrics.on_time_rate || 0).toFixed(0)}%</p>
+                  <p className="text-xs text-muted-foreground">Pontualidade</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-foreground">{metrics.response_time_avg || 0}min</p>
+                  <p className="text-xs text-muted-foreground">Resposta</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-foreground">{Number(metrics.cancel_rate || 0).toFixed(0)}%</p>
+                  <p className="text-xs text-muted-foreground">Cancelamentos</p>
+                </div>
               </div>
-              <div>
-                <p className="text-lg font-bold text-foreground">{Number(metrics.cancel_rate || 0).toFixed(0)}%</p>
-                <p className="text-xs text-muted-foreground">Cancelamentos</p>
-              </div>
-            </div>
-          </div>
+            </motion.div>
+          </AnimatedSection>
         )}
 
         {/* Plan Upgrade Banner */}
         {planType !== "elite" && (
-          <button
-            onClick={() => navigate("/pro/plan")}
-            className={cn(
-              "w-full p-4 rounded-xl border flex items-center gap-3 transition-colors",
-              planType === "free" 
-                ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
-                : "border-warning/50 bg-warning/5 hover:bg-warning/10"
-            )}
-          >
-            {planType === "free" ? (
-              <>
-                <Crown className="w-6 h-6 text-primary" />
-                <div className="flex-1 text-left">
-                  <p className="font-medium text-foreground">Seja PRO</p>
-                  <p className="text-sm text-muted-foreground">Receba 3x mais pedidos</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-6 h-6 text-warning" />
-                <div className="flex-1 text-left">
-                  <p className="font-medium text-foreground">Upgrade para ELITE</p>
-                  <p className="text-sm text-muted-foreground">Máxima prioridade + comercial</p>
-                </div>
-              </>
-            )}
-            <span className="text-primary font-medium">→</span>
-          </button>
+          <AnimatedSection delay={5}>
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => navigate("/pro/plan")}
+              className={cn(
+                "w-full p-4 rounded-xl border flex items-center gap-3 transition-colors",
+                planType === "free" 
+                  ? "border-primary/30 bg-primary/5 hover:bg-primary/10"
+                  : "border-warning/50 bg-warning/5 hover:bg-warning/10"
+              )}
+            >
+              {planType === "free" ? (
+                <>
+                  <Crown className="w-6 h-6 text-primary" />
+                  <div className="flex-1 text-left">
+                    <p className="font-medium text-foreground">Seja PRO</p>
+                    <p className="text-sm text-muted-foreground">Receba 3x mais pedidos</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-6 h-6 text-warning" />
+                  <div className="flex-1 text-left">
+                    <p className="font-medium text-foreground">Upgrade para ELITE</p>
+                    <p className="text-sm text-muted-foreground">Máxima prioridade + comercial</p>
+                  </div>
+                </>
+              )}
+              <span className="text-primary font-medium">→</span>
+            </motion.button>
+          </AnimatedSection>
         )}
 
         {/* Available Orders */}
-        <section>
+        <AnimatedSection delay={6}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-foreground">
               Pedidos disponíveis
@@ -348,89 +387,93 @@ export default function ProHome() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {availableOrders.map((order) => (
-                <div 
-                  key={order.id}
-                  className={cn(
-                    "p-4 bg-card rounded-xl border card-shadow",
-                    order.eliteOnly 
-                      ? "border-warning bg-warning/5" 
-                      : "border-border"
-                  )}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground">{order.serviceName}</h3>
-                        {order.eliteOnly && (
-                          <span className="px-1.5 py-0.5 bg-warning text-warning-foreground rounded text-xs font-medium">
-                            ELITE
-                          </span>
+            <AnimatedList className="space-y-3">
+              {availableOrders.map((order, index) => (
+                <AnimatedListItem key={order.id}>
+                  <motion.div 
+                    whileHover={{ scale: 1.01 }}
+                    className={cn(
+                      "p-4 bg-card rounded-xl border card-shadow",
+                      order.eliteOnly 
+                        ? "border-warning bg-warning/5" 
+                        : "border-border"
+                    )}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-foreground">{order.serviceName}</h3>
+                          {order.eliteOnly && (
+                            <span className="px-1.5 py-0.5 bg-warning text-warning-foreground rounded text-xs font-medium">
+                              ELITE
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{order.neighborhood}, {order.city}</span>
+                          <span className="text-xs">• {order.distance} km</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-success">
+                          R$ {order.proEarning.toFixed(2).replace(".", ",")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Você recebe</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{order.date}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{order.time}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <motion.button 
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleDeclineOrder(order.id)}
+                        disabled={processingOrderId === order.id}
+                        className="flex-1 py-2.5 px-4 rounded-lg border border-border text-muted-foreground font-medium
+                          hover:bg-secondary transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {processingOrderId === order.id && declineOrderMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <X className="w-4 h-4" />
                         )}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{order.neighborhood}, {order.city}</span>
-                        <span className="text-xs">• {order.distance} km</span>
-                      </div>
+                        Recusar
+                      </motion.button>
+                      <motion.button 
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleAcceptOrder(order.id)}
+                        disabled={processingOrderId === order.id}
+                        className={cn(
+                          "flex-1 py-2.5 px-4 rounded-lg font-medium button-shadow hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50",
+                          order.eliteOnly
+                            ? "bg-warning text-warning-foreground"
+                            : "bg-primary text-primary-foreground"
+                        )}
+                      >
+                        {processingOrderId === order.id && acceptOrderMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Check className="w-4 h-4" />
+                        )}
+                        Aceitar
+                      </motion.button>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-success">
-                        R$ {order.proEarning.toFixed(2).replace(".", ",")}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Você recebe</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>{order.date}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{order.time}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleDeclineOrder(order.id)}
-                      disabled={processingOrderId === order.id}
-                      className="flex-1 py-2.5 px-4 rounded-lg border border-border text-muted-foreground font-medium
-                        hover:bg-secondary transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {processingOrderId === order.id && declineOrderMutation.isPending ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <X className="w-4 h-4" />
-                      )}
-                      Recusar
-                    </button>
-                    <button 
-                      onClick={() => handleAcceptOrder(order.id)}
-                      disabled={processingOrderId === order.id}
-                      className={cn(
-                        "flex-1 py-2.5 px-4 rounded-lg font-medium button-shadow hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50",
-                        order.eliteOnly
-                          ? "bg-warning text-warning-foreground"
-                          : "bg-primary text-primary-foreground"
-                      )}
-                    >
-                      {processingOrderId === order.id && acceptOrderMutation.isPending ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Check className="w-4 h-4" />
-                      )}
-                      Aceitar
-                    </button>
-                  </div>
-                </div>
+                  </motion.div>
+                </AnimatedListItem>
               ))}
-            </div>
+            </AnimatedList>
           )}
-        </section>
+        </AnimatedSection>
       </main>
 
       <BottomNav variant="pro" />
