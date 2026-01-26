@@ -75,6 +75,7 @@ import CompanyRequestQuote from "./pages/company/CompanyRequestQuote";
 
 // Dev Pages
 import ComponentShowcase from "./pages/dev/ComponentShowcase";
+import ProjectDocumentation from "./pages/dev/ProjectDocumentation";
 
 const queryClient = new QueryClient();
 
@@ -154,6 +155,7 @@ const App = () => (
 
             {/* Dev Routes */}
             <Route path="/dev/components" element={<ComponentShowcase />} />
+            <Route path="/dev/documentation" element={<ProjectDocumentation />} />
 
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
