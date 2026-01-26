@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { Star, Check } from "lucide-react";
+import { Star, Check, Loader2, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { mockProProfile } from "@/lib/mockData";
+import { useOrder } from "@/hooks/useOrders";
+import { useSubmitRating } from "@/hooks/useSubmitRating";
 
 const ratingTags = [
   { id: "punctuality", label: "Pontualidade" },
@@ -14,11 +15,16 @@ const ratingTags = [
 
 export default function ClientRating() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const orderId = location.state?.orderId as string | null;
+
+  const { data: order, isLoading: orderLoading } = useOrder(orderId);
+  const submitRating = useSubmitRating();
+
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comment, setComment] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
@@ -27,10 +33,100 @@ export default function ClientRating() {
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    navigate("/client/orders");
+    if (!orderId || rating === 0) return;
+
+    submitRating.mutate(
+      {
+        orderId,
+        rating,
+        review: comment.trim() || undefined,
+        tags: selectedTags.length > 0 ? selectedTags : undefined,
+      },
+      {
+        onSuccess: () => {
+          navigate("/client/orders");
+        },
+      }
+    );
   };
+
+  if (orderLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <header className="bg-card border-b border-border p-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/client/orders")}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6 text-foreground" />
+            </button>
+            <h1 className="text-lg font-semibold text-foreground">
+              Pedido não encontrado
+            </h1>
+          </div>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-4">
+          <p className="text-muted-foreground">Não foi possível carregar o pedido para avaliação.</p>
+        </main>
+      </div>
+    );
+  }
+
+  // Check if already rated
+  if (order.client_rating) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <header className="bg-card border-b border-border p-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/client/orders")}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6 text-foreground" />
+            </button>
+            <h1 className="text-lg font-semibold text-foreground">
+              Avaliação
+            </h1>
+          </div>
+        </header>
+        <main className="flex-1 flex flex-col items-center justify-center p-4">
+          <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
+            <Check className="w-10 h-10 text-success" />
+          </div>
+          <p className="text-foreground font-medium mb-2">Este pedido já foi avaliado</p>
+          <div className="flex gap-1 mb-4">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className={cn(
+                  "w-6 h-6",
+                  order.client_rating! >= star
+                    ? "fill-warning text-warning"
+                    : "text-border"
+                )}
+              />
+            ))}
+          </div>
+          <PrimaryButton onClick={() => navigate("/client/orders")}>
+            Ver meus pedidos
+          </PrimaryButton>
+        </main>
+      </div>
+    );
+  }
+
+  const proAvatar = order.pro_profile?.avatar_url || 
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${order.pro_id}`;
+  const proName = order.pro_profile?.full_name || "Profissional";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -44,13 +140,13 @@ export default function ClientRating() {
           Serviço concluído ✅
         </h1>
         <p className="text-muted-foreground text-center mb-8">
-          Como foi a sua experiência com {mockProProfile.name}?
+          Como foi a sua experiência com {proName}?
         </p>
 
         {/* Pro Avatar */}
         <img
-          src={mockProProfile.avatar}
-          alt={mockProProfile.name}
+          src={proAvatar}
+          alt={proName}
           className="w-20 h-20 rounded-full object-cover border-4 border-primary/20 mb-6"
         />
 
@@ -103,11 +199,15 @@ export default function ClientRating() {
             placeholder="Deixe um comentário (opcional)"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            maxLength={500}
             className="w-full px-4 py-3 rounded-xl border border-input bg-background
               text-foreground placeholder:text-muted-foreground resize-none h-24
               focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
               transition-all duration-200"
           />
+          <p className="text-xs text-muted-foreground text-right mt-1">
+            {comment.length}/500
+          </p>
         </div>
       </main>
 
@@ -115,7 +215,7 @@ export default function ClientRating() {
       <div className="p-4 bg-card border-t border-border">
         <PrimaryButton
           fullWidth
-          loading={loading}
+          loading={submitRating.isPending}
           disabled={rating === 0}
           onClick={handleSubmit}
         >
