@@ -45,7 +45,7 @@ export default function ClientHome() {
   const userName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Usuário";
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 safe-top">
       {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
