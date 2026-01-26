@@ -7,9 +7,13 @@ type OrderStatus =
   | "scheduled" 
   | "matching" 
   | "confirmed" 
+  | "en_route"
   | "in_progress" 
   | "completed" 
-  | "rated";
+  | "rated"
+  | "paid_out"
+  | "cancelled"
+  | "in_review";
 
 interface OrderCardProps {
   id: string;
