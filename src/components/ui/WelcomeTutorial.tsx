@@ -138,7 +138,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
             <Logo size="sm" iconOnly />
             <button
               onClick={handleSkip}
-              className="text-sm text-muted-foreground hover:text-foreground px-2 transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground px-4 py-2 rounded-xl bg-muted/50 transition-colors"
             >
               Pular
             </button>
@@ -161,7 +161,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                    className="w-28 h-28 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-8 shadow-lg"
+                    className="w-32 h-32 rounded-[2rem] bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-8 shadow-lg"
                   >
                     <Smartphone className="w-14 h-14 text-primary" />
                   </motion.div>
@@ -221,7 +221,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                    className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6 shadow-lg"
+                    className="w-28 h-28 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6 shadow-lg"
                   >
                     <step.icon className="w-12 h-12 text-primary" />
                   </motion.div>
@@ -259,7 +259,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
           </main>
 
           {/* Footer */}
-          <footer className="p-6 pb-8">
+          <footer className="p-6 pb-10">
             {/* Progress dots */}
             {!showIntro && (
               <div className="flex justify-center gap-2 mb-6">
@@ -277,7 +277,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
                           : "hsl(var(--border))",
                     }}
                     transition={{ duration: 0.2 }}
-                    className="w-2 h-2 rounded-full"
+                    className="w-2.5 h-2.5 rounded-full"
                   />
                 ))}
               </div>
