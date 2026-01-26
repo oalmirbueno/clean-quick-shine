@@ -1,5 +1,12 @@
 import { Logo } from "@/components/ui/Logo";
 
+// Screenshot imports
+import splashScreen from "@/assets/screenshots/splash.png";
+import clientHomeScreen from "@/assets/screenshots/client-home.png";
+import proHomeScreen from "@/assets/screenshots/pro-home.png";
+import adminDashboardScreen from "@/assets/screenshots/admin-dashboard.png";
+import loginScreen from "@/assets/screenshots/login.png";
+import orderTrackingScreen from "@/assets/screenshots/order-tracking.png";
 export default function ProjectDocumentation() {
   return (
     <div className="bg-white text-gray-900 min-h-screen print:bg-white">
@@ -89,6 +96,57 @@ export default function ProjectDocumentation() {
             <StatCard value="4" label="Módulos Principais" />
             <StatCard value="20+" label="Componentes UI" />
           </div>
+        </div>
+      </section>
+
+      {/* Screenshots Gallery */}
+      <section className="page-break p-12">
+        <SectionHeader number="1.1" title="Galeria de Telas" />
+        
+        <p className="text-gray-700 mb-8">
+          Visão geral das principais interfaces do aplicativo nos três módulos: Cliente, Profissional e Administrativo.
+        </p>
+
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          <ScreenshotCard 
+            image={splashScreen} 
+            title="Tela Inicial" 
+            description="Splash screen com opções de login e cadastro"
+          />
+          <ScreenshotCard 
+            image={loginScreen} 
+            title="Login" 
+            description="Autenticação de usuários"
+          />
+          <ScreenshotCard 
+            image={clientHomeScreen} 
+            title="Home Cliente" 
+            description="Dashboard principal do cliente"
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          <ScreenshotCard 
+            image={proHomeScreen} 
+            title="Home Pro" 
+            description="Dashboard do profissional"
+          />
+          <ScreenshotCard 
+            image={orderTrackingScreen} 
+            title="Tracking" 
+            description="Acompanhamento em tempo real"
+          />
+          <div className="flex items-center justify-center">
+            <img 
+              src={adminDashboardScreen} 
+              alt="Admin Dashboard" 
+              className="w-full rounded-xl shadow-lg border border-gray-200"
+            />
+          </div>
+        </div>
+
+        <div className="text-center text-gray-500 text-sm mt-4">
+          <p>* Mockups representativos do design final do aplicativo</p>
         </div>
       </section>
 
@@ -816,7 +874,24 @@ function ModuleBox({ title, color }: { title: string; color: string }) {
   );
 }
 
-function ScreenCard({ 
+function ScreenshotCard({ image, title, description }: { image: string; title: string; description: string }) {
+  return (
+    <div className="text-center">
+      <div className="bg-gray-100 rounded-xl p-2 mb-2">
+        <img 
+          src={image} 
+          alt={title} 
+          className="w-full h-auto rounded-lg shadow-md"
+          style={{ maxHeight: '300px', objectFit: 'contain' }}
+        />
+      </div>
+      <h4 className="font-semibold text-gray-900">{title}</h4>
+      <p className="text-sm text-gray-500">{description}</p>
+    </div>
+  );
+}
+
+function ScreenCard({
   route, 
   name, 
   description, 
