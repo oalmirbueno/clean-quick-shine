@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 const menuItems = [
   { icon: MapPin, label: "Endereços salvos", path: "/client/location" },
   { icon: CreditCard, label: "Formas de pagamento", path: "#payment" },
-  { icon: Settings, label: "Preferências", path: "#settings" },
+  { icon: Settings, label: "Configurações", path: "/settings" },
   { icon: HelpCircle, label: "Ajuda e suporte", path: "/client/support" },
 ];
 
@@ -109,7 +109,7 @@ export default function ClientProfile() {
 
         {/* App Version */}
         <p className="text-center text-sm text-muted-foreground mt-8">
-          JáLimpo v1.0.0
+          CleanQuick v1.0.0
         </p>
       </main>
 
