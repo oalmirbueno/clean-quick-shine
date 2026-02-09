@@ -1,137 +1,128 @@
 
-# Plano: Otimização de Espaçamentos e Margens
+# Plano de Correção e Otimização - Já Limpo
 
-## Problema Identificado
+## Resumo
 
-Baseado na imagem enviada e análise do código, identifiquei os seguintes problemas:
-
-1. **ClientHome**: O card "Próximo agendamento" está sendo cortado pelo BottomNav. O `pb-24` (96px) na área de conteúdo é excessivo
-2. **BottomNav**: Já tem `safe-bottom` que adiciona margem, então o conteúdo acima não precisa de tanto padding
-3. **Login/Onboarding**: O `safe-bottom` combinado com `py-8` cria muito espaço inferior
-4. **Espaçamentos internos**: Muitos `mb-8`, `mb-10`, `space-y-6` que criam áreas vazias desnecessárias
+Foram identificadas falhas de segurança, funcionalidade e performance em diversas áreas do aplicativo. Este plano aborda cada uma delas de forma organizada.
 
 ---
 
-## Alterações Planejadas
+## 1. Correção de Segurança Critica (Nivel Error)
 
-### 1. `src/index.css` - Reduzir Safe-Area Mínimo
+### 1.1 Notificações - Politica INSERT muito permissiva
+A tabela `notifications` possui a politica `WITH CHECK (true)` no INSERT, permitindo que qualquer usuario autenticado crie notificacoes para qualquer outro usuario. Isso permite ataques de spam e phishing.
 
-Reduzir o padding mínimo de `safe-bottom` de 1rem para praticamente zero:
+**Correcao:** Substituir a politica por uma que permita apenas admins ou o proprio usuario inserir notificacoes. As funcoes SECURITY DEFINER (como `create_order_notification`) ja ignoram RLS, entao nao serao afetadas.
 
-**Antes:**
-```css
-.safe-bottom {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
+```sql
+DROP POLICY "System can insert notifications" ON public.notifications;
+CREATE POLICY "Admins can insert notifications"
+  ON public.notifications FOR INSERT
+  WITH CHECK (
+    public.is_admin(auth.uid()) OR auth.uid() = user_id
+  );
 ```
 
-**Depois:**
-```css
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
+### 1.2 Validacao de input no handle_new_user()
+O trigger `handle_new_user()` aceita `full_name` sem validacao, permitindo strings enormes ou caracteres maliciosos.
+
+**Correcao:** Atualizar a funcao para limitar a 100 caracteres e remover caracteres nao imprimiveis.
+
+```sql
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public AS $$
+DECLARE safe_name TEXT;
+BEGIN
+  safe_name := TRIM(SUBSTRING(
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''), 1, 100
+  ));
+  INSERT INTO public.profiles (user_id, full_name)
+  VALUES (NEW.id, NULLIF(safe_name, ''));
+  RETURN NEW;
+END;
+$$;
 ```
 
 ---
 
-### 2. `src/components/ui/BottomNav.tsx` - Altura Mais Compacta
+## 2. Correcoes de Funcionalidade
 
-Reduzir altura de `h-16` para `h-14` e ajustar padding:
+### 2.1 Index.tsx - Navegacao condicional
+Atualmente a splash sempre redireciona para `/onboarding`. Deveria verificar se o usuario ja esta logado e redirecionar para o dashboard correto.
 
-**Antes:** `h-16` (64px)
-**Depois:** `h-14` (56px)
+**Correcao:** Verificar sessao ativa antes de navegar. Se logado, redirecionar para a home do papel correspondente.
 
----
+### 2.2 Decline Order nao funciona
+O `useDeclineOrder` nao faz nada no servidor - apenas invalida queries locais. O pedido continua aparecendo.
 
-### 3. `src/pages/client/ClientHome.tsx` - Otimizar Espaçamentos
+**Correcao:** Criar tabela `pro_declined_orders` para registrar recusas e filtrar no hook `useAvailableOrdersForPro`.
 
-- Reduzir `pb-24` para `pb-16` (adequado para BottomNav menor)
-- Reduzir `space-y-6` para `space-y-4`
-- Reduzir `mb-4` do header para `mb-3`
-- Compactar gaps e margens dos cards de serviço
+### 2.3 Registro - validacao de senha fraca
+Nao ha validacao de tamanho minimo de senha no frontend (o placeholder diz "Minimo 8 caracteres" mas nao valida).
 
----
+**Correcao:** Adicionar validacao de `password.length < 8` antes de submeter.
 
-### 4. `src/pages/Login.tsx` - Remover Espaços Excessivos
+### 2.4 Register - Pro signup nao valida step 2
+No registro como diarista, os campos de dias e periodos nao sao obrigatorios. O usuario pode prosseguir sem selecionar nenhum.
 
-- Remover `safe-bottom` do container (não precisa, é tela fixa)
-- Reduzir `py-8` para `py-4`
-- Reduzir `mb-8` da logo para `mb-5`
-- Reduzir `mb-10` do título para `mb-6`
-- Reduzir `mt-10` do link para `mt-6`
-- Compactar padding dos botões de `p-5` para `p-4`
+**Correcao:** Validar que pelo menos 1 dia e 1 periodo foram selecionados antes de submeter.
 
 ---
 
-### 5. `src/pages/Onboarding.tsx` - Mesmas Otimizações do Login
+## 3. Correcoes de Performance
 
-- Remover `safe-bottom` do container
-- Reduzir `py-8` para `py-4`
-- Reduzir `mb-8` da logo e badges para `mb-5`
-- Reduzir `mt-8` do link para `mt-5`
-- Compactar padding dos botões
+### 3.1 useProData - Multiplas queries sequenciais
+O hook `useCurrentProData` faz 5 queries sequenciais ao banco. Devem ser paralelizadas com `Promise.all`.
 
----
+**Correcao:** Agrupar as queries independentes (profile, proProfile, metrics, subscription) em `Promise.all`.
 
-### 6. Outras Páginas com BottomNav
+### 3.2 useOrders - N+1 queries
+Os hooks de orders fazem queries separadas para services, addresses e profiles. Ja estao parcialmente otimizados com batch, mas podem usar joins do Supabase.
 
-Todas as páginas que usam BottomNav devem ter o padding inferior ajustado de `pb-24` para `pb-16`:
+**Correcao:** Usar `.select("*, service:services(*), address:addresses(*)")` quando possivel para reduzir chamadas.
 
-- `ClientOrders.tsx`
-- `ClientProfile.tsx`
-- `ProHome.tsx`
-- `ProAgenda.tsx`
-- `ProEarnings.tsx`
-- `ProProfile.tsx`
+### 3.3 Distancia mock nos pedidos disponiveis
+A distancia nos pedidos para profissionais e calculada com `Math.random()`, gerando valores diferentes a cada re-render.
+
+**Correcao:** Usar calculo baseado em hash do ID do pedido para manter consistencia, ou calcular com coordenadas reais quando disponiveis.
 
 ---
 
-## Resumo das Mudanças
+## 4. Correcoes de UX/UI
 
-| Arquivo | Mudança |
-|---------|---------|
-| `index.css` | `safe-bottom`: remover padding mínimo, usar apenas safe-area real |
-| `BottomNav.tsx` | Altura: `h-16` → `h-14` |
-| `ClientHome.tsx` | `pb-24` → `pb-16`, `space-y-6` → `space-y-4`, compactar header |
-| `Login.tsx` | Remover `safe-bottom`, reduzir todos os margins/paddings em ~30% |
-| `Onboarding.tsx` | Mesmas otimizações do Login |
-| 6+ páginas com BottomNav | Ajustar `pb-24` → `pb-16` |
+### 4.1 WelcomeTutorial - useEffect dependency
+O `useEffect` que chama `handleComplete` quando PWA esta instalada tem `handleComplete` como dependencia faltante, o que pode causar comportamento inconsistente.
+
+**Correcao:** Usar `useCallback` para `handleComplete` e incluir na lista de dependencias.
+
+### 4.2 Login safe-top inconsistente
+A tela de selecao de tipo (primeiro render do Login) tem `safe-top`, mas o formulario de login (segundo render) nao tem.
+
+**Correcao:** Adicionar `safe-top` ao container do formulario de login.
 
 ---
 
-## Seção Técnica
+## Secao Tecnica - Arquivos a Modificar
 
-### CSS Utilities Atualizadas
-```css
-/* Antes - padding mínimo forçado */
-.safe-bottom {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
+| Arquivo | Alteracao |
+|---------|-----------|
+| `migration SQL` | Corrigir politica notifications INSERT + handle_new_user validation |
+| `src/pages/Index.tsx` | Adicionar verificacao de sessao ativa |
+| `src/pages/Register.tsx` | Validacao de senha e campos obrigatorios step 2 |
+| `src/pages/Login.tsx` | Adicionar safe-top no form view |
+| `src/hooks/useProData.ts` | Paralelizar queries com Promise.all |
+| `src/hooks/useProData.ts` | Corrigir calculo de distancia consistente |
+| `src/components/ui/WelcomeTutorial.tsx` | Corrigir dependencia do useEffect |
+| `migration SQL` | Criar tabela pro_declined_orders |
+| `src/hooks/useProData.ts` | Implementar logica de decline real |
 
-/* Depois - apenas safe-area real, sem padding extra */
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-```
+---
 
-### Padrão de Espaçamento para Páginas com BottomNav
-```tsx
-<main className="flex-1 overflow-y-auto p-4 pb-16 space-y-4">
-  {/* Conteúdo */}
-</main>
-<BottomNav variant="client" /> {/* h-14 = 56px */}
-```
+## Ordem de Execucao
 
-### Padrão de Espaçamento para Telas de Entrada
-```tsx
-<div className="fixed inset-0 bg-background flex flex-col overflow-hidden safe-top">
-  <div className="flex-1 flex flex-col items-center justify-center px-6 py-4">
-    {/* Logo com mb-5 */}
-    {/* Título com mb-6 */}
-    {/* Botões com p-4 */}
-    {/* Link final com mt-5 */}
-  </div>
-</div>
-```
-
-Isso vai criar uma interface mais compacta, profissional e que respeita as safe-areas apenas quando realmente necessário (dispositivos com notch), sem adicionar espaços vazios desnecessários.
+1. Migracoes SQL (seguranca + nova tabela)
+2. Correcoes de seguranca no codigo
+3. Correcoes de funcionalidade
+4. Otimizacoes de performance
+5. Ajustes de UX/UI
