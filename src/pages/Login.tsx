@@ -221,7 +221,7 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0">
+      <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
         {/* Background Pattern */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/5 to-transparent" />
