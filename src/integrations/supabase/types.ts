@@ -1310,39 +1310,33 @@ export type Database = {
       withdrawals: {
         Row: {
           amount: number
-          bank_info: Json | null
           created_at: string
           encrypted_bank_info: string | null
           encrypted_pix_key: string | null
           id: string
           method: string
-          pix_key: string | null
           processed_at: string | null
           status: string | null
           user_id: string
         }
         Insert: {
           amount: number
-          bank_info?: Json | null
           created_at?: string
           encrypted_bank_info?: string | null
           encrypted_pix_key?: string | null
           id?: string
           method: string
-          pix_key?: string | null
           processed_at?: string | null
           status?: string | null
           user_id: string
         }
         Update: {
           amount?: number
-          bank_info?: Json | null
           created_at?: string
           encrypted_bank_info?: string | null
           encrypted_pix_key?: string | null
           id?: string
           method?: string
-          pix_key?: string | null
           processed_at?: string | null
           status?: string | null
           user_id?: string
