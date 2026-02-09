@@ -1,49 +1,30 @@
 
+# Remover rota publica /admin/login
 
-# Correção do Fluxo de Proteção de Rotas Admin
+## Objetivo
+Eliminar a pagina dedicada de login admin (`/admin/login`), forçando admins a usarem a pagina principal `/login` que ja redireciona corretamente para `/admin/dashboard` quando detecta role `admin`.
 
-## Problema Identificado
+## O que ja funciona
+A pagina `/login` (linha 41-42 de `Login.tsx`) ja verifica roles apos autenticacao e redireciona admins automaticamente para `/admin/dashboard`.
 
-O teste revelou que o `ProtectedRoute` fica preso na tela "Verificando acesso..." por até 5 segundos antes de redirecionar. Isso acontece quando:
-- Um usuario esta autenticado mas nao tem roles no banco de dados
-- O timeout de seguranca de 5 segundos e excessivamente longo para a experiencia do usuario
+## Mudancas
 
-## Situacao Atual
+### 1. Remover a rota `/admin/login` do App.tsx
+- Remover o import de `AdminLogin`
+- Remover a linha `<Route path="/admin/login" element={<AdminLogin />} />`
 
-A protecao de rotas **funciona corretamente**:
-- Rotas `/admin/*` exigem role `admin`
-- Usuarios sem role `admin` sao redirecionados
-- Usuarios nao autenticados sao enviados para `/login`
+### 2. Redirecionar `/admin/login` para `/login`
+- Adicionar um redirect: `<Route path="/admin/login" element={<Navigate to="/login" replace />} />`
+- Isso garante que links antigos ou bookmarks continuem funcionando
 
-Porem a experiencia pode ser melhorada.
+### 3. Atualizar referencia no AdminLogin (opcional)
+- O arquivo `src/pages/admin/AdminLogin.tsx` pode ser mantido no projeto sem uso, ou deletado para limpeza
 
-## Mudancas Propostas
+## Secao tecnica
 
-### 1. Reduzir Timeout de Seguranca (ProtectedRoute.tsx)
+Arquivo: `src/App.tsx`
+- Adicionar import: `import { Navigate } from "react-router-dom"` (ja importado via `Routes, Route`)
+- Substituir rota `AdminLogin` por redirect
+- Remover import do componente `AdminLogin`
 
-Reduzir o timeout de 5000ms para 3000ms para uma experiencia mais rapida quando ocorrem problemas de carregamento.
-
-### 2. Adicionar Logs de Debug Temporarios
-
-Adicionar `console.log` para facilitar a depuracao do fluxo de autenticacao durante o desenvolvimento:
-- Estado de loading
-- Roles carregadas
-- Decisao de redirecionamento
-
-### 3. Tratar Caso de Roles Vazias Mais Rapido
-
-Quando `rolesLoaded = true` e `roles = []`, redirecionar imediatamente sem esperar o timeout.
-
-## Detalhes Tecnicos
-
-Arquivo: `src/components/ProtectedRoute.tsx`
-- Alterar timeout de `5000` para `3000`
-- O fluxo `rolesLoaded && roles.length === 0` ja existe e funciona, mas pode ser otimizado para nao depender do timeout
-
-Arquivo: `src/contexts/AuthContext.tsx`
-- Sem alteracoes necessarias, o fluxo de roles ja esta correto
-
-## Observacao Importante
-
-No ambiente de preview do Lovable, o token de autenticacao automatico (`__lovable_token`) cria uma sessao que nao possui roles no banco, causando o comportamento de timeout. No ambiente publicado (`clean-quick-shine.lovable.app`), usuarios sem sessao sao redirecionados imediatamente para `/login`.
-
+Nenhuma outra mudanca necessaria. O fluxo de login principal ja suporta admins nativamente.
