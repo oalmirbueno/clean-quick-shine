@@ -28,7 +28,7 @@ export function ProtectedRoute({
         console.warn("ProtectedRoute: Timeout reached, redirecting to login");
         setTimedOut(true);
       }
-    }, 5000);
+    }, 3000);
     
     return () => clearTimeout(timeout);
   }, [loading, user, rolesLoaded]);
