@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useAdminDocuments, AdminDocument } from "@/hooks/useAdminDocuments";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -32,7 +32,11 @@ export default function AdminDocuments() {
     isApproving,
     isRejecting,
     pendingCount,
+    getSignedUrl,
   } = useAdminDocuments();
+
+  // Cache signed URLs to avoid re-fetching
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   const [selectedDoc, setSelectedDoc] = useState<AdminDocument | null>(null);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -44,6 +48,25 @@ export default function AdminDocuments() {
     if (filter === "all") return true;
     return doc.status === filter;
   });
+
+  // Load signed URLs for visible documents
+  const loadSignedUrl = useCallback(async (docId: string, filePath: string) => {
+    if (signedUrls[docId]) return;
+    const url = await getSignedUrl(filePath);
+    if (url) {
+      setSignedUrls((prev) => ({ ...prev, [docId]: url }));
+    }
+  }, [signedUrls, getSignedUrl]);
+
+  useEffect(() => {
+    filteredDocs.forEach((doc) => {
+      if (!signedUrls[doc.id] && doc.file_url) {
+        loadSignedUrl(doc.id, doc.file_url);
+      }
+    });
+  }, [filteredDocs, signedUrls, loadSignedUrl]);
+
+
 
   const handleApprove = (doc: AdminDocument) => {
     approveDocument(doc.id);
@@ -126,7 +149,7 @@ export default function AdminDocuments() {
                     onClick={() => handlePreview(doc)}
                   >
                     <img
-                      src={doc.file_url}
+                      src={signedUrls[doc.id] || "/placeholder.svg"}
                       alt={docTypeNames[doc.doc_type]}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -216,7 +239,7 @@ export default function AdminDocuments() {
               <div className="space-y-4">
                 <div className="rounded-lg overflow-hidden bg-secondary">
                   <img
-                    src={selectedDoc.file_url}
+                    src={signedUrls[selectedDoc.id] || "/placeholder.svg"}
                     alt="Documento"
                     className="w-full max-h-[60vh] object-contain"
                   />
