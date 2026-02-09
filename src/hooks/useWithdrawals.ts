@@ -126,10 +126,10 @@ export function useRequestWithdrawal() {
         .insert({
           user_id: user.id,
           amount: input.amount,
-          pix_key: input.pixKey.trim(),
+          encrypted_pix_key: input.pixKey.trim(),
           method: "pix",
           status: "pending",
-        })
+        } as any)
         .select("id")
         .single();
 
