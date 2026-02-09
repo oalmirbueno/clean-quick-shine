@@ -1,30 +1,65 @@
 
-# Remover rota publica /admin/login
+
+# Pagina de Acesso Negado (403)
 
 ## Objetivo
-Eliminar a pagina dedicada de login admin (`/admin/login`), forçando admins a usarem a pagina principal `/login` que ja redireciona corretamente para `/admin/dashboard` quando detecta role `admin`.
 
-## O que ja funciona
-A pagina `/login` (linha 41-42 de `Login.tsx`) ja verifica roles apos autenticacao e redireciona admins automaticamente para `/admin/dashboard`.
+Criar uma pagina dedicada de acesso negado que sera exibida quando um usuario autenticado tenta acessar uma rota para a qual nao possui permissao, em vez de redirecionar silenciosamente.
 
 ## Mudancas
 
-### 1. Remover a rota `/admin/login` do App.tsx
-- Remover o import de `AdminLogin`
-- Remover a linha `<Route path="/admin/login" element={<AdminLogin />} />`
+### 1. Criar pagina `src/pages/AccessDenied.tsx`
 
-### 2. Redirecionar `/admin/login` para `/login`
-- Adicionar um redirect: `<Route path="/admin/login" element={<Navigate to="/login" replace />} />`
-- Isso garante que links antigos ou bookmarks continuem funcionando
+Pagina simples e clean seguindo o padrao visual do projeto (similar ao `NotFound.tsx`):
+- Icone de cadeado (lucide-react `ShieldX` ou `Lock`)
+- Titulo "Acesso Negado"
+- Mensagem explicativa curta
+- Botao para voltar a area correta do usuario (baseado na role)
+- Botao secundario para sair da conta
 
-### 3. Atualizar referencia no AdminLogin (opcional)
-- O arquivo `src/pages/admin/AdminLogin.tsx` pode ser mantido no projeto sem uso, ou deletado para limpeza
+### 2. Atualizar `src/App.tsx`
 
-## Secao tecnica
+- Importar a nova pagina
+- Adicionar rota `/access-denied`
 
-Arquivo: `src/App.tsx`
-- Adicionar import: `import { Navigate } from "react-router-dom"` (ja importado via `Routes, Route`)
-- Substituir rota `AdminLogin` por redirect
-- Remover import do componente `AdminLogin`
+### 3. Atualizar `src/components/ProtectedRoute.tsx`
 
-Nenhuma outra mudanca necessaria. O fluxo de login principal ja suporta admins nativamente.
+Quando o usuario esta autenticado mas nao tem a role necessaria, em vez de redirecionar silenciosamente para a home da role correta, redirecionar para `/access-denied` passando informacoes via state:
+- A role que o usuario tentou acessar
+- As roles que o usuario possui
+
+Isso substitui o bloco atual que faz `Navigate` silencioso para `/admin/dashboard`, `/client/home` ou `/pro/home`.
+
+## Detalhes Tecnicos
+
+### AccessDenied.tsx (estrutura)
+
+```text
++----------------------------------+
+|                                  |
+|          [ShieldX icon]          |
+|                                  |
+|        Acesso Negado             |
+|                                  |
+|  Voce nao tem permissao para     |
+|  acessar esta area.              |
+|                                  |
+|  [Ir para minha area]  (primary) |
+|  [Sair da conta]     (secondary) |
+|                                  |
++----------------------------------+
+```
+
+### ProtectedRoute.tsx (mudanca no fluxo)
+
+Antes:
+- Usuario sem role correta -> redirect silencioso para home da role
+
+Depois:
+- Usuario sem role correta -> redirect para `/access-denied` com state contendo as roles do usuario
+- A pagina AccessDenied usa as roles do state para criar o botao "Ir para minha area" apontando para o destino correto
+
+### Caso especial: roles vazias
+
+Quando `rolesLoaded && roles.length === 0`, manter o redirect para `/login` (usuario sem nenhuma role configurada).
+
