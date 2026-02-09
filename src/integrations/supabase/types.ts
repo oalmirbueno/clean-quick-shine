@@ -76,6 +76,24 @@ export type Database = {
           },
         ]
       }
+      app_config: {
+        Row: {
+          created_at: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           active: boolean | null
@@ -1294,6 +1312,8 @@ export type Database = {
           amount: number
           bank_info: Json | null
           created_at: string
+          encrypted_bank_info: string | null
+          encrypted_pix_key: string | null
           id: string
           method: string
           pix_key: string | null
@@ -1305,6 +1325,8 @@ export type Database = {
           amount: number
           bank_info?: Json | null
           created_at?: string
+          encrypted_bank_info?: string | null
+          encrypted_pix_key?: string | null
           id?: string
           method: string
           pix_key?: string | null
@@ -1316,6 +1338,8 @@ export type Database = {
           amount?: number
           bank_info?: Json | null
           created_at?: string
+          encrypted_bank_info?: string | null
+          encrypted_pix_key?: string | null
           id?: string
           method?: string
           pix_key?: string | null
@@ -1406,9 +1430,46 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      withdrawals_secure: {
+        Row: {
+          amount: number | null
+          bank_info: Json | null
+          created_at: string | null
+          id: string | null
+          method: string | null
+          pix_key: string | null
+          processed_at: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          bank_info?: never
+          created_at?: string | null
+          id?: string | null
+          method?: string | null
+          pix_key?: never
+          processed_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          bank_info?: never
+          created_at?: string | null
+          id?: string | null
+          method?: string | null
+          pix_key?: never
+          processed_at?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      decrypt_field: { Args: { encrypted_text: string }; Returns: string }
+      encrypt_field: { Args: { plain_text: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
