@@ -59,15 +59,7 @@ export function ProtectedRoute({
   }
 
   if (requiredRole && !hasRole(requiredRole)) {
-    // Redirect based on their actual role
-    if (roles.includes("admin")) {
-      return <Navigate to="/admin/dashboard" replace />;
-    } else if (roles.includes("client")) {
-      return <Navigate to="/client/home" replace />;
-    } else if (roles.includes("pro")) {
-      return <Navigate to="/pro/home" replace />;
-    }
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/access-denied" state={{ roles }} replace />;
   }
 
   return <>{children}</>;
