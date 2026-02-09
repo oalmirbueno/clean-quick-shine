@@ -1,28 +1,52 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
-import { ChevronLeft, ChevronRight, MapPin, Clock, Loader2, Radio } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Clock, Loader2, Radio, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFlatProOrders } from "@/hooks/useOrders";
 import { useProOrdersRealtime } from "@/hooks/useOrderRealtime";
 import { useAuth } from "@/contexts/AuthContext";
+import { subDays, isAfter, startOfDay } from "date-fns";
+
+type PeriodFilter = "week" | "month" | "all";
 
 export default function ProAgenda() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [period, setPeriod] = useState<PeriodFilter>("all");
+  const [search, setSearch] = useState("");
   
   const { orders, isLoading } = useFlatProOrders();
 
   // Enable realtime updates for pro orders
   useProOrdersRealtime(user?.id || null);
 
-  // Filter only confirmed/active orders
+  // Filter only confirmed/active orders, then by period and search
   const activeOrders = useMemo(() => {
-    return orders.filter(order => 
+    let filtered = orders.filter(order => 
       ["confirmed", "en_route", "in_progress", "scheduled"].includes(order.status || "")
     );
-  }, [orders]);
+
+    if (period !== "all") {
+      const cutoff = startOfDay(subDays(new Date(), period === "week" ? 7 : 30));
+      filtered = filtered.filter(o => isAfter(new Date(o.scheduled_date), cutoff));
+    }
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      filtered = filtered.filter(o => {
+        const serviceName = (o.service?.name || "").toLowerCase();
+        const addr = o.address
+          ? `${o.address.street} ${o.address.number} ${o.address.neighborhood} ${o.address.city}`.toLowerCase()
+          : "";
+        const clientName = ((o as any).client_profile?.full_name || "").toLowerCase();
+        return serviceName.includes(q) || addr.includes(q) || clientName.includes(q);
+      });
+    }
+
+    return filtered;
+  }, [orders, period, search]);
 
   const daysInMonth = new Date(
     currentDate.getFullYear(),
@@ -133,6 +157,49 @@ export default function ProAgenda() {
           </div>
         </div>
       </header>
+
+      {/* Filters */}
+      <div className="flex-shrink-0 bg-card border-b border-border px-4 py-2 space-y-2">
+        <div className="flex gap-2">
+          {([
+            { value: "week" as PeriodFilter, label: "7 dias" },
+            { value: "month" as PeriodFilter, label: "30 dias" },
+            { value: "all" as PeriodFilter, label: "Todos" },
+          ]).map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setPeriod(opt.value)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                period === opt.value
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-accent"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por serviço, endereço ou cliente..."
+            maxLength={100}
+            className="w-full pl-9 pr-9 py-2 text-sm rounded-lg bg-muted border-none outline-none placeholder:text-muted-foreground text-foreground focus:ring-1 focus:ring-primary"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
 
       <main className="flex-1 overflow-y-auto p-4 pb-20 animate-fade-in">
         {/* Calendar Header */}
