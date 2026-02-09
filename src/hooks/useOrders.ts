@@ -32,10 +32,9 @@ export function useClientOrders() {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Fetch orders
       const { data: orders, error } = await supabase
         .from("orders")
-        .select("*")
+        .select("*, service:services(name, icon), address:addresses(label, street, number, neighborhood, city, state)")
         .eq("client_id", user.id)
         .order("scheduled_date", { ascending: false })
         .order("scheduled_time", { ascending: false });
@@ -43,24 +42,8 @@ export function useClientOrders() {
       if (error) throw error;
       if (!orders || orders.length === 0) return [];
 
-      // Get unique service IDs and address IDs
-      const serviceIds = [...new Set(orders.map(o => o.service_id))];
-      const addressIds = [...new Set(orders.map(o => o.address_id))];
+      // Fetch pro profiles separately (cross-user RLS)
       const proIds = [...new Set(orders.filter(o => o.pro_id).map(o => o.pro_id!))];
-
-      // Fetch services
-      const { data: services } = await supabase
-        .from("services")
-        .select("id, name, icon")
-        .in("id", serviceIds);
-
-      // Fetch addresses
-      const { data: addresses } = await supabase
-        .from("addresses")
-        .select("id, label, street, number, neighborhood, city, state")
-        .in("id", addressIds);
-
-      // Fetch pro profiles if any
       let proProfiles: { user_id: string; full_name: string | null; avatar_url: string | null }[] = [];
       if (proIds.length > 0) {
         const { data } = await supabase
@@ -70,17 +53,12 @@ export function useClientOrders() {
         proProfiles = data || [];
       }
 
-      // Merge data
-      const ordersWithDetails: OrderWithDetails[] = orders.map(order => ({
+      return orders.map(order => ({
         ...order,
-        service: services?.find(s => s.id === order.service_id) || null,
-        address: addresses?.find(a => a.id === order.address_id) || null,
-        pro_profile: order.pro_id 
-          ? proProfiles.find(p => p.user_id === order.pro_id) || null 
+        pro_profile: order.pro_id
+          ? proProfiles.find(p => p.user_id === order.pro_id) || null
           : null,
-      }));
-
-      return ordersWithDetails;
+      })) as OrderWithDetails[];
     },
     enabled: !!user?.id,
   });
@@ -94,51 +72,24 @@ export function useOrder(orderId: string | null) {
 
       const { data: order, error } = await supabase
         .from("orders")
-        .select("*")
+        .select("*, service:services(id, name, icon, description, duration_hours, base_price), address:addresses(*)")
         .eq("id", orderId)
         .maybeSingle();
 
       if (error) throw error;
       if (!order) return null;
 
-      // Fetch service
-      const { data: service } = await supabase
-        .from("services")
-        .select("id, name, icon, description, duration_hours, base_price")
-        .eq("id", order.service_id)
-        .maybeSingle();
-
-      // Fetch address
-      const { data: address } = await supabase
-        .from("addresses")
-        .select("*")
-        .eq("id", order.address_id)
-        .maybeSingle();
-
-      // Fetch pro profile if assigned
+      // Fetch pro profile if assigned (separate due to cross-user RLS)
       let proProfile = null;
       if (order.pro_id) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("user_id, full_name, avatar_url, phone")
-          .eq("user_id", order.pro_id)
-          .maybeSingle();
-
-        const { data: proPro } = await supabase
-          .from("pro_profiles")
-          .select("rating, jobs_done, verified")
-          .eq("user_id", order.pro_id)
-          .maybeSingle();
-
-        proProfile = { ...profile, ...proPro };
+        const [profileRes, proProRes] = await Promise.all([
+          supabase.from("profiles").select("user_id, full_name, avatar_url, phone").eq("user_id", order.pro_id).maybeSingle(),
+          supabase.from("pro_profiles").select("rating, jobs_done, verified").eq("user_id", order.pro_id).maybeSingle(),
+        ]);
+        proProfile = { ...profileRes.data, ...proProRes.data };
       }
 
-      return {
-        ...order,
-        service,
-        address,
-        pro_profile: proProfile,
-      };
+      return { ...order, pro_profile: proProfile };
     },
     enabled: !!orderId,
   });
@@ -154,7 +105,7 @@ export function useProOrders() {
 
       const { data: orders, error } = await supabase
         .from("orders")
-        .select("*")
+        .select("*, service:services(id, name, icon), address:addresses(id, label, street, number, neighborhood, city, state)")
         .eq("pro_id", user.id)
         .order("scheduled_date", { ascending: true })
         .order("scheduled_time", { ascending: true });
@@ -162,38 +113,17 @@ export function useProOrders() {
       if (error) throw error;
       if (!orders || orders.length === 0) return [];
 
-      // Get unique service IDs and address IDs
-      const serviceIds = [...new Set(orders.map(o => o.service_id))];
-      const addressIds = [...new Set(orders.map(o => o.address_id))];
+      // Fetch client profiles separately (cross-user RLS)
       const clientIds = [...new Set(orders.map(o => o.client_id))];
-
-      // Fetch services
-      const { data: services } = await supabase
-        .from("services")
-        .select("id, name, icon")
-        .in("id", serviceIds);
-
-      // Fetch addresses
-      const { data: addresses } = await supabase
-        .from("addresses")
-        .select("id, label, street, number, neighborhood, city, state")
-        .in("id", addressIds);
-
-      // Fetch client profiles
       const { data: clientProfiles } = await supabase
         .from("profiles")
         .select("user_id, full_name, avatar_url, phone")
         .in("user_id", clientIds);
 
-      // Merge data
-      const ordersWithDetails = orders.map(order => ({
+      return orders.map(order => ({
         ...order,
-        service: services?.find(s => s.id === order.service_id) || null,
-        address: addresses?.find(a => a.id === order.address_id) || null,
         client_profile: clientProfiles?.find(p => p.user_id === order.client_id) || null,
       }));
-
-      return ordersWithDetails;
     },
     enabled: !!user?.id,
   });
