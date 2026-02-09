@@ -23,6 +23,7 @@ import Onboarding from "./pages/Onboarding";
 import OnboardingClient from "./pages/OnboardingClient";
 import OnboardingPro from "./pages/OnboardingPro";
 import NotFound from "./pages/NotFound";
+import AccessDenied from "./pages/AccessDenied";
 
 // Client Pages
 import ClientHome from "./pages/client/ClientHome";
@@ -211,6 +212,7 @@ const App = () => {
             <Route path="/install" element={<Install />} />
             <Route path="/settings" element={<AppSettings />} />
             <Route path="/offline" element={<Offline />} />
+            <Route path="/access-denied" element={<AccessDenied />} />
 
             {/* Catch all */}
             <Route path="*" element={<NotFound />} />
