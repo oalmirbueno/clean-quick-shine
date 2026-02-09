@@ -197,8 +197,13 @@ export default function ProAgenda() {
             >
               <X className="w-4 h-4" />
             </button>
-          )}
+        )}
         </div>
+        {(search || period !== "all") && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {activeOrders.length} {activeOrders.length === 1 ? "resultado encontrado" : "resultados encontrados"}
+          </p>
+        )}
       </div>
 
       <main className="flex-1 overflow-y-auto p-4 pb-20 animate-fade-in">
