@@ -56,11 +56,7 @@ export function useProDocuments() {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("pro-documents")
-        .getPublicUrl(filePath);
-
+      // Store only the storage path (not public URL) for security
       // Check if document already exists
       const { data: existing } = await supabase
         .from("pro_documents")
@@ -74,7 +70,7 @@ export function useProDocuments() {
         const { error: updateError } = await supabase
           .from("pro_documents")
           .update({
-            file_url: urlData.publicUrl,
+            file_url: filePath,
             file_name: file.name,
             status: "pending",
             rejection_reason: null,
@@ -89,7 +85,7 @@ export function useProDocuments() {
           .insert({
             user_id: user.id,
             doc_type: docType,
-            file_url: urlData.publicUrl,
+            file_url: filePath,
             file_name: file.name,
             status: "pending",
           });
@@ -113,11 +109,23 @@ export function useProDocuments() {
     return documents.find((d) => d.doc_type === docType);
   };
 
+  const getSignedUrl = async (filePath: string): Promise<string | null> => {
+    const { data, error } = await supabase.storage
+      .from("pro-documents")
+      .createSignedUrl(filePath, 3600); // 1 hour expiry
+    if (error) {
+      console.error("Error creating signed URL:", error);
+      return null;
+    }
+    return data.signedUrl;
+  };
+
   return {
     documents,
     isLoading,
     uploadDocument: uploadDocument.mutate,
     isUploading: uploadDocument.isPending,
     getDocumentStatus,
+    getSignedUrl,
   };
 }

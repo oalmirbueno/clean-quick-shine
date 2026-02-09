@@ -130,6 +130,17 @@ export function useAdminDocuments() {
 
   const pendingCount = documents.filter((d) => d.status === "pending").length;
 
+  const getSignedUrl = async (filePath: string): Promise<string | null> => {
+    const { data, error } = await supabase.storage
+      .from("pro-documents")
+      .createSignedUrl(filePath, 3600); // 1 hour expiry
+    if (error) {
+      console.error("Error creating signed URL:", error);
+      return null;
+    }
+    return data.signedUrl;
+  };
+
   return {
     documents,
     isLoading,
@@ -138,6 +149,7 @@ export function useAdminDocuments() {
     isApproving: approveDocument.isPending,
     isRejecting: rejectDocument.isPending,
     pendingCount,
+    getSignedUrl,
   };
 }
 
