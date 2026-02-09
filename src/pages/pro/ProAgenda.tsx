@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ChevronLeft, ChevronRight, MapPin, Clock, Loader2, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useProOrders } from "@/hooks/useOrders";
+import { useFlatProOrders } from "@/hooks/useOrders";
 import { useProOrdersRealtime } from "@/hooks/useOrderRealtime";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,7 +12,7 @@ export default function ProAgenda() {
   const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   
-  const { data: orders = [], isLoading } = useProOrders();
+  const { orders, isLoading } = useFlatProOrders();
 
   // Enable realtime updates for pro orders
   useProOrdersRealtime(user?.id || null);

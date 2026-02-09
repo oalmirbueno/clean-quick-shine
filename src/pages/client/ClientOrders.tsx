@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { OrderCard } from "@/components/ui/OrderCard";
 import { cn } from "@/lib/utils";
-import { useClientOrders } from "@/hooks/useOrders";
+import { useFlatClientOrders } from "@/hooks/useOrders";
 import { useClientOrdersRealtime } from "@/hooks/useOrderRealtime";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ClipboardList, Radio } from "lucide-react";
@@ -16,7 +16,7 @@ export default function ClientOrders() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("upcoming");
-  const { data: orders, isLoading } = useClientOrders();
+  const { orders, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useFlatClientOrders();
 
   // Enable realtime updates for client orders
   useClientOrdersRealtime(user?.id || null);
@@ -24,13 +24,13 @@ export default function ClientOrders() {
   const upcomingStatuses = ["draft", "scheduled", "matching", "confirmed", "en_route", "in_progress"];
   const completedStatuses = ["completed", "rated", "paid_out", "cancelled"];
 
-  const upcomingOrders = orders?.filter(o => 
+  const upcomingOrders = orders.filter(o => 
     upcomingStatuses.includes(o.status || "")
-  ) || [];
+  );
   
-  const completedOrders = orders?.filter(o => 
+  const completedOrders = orders.filter(o => 
     completedStatuses.includes(o.status || "")
-  ) || [];
+  );
 
   const displayedOrders = activeTab === "upcoming" ? upcomingOrders : completedOrders;
 
@@ -150,6 +150,19 @@ export default function ClientOrders() {
                 onClick={() => navigate(`/client/orders/${order.id}`)}
               />
             ))}
+            {hasNextPage && (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="w-full py-3 text-sm font-medium text-primary hover:bg-primary/5 rounded-xl transition-colors disabled:opacity-50"
+              >
+                {isFetchingNextPage ? (
+                  <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                ) : (
+                  "Carregar mais"
+                )}
+              </button>
+            )}
           </div>
         )}
       </main>
