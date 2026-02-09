@@ -2,19 +2,40 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import logoIcon from "@/assets/logo-icon.png";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Index() {
   const navigate = useNavigate();
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    // Quick brand vignette - 800ms
-    const timer = setTimeout(() => {
-      setShow(false);
-    }, 800);
+    const timer = setTimeout(() => setShow(false), 800);
 
-    const navigateTimer = setTimeout(() => {
-      navigate("/onboarding", { replace: true });
+    const navigateTimer = setTimeout(async () => {
+      // Check for active session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        // Fetch roles to determine destination
+        const { data: userRoles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+        
+        const roles = userRoles?.map(r => r.role) || [];
+        
+        if (roles.includes("admin")) {
+          navigate("/admin/dashboard", { replace: true });
+        } else if (roles.includes("pro")) {
+          navigate("/pro/home", { replace: true });
+        } else if (roles.includes("client")) {
+          navigate("/client/home", { replace: true });
+        } else {
+          navigate("/onboarding", { replace: true });
+        }
+      } else {
+        navigate("/onboarding", { replace: true });
+      }
     }, 1000);
 
     return () => {

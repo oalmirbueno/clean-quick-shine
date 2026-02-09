@@ -30,41 +30,20 @@ export function useCurrentProData() {
         return { profile: null, proProfile: null, metrics: null, plan: null, balance: 0 };
       }
 
-      // Fetch profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, avatar_url, phone")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      // Parallel fetch all data
+      const [profileRes, proProfileRes, metricsRes, subscriptionRes, completedOrdersRes] = await Promise.all([
+        supabase.from("profiles").select("full_name, avatar_url, phone").eq("user_id", user.id).maybeSingle(),
+        supabase.from("pro_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("pro_metrics").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("pro_subscriptions").select("*, plan:pro_plans(*)").eq("user_id", user.id).eq("status", "active").maybeSingle(),
+        supabase.from("orders").select("total_price").eq("pro_id", user.id).in("status", ["completed", "rated"]),
+      ]);
 
-      // Fetch pro profile
-      const { data: proProfile } = await supabase
-        .from("pro_profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      // Fetch metrics
-      const { data: metrics } = await supabase
-        .from("pro_metrics")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      // Fetch active subscription with plan
-      const { data: subscription } = await supabase
-        .from("pro_subscriptions")
-        .select("*, plan:pro_plans(*)")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .maybeSingle();
-
-      // Calculate balance from completed orders (simplified - in production this would be more complex)
-      const { data: completedOrders } = await supabase
-        .from("orders")
-        .select("total_price")
-        .eq("pro_id", user.id)
-        .in("status", ["completed", "rated"]);
+      const profile = profileRes.data;
+      const proProfile = proProfileRes.data;
+      const metrics = metricsRes.data;
+      const subscription = subscriptionRes.data;
+      const completedOrders = completedOrdersRes.data;
 
       // Pro typically gets ~80% of order value (simplified calculation)
       const balance = completedOrders?.reduce((sum, order) => {
@@ -113,8 +92,16 @@ export function useAvailableOrdersForPro() {
 
       const zoneIds = proZones?.map(z => z.zone_id) || [];
 
+      // Get declined order IDs for this pro
+      const { data: declinedOrders } = await supabase
+        .from("pro_declined_orders")
+        .select("order_id")
+        .eq("user_id", user.id);
+      
+      const declinedIds = declinedOrders?.map(d => d.order_id) || [];
+
       // Get orders in matching status (not yet assigned)
-      const { data: orders, error } = await supabase
+      let query = supabase
         .from("orders")
         .select("*")
         .is("pro_id", null)
@@ -122,13 +109,20 @@ export function useAvailableOrdersForPro() {
         .gte("scheduled_date", new Date().toISOString().split("T")[0])
         .order("scheduled_date", { ascending: true })
         .order("scheduled_time", { ascending: true })
-        .limit(10);
+        .limit(20);
+
+      const { data: orders, error } = await query;
 
       if (error || !orders || orders.length === 0) return [];
 
+      // Filter out declined orders client-side
+      const filteredOrders = declinedIds.length > 0 
+        ? orders.filter(o => !declinedIds.includes(o.id))
+        : orders;
+
       // Get service and address details
-      const serviceIds = [...new Set(orders.map(o => o.service_id))];
-      const addressIds = [...new Set(orders.map(o => o.address_id))];
+      const serviceIds = [...new Set(filteredOrders.map(o => o.service_id))];
+      const addressIds = [...new Set(filteredOrders.map(o => o.address_id))];
 
       const [servicesResult, addressesResult] = await Promise.all([
         supabase.from("services").select("id, name").in("id", serviceIds),
@@ -160,7 +154,7 @@ export function useAvailableOrdersForPro() {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      return orders.map(order => {
+      return filteredOrders.map(order => {
         const service = services.find(s => s.id === order.service_id);
         const address = addresses.find(a => a.id === order.address_id);
         
@@ -179,8 +173,9 @@ export function useAvailableOrdersForPro() {
         // Check if this is a commercial/elite-only order (simplified: orders > R$150 are elite)
         const isEliteOnly = Number(order.total_price) > 150;
 
-        // Simplified distance calculation (random for now - in production would use real geo)
-        const distance = Math.round((Math.random() * 5 + 0.5) * 10) / 10;
+        // Consistent distance based on order ID hash (deterministic)
+        const hashCode = order.id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
+        const distance = Math.round((Math.abs(hashCode % 50) / 10 + 0.5) * 10) / 10;
 
         return {
           id: order.id,
@@ -268,13 +263,11 @@ export function useDeclineOrder() {
     mutationFn: async (orderId: string) => {
       if (!user?.id) throw new Error("Usuário não autenticado");
 
-      // For now, we'll just record that this pro declined
-      // In a real system, you might have a pro_declined_orders table
-      // Here we just refetch to hide the order from this pro's view
-      
-      // Option: We could add a declined_by field or create a separate table
-      // For simplicity, we'll just remove from local state
-      
+      const { error } = await supabase
+        .from("pro_declined_orders")
+        .insert({ user_id: user.id, order_id: orderId });
+
+      if (error) throw error;
       return orderId;
     },
     onSuccess: (orderId) => {

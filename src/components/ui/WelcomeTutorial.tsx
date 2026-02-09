@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Download, Share, PlusSquare, Smartphone, ChevronRight, Check } from "lucide-react";
@@ -109,20 +109,20 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
     handleComplete();
   };
 
-  const handleComplete = () => {
+  const handleComplete = useCallback(() => {
     setIsExiting(true);
     localStorage.setItem(TUTORIAL_STORAGE_KEY, "true");
     setTimeout(() => {
       onComplete();
     }, 500);
-  };
+  }, [onComplete]);
 
   // If already installed as PWA, skip tutorial
   useEffect(() => {
     if (deviceInfo.isStandalone) {
       handleComplete();
     }
-  }, [deviceInfo.isStandalone]);
+  }, [deviceInfo.isStandalone, handleComplete]);
 
   const step = steps[currentStep];
   const isLastStep = currentStep === steps.length - 1;

@@ -58,6 +58,25 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Password validation
+    if (password.length < 8) {
+      toast.error("A senha deve ter no mínimo 8 caracteres");
+      return;
+    }
+
+    // Pro step 2 validation
+    if (userType === "pro" && step === 2) {
+      if (selectedDays.length === 0) {
+        toast.error("Selecione pelo menos um dia disponível");
+        return;
+      }
+      if (selectedPeriods.length === 0) {
+        toast.error("Selecione pelo menos um turno disponível");
+        return;
+      }
+    }
+
     setLoading(true);
     
     const role = userType === "client" ? "client" : "pro";
@@ -270,11 +289,12 @@ export default function Register() {
                   Criar conta
                 </PrimaryButton>
               ) : (
-                <PrimaryButton 
-                  type="button" 
-                  fullWidth 
-                  onClick={() => setStep(2)}
-                >
+              <PrimaryButton 
+                type="button" 
+                fullWidth 
+                disabled={password.length < 8 || !name || !phone || !email}
+                onClick={() => setStep(2)}
+              >
                   Continuar
                 </PrimaryButton>
               )}
