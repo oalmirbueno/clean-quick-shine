@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useFlatClientOrders } from "@/hooks/useOrders";
 import { useClientOrdersRealtime } from "@/hooks/useOrderRealtime";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, ClipboardList, Radio } from "lucide-react";
+import { Loader2, ClipboardList, Radio, Search, X } from "lucide-react";
 import { format, subDays, isAfter, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -18,6 +18,7 @@ export default function ClientOrders() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("upcoming");
   const [period, setPeriod] = useState<PeriodFilter>("all");
+  const [search, setSearch] = useState("");
   const { orders, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useFlatClientOrders();
 
   // Enable realtime updates for client orders
@@ -32,14 +33,26 @@ export default function ClientOrders() {
     return list.filter(o => isAfter(new Date(o.scheduled_date), cutoff));
   };
 
+  const filterBySearch = (list: typeof orders) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(o => {
+      const serviceName = (o.service?.name || "").toLowerCase();
+      const addr = o.address
+        ? `${o.address.street} ${o.address.number} ${o.address.neighborhood} ${o.address.city}`.toLowerCase()
+        : "";
+      return serviceName.includes(q) || addr.includes(q);
+    });
+  };
+
   const upcomingOrders = useMemo(
-    () => filterByPeriod(orders.filter(o => upcomingStatuses.includes(o.status || ""))),
-    [orders, period]
+    () => filterBySearch(filterByPeriod(orders.filter(o => upcomingStatuses.includes(o.status || "")))),
+    [orders, period, search]
   );
 
   const completedOrders = useMemo(
-    () => filterByPeriod(orders.filter(o => completedStatuses.includes(o.status || ""))),
-    [orders, period]
+    () => filterBySearch(filterByPeriod(orders.filter(o => completedStatuses.includes(o.status || "")))),
+    [orders, period, search]
   );
 
   const displayedOrders = activeTab === "upcoming" ? upcomingOrders : completedOrders;
@@ -145,6 +158,29 @@ export default function ClientOrders() {
             {opt.label}
           </button>
         ))}
+      </div>
+
+      {/* Search */}
+      <div className="flex-shrink-0 px-4 py-2 bg-card border-b border-border">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por serviço ou endereço..."
+            maxLength={100}
+            className="w-full pl-9 pr-9 py-2 text-sm rounded-lg bg-muted border-none outline-none placeholder:text-muted-foreground text-foreground focus:ring-1 focus:ring-primary"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       <main className="flex-1 overflow-y-auto p-4 pb-20 animate-fade-in">
