@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { OrderCard } from "@/components/ui/OrderCard";
@@ -7,15 +7,17 @@ import { useFlatClientOrders } from "@/hooks/useOrders";
 import { useClientOrdersRealtime } from "@/hooks/useOrderRealtime";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ClipboardList, Radio } from "lucide-react";
-import { format } from "date-fns";
+import { format, subDays, isAfter, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 type Tab = "upcoming" | "completed";
+type PeriodFilter = "week" | "month" | "all";
 
 export default function ClientOrders() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("upcoming");
+  const [period, setPeriod] = useState<PeriodFilter>("all");
   const { orders, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useFlatClientOrders();
 
   // Enable realtime updates for client orders
@@ -24,12 +26,20 @@ export default function ClientOrders() {
   const upcomingStatuses = ["draft", "scheduled", "matching", "confirmed", "en_route", "in_progress"];
   const completedStatuses = ["completed", "rated", "paid_out", "cancelled"];
 
-  const upcomingOrders = orders.filter(o => 
-    upcomingStatuses.includes(o.status || "")
+  const filterByPeriod = (list: typeof orders) => {
+    if (period === "all") return list;
+    const cutoff = startOfDay(subDays(new Date(), period === "week" ? 7 : 30));
+    return list.filter(o => isAfter(new Date(o.scheduled_date), cutoff));
+  };
+
+  const upcomingOrders = useMemo(
+    () => filterByPeriod(orders.filter(o => upcomingStatuses.includes(o.status || ""))),
+    [orders, period]
   );
-  
-  const completedOrders = orders.filter(o => 
-    completedStatuses.includes(o.status || "")
+
+  const completedOrders = useMemo(
+    () => filterByPeriod(orders.filter(o => completedStatuses.includes(o.status || ""))),
+    [orders, period]
   );
 
   const displayedOrders = activeTab === "upcoming" ? upcomingOrders : completedOrders;
@@ -113,6 +123,28 @@ export default function ClientOrders() {
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
           )}
         </button>
+      </div>
+
+      {/* Period Filter */}
+      <div className="flex-shrink-0 flex gap-2 px-4 py-2 bg-card border-b border-border">
+        {([
+          { value: "week" as PeriodFilter, label: "7 dias" },
+          { value: "month" as PeriodFilter, label: "30 dias" },
+          { value: "all" as PeriodFilter, label: "Todos" },
+        ]).map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => setPeriod(opt.value)}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+              period === opt.value
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-accent"
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       <main className="flex-1 overflow-y-auto p-4 pb-20 animate-fade-in">
