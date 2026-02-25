@@ -15,7 +15,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
   const [isSupported, setIsSupported] = useState(false);
   const [permission, setPermission] = useState<PermissionState>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [registration, setRegistration] = useState<ServiceWorkerRegistration & { pushManager?: PushManager } | null>(null);
+  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
     const checkSupport = async () => {
@@ -40,7 +40,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         setRegistration(reg);
 
         // Check if already subscribed
-        const subscription = await reg.pushManager.getSubscription();
+        const subscription = await (reg as any).pushManager?.getSubscription();
         setIsSubscribed(!!subscription);
       } catch (error) {
         console.error("Error checking push subscription:", error);
@@ -72,7 +72,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
     try {
       // In production, you'd use your VAPID public key here
-      const subscription = await registration.pushManager.subscribe({
+      const subscription = await (registration as any).pushManager.subscribe({
         userVisibleOnly: true,
         // applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
@@ -95,7 +95,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
     }
 
     try {
-      const subscription = await registration.pushManager.getSubscription();
+      const subscription = await (registration as any).pushManager?.getSubscription();
       if (subscription) {
         await subscription.unsubscribe();
         setIsSubscribed(false);
