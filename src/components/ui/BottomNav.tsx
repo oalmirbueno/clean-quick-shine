@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { Home, ClipboardList, User, Calendar, Wallet, LayoutDashboard, Users, Settings } from "lucide-react";
 
 interface NavItem {
@@ -38,36 +39,40 @@ export function BottomNav({ variant }: BottomNavProps) {
   const items =
     variant === "client" ? clientItems : variant === "pro" ? proItems : adminItems;
 
-  return (
+  const nav = (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/30"
-      style={{
-        background: "hsl(var(--card))",
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 2px)",
-      }}
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/30"
+      style={{ background: "hsl(var(--card))" }}
     >
-      <div className="flex items-end justify-around h-14 max-w-lg mx-auto px-1">
-        {items.map((item) => {
-          const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+      <div
+        className="max-w-lg mx-auto px-1 pt-1"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)" }}
+      >
+        <div className="grid grid-cols-3 items-end min-h-14">
+          {items.map((item) => {
+            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
 
-          return (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={cn(
-                "flex flex-col items-center justify-end gap-1 px-4 py-1.5 rounded-xl transition-all",
-                isActive
-                  ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}
-            >
-              {item.icon}
-              <span className="text-xs font-medium leading-none">{item.label}</span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={cn(
+                  "mx-auto flex flex-col items-center justify-end gap-1 px-4 py-1.5 rounded-xl transition-all",
+                  isActive
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                {item.icon}
+                <span className="text-xs font-medium leading-none">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
+
+  return typeof document !== "undefined" ? createPortal(nav, document.body) : null;
 }
 
