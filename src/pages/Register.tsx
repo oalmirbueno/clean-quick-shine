@@ -123,8 +123,8 @@ export default function Register() {
       }
     }
 
-    // Redirect to email confirmation page
-    navigate("/confirm-email", { state: { email } });
+    toast.success("Conta criada! Faça login.");
+    navigate("/login");
   };
 
   if (!userType) {

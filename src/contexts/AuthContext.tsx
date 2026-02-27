@@ -141,19 +141,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error };
       }
 
-      // Check if email is confirmed
-      if (data.user && !data.user.email_confirmed_at) {
-        await supabase.auth.signOut();
-        setSigningIn(false);
-        return {
-          error: {
-            message: "Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.",
-            name: "email_not_confirmed",
-            status: 400,
-          } as any,
-        };
-      }
-
       // Fetch roles immediately after sign in
       if (data.user) {
         const fetchedRoles = await fetchRoles(data.user.id);
