@@ -43,7 +43,7 @@ export function BottomNav({ variant }: BottomNavProps) {
 
   const nav = (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/30 pointer-events-none"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/30 pointer-events-none safe-bottom"
       style={{ background: "hsl(var(--card))" }}
     >
       <div className="max-w-lg mx-auto px-1 pt-0">
@@ -81,7 +81,7 @@ export function BottomNav({ variant }: BottomNavProps) {
   return (
     <>
       {/* Spacer to prevent content from hiding behind the fixed nav */}
-      <div className="shrink-0 w-full" style={{ height: "56px" }} />
+      <div className="shrink-0 w-full" style={{ height: "calc(56px + env(safe-area-inset-bottom, 0px))" }} />
       {typeof document !== "undefined" && createPortal(nav, document.body)}
     </>
   );

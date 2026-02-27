@@ -262,7 +262,7 @@ export default function ProProfile() {
   ];
 
   return (
-    <PageTransition>
+    <PageTransition className="h-full">
       <div className="h-full bg-background flex flex-col safe-top">
         {/* Header */}
         <header className="flex-shrink-0 bg-card border-b border-border p-6">
