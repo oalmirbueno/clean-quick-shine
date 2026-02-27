@@ -39,9 +39,7 @@ export default function InstallScreen() {
     <div className="fixed inset-0 bg-gradient-to-b from-background to-accent/20 flex items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col items-center text-center space-y-8">
         {/* Logo */}
-        <div className="w-28 h-28 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-lg">
-          <Logo size="xl" iconOnly />
-        </div>
+        <Logo size="2xl" iconOnly />
 
         {/* Icon */}
         <div className="relative">
