@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createPortal } from "react-dom";
 import { Home, ClipboardList, User, Calendar, Wallet, LayoutDashboard, Users, Settings } from "lucide-react";
 
 interface NavItem {
@@ -41,18 +40,20 @@ export function BottomNav({ variant }: BottomNavProps) {
 
   const gridCols = items.length === 4 ? "grid-cols-4" : "grid-cols-3";
 
-  const nav = (
+  return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/30 pointer-events-none safe-bottom"
+      className="shrink-0 w-full border-t border-border/30"
       style={{ background: "hsl(var(--card))" }}
     >
-      <div className="max-w-lg mx-auto px-1 pt-0">
+      <div
+        className="max-w-lg mx-auto px-1"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
         <div
-          className={cn("grid items-end", gridCols)}
-          style={{
-            height: "calc(56px + env(safe-area-inset-bottom, 0px))",
-            paddingBottom: "2px",
-          }}
+          className={cn("grid", gridCols)}
+          style={{ height: "56px" }}
         >
           {items.map((item) => {
             const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
@@ -62,10 +63,10 @@ export function BottomNav({ variant }: BottomNavProps) {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  "pointer-events-auto mx-auto flex flex-col items-center justify-end gap-1 px-3 py-1.5 rounded-xl transition-all",
+                  "flex flex-col items-center justify-center gap-1 transition-all",
                   isActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {item.icon}
@@ -77,13 +78,4 @@ export function BottomNav({ variant }: BottomNavProps) {
       </div>
     </nav>
   );
-
-  return (
-    <>
-      {/* Spacer to prevent content from hiding behind the fixed nav */}
-      <div className="shrink-0 w-full" style={{ height: "calc(56px + env(safe-area-inset-bottom, 0px))", background: "hsl(var(--card))" }} />
-      {typeof document !== "undefined" && createPortal(nav, document.body)}
-    </>
-  );
 }
-
