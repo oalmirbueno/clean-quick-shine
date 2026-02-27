@@ -1,292 +1,580 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { PageTransition } from "@/components/ui/PageTransition";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { MoneyBreakdown } from "@/components/ui/MoneyBreakdown";
-import { CouponInput } from "@/components/ui/CouponInput";
-import { ChevronLeft, Calendar, Clock, MapPin, CreditCard, Smartphone, Wallet, Shield, Check, Loader2, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useService } from "@/hooks/useServices";
-import { useAddress } from "@/hooks/useAddresses";
-import { useCreateOrder, useValidateCoupon } from "@/hooks/useCreateOrder";
+import { InputField } from "@/components/ui/InputField";
+import { BottomNav } from "@/components/ui/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOrder } from "@/hooks/useOrders";
+import {
+  useCreateAsaasCustomer,
+  useCreatePayment,
+  usePaymentByOrder,
+  useHasAsaasCustomer,
+} from "@/hooks/usePayments";
+import { ArrowLeft, CreditCard, QrCode, FileText, Copy, Check, Loader2, ShieldCheck, Clock } from "lucide-react";
+import { toast } from "sonner";
 
-const paymentMethods = [
-  { id: "pix", icon: Smartphone, label: "Pix", description: "Aprovação instantânea" },
-  { id: "card", icon: CreditCard, label: "Cartão", description: "Crédito ou débito" },
-  { id: "balance", icon: Wallet, label: "Saldo", description: "R$ 0,00 disponível" },
-];
+type PaymentMethod = "PIX" | "CREDIT_CARD" | "BOLETO";
 
-export default function ClientCheckout() {
-  const navigate = useNavigate();
-  const location = useLocation();
+// Etapa 1: Cadastro CPF
+function CpfStep({ onComplete }: { onComplete: () => void }) {
   const { user } = useAuth();
-  const { serviceId, date, time, addressId, proId, proName, proRating } = location.state || {};
-  
-  const { data: service, isLoading: isLoadingService } = useService(serviceId);
-  const { data: address, isLoading: isLoadingAddress } = useAddress(addressId);
-  
-  const createOrderMutation = useCreateOrder();
-  const validateCouponMutation = useValidateCoupon();
-  
-  const [selectedPayment, setSelectedPayment] = useState<string | null>("pix");
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
-  const [notes, setNotes] = useState("");
+  const createCustomer = useCreateAsaasCustomer();
+  const [name, setName] = useState("");
+  const [cpf, setCpf] = useState("");
 
-  const isLoading = isLoadingService || isLoadingAddress;
-  const basePrice = Number(service?.base_price || 0);
-  const serviceFee = basePrice * 0.1; // 10% service fee
-  const discount = appliedCoupon?.discount || 0;
-  const totalPrice = Math.max(0, basePrice + serviceFee - discount);
+  const formatCpf = (value: string) => {
+    const numbers = value.replace(/\D/g, "").slice(0, 11);
+    return numbers
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  };
 
-  const handleApplyCoupon = async (code: string): Promise<{ success: boolean; message: string }> => {
-    try {
-      const result = await validateCouponMutation.mutateAsync({
-        code,
-        orderValue: basePrice,
-      });
-      
-      setAppliedCoupon({ code: result.code, discount: result.discount });
-      return { success: true, message: "" };
-    } catch (error: any) {
-      return { success: false, message: error.message || "Cupom inválido" };
+  const handleSubmit = async () => {
+    const cleanCpf = cpf.replace(/\D/g, "");
+    if (cleanCpf.length !== 11) {
+      toast.error("CPF deve ter 11 dígitos");
+      return;
     }
-  };
-
-  const formatDate = (d: Date | string) => {
-    if (!d) return "Data não selecionada";
-    const dateObj = d instanceof Date ? d : new Date(d);
-    return dateObj.toLocaleDateString("pt-BR", {
-      weekday: "long",
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
-  const formatDateForDB = (d: Date | string): string => {
-    if (!d) return "";
-    const dateObj = d instanceof Date ? d : new Date(d);
-    return dateObj.toISOString().split("T")[0];
-  };
-
-  const handlePayment = async () => {
-    if (!user?.id || !serviceId || !addressId || !date || !time) {
+    if (!name.trim()) {
+      toast.error("Preencha seu nome completo");
       return;
     }
 
-    try {
-      const result = await createOrderMutation.mutateAsync({
-        serviceId,
-        addressId,
-        scheduledDate: formatDateForDB(date),
-        scheduledTime: time,
-        proId: proId || null,
-        couponCode: appliedCoupon?.code || null,
-        notes: notes || undefined,
-      });
+    await createCustomer.mutateAsync({
+      name: name.trim(),
+      email: user?.email || "",
+      cpfCnpj: cleanCpf,
+    });
 
-      navigate("/client/order-tracking", { 
-        state: { orderId: result.orderId } 
-      });
-    } catch (error) {
-      // Error handled by mutation
+    onComplete();
+  };
+
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      <div className="flex flex-col items-center text-center gap-3">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <ShieldCheck className="w-8 h-8 text-primary" />
+        </div>
+        <h2 className="text-xl font-semibold text-foreground">Cadastro para pagamento</h2>
+        <p className="text-sm text-muted-foreground max-w-xs">
+          Para sua segurança, precisamos do seu CPF para processar o pagamento.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <InputField
+          label="Nome completo"
+          placeholder="Seu nome como no documento"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <InputField
+          label="CPF"
+          placeholder="000.000.000-00"
+          value={cpf}
+          onChange={(e) => setCpf(formatCpf(e.target.value))}
+          inputMode="numeric"
+        />
+      </div>
+
+      <PrimaryButton
+        fullWidth
+        loading={createCustomer.isPending}
+        disabled={createCustomer.isPending}
+        onClick={handleSubmit}
+      >
+        Continuar para pagamento
+      </PrimaryButton>
+    </div>
+  );
+}
+
+// Etapa 2: Seleção de método + dados
+function PaymentStep({
+  orderId,
+  orderTotal,
+  serviceName,
+  onPaymentCreated,
+}: {
+  orderId: string;
+  orderTotal: number;
+  serviceName: string;
+  onPaymentCreated: () => void;
+}) {
+  const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const createPayment = useCreatePayment();
+
+  const [cardData, setCardData] = useState({
+    holderName: "",
+    number: "",
+    expiryMonth: "",
+    expiryYear: "",
+    ccv: "",
+  });
+  const [holderInfo, setHolderInfo] = useState({
+    name: "",
+    email: "",
+    cpfCnpj: "",
+    postalCode: "",
+    addressNumber: "",
+    phone: "",
+  });
+
+  const formatCardNumber = (value: string) => {
+    const numbers = value.replace(/\D/g, "").slice(0, 16);
+    return numbers.replace(/(\d{4})(?=\d)/g, "$1 ");
+  };
+
+  const handlePay = async () => {
+    if (!method) return;
+
+    const payload: any = {
+      orderId,
+      billingType: method,
+    };
+
+    if (method === "CREDIT_CARD") {
+      if (!cardData.holderName || !cardData.number || !cardData.expiryMonth || !cardData.expiryYear || !cardData.ccv) {
+        toast.error("Preencha todos os dados do cartão");
+        return;
+      }
+      if (!holderInfo.name || !holderInfo.cpfCnpj || !holderInfo.postalCode || !holderInfo.addressNumber || !holderInfo.phone) {
+        toast.error("Preencha todos os dados do titular");
+        return;
+      }
+      payload.creditCard = {
+        ...cardData,
+        number: cardData.number.replace(/\s/g, ""),
+      };
+      payload.creditCardHolderInfo = holderInfo;
+    }
+
+    await createPayment.mutateAsync(payload);
+    onPaymentCreated();
+  };
+
+  const methods = [
+    { id: "PIX" as PaymentMethod, icon: QrCode, label: "Pix", desc: "Aprovação instantânea" },
+    { id: "CREDIT_CARD" as PaymentMethod, icon: CreditCard, label: "Cartão de Crédito", desc: "Aprovação imediata" },
+    { id: "BOLETO" as PaymentMethod, icon: FileText, label: "Boleto", desc: "Até 2 dias úteis" },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6 p-6">
+      {/* Resumo */}
+      <div className="p-4 rounded-2xl bg-card border border-border">
+        <h3 className="text-sm font-medium text-muted-foreground mb-1">Resumo do pedido</h3>
+        <div className="flex items-center justify-between">
+          <span className="font-medium text-foreground">{serviceName}</span>
+          <span className="text-lg font-bold text-primary">
+            R$ {orderTotal.toFixed(2).replace(".", ",")}
+          </span>
+        </div>
+      </div>
+
+      {/* Métodos */}
+      <div className="space-y-3">
+        <h3 className="font-medium text-foreground">Forma de pagamento</h3>
+        {methods.map((m) => (
+          <button
+            key={m.id}
+            onClick={() => setMethod(m.id)}
+            className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 ${
+              method === m.id
+                ? "border-primary bg-accent shadow-sm"
+                : "border-border bg-card hover:border-primary/30"
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+              method === m.id ? "bg-primary" : "bg-muted"
+            }`}>
+              <m.icon className={`w-6 h-6 ${method === m.id ? "text-primary-foreground" : "text-muted-foreground"}`} />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium text-foreground">{m.label}</p>
+              <p className="text-sm text-muted-foreground">{m.desc}</p>
+            </div>
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+              method === m.id ? "border-primary bg-primary" : "border-border"
+            }`}>
+              {method === m.id && <Check className="w-3 h-3 text-primary-foreground" />}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Formulário de Cartão */}
+      {method === "CREDIT_CARD" && (
+        <div className="space-y-4">
+          <h3 className="font-medium text-foreground">Dados do cartão</h3>
+          <InputField
+            label="Nome no cartão"
+            placeholder="Como impresso no cartão"
+            value={cardData.holderName}
+            onChange={(e) => setCardData({ ...cardData, holderName: e.target.value.toUpperCase() })}
+          />
+          <InputField
+            label="Número do cartão"
+            placeholder="0000 0000 0000 0000"
+            value={cardData.number}
+            onChange={(e) => setCardData({ ...cardData, number: formatCardNumber(e.target.value) })}
+            inputMode="numeric"
+          />
+          <div className="grid grid-cols-3 gap-3">
+            <InputField
+              label="Mês"
+              placeholder="MM"
+              value={cardData.expiryMonth}
+              onChange={(e) => setCardData({ ...cardData, expiryMonth: e.target.value.replace(/\D/g, "").slice(0, 2) })}
+              inputMode="numeric"
+            />
+            <InputField
+              label="Ano"
+              placeholder="AAAA"
+              value={cardData.expiryYear}
+              onChange={(e) => setCardData({ ...cardData, expiryYear: e.target.value.replace(/\D/g, "").slice(0, 4) })}
+              inputMode="numeric"
+            />
+            <InputField
+              label="CVV"
+              placeholder="***"
+              value={cardData.ccv}
+              onChange={(e) => setCardData({ ...cardData, ccv: e.target.value.replace(/\D/g, "").slice(0, 4) })}
+              inputMode="numeric"
+              type="password"
+            />
+          </div>
+
+          <h3 className="font-medium text-foreground pt-2">Dados do titular</h3>
+          <InputField
+            label="Nome completo"
+            placeholder="Nome do titular"
+            value={holderInfo.name}
+            onChange={(e) => setHolderInfo({ ...holderInfo, name: e.target.value })}
+          />
+          <InputField
+            label="CPF"
+            placeholder="Somente números"
+            value={holderInfo.cpfCnpj}
+            onChange={(e) => setHolderInfo({ ...holderInfo, cpfCnpj: e.target.value.replace(/\D/g, "").slice(0, 11) })}
+            inputMode="numeric"
+          />
+          <InputField
+            label="Telefone"
+            placeholder="DDD + número"
+            value={holderInfo.phone}
+            onChange={(e) => setHolderInfo({ ...holderInfo, phone: e.target.value.replace(/\D/g, "").slice(0, 11) })}
+            inputMode="numeric"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <InputField
+              label="CEP"
+              placeholder="00000000"
+              value={holderInfo.postalCode}
+              onChange={(e) => setHolderInfo({ ...holderInfo, postalCode: e.target.value.replace(/\D/g, "").slice(0, 8) })}
+              inputMode="numeric"
+            />
+            <InputField
+              label="Nº endereço"
+              placeholder="123"
+              value={holderInfo.addressNumber}
+              onChange={(e) => setHolderInfo({ ...holderInfo, addressNumber: e.target.value })}
+            />
+          </div>
+          <InputField
+            label="E-mail"
+            placeholder="seu@exemplo.com"
+            value={holderInfo.email}
+            onChange={(e) => setHolderInfo({ ...holderInfo, email: e.target.value })}
+            type="email"
+          />
+        </div>
+      )}
+
+      {/* Botão Pagar */}
+      {method && (
+        <PrimaryButton
+          fullWidth
+          loading={createPayment.isPending}
+          disabled={createPayment.isPending}
+          onClick={handlePay}
+        >
+          {method === "PIX" && "Gerar QR Code Pix"}
+          {method === "CREDIT_CARD" && `Pagar R$ ${orderTotal.toFixed(2).replace(".", ",")}`}
+          {method === "BOLETO" && "Gerar Boleto"}
+        </PrimaryButton>
+      )}
+    </div>
+  );
+}
+
+// Etapa 3: Confirmação / Aguardando pagamento
+function ConfirmationStep({ orderId }: { orderId: string }) {
+  const navigate = useNavigate();
+  const { data: payment, isLoading } = usePaymentByOrder(orderId);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success("Código copiado!");
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      toast.error("Erro ao copiar");
     }
   };
 
-  const breakdownItems = [
-    { label: "Subtotal", value: basePrice },
-    ...(discount > 0 ? [{ label: `Cupom (${appliedCoupon?.code})`, value: discount, negative: true }] : []),
-    { label: "Taxa de serviço", value: serviceFee },
-  ];
+  useEffect(() => {
+    if (payment?.status === "confirmed") {
+      const timer = setTimeout(() => {
+        navigate(`/client/order-tracking?orderId=${orderId}`);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [payment?.status, orderId, navigate]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center p-12 gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Carregando pagamento...</p>
       </div>
     );
   }
 
-  if (!service || !address) {
+  if (!payment) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <p className="text-muted-foreground mb-4">Dados do pedido não encontrados</p>
-        <PrimaryButton onClick={() => navigate("/client/home")}>
-          Voltar ao início
-        </PrimaryButton>
+      <div className="flex flex-col items-center justify-center p-12">
+        <p className="text-muted-foreground">Pagamento não encontrado</p>
       </div>
+    );
+  }
+
+  // Pagamento confirmado
+  if (payment.status === "confirmed") {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 gap-4">
+        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+          <Check className="w-10 h-10 text-primary" />
+        </div>
+        <h2 className="text-xl font-semibold text-foreground">Pagamento confirmado!</h2>
+        <p className="text-sm text-muted-foreground text-center">
+          Redirecionando para o acompanhamento do pedido...
+        </p>
+        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // PIX - Mostrar QR Code
+  if (payment.method === "pix" && payment.pix_qr_code) {
+    return (
+      <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col items-center text-center gap-2">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <QrCode className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground">Pague com Pix</h2>
+          <p className="text-sm text-muted-foreground">
+            Escaneie o QR Code ou copie o código abaixo
+          </p>
+        </div>
+
+        {/* QR Code */}
+        <div className="flex justify-center">
+          <div className="p-4 bg-white rounded-2xl shadow-sm">
+            <img
+              src={`data:image/png;base64,${payment.pix_qr_code}`}
+              alt="QR Code Pix"
+              className="w-56 h-56"
+            />
+          </div>
+        </div>
+
+        {/* Copia e Cola */}
+        {payment.pix_copy_paste && (
+          <button
+            onClick={() => handleCopy(payment.pix_copy_paste!)}
+            className="w-full flex items-center gap-3 p-4 bg-card rounded-2xl border border-border hover:border-primary/30 transition-all"
+          >
+            {copied ? (
+              <Check className="w-5 h-5 text-primary flex-shrink-0" />
+            ) : (
+              <Copy className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            )}
+            <span className="text-sm text-muted-foreground truncate flex-1 text-left">
+              {payment.pix_copy_paste}
+            </span>
+          </button>
+        )}
+
+        {/* Status */}
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Aguardando pagamento...
+        </div>
+
+        <p className="text-xs text-center text-muted-foreground">
+          O pagamento será confirmado automaticamente em segundos após o Pix.
+        </p>
+      </div>
+    );
+  }
+
+  // Boleto
+  if (payment.method === "boleto" && (payment.boleto_url || payment.invoice_url)) {
+    return (
+      <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col items-center text-center gap-2">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <FileText className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground">Boleto gerado!</h2>
+          <p className="text-sm text-muted-foreground">
+            O pagamento será confirmado em até 2 dias úteis após o pagamento.
+          </p>
+        </div>
+
+        <PrimaryButton
+          fullWidth
+          onClick={() => window.open(payment.boleto_url || payment.invoice_url || "", "_blank")}
+        >
+          Abrir Boleto
+        </PrimaryButton>
+
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Clock className="w-4 h-4" />
+          Aguardando pagamento do boleto...
+        </div>
+      </div>
+    );
+  }
+
+  // Cartão pendente
+  return (
+    <div className="flex flex-col items-center justify-center p-12 gap-4">
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <h2 className="text-lg font-semibold text-foreground">Processando pagamento...</h2>
+      <p className="text-sm text-muted-foreground text-center">
+        Aguarde enquanto confirmamos seu pagamento.
+      </p>
+    </div>
+  );
+}
+
+// Página principal de Checkout
+export default function ClientCheckout() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const orderId = searchParams.get("orderId");
+
+  const { data: order, isLoading: orderLoading } = useOrder(orderId);
+  const { data: hasCustomer, isLoading: customerLoading } = useHasAsaasCustomer();
+  const { data: existingPayment } = usePaymentByOrder(orderId);
+
+  const [step, setStep] = useState<"cpf" | "payment" | "confirmation">("cpf");
+
+  // Definir step inicial baseado no estado
+  useEffect(() => {
+    if (customerLoading) return;
+
+    if (existingPayment) {
+      setStep("confirmation");
+    } else if (hasCustomer) {
+      setStep("payment");
+    } else {
+      setStep("cpf");
+    }
+  }, [hasCustomer, customerLoading, existingPayment]);
+
+  if (!orderId) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+          <div className="text-center space-y-4">
+            <p className="text-muted-foreground">Pedido não encontrado</p>
+            <PrimaryButton onClick={() => navigate("/client/home")}>
+              Voltar ao início
+            </PrimaryButton>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  if (orderLoading || customerLoading) {
+    return (
+      <PageTransition>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </PageTransition>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
-      {/* Header */}
-      <header className="flex-shrink-0 bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-foreground" />
-          </button>
-          <h1 className="text-lg font-semibold text-foreground">
-            Finalizar pedido
-          </h1>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto animate-fade-in">
-        {/* Pro Info */}
-        {proName && (
-          <section className="p-4 border-b border-border">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-semibold text-primary">
-                  {proName.charAt(0)}
-                </span>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">{proName}</p>
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <span className="text-warning">★</span> {proRating?.toFixed(1) || "5.0"} · Profissional verificado(a)
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Order Summary */}
-        <section className="p-4 border-b border-border">
-          <h2 className="font-medium text-foreground mb-3">Resumo do pedido</h2>
-          
-          <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">{service.name}</p>
-                <p className="text-muted-foreground">{service.description}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Duração: ~{service.duration_hours}h
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">{formatDate(date)}</p>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  <span>{time}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">{address.label}</p>
-                <p className="text-muted-foreground">
-                  {address.street}, {address.number} - {address.neighborhood}, {address.city}
-                </p>
-              </div>
-            </div>
+    <PageTransition>
+      <div className="fixed inset-0 bg-background flex flex-col safe-top">
+        {/* Header */}
+        <header className="flex-shrink-0 bg-card border-b border-border px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (step === "payment") setStep("cpf");
+                else navigate(-1);
+              }}
+              className="p-2 rounded-xl hover:bg-muted transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-foreground" />
+            </button>
+            <h1 className="text-lg font-semibold text-foreground">
+              {step === "cpf" && "Dados para pagamento"}
+              {step === "payment" && "Pagamento"}
+              {step === "confirmation" && "Confirmação"}
+            </h1>
           </div>
-        </section>
 
-        {/* Notes */}
-        <section className="p-4 border-b border-border">
-          <h2 className="font-medium text-foreground mb-3">Observações (opcional)</h2>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ex: Tenho um cachorro amigável, a chave está embaixo do tapete..."
-            className="w-full p-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-            rows={3}
-            maxLength={500}
-          />
-        </section>
-
-        {/* Coupon */}
-        <section className="p-4 border-b border-border">
-          <h2 className="font-medium text-foreground mb-3">Cupom de desconto</h2>
-          <CouponInput
-            onApply={handleApplyCoupon}
-            appliedCoupon={appliedCoupon || undefined}
-            onRemove={() => setAppliedCoupon(null)}
-          />
-        </section>
-
-        {/* Payment Methods */}
-        <section className="p-4 border-b border-border">
-          <h2 className="font-medium text-foreground mb-3">Forma de pagamento</h2>
-          
-          <div className="space-y-2">
-            {paymentMethods.map((method) => (
-              <button
-                key={method.id}
-                onClick={() => setSelectedPayment(method.id)}
-                className={cn(
-                  "w-full p-4 rounded-xl border text-left transition-all duration-200",
-                  "flex items-center gap-3",
-                  selectedPayment === method.id
-                    ? "border-primary bg-accent"
-                    : "border-border bg-card hover:border-primary/20"
-                )}
-              >
-                <div className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center",
-                  selectedPayment === method.id ? "bg-primary" : "bg-secondary"
-                )}>
-                  <method.icon className={cn(
-                    "w-5 h-5",
-                    selectedPayment === method.id ? "text-primary-foreground" : "text-muted-foreground"
-                  )} />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">{method.label}</p>
-                  <p className="text-sm text-muted-foreground">{method.description}</p>
-                </div>
-                {selectedPayment === method.id && (
-                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="w-3 h-3 text-primary-foreground" />
-                  </div>
-                )}
-              </button>
+          {/* Progress */}
+          <div className="flex gap-2 mt-3">
+            {["cpf", "payment", "confirmation"].map((s, i) => (
+              <div
+                key={s}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  ["cpf", "payment", "confirmation"].indexOf(step) >= i
+                    ? "bg-primary"
+                    : "bg-border"
+                }`}
+              />
             ))}
           </div>
-        </section>
+        </header>
 
-        {/* Price Breakdown */}
-        <section className="p-4">
-          <MoneyBreakdown
-            items={breakdownItems}
-            total={totalPrice}
-          />
-        </section>
-      </main>
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto">
+          {step === "cpf" && (
+            <CpfStep onComplete={() => setStep("payment")} />
+          )}
 
-      {/* Bottom Action */}
-      <div className="flex-shrink-0 p-4 bg-card border-t border-border space-y-3 safe-bottom">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
-          <Shield className="w-4 h-4" />
-          <span>Pagamento seguro. Liberado após confirmação do serviço.</span>
-        </div>
-        <PrimaryButton
-          fullWidth
-          loading={createOrderMutation.isPending}
-          disabled={!selectedPayment || createOrderMutation.isPending}
-          onClick={handlePayment}
-        >
-          Pagar R$ {totalPrice.toFixed(2).replace(".", ",")}
-        </PrimaryButton>
+          {step === "payment" && order && (
+            <PaymentStep
+              orderId={orderId!}
+              orderTotal={order.total_price}
+              serviceName={(order as any).service?.name || "Serviço de limpeza"}
+              onPaymentCreated={() => setStep("confirmation")}
+            />
+          )}
+
+          {step === "confirmation" && orderId && (
+            <ConfirmationStep orderId={orderId} />
+          )}
+        </main>
+
+        <BottomNav variant="client" />
       </div>
-    </div>
+    </PageTransition>
   );
 }
