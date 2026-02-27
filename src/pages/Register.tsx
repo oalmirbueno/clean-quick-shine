@@ -56,12 +56,31 @@ export default function Register() {
     );
   };
 
+  const validatePassword = (pwd: string): string | null => {
+    if (pwd.length < 8) return "Senha deve ter no mínimo 8 caracteres";
+    if (!/[A-Z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra maiúscula";
+    if (!/[a-z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra minúscula";
+    if (!/[0-9]/.test(pwd)) return "Senha deve ter pelo menos 1 número";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) return "Senha deve ter pelo menos 1 caractere especial";
+    const commonPasswords = [
+      "12345678", "password", "123456789", "qwerty123", "password1",
+      "11111111", "abc12345", "iloveyou", "admin123", "welcome1",
+      "monkey12", "master12", "qwerty12", "letmein1", "trustno1",
+      "jalimpo1", "jalimpo123", "limpeza1", "limpeza123",
+    ];
+    if (commonPasswords.includes(pwd.toLowerCase())) {
+      return "Esta senha é muito comum. Escolha uma senha mais segura.";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Password validation
-    if (password.length < 8) {
-      toast.error("A senha deve ter no mínimo 8 caracteres");
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      toast.error(passwordError);
       return;
     }
 
