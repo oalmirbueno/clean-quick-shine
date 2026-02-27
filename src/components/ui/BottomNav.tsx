@@ -41,41 +41,51 @@ export function BottomNav({ variant }: BottomNavProps) {
   const gridCols = items.length === 4 ? "grid-cols-4" : "grid-cols-3";
 
   return (
-    <nav
-      className="shrink-0 w-full border-t border-border/30"
-      style={{ background: "hsl(var(--card))" }}
-    >
+    <>
+      {/* Spacer keeps content above fixed nav and removes dead gray zone */}
       <div
-        className="max-w-lg mx-auto px-1"
+        className="shrink-0 w-full"
         style={{
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          height: "calc(56px + env(safe-area-inset-bottom, 0px))",
+          background: "hsl(var(--card))",
         }}
+      />
+
+      <nav
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/30"
+        style={{ background: "hsl(var(--card))" }}
       >
         <div
-          className={cn("grid", gridCols)}
-          style={{ height: "56px" }}
+          className="max-w-lg mx-auto px-1"
+          style={{
+            paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          }}
         >
-          {items.map((item) => {
-            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+          <div className={cn("grid", gridCols)} style={{ height: "56px" }}>
+            {items.map((item) => {
+              const isActive =
+                location.pathname === item.path ||
+                location.pathname.startsWith(`${item.path}/`);
 
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 transition-all",
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {item.icon}
-                <span className="text-xs font-medium leading-none">{item.label}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-1 transition-all",
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.icon}
+                  <span className="text-xs font-medium leading-none">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }
