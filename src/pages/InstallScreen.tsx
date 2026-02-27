@@ -36,11 +36,11 @@ export default function InstallScreen() {
   };
 
   return (
-    <div className="fixed inset-0 bg-background flex items-center justify-center p-6">
+    <div className="fixed inset-0 bg-gradient-to-b from-background to-accent/20 flex items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col items-center text-center space-y-8">
         {/* Logo */}
-        <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20">
-          <Logo size="lg" iconOnly />
+        <div className="w-28 h-28 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-lg">
+          <Logo size="xl" iconOnly />
         </div>
 
         {/* Icon */}
@@ -63,7 +63,7 @@ export default function InstallScreen() {
           <button
             onClick={handleInstall}
             className="w-full py-4 px-6 rounded-2xl bg-primary text-primary-foreground font-semibold
-              hover:opacity-90 transition-opacity flex items-center justify-center gap-3 text-lg"
+              shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-lg"
           >
             <Download className="w-5 h-5" />
             Instalar Já Limpo

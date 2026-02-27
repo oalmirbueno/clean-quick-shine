@@ -21,11 +21,11 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
     ...props 
   }, ref) => {
     const variants = {
-      primary: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+      primary: "bg-primary text-primary-foreground shadow-md hover:shadow-lg hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]",
       secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
       outline: "border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground",
       ghost: "text-foreground hover:bg-accent hover:text-accent-foreground",
-      success: "bg-success text-success-foreground shadow-sm hover:bg-success/90",
+      success: "bg-success text-success-foreground shadow-md hover:shadow-lg hover:bg-success/90 hover:scale-[1.02] active:scale-[0.98]",
     };
 
     const sizes = {

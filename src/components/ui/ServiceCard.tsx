@@ -20,9 +20,9 @@ export function ServiceCard({
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center p-5 bg-card rounded-2xl border border-border",
+        "flex flex-col items-center justify-center p-5 bg-card rounded-2xl border border-border/50",
         "shadow-sm hover:shadow-md transition-all duration-200",
-        "hover:border-primary/30 hover:bg-accent/50 active:scale-[0.98]",
+        "hover:border-primary/30 hover:bg-accent/50 active:scale-[0.98] hover-lift",
         "min-h-[110px] w-full text-center group",
         className
       )}
