@@ -305,6 +305,7 @@ body {
   right: 0;
   bottom: 0;
   background-color: hsl(var(--background));
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Standalone PWA adjustments */
