@@ -1488,6 +1488,10 @@ export type Database = {
     Functions: {
       decrypt_field: { Args: { encrypted_text: string }; Returns: string }
       encrypt_field: { Args: { plain_text: string }; Returns: string }
+      find_nearest_zone: {
+        Args: { p_lat: number; p_lng: number }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
