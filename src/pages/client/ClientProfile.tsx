@@ -69,7 +69,7 @@ export default function ClientProfile() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto overscroll-contain p-4 animate-fade-in" style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Menu Items */}
         <div className="bg-card rounded-xl border border-border overflow-hidden card-shadow">
           {menuItems.map((item, index) => (
