@@ -53,7 +53,7 @@ export default function ClientProfile() {
   const userName = profile?.full_name || user?.email?.split("@")[0] || "Usuário";
 
   return (
-    <div className="h-full bg-background flex flex-col safe-top">
+    <div className="h-full min-h-0 bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="flex-shrink-0 bg-card border-b border-border p-6">
         <div className="flex items-center gap-4">
@@ -69,7 +69,7 @@ export default function ClientProfile() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto overscroll-contain p-4 animate-fade-in" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 animate-fade-in" style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Menu Items */}
         <div className="bg-card rounded-xl border border-border overflow-hidden card-shadow">
           {menuItems.map((item, index) => (

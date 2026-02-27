@@ -81,7 +81,7 @@ export function BottomNav({ variant }: BottomNavProps) {
   return (
     <>
       {/* Spacer to prevent content from hiding behind the fixed nav */}
-      <div className="shrink-0 w-full" style={{ height: "calc(56px + env(safe-area-inset-bottom, 0px))" }} />
+      <div className="shrink-0 w-full" style={{ height: "calc(56px + env(safe-area-inset-bottom, 0px))", background: "hsl(var(--card))" }} />
       {typeof document !== "undefined" && createPortal(nav, document.body)}
     </>
   );
