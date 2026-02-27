@@ -39,6 +39,8 @@ export function BottomNav({ variant }: BottomNavProps) {
   const items =
     variant === "client" ? clientItems : variant === "pro" ? proItems : adminItems;
 
+  const gridCols = items.length === 4 ? "grid-cols-4" : "grid-cols-3";
+
   const nav = (
     <nav
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border/30"
@@ -48,7 +50,7 @@ export function BottomNav({ variant }: BottomNavProps) {
         className="max-w-lg mx-auto px-1 pt-1"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)" }}
       >
-        <div className="grid grid-cols-3 items-end min-h-14">
+        <div className={cn("grid items-end min-h-[56px]", gridCols)}>
           {items.map((item) => {
             const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
 
@@ -57,7 +59,7 @@ export function BottomNav({ variant }: BottomNavProps) {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  "mx-auto flex flex-col items-center justify-end gap-1 px-4 py-1.5 rounded-xl transition-all",
+                  "mx-auto flex flex-col items-center justify-end gap-1 px-3 py-1.5 rounded-xl transition-all",
                   isActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -73,6 +75,12 @@ export function BottomNav({ variant }: BottomNavProps) {
     </nav>
   );
 
-  return typeof document !== "undefined" ? createPortal(nav, document.body) : null;
+  return (
+    <>
+      {/* Spacer to prevent content from hiding behind the fixed nav */}
+      <div className="shrink-0 w-full" style={{ height: "calc(60px + env(safe-area-inset-bottom, 0px))" }} />
+      {typeof document !== "undefined" && createPortal(nav, document.body)}
+    </>
+  );
 }
 
