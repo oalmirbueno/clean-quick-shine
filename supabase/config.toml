@@ -1,1 +1,10 @@
 project_id = "mdgiviynypoyixpskmpu"
+
+[functions.asaas-webhook]
+verify_jwt = false
+
+[functions.create-asaas-customer]
+verify_jwt = false
+
+[functions.create-payment]
+verify_jwt = false
