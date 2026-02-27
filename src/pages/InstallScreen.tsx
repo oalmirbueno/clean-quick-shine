@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
-import logoFullText from "@/assets/logo-full-text.png";
 import { Download, Smartphone, Share, MoreVertical, Plus } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+function StyledLogo() {
+  return (
+    <h1 className="text-4xl font-bold tracking-tight">
+      <span className="text-primary">Já</span>
+      <span className="text-foreground ml-1">Limpo</span>
+    </h1>
+  );
 }
 
 export default function InstallScreen() {
@@ -38,19 +46,17 @@ export default function InstallScreen() {
   return (
     <div className="fixed inset-0 bg-background flex items-center justify-center p-6 safe-all">
       <div className="w-full max-w-sm flex flex-col items-center text-center space-y-8">
-        {/* Logo */}
-        <img src={logoFullText} alt="Já Limpo" className="h-32 w-auto" />
+        {/* Logo texto estilizado */}
+        <StyledLogo />
 
         {/* Icon */}
-        <div className="relative">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Smartphone className="w-8 h-8 text-primary" />
-          </div>
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <Smartphone className="w-8 h-8 text-primary" />
         </div>
 
         {/* Text */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">Instale o Já Limpo</h1>
+          <h2 className="text-2xl font-bold text-foreground">Instale o Já Limpo</h2>
           <p className="text-muted-foreground leading-relaxed">
             Para usar o app, instale-o no seu dispositivo. É rápido e não ocupa quase nada de espaço.
           </p>
