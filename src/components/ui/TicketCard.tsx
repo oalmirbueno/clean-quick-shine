@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { MessageCircle, Clock, AlertCircle, CheckCircle2 } from "lucide-react";
-import type { TicketStatus, TicketPriority } from "@/lib/mockDataV2";
+import type { TicketStatus, TicketPriority } from "@/lib/types";
 
 interface TicketCardProps {
   id: string;
@@ -15,10 +15,11 @@ interface TicketCardProps {
   className?: string;
 }
 
-const statusConfig: Record<TicketStatus, { label: string; color: string; icon: typeof Clock }> = {
+const statusConfig: Record<string, { label: string; color: string; icon: typeof Clock }> = {
   open: { label: "Aberto", color: "bg-warning/10 text-warning", icon: Clock },
   in_progress: { label: "Em andamento", color: "bg-primary/10 text-primary", icon: MessageCircle },
   resolved: { label: "Resolvido", color: "bg-success/10 text-success", icon: CheckCircle2 },
+  closed: { label: "Fechado", color: "bg-muted text-muted-foreground", icon: CheckCircle2 },
 };
 
 const priorityConfig: Record<TicketPriority, { label: string; color: string }> = {
@@ -38,8 +39,8 @@ export function TicketCard({
   onClick,
   className,
 }: TicketCardProps) {
-  const statusCfg = statusConfig[status];
-  const priorityCfg = priorityConfig[priority];
+  const statusCfg = statusConfig[status] || statusConfig.open;
+  const priorityCfg = priorityConfig[priority] || priorityConfig.low;
   const StatusIcon = statusCfg.icon;
 
   return (

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { MapPin, Users, TrendingUp, Settings } from "lucide-react";
-import type { Zone, ZoneRule } from "@/lib/mockDataV3";
+import type { Zone, ZoneRule } from "@/lib/types";
 
 interface ZoneCardProps {
   zone: Zone;
@@ -62,7 +62,7 @@ export function ZoneCard({ zone, rule, prosOnline = 0, onClick, className }: Zon
         <div className="p-2 bg-secondary/50 rounded-lg">
           <Settings className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
           <p className="text-sm font-medium text-foreground">
-            +R$ {zone.feeExtra.toFixed(0)}
+            +R$ {(zone.feeExtra || 0).toFixed(0)}
           </p>
           <p className="text-xs text-muted-foreground">Taxa</p>
         </div>
