@@ -39,7 +39,7 @@ export function PageHeader({
         className
       )}
     >
-      <div className="flex items-center gap-3 p-4">
+      <div className="flex items-center gap-3 px-4 py-3 max-w-lg mx-auto">
         {showBack && (
           <button
             onClick={handleBack}

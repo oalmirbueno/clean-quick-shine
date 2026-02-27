@@ -53,7 +53,8 @@ export default function ClientHome() {
         <AppTutorial variant="client" onComplete={completeTutorial} />
       )}
       
-      <div className="fixed inset-0 bg-background flex flex-col safe-top">
+      <div className="fixed inset-0 bg-background flex flex-col"
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)' }}>
         {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}

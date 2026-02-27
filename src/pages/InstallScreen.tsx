@@ -36,7 +36,7 @@ export default function InstallScreen() {
   };
 
   return (
-    <div className="fixed inset-0 bg-white flex items-center justify-center p-6 safe-all">
+    <div className="fixed inset-0 bg-background flex items-center justify-center p-6 safe-all">
       <div className="w-full max-w-sm flex flex-col items-center text-center space-y-8">
         {/* Logo */}
         <img src={logoFullText} alt="Já Limpo" className="h-32 w-auto" />
