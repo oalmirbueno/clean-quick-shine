@@ -42,18 +42,18 @@ export function BottomNav({ variant }: BottomNavProps) {
 
   return (
     <>
-      {/* Spacer keeps content above fixed nav and removes dead gray zone */}
+      {/* Spacer keeps space for fixed nav and matches app background */}
       <div
         className="shrink-0 w-full"
         style={{
-          height: "calc(56px + env(safe-area-inset-bottom, 0px))",
-          background: "hsl(var(--card))",
+          height: "calc(60px + env(safe-area-inset-bottom, 0px))",
+          background: "hsl(var(--background))",
         }}
       />
 
       <nav
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border/30"
-        style={{ background: "hsl(var(--card))" }}
+        style={{ background: "hsl(var(--background))" }}
       >
         <div
           className="max-w-lg mx-auto px-1"
@@ -61,7 +61,7 @@ export function BottomNav({ variant }: BottomNavProps) {
             paddingBottom: "env(safe-area-inset-bottom, 0px)",
           }}
         >
-          <div className={cn("grid", gridCols)} style={{ height: "56px" }}>
+          <div className={cn("grid", gridCols)} style={{ height: "60px" }}>
             {items.map((item) => {
               const isActive =
                 location.pathname === item.path ||
@@ -72,7 +72,7 @@ export function BottomNav({ variant }: BottomNavProps) {
                   key={item.path}
                   onClick={() => navigate(item.path)}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 transition-all",
+                    "flex h-full flex-col items-center justify-end gap-1 pb-1 transition-all",
                     isActive
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
