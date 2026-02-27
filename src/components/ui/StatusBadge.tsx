@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { OrderStatus, ProVerifiedStatus, WithdrawalStatus, PaymentStatus, TicketStatus } from "@/lib/mockDataV2";
+import type { OrderStatus, ProVerifiedStatus, WithdrawalStatus, PaymentStatus, TicketStatus } from "@/lib/types";
 
 type BadgeStatus = OrderStatus | ProVerifiedStatus | WithdrawalStatus | PaymentStatus | TicketStatus | "active" | "suspended" | "blocked" | "free" | "pro";
 
@@ -45,6 +45,11 @@ const statusConfig: Record<string, { label: string; variant: string }> = {
   // Withdrawal
   requested: { label: "Solicitado", variant: "bg-warning/10 text-warning" },
   paid: { label: "Pago", variant: "bg-success/10 text-success" },
+
+  // Ticket
+  open: { label: "Aberto", variant: "bg-warning/10 text-warning" },
+  resolved: { label: "Resolvido", variant: "bg-success/10 text-success" },
+  closed: { label: "Fechado", variant: "bg-muted text-muted-foreground" },
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Calendar, Sparkles, Pause, Play, X } from "lucide-react";
-import type { ClientSubscription, ClientPlan } from "@/lib/mockDataV3";
+import type { ClientSubscription, ClientPlan } from "@/lib/types";
 
 interface SubscriptionCardProps {
   subscription: ClientSubscription;

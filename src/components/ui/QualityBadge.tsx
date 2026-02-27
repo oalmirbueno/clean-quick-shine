@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Award, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import type { QualityLevel } from "@/lib/mockDataV3";
+import type { QualityLevel } from "@/lib/types";
 
 interface QualityBadgeProps {
   level: QualityLevel;
