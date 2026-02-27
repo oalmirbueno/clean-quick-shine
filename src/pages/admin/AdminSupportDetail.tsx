@@ -3,11 +3,22 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { ChevronLeft, Send, DollarSign, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
+interface TicketWithProfile {
+  id: string;
+  subject: string;
+  description: string;
+  status: string;
+  user_id: string;
+  order_id: string | null;
+  created_at: string;
+  profile_name: string;
+}
 
 export default function AdminSupportDetail() {
   const navigate = useNavigate();
@@ -15,7 +26,7 @@ export default function AdminSupportDetail() {
   const queryClient = useQueryClient();
   const [newMessage, setNewMessage] = useState("");
 
-  const { data: ticket } = useQuery({
+  const { data: ticket } = useQuery<TicketWithProfile | null>({
     queryKey: ["admin_ticket", id],
     queryFn: async () => {
       const { data } = await supabase
@@ -23,12 +34,11 @@ export default function AdminSupportDetail() {
         .select("*")
         .eq("id", id!)
         .single();
-      // Fetch profile separately
       if (data) {
         const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", data.user_id).single();
-        return { ...data, profile_name: profile?.full_name || "Usuário" };
+        return { ...data, profile_name: profile?.full_name || "Usuário" } as TicketWithProfile;
       }
-      return data;
+      return null;
     },
     enabled: !!id,
   });
@@ -82,7 +92,7 @@ export default function AdminSupportDetail() {
             <div className="flex-1">
               <h1 className="text-lg font-bold text-foreground">{ticket.subject}</h1>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm text-muted-foreground">{ticket.profile_name || "Usuário"}</span>
+                <span className="text-sm text-muted-foreground">{ticket.profile_name}</span>
                 {ticket.order_id && <><span className="text-muted-foreground">•</span><span className="text-sm text-muted-foreground">Pedido #{ticket.order_id.slice(0, 8)}</span></>}
               </div>
             </div>
