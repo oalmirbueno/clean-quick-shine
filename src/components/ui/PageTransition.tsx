@@ -35,7 +35,7 @@ export function PageTransition({ children, className }: PageTransitionProps) {
       exit="out"
       variants={pageVariants}
       transition={pageTransition}
-      className={className}
+      className={`h-full ${className || ""}`}
     >
       {children}
     </motion.div>
