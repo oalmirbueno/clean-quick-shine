@@ -57,7 +57,7 @@ export function NotificationsDropdown() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
+              className="fixed inset-0 z-[9998] bg-black/50"
               onClick={() => setIsOpen(false)}
             />
 
@@ -67,7 +67,7 @@ export function NotificationsDropdown() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-16 sm:top-full sm:mt-2 sm:w-80 max-h-[70vh] bg-card border border-border rounded-xl shadow-lg overflow-hidden z-50"
+              className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-16 sm:top-full sm:mt-2 sm:w-80 max-h-[70vh] bg-card border border-border rounded-xl shadow-lg overflow-hidden z-[9999]"
             >
               {/* Header */}
               <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border">

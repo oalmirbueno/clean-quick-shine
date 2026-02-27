@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { User, Briefcase, ChevronLeft, Shield, Clock, Star } from "lucide-react";
-import heroCleanerImg from "@/assets/hero-cleaner-pro.png";
 import { motion } from "framer-motion";
 
 export default function Onboarding() {
@@ -15,33 +14,6 @@ export default function Onboarding() {
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-primary/3 to-transparent" />
       </div>
 
-      {/* Hero Image - Desktop */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="absolute right-0 bottom-0 h-full w-[55%] pointer-events-none hidden lg:flex items-end justify-center"
-      >
-        <img 
-          src={heroCleanerImg} 
-          alt="Profissional de limpeza" 
-          className="h-[92%] w-auto object-contain object-bottom drop-shadow-2xl"
-        />
-      </motion.div>
-
-      {/* Mobile Hero Image */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="absolute right-0 bottom-0 lg:hidden pointer-events-none"
-      >
-        <img 
-          src={heroCleanerImg} 
-          alt="" 
-          className="h-[50vh] w-auto object-contain object-bottom"
-        />
-      </motion.div>
 
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pt-4 lg:items-start lg:w-[45%]">
