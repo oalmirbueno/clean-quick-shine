@@ -16,8 +16,17 @@ import {
   WifiOff,
   Bell
 } from "lucide-react";
-import { Logo } from "@/components/ui/Logo";
 import { useNavigate } from "react-router-dom";
+
+function StyledLogo({ size = "md" }: { size?: "sm" | "md" }) {
+  const textSize = size === "sm" ? "text-xl" : "text-3xl";
+  return (
+    <span className={`${textSize} font-bold tracking-tight`}>
+      <span className="text-primary">Já</span>
+      <span className="text-foreground ml-1">Limpo</span>
+    </span>
+  );
+}
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -153,9 +162,9 @@ export default function Install() {
           </div>
           <div className="p-6 flex flex-col items-center">
             <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-3">
-              <Logo size="sm" iconOnly />
+              <StyledLogo size="sm" />
             </div>
-            <span className="font-medium">CleanQuick</span>
+            <span className="font-medium">Já Limpo</span>
           </div>
         </div>
       )
@@ -216,11 +225,11 @@ export default function Install() {
           <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Logo size="sm" iconOnly />
+                <StyledLogo size="sm" />
               </div>
               <div>
-                <p className="font-medium">CleanQuick</p>
-                <p className="text-xs text-muted-foreground">cleanquick.app</p>
+                <p className="font-medium">Já Limpo</p>
+                <p className="text-xs text-muted-foreground">jalimpo.app</p>
               </div>
             </div>
             <motion.button
@@ -245,7 +254,7 @@ export default function Install() {
         <div className="w-full bg-muted/30 rounded-xl p-4">
           <div className="bg-card rounded-lg border border-border p-2 flex items-center gap-2">
             <div className="flex-1 h-8 rounded bg-muted/50 px-3 flex items-center">
-              <span className="text-xs text-muted-foreground truncate">cleanquick.app</span>
+              <span className="text-xs text-muted-foreground truncate">jalimpo.app</span>
             </div>
             <motion.div 
               animate={{ scale: [1, 1.15, 1] }}
@@ -266,7 +275,7 @@ export default function Install() {
       visual: (
         <div className="w-full bg-muted/30 rounded-xl p-6 flex justify-center">
           <div className="bg-card rounded-xl p-5 shadow-xl border border-border w-64">
-            <p className="font-medium text-center mb-4">Instalar CleanQuick?</p>
+            <p className="font-medium text-center mb-4">Instalar Já Limpo?</p>
             <div className="flex gap-2">
               <button className="flex-1 py-2 rounded-lg border border-border text-sm text-muted-foreground">
                 Cancelar
@@ -321,7 +330,7 @@ export default function Install() {
           transition={{ delay: 0.3 }}
           className="text-muted-foreground text-center mb-8"
         >
-          O CleanQuick está pronto para usar na sua tela inicial
+          O Já Limpo está pronto para usar na sua tela inicial
         </motion.p>
         <motion.button
           initial={{ opacity: 0, y: 20 }}
@@ -345,7 +354,7 @@ export default function Install() {
         className="flex-shrink-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
       >
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Logo size="sm" />
+          <StyledLogo size="sm" />
           <button
             onClick={() => navigate(-1)}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -370,7 +379,7 @@ export default function Install() {
             Adicione à Tela Inicial
           </h1>
           <p className="text-muted-foreground max-w-md mx-auto">
-            Instale o CleanQuick para ter acesso rápido e uma experiência como app nativo
+            Instale o Já Limpo para ter acesso rápido e uma experiência como app nativo
           </p>
         </motion.section>
 
