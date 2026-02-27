@@ -43,7 +43,7 @@ export default function ProPlan() {
   ];
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"><ChevronLeft className="w-6 h-6 text-foreground" /></button>
@@ -51,7 +51,7 @@ export default function ProPlan() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-24 space-y-4 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
         <div className="text-center py-4">
           <p className="text-sm text-muted-foreground">Seu plano atual</p>
           <p className="text-xl font-bold text-foreground capitalize">{currentPlan === "elite" ? "ELITE" : currentPlan === "pro" ? "PRO" : "Free"}</p>

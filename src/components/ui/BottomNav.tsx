@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Home, ClipboardList, User, Calendar, Wallet } from "lucide-react";
 
 interface NavItem {
@@ -26,37 +26,36 @@ const proItems: NavItem[] = [
 ];
 
 export function BottomNav({ variant }: BottomNavProps) {
+  const navigate = useNavigate();
   const location = useLocation();
   const items = variant === "client" ? clientItems : proItems;
 
   return (
-    <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/30"
-      style={{
-        background: 'hsl(var(--card))',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-      }}
-    >
+    <nav className="shrink-0 border-t border-border/30 bg-card">
       <div className="flex items-center justify-around py-2.5 max-w-lg mx-auto">
         {items.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+
           return (
-            <Link
+            <button
               key={item.path}
-              to={item.path}
+              onClick={() => navigate(item.path)}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all",
-                isActive 
-                  ? "text-primary bg-primary/10" 
+                isActive
+                  ? "text-primary bg-primary/10"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
               {item.icon}
               <span className="text-xs font-medium">{item.label}</span>
-            </Link>
+            </button>
           );
         })}
       </div>
+
+      <div className="h-[env(safe-area-inset-bottom,0px)]" />
     </nav>
   );
 }
+

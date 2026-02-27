@@ -38,7 +38,7 @@ export default function OnboardingPro() {
   const step = steps[currentStep];
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col overflow-hidden safe-top safe-bottom">
+    <div className="h-full bg-background flex flex-col overflow-hidden safe-top safe-bottom">
       {/* Header */}
       <header className="p-4 flex items-center justify-between">
         <button

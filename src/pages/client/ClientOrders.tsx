@@ -73,7 +73,7 @@ export default function ClientOrders() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-background flex flex-col safe-top">
+      <div className="h-full bg-background flex flex-col safe-top">
         <header className="flex-shrink-0 bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">Meus pedidos</h1>
         </header>
@@ -86,7 +86,7 @@ export default function ClientOrders() {
   }
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
@@ -188,7 +188,7 @@ export default function ClientOrders() {
         )}
       </div>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-28 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 animate-fade-in">
         {displayedOrders.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">

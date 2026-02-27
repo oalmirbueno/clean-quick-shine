@@ -129,7 +129,7 @@ export default function ClientRating() {
   const proName = order.pro_profile?.full_name || "Profissional";
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       <main className="flex-1 overflow-y-auto p-6 flex flex-col items-center animate-fade-in">
         {/* Success Icon */}
         <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6">

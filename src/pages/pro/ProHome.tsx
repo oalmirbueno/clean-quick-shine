@@ -185,7 +185,7 @@ export default function ProHome() {
         <AppTutorial variant="pro" onComplete={completeTutorial} />
       )}
       
-      <div className="fixed inset-0 bg-background flex flex-col safe-top">
+      <div className="h-full bg-background flex flex-col safe-top">
         {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
@@ -246,7 +246,7 @@ export default function ProHome() {
         )}
       </motion.header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-28 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Live Availability Toggle */}
         <AnimatedSection delay={1} className="p-4 bg-card rounded-xl border border-border">
           <div className="flex items-center justify-between">

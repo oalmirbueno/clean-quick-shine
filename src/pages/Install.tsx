@@ -307,7 +307,7 @@ export default function Install() {
 
   if (isInstalled) {
     return (
-      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
+      <div className="h-full bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -346,7 +346,7 @@ export default function Install() {
   }
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}

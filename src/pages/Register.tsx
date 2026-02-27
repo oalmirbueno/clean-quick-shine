@@ -129,7 +129,7 @@ export default function Register() {
 
   if (!userType) {
     return (
-      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden"
+      <div className="h-full bg-background flex flex-col items-center justify-center p-6 overflow-hidden"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="w-full max-w-sm animate-fade-in">
           <div className="text-center mb-12">
@@ -193,7 +193,7 @@ export default function Register() {
   }
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col"
+    <div className="h-full bg-background flex flex-col"
       style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       {/* Header */}
       <header className="flex-shrink-0 p-6 pb-0">

@@ -91,7 +91,7 @@ export default function ClientMatching() {
 
   return (
     <PageTransition>
-      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 safe-top safe-bottom">
+      <div className="h-full bg-background flex flex-col items-center justify-center p-6 safe-top safe-bottom">
         {/* Buscando */}
         {status === "searching" && (
           <div className="text-center animate-fade-in">

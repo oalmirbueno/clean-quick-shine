@@ -47,7 +47,7 @@ export default function ProQuality() {
   ];
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 hover:bg-secondary rounded-lg">
@@ -57,7 +57,7 @@ export default function ProQuality() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-24 space-y-6 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 space-y-6 animate-fade-in">
         <QualityCard
           level={displayMetrics.qualityLevel as "A" | "B" | "C" | "D"}
           metrics={{

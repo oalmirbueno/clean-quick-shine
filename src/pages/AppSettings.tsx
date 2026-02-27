@@ -129,7 +129,7 @@ export default function AppSettings() {
   };
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}

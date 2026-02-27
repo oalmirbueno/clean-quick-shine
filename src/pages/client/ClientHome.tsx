@@ -53,7 +53,7 @@ export default function ClientHome() {
         <AppTutorial variant="client" onComplete={completeTutorial} />
       )}
       
-      <div className="fixed inset-0 bg-background flex flex-col"
+      <div className="h-full bg-background flex flex-col"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)' }}>
         {/* Header */}
       <motion.header 
@@ -89,7 +89,7 @@ export default function ClientHome() {
         </motion.div>
       </motion.header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-28 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Search */}
         <AnimatedSection delay={1}>
           <div className="relative">

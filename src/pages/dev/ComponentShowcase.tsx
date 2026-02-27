@@ -368,13 +368,13 @@ export default function ComponentShowcase() {
           {/* Navigation */}
           <TabsContent value="navigation" className="space-y-6">
             <ComponentSection title="Bottom Nav - Client" description="Navegação inferior para clientes">
-              <div className="relative h-20 bg-muted rounded-lg overflow-hidden max-w-md">
+              <div className="relative h-24 bg-muted rounded-lg overflow-hidden max-w-md flex flex-col justify-end">
                 <BottomNav variant="client" />
               </div>
             </ComponentSection>
 
             <ComponentSection title="Bottom Nav - Pro" description="Navegação inferior para profissionais">
-              <div className="relative h-20 bg-muted rounded-lg overflow-hidden max-w-md">
+              <div className="relative h-24 bg-muted rounded-lg overflow-hidden max-w-md flex flex-col justify-end">
                 <BottomNav variant="pro" />
               </div>
             </ComponentSection>
