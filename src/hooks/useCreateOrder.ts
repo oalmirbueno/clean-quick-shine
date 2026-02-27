@@ -13,13 +13,16 @@ export interface CreateOrderInput {
   notes?: string;
 }
 
-export interface OrderPricing {
-  basePrice: number;
-  durationHours: number;
-  zoneFee: number;
-  surgeMultiplier: number;
-  discount: number;
-  totalPrice: number;
+export interface CreateOrderResult {
+  orderId: string;
+  pricing: {
+    basePrice: number;
+    durationHours: number;
+    zoneFee: number;
+    surgeMultiplier: number;
+    discount: number;
+    totalPrice: number;
+  };
 }
 
 export function useCreateOrder() {
@@ -27,7 +30,7 @@ export function useCreateOrder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreateOrderInput): Promise<{ orderId: string; pricing: OrderPricing }> => {
+    mutationFn: async (input: CreateOrderInput): Promise<CreateOrderResult> => {
       if (!user?.id) throw new Error("Usuário não autenticado");
 
       // 1. Get service details
@@ -66,7 +69,6 @@ export function useCreateOrder() {
 
         zoneFee = Number(zone?.fee_extra || 0);
 
-        // Check for surge pricing
         const { data: zoneRule } = await supabase
           .from("zone_rules")
           .select("surge_multiplier")
@@ -123,7 +125,7 @@ export function useCreateOrder() {
           discount: discount,
           total_price: totalPrice,
           duration_hours: Number(service.duration_hours),
-          status: input.proId ? "confirmed" : "scheduled",
+          status: input.proId ? "confirmed" : "draft",
           notes: input.notes || null,
         })
         .select("id")
@@ -142,7 +144,6 @@ export function useCreateOrder() {
           order_id: order.id,
         });
 
-        // Increment coupon uses_count manually
         const { data: currentCoupon } = await supabase
           .from("coupons")
           .select("uses_count")
@@ -198,7 +199,6 @@ export function useValidateCoupon() {
         throw new Error("Cupom inválido ou expirado");
       }
 
-      // Check validity dates
       const now = new Date();
       if (coupon.valid_from && new Date(coupon.valid_from) > now) {
         throw new Error("Cupom ainda não está válido");
@@ -207,18 +207,15 @@ export function useValidateCoupon() {
         throw new Error("Cupom expirado");
       }
 
-      // Check max uses
       if (coupon.max_uses && (coupon.uses_count || 0) >= coupon.max_uses) {
         throw new Error("Cupom esgotado");
       }
 
-      // Check min order value
       const minValue = Number(coupon.min_order_value || 0);
       if (orderValue < minValue) {
         throw new Error(`Valor mínimo: R$ ${minValue.toFixed(2).replace(".", ",")}`);
       }
 
-      // Check if user already used this coupon
       const { data: existingUse } = await supabase
         .from("coupon_uses")
         .select("id")
@@ -230,7 +227,6 @@ export function useValidateCoupon() {
         throw new Error("Você já utilizou este cupom");
       }
 
-      // Calculate discount
       let discount: number;
       if (coupon.discount_type === "percent") {
         discount = orderValue * (Number(coupon.discount_value) / 100);
@@ -240,7 +236,7 @@ export function useValidateCoupon() {
 
       return {
         code: coupon.code,
-        discount: Math.min(discount, orderValue), // Can't discount more than order value
+        discount: Math.min(discount, orderValue),
         description: coupon.description,
       };
     },
