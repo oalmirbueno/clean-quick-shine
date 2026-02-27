@@ -20,12 +20,10 @@ import {
   RefreshCw,
   Check,
   Loader2,
-  RotateCcw
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/ui/Logo";
-import { useTutorialComplete } from "@/components/ui/WelcomeTutorial";
 
 interface SettingItemProps {
   icon: React.ReactNode;
@@ -82,7 +80,6 @@ export default function AppSettings() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user, signOut, roles } = useAuth();
-  const { reset: resetTutorial } = useTutorialComplete();
   
   const userRole = roles[0] || "client";
   
@@ -91,10 +88,8 @@ export default function AppSettings() {
   const [isClearing, setIsClearing] = useState(false);
   const [cleared, setCleared] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
-  const [tutorialReset, setTutorialReset] = useState(false);
 
   useEffect(() => {
-    // Calculate cache size (approximate)
     if ('storage' in navigator && 'estimate' in navigator.storage) {
       navigator.storage.estimate().then(({ usage }) => {
         if (usage) {
@@ -103,31 +98,23 @@ export default function AppSettings() {
         }
       });
     }
-
-    // Check if running as PWA
     setIsPWA(window.matchMedia("(display-mode: standalone)").matches);
   }, []);
 
   const handleClearCache = async () => {
     setIsClearing(true);
-    
     try {
-      // Clear caches
       if ('caches' in window) {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map(name => caches.delete(name)));
       }
-      
-      // Clear localStorage (except auth)
       const authData = localStorage.getItem('sb-mdgiviynypoyixpskmpu-auth-token');
       localStorage.clear();
       if (authData) {
         localStorage.setItem('sb-mdgiviynypoyixpskmpu-auth-token', authData);
       }
-      
       setCleared(true);
       setCacheSize("0 MB");
-      
       setTimeout(() => setCleared(false), 2000);
     } catch (error) {
       console.error("Error clearing cache:", error);
@@ -139,14 +126,6 @@ export default function AppSettings() {
   const handleLogout = async () => {
     await signOut();
     navigate("/login");
-  };
-
-  const getHomeRoute = () => {
-    switch (userRole) {
-      case "pro": return "/pro/home";
-      case "admin": return "/admin/dashboard";
-      default: return "/client/home";
-    }
   };
 
   return (
@@ -181,7 +160,7 @@ export default function AppSettings() {
             <Logo size="sm" iconOnly />
           </div>
           <div className="flex-1">
-            <h2 className="font-semibold text-lg">CleanQuick</h2>
+            <h2 className="font-semibold text-lg">Já Limpo</h2>
             <p className="text-sm text-muted-foreground">Versão 1.0.0</p>
             {isPWA && (
               <span className="inline-flex items-center gap-1 mt-1 text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
@@ -193,65 +172,35 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Appearance */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Aparência</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <SettingItem
               icon={theme === "dark" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               label="Tema escuro"
               description={theme === "dark" ? "Ativado" : "Desativado"}
-              action={
-                <Toggle 
-                  checked={theme === "dark"} 
-                  onChange={(v) => setTheme(v ? "dark" : "light")} 
-                />
-              }
+              action={<Toggle checked={theme === "dark"} onChange={(v) => setTheme(v ? "dark" : "light")} />}
             />
           </div>
         </motion.section>
 
         {/* Notifications */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-        >
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Notificações</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <SettingItem
               icon={notifications ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
               label="Notificações push"
               description={notifications ? "Receber alertas de pedidos" : "Notificações desativadas"}
-              action={
-                <Toggle 
-                  checked={notifications} 
-                  onChange={setNotifications} 
-                />
-              }
+              action={<Toggle checked={notifications} onChange={setNotifications} />}
             />
           </div>
         </motion.section>
 
         {/* App & Data */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">App e Dados</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
-            {!isPWA && (
-              <SettingItem
-                icon={<Download className="w-5 h-5 text-primary" />}
-                label="Instalar aplicativo"
-                description="Adicionar à tela inicial"
-                onClick={() => navigate("/install")}
-              />
-            )}
             <SettingItem
               icon={<Database className="w-5 h-5" />}
               label="Dados em cache"
@@ -263,10 +212,7 @@ export default function AppSettings() {
                   ) : isClearing ? (
                     <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                   ) : (
-                    <button
-                      onClick={handleClearCache}
-                      className="p-2 rounded-lg hover:bg-muted transition-colors"
-                    >
+                    <button onClick={handleClearCache} className="p-2 rounded-lg hover:bg-muted transition-colors">
                       <Trash2 className="w-5 h-5 text-muted-foreground" />
                     </button>
                   )}
@@ -279,27 +225,11 @@ export default function AppSettings() {
               description="Verificar nova versão"
               onClick={() => window.location.reload()}
             />
-            <SettingItem
-              icon={tutorialReset ? <Check className="w-5 h-5 text-success" /> : <RotateCcw className="w-5 h-5" />}
-              label="Resetar tutorial PWA"
-              description="Ver instruções de instalação novamente"
-              onClick={() => {
-                resetTutorial();
-                setTutorialReset(true);
-                setTimeout(() => {
-                  window.location.reload();
-                }, 500);
-              }}
-            />
           </div>
         </motion.section>
 
         {/* Support */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-        >
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Suporte</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
             <SettingItem
@@ -325,11 +255,7 @@ export default function AppSettings() {
 
         {/* Account */}
         {user && (
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
+          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Conta</h3>
             <div className="bg-card rounded-2xl border border-border overflow-hidden">
               <SettingItem
@@ -344,15 +270,8 @@ export default function AppSettings() {
         )}
 
         {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
-          className="text-center pt-4"
-        >
-          <p className="text-xs text-muted-foreground">
-            CleanQuick © 2024. Todos os direitos reservados.
-          </p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="text-center pt-4">
+          <p className="text-xs text-muted-foreground">Já Limpo © 2025. Todos os direitos reservados.</p>
         </motion.div>
       </main>
     </div>
