@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Logo } from "@/components/ui/Logo";
+import logoFullText from "@/assets/logo-full-text.png";
 import { Download, Smartphone, Share, MoreVertical, Plus } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -39,7 +39,7 @@ export default function InstallScreen() {
     <div className="fixed inset-0 bg-gradient-to-b from-background to-accent/20 flex items-center justify-center p-6">
       <div className="w-full max-w-sm flex flex-col items-center text-center space-y-8">
         {/* Logo */}
-        <Logo size="2xl" iconOnly />
+        <img src={logoFullText} alt="Já Limpo" className="h-20 w-auto" />
 
         {/* Icon */}
         <div className="relative">
