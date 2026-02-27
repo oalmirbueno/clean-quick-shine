@@ -155,9 +155,13 @@ export function useAdminDocuments() {
 
 function getDocTypeName(docType: string): string {
   const names: Record<string, string> = {
+    cpf: "CPF",
+    rg: "RG ou CNH",
+    selfie: "Selfie com documento",
+    comprovante_endereco: "Comprovante de Endereço",
+    antecedentes: "Certidão de Antecedentes",
     id_front: "RG/CNH (Frente)",
     id_back: "RG/CNH (Verso)",
-    selfie: "Selfie",
     proof_residence: "Comprovante de Residência",
   };
   return names[docType] || docType;

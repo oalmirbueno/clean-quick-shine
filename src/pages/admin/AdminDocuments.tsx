@@ -17,10 +17,16 @@ import { CheckCircle, XCircle, Eye, FileText, User, Clock, Filter } from "lucide
 import { Skeleton } from "@/components/ui/skeleton";
 
 const docTypeNames: Record<string, string> = {
+  cpf: "CPF",
+  rg: "RG ou CNH",
+  selfie: "Selfie com documento",
+  comprovante_endereco: "Comprovante de Endereço",
+  antecedentes: "Certidão de Antecedentes",
+  // Legacy types
   id_front: "RG/CNH (Frente)",
   id_back: "RG/CNH (Verso)",
-  selfie: "Selfie",
   proof_residence: "Comprovante de Residência",
+  proof: "Comprovante de Residência",
 };
 
 export default function AdminDocuments() {
