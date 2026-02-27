@@ -447,60 +447,7 @@ function ConfirmationStep({ orderId, paymentResult }: { orderId: string; payment
     );
   }
 
-  // PIX - Mostrar QR Code
-  if (payment.method === "pix" && payment.pix_qr_code) {
-    return (
-      <div className="flex flex-col gap-6 p-6">
-        <div className="flex flex-col items-center text-center gap-2">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <QrCode className="w-8 h-8 text-primary" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground">Pague com Pix</h2>
-          <p className="text-sm text-muted-foreground">
-            Escaneie o QR Code ou copie o código abaixo
-          </p>
-        </div>
-
-        {/* QR Code */}
-        <div className="flex justify-center">
-          <div className="p-4 bg-white rounded-2xl shadow-sm">
-            <img
-              src={`data:image/png;base64,${payment.pix_qr_code}`}
-              alt="QR Code Pix"
-              className="w-56 h-56"
-            />
-          </div>
-        </div>
-
-        {/* Copia e Cola */}
-        {payment.pix_copy_paste && (
-          <button
-            onClick={() => handleCopy(payment.pix_copy_paste!)}
-            className="w-full flex items-center gap-3 p-4 bg-card rounded-2xl border border-border hover:border-primary/30 transition-all"
-          >
-            {copied ? (
-              <Check className="w-5 h-5 text-primary flex-shrink-0" />
-            ) : (
-              <Copy className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-            )}
-            <span className="text-sm text-muted-foreground truncate flex-1 text-left">
-              {payment.pix_copy_paste}
-            </span>
-          </button>
-        )}
-
-        {/* Status */}
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Aguardando pagamento...
-        </div>
-
-        <p className="text-xs text-center text-muted-foreground">
-          O pagamento será confirmado automaticamente em segundos após o Pix.
-        </p>
-      </div>
-    );
-  }
+  // (PIX QR Code case already handled by isPixWithQr above)
 
   // Boleto
   if (paymentMethod === "boleto" && (boletoUrl || invoiceUrl)) {
