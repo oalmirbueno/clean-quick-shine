@@ -30,7 +30,8 @@ export function BottomNav({ variant }: BottomNavProps) {
   const items = variant === "client" ? clientItems : proItems;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border/30 safe-bottom z-50">
+    <nav className="fixed bottom-0 left-0 right-0 glass border-t border-border/30 z-50"
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 10px)' }}>
       <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
         {items.map((item) => {
           const isActive = location.pathname === item.path;
