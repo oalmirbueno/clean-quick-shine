@@ -30,11 +30,28 @@ export default function ResetPassword() {
     checkSession();
   }, [navigate]);
 
+  const validatePassword = (pwd: string): string | null => {
+    if (pwd.length < 8) return "Senha deve ter no mínimo 8 caracteres";
+    if (!/[A-Z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra maiúscula";
+    if (!/[a-z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra minúscula";
+    if (!/[0-9]/.test(pwd)) return "Senha deve ter pelo menos 1 número";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) return "Senha deve ter pelo menos 1 caractere especial";
+    const commonPasswords = [
+      "12345678", "password", "123456789", "qwerty123", "password1",
+      "11111111", "abc12345", "iloveyou", "admin123", "welcome1",
+    ];
+    if (commonPasswords.includes(pwd.toLowerCase())) {
+      return "Esta senha é muito comum. Escolha uma senha mais segura.";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password.length < 6) {
-      toast.error("A senha deve ter pelo menos 6 caracteres");
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      toast.error(passwordError);
       return;
     }
 
@@ -157,7 +174,7 @@ export default function ResetPassword() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              A senha deve ter pelo menos 6 caracteres.
+              Mínimo 8 caracteres com maiúscula, minúscula, número e especial.
             </p>
 
             <PrimaryButton type="submit" fullWidth loading={loading}>
