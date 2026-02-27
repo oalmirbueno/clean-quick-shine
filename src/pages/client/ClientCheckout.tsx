@@ -519,7 +519,7 @@ export default function ClientCheckout() {
   if (!orderId) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
+        <div className="h-full bg-background flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4">
             <p className="text-muted-foreground">Pedido não encontrado</p>
             <PrimaryButton onClick={() => navigate("/client/home")}>
@@ -534,7 +534,7 @@ export default function ClientCheckout() {
   if (orderLoading || customerLoading) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-full bg-background flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </PageTransition>
@@ -543,7 +543,7 @@ export default function ClientCheckout() {
 
   return (
     <PageTransition>
-      <div className="fixed inset-0 bg-background flex flex-col safe-top">
+      <div className="h-full bg-background flex flex-col safe-top">
         {/* Header */}
         <header className="flex-shrink-0 bg-card border-b border-border px-4 py-3">
           <div className="flex items-center gap-3">

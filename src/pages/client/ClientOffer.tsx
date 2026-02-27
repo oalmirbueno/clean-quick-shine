@@ -81,7 +81,7 @@ export default function ClientOffer() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background pb-24">
+      <div className="h-full bg-background flex flex-col safe-top">
         {/* Header */}
         <header className="bg-card border-b border-border p-4">
           <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ export default function ClientOffer() {
           </div>
         </header>
 
-        <main className="p-4 space-y-4">
+        <main className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Card da Profissional */}
           <div className="bg-card rounded-2xl border border-border p-5">
             <div className="flex items-center gap-3 mb-3">

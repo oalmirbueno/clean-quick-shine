@@ -88,7 +88,7 @@ export default function ResetPassword() {
   if (success) {
     return (
       <PageTransition>
-        <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
+        <div className="h-full bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
           <div className="w-full max-w-sm animate-fade-in">
             <div className="text-center mb-8">
               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
@@ -116,7 +116,7 @@ export default function ResetPassword() {
 
   return (
     <PageTransition>
-      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
+      <div className="h-full bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
         <div className="w-full max-w-sm animate-fade-in">
           <div className="text-center mb-8">
             <Logo size="md" className="justify-center mb-4" />

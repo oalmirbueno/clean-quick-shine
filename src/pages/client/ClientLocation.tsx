@@ -148,14 +148,14 @@ export default function ClientLocation() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-background flex items-center justify-center">
+      <div className="h-full bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">

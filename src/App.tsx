@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useViewportHeight } from "@/hooks/useViewportHeight";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -101,6 +102,7 @@ const queryClient = new QueryClient({
 
 const App = () => {
   const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
+  useViewportHeight();
 
   useEffect(() => {
     const standalone =

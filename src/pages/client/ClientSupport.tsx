@@ -51,7 +51,7 @@ export default function ClientSupport() {
   });
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       <header className="bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ export default function ClientSupport() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-24 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 animate-fade-in">
         {tickets.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">Você não tem tickets abertos</p>

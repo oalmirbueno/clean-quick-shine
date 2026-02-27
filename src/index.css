@@ -64,6 +64,7 @@
     --shadow-card: var(--shadow-sm);
     --shadow-card-hover: var(--shadow-md);
     --shadow-button: 0 2px 4px 0 hsl(162 78% 45% / 0.2);
+    --app-height: 100vh;
   }
 
   .dark {
@@ -284,36 +285,26 @@ button, a, input, select, textarea, [role="button"] {
 }
 
 /* Global viewport fix for mobile */
-html {
-  height: 100%;
-  height: -webkit-fill-available;
-  background-color: hsl(var(--background));
-}
-
+html,
 body {
-  height: 100%;
-  height: -webkit-fill-available;
   margin: 0;
   padding: 0;
-  background-color: hsl(var(--background));
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
   overflow: hidden;
+  background-color: hsl(var(--background));
 }
 
 #root {
-  height: 100%;
-  height: -webkit-fill-available;
+  height: var(--app-height);
+  width: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: hsl(var(--background));
-}
-
-/* Override min-h-screen to use fill-available */
-.min-h-screen {
-  min-height: 100% !important;
-  min-height: -webkit-fill-available !important;
 }
 
 /* Standalone PWA adjustments */

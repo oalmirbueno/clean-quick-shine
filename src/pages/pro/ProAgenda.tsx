@@ -139,7 +139,7 @@ export default function ProAgenda() {
   }
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col safe-top">
+    <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
       <header className="flex-shrink-0 bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
@@ -206,7 +206,7 @@ export default function ProAgenda() {
         )}
       </div>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-28 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 animate-fade-in">
         {/* Calendar Header */}
         <div className="flex items-center justify-between mb-4">
           <button
