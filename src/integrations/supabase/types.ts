@@ -1364,6 +1364,7 @@ export type Database = {
       withdrawals: {
         Row: {
           amount: number
+          asaas_transfer_id: string | null
           created_at: string
           encrypted_bank_info: string | null
           encrypted_pix_key: string | null
@@ -1375,6 +1376,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          asaas_transfer_id?: string | null
           created_at?: string
           encrypted_bank_info?: string | null
           encrypted_pix_key?: string | null
@@ -1386,6 +1388,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          asaas_transfer_id?: string | null
           created_at?: string
           encrypted_bank_info?: string | null
           encrypted_pix_key?: string | null
