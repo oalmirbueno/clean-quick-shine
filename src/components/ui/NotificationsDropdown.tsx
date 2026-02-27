@@ -57,8 +57,7 @@ export function NotificationsDropdown() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40"
-              style={{ zIndex: 9998 }}
+              className="fixed inset-0 bg-black/50 z-[100]"
               onClick={() => setIsOpen(false)}
             />
 
@@ -68,10 +67,9 @@ export function NotificationsDropdown() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed top-0 right-0 w-full max-w-sm h-full bg-card border-l border-border shadow-2xl flex flex-col"
+              className="fixed top-0 right-0 w-full max-w-sm h-full bg-card border-l border-border shadow-2xl flex flex-col z-[101]"
               style={{ 
-                zIndex: 9999,
-                paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)'
+                paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)'
               }}
             >
               {/* Header */}

@@ -85,15 +85,22 @@ export default function ForgotPassword() {
 
   return (
     <PageTransition>
-      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
-        <div className="w-full max-w-sm animate-fade-in">
+      <div 
+        className="fixed inset-0 bg-background flex flex-col overflow-hidden"
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)' }}
+      >
+        {/* Back button at top */}
+        <div className="px-4 py-2 shrink-0">
           <button
             onClick={() => navigate("/login")}
-            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors mb-6"
+            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
+        </div>
 
+        <div className="flex-1 flex flex-col justify-center px-6 pb-10">
+        <div className="w-full max-w-sm mx-auto animate-fade-in">
           <div className="text-center mb-8">
             <Logo size="md" className="justify-center mb-4" />
             <h1 className="text-xl font-semibold text-foreground mb-2">
@@ -131,6 +138,7 @@ export default function ForgotPassword() {
               Fazer login
             </button>
           </p>
+        </div>
         </div>
       </div>
     </PageTransition>

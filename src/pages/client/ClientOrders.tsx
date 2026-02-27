@@ -188,7 +188,7 @@ export default function ClientOrders() {
         )}
       </div>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-20 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-28 animate-fade-in">
         {displayedOrders.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">

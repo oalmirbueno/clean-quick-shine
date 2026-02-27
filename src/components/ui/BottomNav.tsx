@@ -30,9 +30,14 @@ export function BottomNav({ variant }: BottomNavProps) {
   const items = variant === "client" ? clientItems : proItems;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border/30 z-50"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-      <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
+    <nav 
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/30"
+      style={{
+        background: 'hsl(var(--card))',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
+    >
+      <div className="flex items-center justify-around py-2.5 max-w-lg mx-auto">
         {items.map((item) => {
           const isActive = location.pathname === item.path;
           return (
