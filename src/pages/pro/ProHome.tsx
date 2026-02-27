@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { QualityBadge } from "@/components/ui/QualityBadge";
-import { MapMock } from "@/components/ui/MapMock";
+import { MapView } from "@/components/ui/MapView";
+import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AnimatedSection } from "@/components/ui/AnimatedCard";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
@@ -38,6 +39,57 @@ export default function ProHome() {
   const balance = proData?.balance || 0;
   const planType = proData?.plan?.type || "free";
   const metrics = proData?.metrics;
+  const [proLocation, setProLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Update pro location in DB every 60s when available
+  useEffect(() => {
+    if (!isAvailable || !user?.id) return;
+
+    const updateLocation = () => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setProLocation({ lat: latitude, lng: longitude });
+          await supabase
+            .from("pro_profiles")
+            .update({
+              current_lat: latitude,
+              current_lng: longitude,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("user_id", user.id);
+        },
+        (err) => console.warn("Geo error:", err),
+        { enableHighAccuracy: true }
+      );
+    };
+
+    updateLocation();
+    const interval = setInterval(updateLocation, 60000);
+    return () => clearInterval(interval);
+  }, [isAvailable, user?.id]);
+
+  // Build order markers for the map
+  const orderMarkers = availableOrders
+    ?.filter((o: any) => o.address?.lat && o.address?.lng)
+    .map((o: any) => ({
+      lat: Number(o.address.lat),
+      lng: Number(o.address.lng),
+      color: "orange" as const,
+      popup: `${o.serviceName || "Serviço"} - R$ ${o.proEarning?.toFixed(2).replace(".", ",")}`,
+    })) || [];
+
+  const mapCenter = proLocation || {
+    lat: Number(proData?.proProfile?.current_lat) || -25.4284,
+    lng: Number(proData?.proProfile?.current_lng) || -49.2733,
+  };
+
+  const proMarker = {
+    lat: mapCenter.lat,
+    lng: mapCenter.lng,
+    color: "blue" as const,
+    popup: "Você está aqui",
+  };
 
   const handleToggleAvailability = async () => {
     try {
@@ -226,16 +278,14 @@ export default function ProHome() {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="mt-3 h-40 rounded-lg overflow-hidden"
+                  className="mt-3 rounded-lg overflow-hidden"
                 >
-                  <MapMock 
-                    markers={[{
-                      lat: Number(proData?.proProfile?.current_lat) || -23.5634,
-                      lng: Number(proData?.proProfile?.current_lng) || -46.6542,
-                      label: "Você"
-                    }]}
-                    radiusKm={Number(proData?.proProfile?.radius_km) || 10}
-                    height="100%"
+                  <MapView
+                    center={mapCenter}
+                    zoom={13}
+                    markers={[proMarker, ...orderMarkers]}
+                    showUserLocation
+                    height="200px"
                   />
                 </motion.div>
               )}
