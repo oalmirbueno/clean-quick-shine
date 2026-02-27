@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { BottomNav } from "@/components/ui/BottomNav";
@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useCurrentProData, useAvailableOrdersForPro, useToggleProAvailability, useAcceptOrder, useDeclineOrder } from "@/hooks/useProData";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 export default function ProHome() {
   const navigate = useNavigate();
@@ -31,6 +32,8 @@ export default function ProHome() {
   const { toggleAvailability } = useToggleProAvailability();
   const acceptOrderMutation = useAcceptOrder();
   const declineOrderMutation = useDeclineOrder();
+  const { isSupported: pushSupported, permission: pushPermission, subscribe: pushSubscribe, showLocalNotification } = usePushNotifications();
+  const prevOrderCountRef = useRef(0);
 
   const isAvailable = proData?.proProfile?.available_now || false;
   const isVerified = proData?.proProfile?.verified || false;
@@ -40,6 +43,30 @@ export default function ProHome() {
   const planType = proData?.plan?.type || "free";
   const metrics = proData?.metrics;
   const [proLocation, setProLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Request push permission when pro goes available
+  useEffect(() => {
+    if (isAvailable && pushSupported && pushPermission === "default") {
+      pushSubscribe();
+    }
+  }, [isAvailable, pushSupported, pushPermission]);
+
+  // Show local notification when new orders arrive while app is in background
+  useEffect(() => {
+    if (!availableOrders || availableOrders.length === 0) {
+      prevOrderCountRef.current = 0;
+      return;
+    }
+    if (availableOrders.length > prevOrderCountRef.current && prevOrderCountRef.current > 0 && document.hidden) {
+      const latestOrder = availableOrders[0] as any;
+      showLocalNotification("Novo pedido disponível! 🧹", {
+        body: `${latestOrder?.serviceName || "Serviço"} - R$ ${latestOrder?.totalPrice?.toFixed(2).replace(".", ",")}`,
+        data: { url: "/pro/home" },
+        tag: "new-order",
+      } as any);
+    }
+    prevOrderCountRef.current = availableOrders.length;
+  }, [availableOrders?.length]);
 
   // Update pro location in DB every 60s when available
   useEffect(() => {

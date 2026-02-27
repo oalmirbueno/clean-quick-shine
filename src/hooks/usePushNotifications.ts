@@ -1,131 +1,143 @@
 import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
-type PermissionState = "default" | "granted" | "denied" | "unsupported";
-
-interface UsePushNotificationsReturn {
-  isSupported: boolean;
-  permission: PermissionState;
-  isSubscribed: boolean;
-  requestPermission: () => Promise<boolean>;
-  subscribe: () => Promise<PushSubscription | null>;
-  unsubscribe: () => Promise<boolean>;
-}
-
-export function usePushNotifications(): UsePushNotificationsReturn {
-  const [isSupported, setIsSupported] = useState(false);
-  const [permission, setPermission] = useState<PermissionState>("default");
+export function usePushNotifications() {
+  const { user } = useAuth();
+  const [permission, setPermission] = useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
-    const checkSupport = async () => {
-      const supported =
-        "serviceWorker" in navigator &&
-        "PushManager" in window &&
-        "Notification" in window;
+    const supported =
+      "Notification" in window &&
+      "serviceWorker" in navigator &&
+      "PushManager" in window;
+    setIsSupported(supported);
+    if (supported) {
+      setPermission(Notification.permission);
+    }
+  }, []);
 
-      setIsSupported(supported);
+  // Check if already subscribed
+  useEffect(() => {
+    if (!isSupported || !user?.id) return;
 
-      if (!supported) {
-        setPermission("unsupported");
-        return;
-      }
-
-      // Get current permission state
-      setPermission(Notification.permission as PermissionState);
-
-      // Get service worker registration
+    const checkSubscription = async () => {
       try {
-        const reg = await navigator.serviceWorker.ready;
-        setRegistration(reg);
-
-        // Check if already subscribed
-        const subscription = await (reg as any).pushManager?.getSubscription();
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await (registration as any).pushManager.getSubscription();
         setIsSubscribed(!!subscription);
-      } catch (error) {
-        console.error("Error checking push subscription:", error);
+      } catch {
+        setIsSubscribed(false);
       }
     };
 
-    checkSupport();
-  }, []);
+    checkSubscription();
+  }, [isSupported, user?.id]);
 
-  const requestPermission = useCallback(async (): Promise<boolean> => {
-    if (!isSupported) {
-      return false;
-    }
+  const subscribe = useCallback(async () => {
+    if (!isSupported || !user?.id) return false;
 
     try {
-      const result = await Notification.requestPermission();
-      setPermission(result as PermissionState);
-      return result === "granted";
-    } catch (error) {
-      console.error("Error requesting notification permission:", error);
-      return false;
-    }
-  }, [isSupported]);
+      const perm = await Notification.requestPermission();
+      setPermission(perm);
+      if (perm !== "granted") return false;
 
-  const subscribe = useCallback(async (): Promise<PushSubscription | null> => {
-    if (!registration || permission !== "granted") {
-      return null;
-    }
+      const registration = await navigator.serviceWorker.ready;
 
-    try {
-      // In production, you'd use your VAPID public key here
+      const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || "";
+      if (!vapidKey) {
+        console.warn("VAPID public key not configured");
+        return false;
+      }
+
       const subscription = await (registration as any).pushManager.subscribe({
         userVisibleOnly: true,
-        // applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
 
+      const subJson = subscription.toJSON();
+      const { error } = await supabase.from("push_subscriptions" as any).upsert(
+        {
+          user_id: user.id,
+          endpoint: subJson.endpoint!,
+          p256dh: subJson.keys!.p256dh!,
+          auth_key: subJson.keys!.auth!,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,endpoint" }
+      );
+
+      if (error) {
+        console.error("Error saving push subscription:", error);
+        return false;
+      }
+
       setIsSubscribed(true);
-
-      // In production, send subscription to your backend
-      console.log("Push subscription:", JSON.stringify(subscription));
-
-      return subscription;
+      return true;
     } catch (error) {
-      console.error("Error subscribing to push:", error);
-      return null;
-    }
-  }, [registration, permission]);
-
-  const unsubscribe = useCallback(async (): Promise<boolean> => {
-    if (!registration) {
+      console.error("Push subscription error:", error);
       return false;
     }
+  }, [isSupported, user?.id]);
+
+  const unsubscribe = useCallback(async () => {
+    if (!isSupported || !user?.id) return;
 
     try {
-      const subscription = await (registration as any).pushManager?.getSubscription();
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await (registration as any).pushManager.getSubscription();
+
       if (subscription) {
         await subscription.unsubscribe();
-        setIsSubscribed(false);
-        return true;
+        await (supabase.from("push_subscriptions" as any) as any)
+          .delete()
+          .eq("user_id", user.id)
+          .eq("endpoint", subscription.endpoint);
       }
-      return false;
+
+      setIsSubscribed(false);
     } catch (error) {
-      console.error("Error unsubscribing from push:", error);
-      return false;
+      console.error("Unsubscribe error:", error);
     }
-  }, [registration]);
+  }, [isSupported, user?.id]);
+
+  const showLocalNotification = useCallback(
+    async (title: string, options?: NotificationOptions) => {
+      if (permission !== "granted") return;
+
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.showNotification(title, {
+          icon: "/pwa-192x192.png",
+          badge: "/pwa-72x72.png",
+          ...options,
+        } as any);
+      } catch {
+        new Notification(title, options);
+      }
+    },
+    [permission]
+  );
 
   return {
     isSupported,
     permission,
     isSubscribed,
-    requestPermission,
     subscribe,
     unsubscribe,
+    showLocalNotification,
   };
 }
 
-// Helper function for VAPID key conversion (for future use)
-// function urlBase64ToUint8Array(base64String: string): Uint8Array {
-//   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-//   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-//   const rawData = window.atob(base64);
-//   const outputArray = new Uint8Array(rawData.length);
-//   for (let i = 0; i < rawData.length; ++i) {
-//     outputArray[i] = rawData.charCodeAt(i);
-//   }
-//   return outputArray;
-// }
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
