@@ -72,7 +72,7 @@ export function BottomNav({ variant }: BottomNavProps) {
                   key={item.path}
                   onClick={() => navigate(item.path)}
                   className={cn(
-                    "flex h-full flex-col items-center justify-end gap-1 pb-1 transition-all",
+                    "flex h-full flex-col items-center justify-end gap-1 pb-3 transition-all",
                     isActive
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
