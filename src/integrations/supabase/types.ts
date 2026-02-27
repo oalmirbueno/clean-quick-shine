@@ -497,31 +497,49 @@ export type Database = {
       payments: {
         Row: {
           amount: number
+          asaas_payment_id: string | null
+          asaas_status: string | null
+          boleto_url: string | null
           created_at: string
           external_id: string | null
           id: string
+          invoice_url: string | null
           method: string
           order_id: string
+          pix_copy_paste: string | null
+          pix_qr_code: string | null
           status: string | null
           user_id: string
         }
         Insert: {
           amount: number
+          asaas_payment_id?: string | null
+          asaas_status?: string | null
+          boleto_url?: string | null
           created_at?: string
           external_id?: string | null
           id?: string
+          invoice_url?: string | null
           method: string
           order_id: string
+          pix_copy_paste?: string | null
+          pix_qr_code?: string | null
           status?: string | null
           user_id: string
         }
         Update: {
           amount?: number
+          asaas_payment_id?: string | null
+          asaas_status?: string | null
+          boleto_url?: string | null
           created_at?: string
           external_id?: string | null
           id?: string
+          invoice_url?: string | null
           method?: string
           order_id?: string
+          pix_copy_paste?: string | null
+          pix_qr_code?: string | null
           status?: string | null
           user_id?: string
         }
@@ -798,6 +816,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          asaas_customer_id: string | null
           avatar_url: string | null
           cpf: string | null
           created_at: string
@@ -808,6 +827,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          asaas_customer_id?: string | null
           avatar_url?: string | null
           cpf?: string | null
           created_at?: string
@@ -818,6 +838,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          asaas_customer_id?: string | null
           avatar_url?: string | null
           cpf?: string | null
           created_at?: string
