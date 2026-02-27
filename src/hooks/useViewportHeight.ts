@@ -3,8 +3,27 @@ import { useEffect } from "react";
 export function useViewportHeight() {
   useEffect(() => {
     const setViewportHeight = () => {
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-      document.documentElement.style.setProperty("--app-height", `${Math.round(viewportHeight)}px`);
+      const visualViewportHeight = window.visualViewport?.height;
+      const windowHeight = window.innerHeight;
+
+      const activeEl = document.activeElement;
+      const isInputFocused =
+        !!activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.getAttribute("contenteditable") === "true");
+
+      // Keep a stable app height during browser chrome/UI movements.
+      // Only use visualViewport when keyboard/input is actually active.
+      const viewportHeight =
+        isInputFocused && visualViewportHeight
+          ? visualViewportHeight
+          : windowHeight;
+
+      document.documentElement.style.setProperty(
+        "--app-height",
+        `${Math.round(viewportHeight)}px`
+      );
     };
 
     const setViewportHeightDeferred = () => {
@@ -21,7 +40,6 @@ export function useViewportHeight() {
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", setViewportHeightDeferred);
-      window.visualViewport.addEventListener("scroll", setViewportHeightDeferred);
     }
 
     return () => {
@@ -32,7 +50,6 @@ export function useViewportHeight() {
 
       if (window.visualViewport) {
         window.visualViewport.removeEventListener("resize", setViewportHeightDeferred);
-        window.visualViewport.removeEventListener("scroll", setViewportHeightDeferred);
       }
     };
   }, []);
