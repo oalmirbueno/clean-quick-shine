@@ -102,7 +102,7 @@ function PaymentStep({
   orderId: string;
   orderTotal: number;
   serviceName: string;
-  onPaymentCreated: () => void;
+  onPaymentCreated: (result: any) => void;
 }) {
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const createPayment = useCreatePayment();
@@ -152,8 +152,8 @@ function PaymentStep({
       payload.creditCardHolderInfo = holderInfo;
     }
 
-    await createPayment.mutateAsync(payload);
-    onPaymentCreated();
+    const result = await createPayment.mutateAsync(payload);
+    onPaymentCreated(result);
   };
 
   const methods = [
@@ -312,7 +312,7 @@ function PaymentStep({
 }
 
 // Etapa 3: Confirmação / Aguardando pagamento
-function ConfirmationStep({ orderId }: { orderId: string }) {
+function ConfirmationStep({ orderId, paymentResult }: { orderId: string; paymentResult?: any }) {
   const navigate = useNavigate();
   const { data: payment, isLoading } = usePaymentByOrder(orderId);
   const [copied, setCopied] = useState(false);
@@ -328,16 +328,32 @@ function ConfirmationStep({ orderId }: { orderId: string }) {
     }
   };
 
+  // Derive values with paymentResult fallback
+  const pixQrCode = payment?.pix_qr_code || paymentResult?.payment?.pixQrCode;
+  const pixCopyPaste = payment?.pix_copy_paste || paymentResult?.payment?.pixCopyPaste;
+  const paymentStatus = payment?.status;
+  const paymentMethod = payment?.method || paymentResult?.payment?.billingType?.toLowerCase();
+  const boletoUrl = payment?.boleto_url || paymentResult?.payment?.bankSlipUrl;
+  const invoiceUrl = payment?.invoice_url || paymentResult?.payment?.invoiceUrl;
+  const isPixWithQr = paymentMethod === "pix" && pixQrCode;
+
   useEffect(() => {
-    if (payment?.status === "confirmed") {
+    if (paymentStatus === "confirmed" && !isPixWithQr) {
       const timer = setTimeout(() => {
         navigate(`/client/order-tracking?orderId=${orderId}`);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [payment?.status, orderId, navigate]);
+    // Sandbox may auto-confirm PIX — still show QR briefly
+    if (paymentStatus === "confirmed" && isPixWithQr) {
+      const timer = setTimeout(() => {
+        navigate(`/client/order-tracking?orderId=${orderId}`);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentStatus, isPixWithQr, orderId, navigate]);
 
-  if (isLoading) {
+  if (isLoading && !paymentResult) {
     return (
       <div className="flex flex-col items-center justify-center p-12 gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -346,7 +362,7 @@ function ConfirmationStep({ orderId }: { orderId: string }) {
     );
   }
 
-  if (!payment) {
+  if (!payment && !paymentResult) {
     return (
       <div className="flex flex-col items-center justify-center p-12">
         <p className="text-muted-foreground">Pagamento não encontrado</p>
@@ -354,8 +370,69 @@ function ConfirmationStep({ orderId }: { orderId: string }) {
     );
   }
 
-  // Pagamento confirmado
-  if (payment.status === "confirmed") {
+  // PIX with QR Code (even if already confirmed in sandbox)
+  if (isPixWithQr) {
+    return (
+      <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col items-center text-center gap-2">
+          {paymentStatus === "confirmed" ? (
+            <>
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Check className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-semibold text-foreground">Pix confirmado!</h2>
+              <p className="text-sm text-muted-foreground">Pagamento recebido com sucesso</p>
+            </>
+          ) : (
+            <>
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <QrCode className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-semibold text-foreground">Pague com Pix</h2>
+              <p className="text-sm text-muted-foreground">Escaneie o QR Code ou copie o código abaixo</p>
+            </>
+          )}
+        </div>
+
+        <div className="flex justify-center">
+          <div className="p-4 bg-white rounded-2xl shadow-sm">
+            <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code Pix" className="w-56 h-56" />
+          </div>
+        </div>
+
+        {pixCopyPaste && (
+          <button
+            onClick={() => handleCopy(pixCopyPaste)}
+            className="w-full flex items-center gap-3 p-4 bg-card rounded-2xl border border-border hover:border-primary/30 transition-all"
+          >
+            {copied ? (
+              <Check className="w-5 h-5 text-primary flex-shrink-0" />
+            ) : (
+              <Copy className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            )}
+            <span className="text-sm text-muted-foreground truncate flex-1 text-left">
+              {pixCopyPaste}
+            </span>
+          </button>
+        )}
+
+        {paymentStatus === "confirmed" ? (
+          <div className="flex items-center justify-center gap-2 text-sm text-primary">
+            <Check className="w-4 h-4" />
+            <span className="font-medium">Pagamento confirmado! Redirecionando...</span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Aguardando pagamento...
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Pagamento confirmado (non-PIX)
+  if (paymentStatus === "confirmed") {
     return (
       <div className="flex flex-col items-center justify-center p-12 gap-4">
         <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
@@ -426,7 +503,7 @@ function ConfirmationStep({ orderId }: { orderId: string }) {
   }
 
   // Boleto
-  if (payment.method === "boleto" && (payment.boleto_url || payment.invoice_url)) {
+  if (paymentMethod === "boleto" && (boletoUrl || invoiceUrl)) {
     return (
       <div className="flex flex-col gap-6 p-6">
         <div className="flex flex-col items-center text-center gap-2">
@@ -441,7 +518,7 @@ function ConfirmationStep({ orderId }: { orderId: string }) {
 
         <PrimaryButton
           fullWidth
-          onClick={() => window.open(payment.boleto_url || payment.invoice_url || "", "_blank")}
+          onClick={() => window.open(boletoUrl || invoiceUrl || "", "_blank")}
         >
           Abrir Boleto
         </PrimaryButton>
@@ -477,6 +554,7 @@ export default function ClientCheckout() {
   const { data: existingPayment } = usePaymentByOrder(orderId);
 
   const [step, setStep] = useState<"cpf" | "payment" | "confirmation">("cpf");
+  const [paymentResult, setPaymentResult] = useState<any>(null);
 
   // Definir step inicial baseado no estado
   useEffect(() => {
@@ -564,12 +642,15 @@ export default function ClientCheckout() {
               orderId={orderId!}
               orderTotal={order.total_price}
               serviceName={(order as any).service?.name || "Serviço de limpeza"}
-              onPaymentCreated={() => setStep("confirmation")}
+              onPaymentCreated={(result) => {
+                setPaymentResult(result);
+                setStep("confirmation");
+              }}
             />
           )}
 
           {step === "confirmation" && orderId && (
-            <ConfirmationStep orderId={orderId} />
+            <ConfirmationStep orderId={orderId} paymentResult={paymentResult} />
           )}
         </main>
 
