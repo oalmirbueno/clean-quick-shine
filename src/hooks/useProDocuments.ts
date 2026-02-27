@@ -124,6 +124,7 @@ export function useProDocuments() {
     documents,
     isLoading,
     uploadDocument: uploadDocument.mutate,
+    uploadDocumentAsync: uploadDocument.mutateAsync,
     isUploading: uploadDocument.isPending,
     getDocumentStatus,
     getSignedUrl,
