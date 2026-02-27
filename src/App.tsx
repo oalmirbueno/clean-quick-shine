@@ -24,6 +24,7 @@ import OnboardingClient from "./pages/OnboardingClient";
 import OnboardingPro from "./pages/OnboardingPro";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
+import ConfirmEmail from "./pages/ConfirmEmail";
 
 // Client Pages
 import ClientHome from "./pages/client/ClientHome";
@@ -146,6 +147,7 @@ const App = () => {
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/onboarding/client" element={<OnboardingClient />} />
             <Route path="/onboarding/pro" element={<OnboardingPro />} />
+            <Route path="/confirm-email" element={<ConfirmEmail />} />
 
             {/* Client Routes */}
             <Route path="/client/home" element={<ProtectedRoute requiredRole="client"><ClientHome /></ProtectedRoute>} />

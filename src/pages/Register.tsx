@@ -104,13 +104,8 @@ export default function Register() {
       }
     }
 
-    toast.success("Conta criada com sucesso!");
-    
-    if (userType === "client") {
-      navigate("/client/home");
-    } else {
-      navigate("/pro/home");
-    }
+    // Redirect to email confirmation page
+    navigate("/confirm-email", { state: { email } });
   };
 
   if (!userType) {
