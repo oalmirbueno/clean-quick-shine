@@ -67,12 +67,15 @@ export default function ClientOffer() {
     }
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateInput: string | Date) => {
     try {
+      const dateStr = dateInput instanceof Date 
+        ? dateInput.toISOString().split("T")[0] 
+        : String(dateInput);
       const [year, month, day] = dateStr.split("-");
       return `${day}/${month}/${year}`;
     } catch {
-      return dateStr;
+      return String(dateInput);
     }
   };
 
