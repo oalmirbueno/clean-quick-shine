@@ -25,7 +25,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
           <input
             ref={ref}
             className={cn(
-              "w-full py-3 rounded-lg border border-input bg-background",
+              "w-full py-3 rounded-xl border border-border/50 bg-background",
               "text-foreground placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary",
               "transition-all duration-200",

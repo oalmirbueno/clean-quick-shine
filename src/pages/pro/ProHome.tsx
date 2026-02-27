@@ -191,7 +191,7 @@ export default function ProHome() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex-shrink-0 bg-card border-b border-border p-4"
+        className="flex-shrink-0 glass border-b border-border/30 p-4"
       >
         <div className="flex items-center justify-between mb-4">
           <Logo size="lg" iconOnly />
@@ -325,7 +325,7 @@ export default function ProHome() {
           <motion.div 
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            className="p-5 bg-primary rounded-xl text-primary-foreground cursor-pointer"
+            className="p-5 bg-gradient-to-br from-primary to-primary/80 rounded-xl text-primary-foreground cursor-pointer shadow-lg"
             onClick={() => navigate("/pro/earnings")}
           >
             <p className="text-sm opacity-90">Saldo disponível</p>

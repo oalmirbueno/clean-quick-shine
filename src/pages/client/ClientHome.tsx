@@ -59,7 +59,7 @@ export default function ClientHome() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex-shrink-0 bg-card border-b border-border p-4"
+        className="flex-shrink-0 glass border-b border-border/30 p-4"
       >
         <div className="flex items-center justify-between mb-4">
           <Logo size="lg" iconOnly />
@@ -81,8 +81,8 @@ export default function ClientHome() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h1 className="text-xl font-semibold text-foreground">
-            Olá, {userName}
+          <h1 className="text-xl font-semibold">
+            Olá, <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{userName}</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">O que você precisa hoje?</p>
         </motion.div>
