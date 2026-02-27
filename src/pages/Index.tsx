@@ -63,7 +63,7 @@ export default function Index() {
               duration: 0.4, 
               ease: [0.4, 0, 0.2, 1]
             }}
-            className="w-20 h-20"
+            className="w-32 h-32"
           />
         </motion.div>
       )}
