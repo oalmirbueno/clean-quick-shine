@@ -69,7 +69,7 @@ export default function ClientProfile() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 pb-20 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 pb-28 animate-fade-in">
         {/* Menu Items */}
         <div className="bg-card rounded-xl border border-border overflow-hidden card-shadow">
           {menuItems.map((item, index) => (
@@ -109,7 +109,7 @@ export default function ClientProfile() {
 
         {/* App Version */}
         <p className="text-center text-sm text-muted-foreground mt-8">
-          CleanQuick v1.0.0
+          Já Limpo v1.0.0
         </p>
       </main>
 

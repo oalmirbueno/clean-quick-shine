@@ -209,24 +209,28 @@ export default function Login() {
         </div>
 
 
+        {/* Back button at top */}
+        <div className="relative z-10 px-4 py-2 shrink-0">
+          <motion.button
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setUserType(null)}
+            className="w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5 text-foreground" />
+          </motion.button>
+        </div>
+
         {/* Content */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 pt-4 lg:w-[45%]">
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 pb-10 lg:w-[45%]">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto lg:mr-12"
           >
-            <motion.button
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setUserType(null)}
-              className="w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors mb-8"
-            >
-              <ChevronLeft className="w-5 h-5 text-foreground" />
-            </motion.button>
 
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
