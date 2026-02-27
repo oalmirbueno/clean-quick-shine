@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { OrderStatus, ProVerifiedStatus, WithdrawalStatus, PaymentStatus, TicketStatus } from "@/lib/types";
 
-type BadgeStatus = OrderStatus | ProVerifiedStatus | WithdrawalStatus | PaymentStatus | TicketStatus | "active" | "suspended" | "blocked" | "free" | "pro";
+type BadgeStatus = OrderStatus | ProVerifiedStatus | WithdrawalStatus | PaymentStatus | TicketStatus | "active" | "suspended" | "blocked" | "free" | "pro" | "elite" | "expired" | string;
 
 interface StatusBadgeProps {
   status: BadgeStatus;
