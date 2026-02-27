@@ -509,6 +509,7 @@ export type Database = {
           pix_copy_paste: string | null
           pix_qr_code: string | null
           status: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -525,6 +526,7 @@ export type Database = {
           pix_copy_paste?: string | null
           pix_qr_code?: string | null
           status?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -541,6 +543,7 @@ export type Database = {
           pix_copy_paste?: string | null
           pix_qr_code?: string | null
           status?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
