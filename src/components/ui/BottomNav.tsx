@@ -51,7 +51,7 @@ export function BottomNav({ variant }: BottomNavProps) {
           className={cn("grid items-end", gridCols)}
           style={{
             height: "calc(56px + env(safe-area-inset-bottom, 0px))",
-            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 6px)",
+            paddingBottom: "2px",
           }}
         >
           {items.map((item) => {
@@ -81,7 +81,7 @@ export function BottomNav({ variant }: BottomNavProps) {
   return (
     <>
       {/* Spacer to prevent content from hiding behind the fixed nav */}
-      <div className="shrink-0 w-full" style={{ height: "calc(56px + env(safe-area-inset-bottom, 0px))" }} />
+      <div className="shrink-0 w-full" style={{ height: "56px" }} />
       {typeof document !== "undefined" && createPortal(nav, document.body)}
     </>
   );
