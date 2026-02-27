@@ -66,7 +66,8 @@ export default function Login() {
   if (!userType) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
+        <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0"
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
           {/* Background Pattern */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/5 to-transparent" />
@@ -200,7 +201,8 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0 safe-top">
+       <div className="min-h-screen bg-background flex flex-col overflow-hidden fixed inset-0"
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {/* Background Pattern */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/5 to-transparent" />

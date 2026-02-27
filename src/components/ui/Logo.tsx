@@ -9,11 +9,11 @@ interface LogoProps {
 }
 
 const sizes = {
-  sm: { icon: "w-8 h-8", full: "h-8" },
-  md: { icon: "w-10 h-10", full: "h-10" },
-  lg: { icon: "w-14 h-14", full: "h-14" },
-  xl: { icon: "w-24 h-24", full: "h-28" },
-  "2xl": { icon: "w-32 h-32", full: "h-36" },
+  sm: { icon: "h-8", full: "h-8" },
+  md: { icon: "h-10", full: "h-10" },
+  lg: { icon: "h-14", full: "h-14" },
+  xl: { icon: "h-24", full: "h-28" },
+  "2xl": { icon: "h-32", full: "h-36" },
 };
 
 export function Logo({ size = "md", className, iconOnly = false }: LogoProps) {
@@ -24,7 +24,7 @@ export function Logo({ size = "md", className, iconOnly = false }: LogoProps) {
       <img 
         src={logoIcon} 
         alt="JáLimpo" 
-        className={cn(icon, className)}
+        className={cn(icon, "w-auto object-contain", className)}
       />
     );
   }
@@ -33,7 +33,7 @@ export function Logo({ size = "md", className, iconOnly = false }: LogoProps) {
     <img 
       src={logoFull} 
       alt="JáLimpo - Chamou, tá limpo" 
-      className={cn(full, "w-auto", className)}
+      className={cn(full, "w-auto object-contain", className)}
     />
   );
 }

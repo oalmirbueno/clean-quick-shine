@@ -52,31 +52,36 @@ export function NotificationsDropdown() {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
+            {/* Overlay fixed covering everything */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9998] bg-black/50"
+              className="fixed inset-0 bg-black/40"
+              style={{ zIndex: 9998 }}
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Dropdown */}
+            {/* Panel - fixed slide from right */}
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-16 sm:top-full sm:mt-2 sm:w-80 max-h-[70vh] bg-card border border-border rounded-xl shadow-lg overflow-hidden z-[9999]"
+              initial={{ opacity: 0, x: '100%' }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed top-0 right-0 w-full max-w-sm h-full bg-card border-l border-border shadow-2xl flex flex-col"
+              style={{ 
+                zIndex: 9999,
+                paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)'
+              }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border">
-                <h3 className="font-semibold text-foreground text-sm sm:text-base">Notificações</h3>
-                <div className="flex items-center gap-1 sm:gap-2">
+              <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
+                <h2 className="font-bold text-lg text-foreground">Notificações</h2>
+                <div className="flex items-center gap-3">
                   {unreadCount > 0 && (
                     <button
                       onClick={() => markAllAsRead()}
-                      className="text-xs text-primary hover:underline whitespace-nowrap"
+                      className="text-sm text-primary font-medium hover:underline"
                     >
                       Marcar lidas
                     </button>
@@ -85,20 +90,20 @@ export function NotificationsDropdown() {
                     onClick={() => setIsOpen(false)}
                     className="p-1.5 rounded-lg hover:bg-secondary"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
               {/* Notifications List */}
-              <div className="overflow-y-auto max-h-[calc(70vh-60px)] sm:max-h-[50vh]">
+              <div className="flex-1 overflow-y-auto">
                 {isLoading ? (
-                  <div className="p-6 sm:p-8 text-center">
+                  <div className="p-8 text-center">
                     <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className="p-6 sm:p-8 text-center">
-                    <Bell className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground mx-auto mb-2" />
+                  <div className="p-8 text-center">
+                    <Bell className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
                     <p className="text-muted-foreground text-sm">
                       Nenhuma notificação
                     </p>
@@ -109,16 +114,16 @@ export function NotificationsDropdown() {
                     const colorClass = typeColors[notification.type as keyof typeof typeColors] || typeColors.info;
 
                     return (
-                      <motion.button
+                      <button
                         key={notification.id}
                         onClick={() => handleNotificationClick(notification)}
                         className={cn(
-                          "w-full p-3 sm:p-4 flex gap-3 text-left hover:bg-secondary/50 transition-colors border-b border-border last:border-0",
+                          "w-full p-4 flex gap-3 text-left hover:bg-secondary/50 transition-colors border-b border-border last:border-0",
                           !notification.read && "bg-accent/30"
                         )}
                       >
-                        <div className={cn("w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0", colorClass)}>
-                          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0", colorClass)}>
+                          <Icon className="w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
@@ -142,7 +147,7 @@ export function NotificationsDropdown() {
                             })}
                           </p>
                         </div>
-                      </motion.button>
+                      </button>
                     );
                   })
                 )}
