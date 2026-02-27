@@ -18,19 +18,12 @@ export function AuthLoading({
       <div className="flex flex-col items-center gap-6 animate-fade-in">
         {/* Animated Logo Container */}
         <div className="relative">
-          {/* Pulse ring effect */}
-          <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" 
-               style={{ animationDuration: '1.5s' }} />
-          <div className="absolute inset-[-8px] rounded-full bg-primary/10 animate-pulse" 
-               style={{ animationDuration: '2s' }} />
-          
-          {/* Logo with bounce animation */}
-          <div className="relative w-20 h-20 rounded-full bg-white shadow-lg flex items-center justify-center animate-bounce"
-               style={{ animationDuration: '1s' }}>
+          {/* Logo with subtle animation */}
+          <div className="relative animate-pulse" style={{ animationDuration: '2s' }}>
             <img 
               src={logoIcon} 
               alt="JáLimpo" 
-              className="w-12 h-12"
+              className="w-24 h-24"
             />
           </div>
         </div>
