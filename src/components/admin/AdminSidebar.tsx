@@ -17,6 +17,7 @@ import {
   BarChart3,
   Shield,
   Building2,
+  Eye,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -70,6 +71,26 @@ export function AdminSidebar() {
           );
         })}
       </nav>
+
+      <div className="p-3 border-t border-border space-y-1">
+        <p className="px-3 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">Acessar como</p>
+        <Link
+          to="/client/home"
+          onClick={() => setIsOpen(false)}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <Eye className="w-4 h-4 shrink-0" />
+          <span>Ver como Cliente</span>
+        </Link>
+        <Link
+          to="/pro/home"
+          onClick={() => setIsOpen(false)}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <Eye className="w-4 h-4 shrink-0" />
+          <span>Ver como Diarista</span>
+        </Link>
+      </div>
 
       <div className="p-3 border-t border-border">
         <button

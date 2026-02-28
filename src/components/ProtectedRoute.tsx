@@ -58,7 +58,8 @@ export function ProtectedRoute({
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && !hasRole(requiredRole)) {
+  // Admins can access any role's routes
+  if (requiredRole && !hasRole(requiredRole) && !hasRole("admin")) {
     return <Navigate to="/access-denied" state={{ roles }} replace />;
   }
 
