@@ -91,9 +91,9 @@ import Offline from "./pages/Offline";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 30,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 2,
+      gcTime: 1000 * 60 * 15,
+      refetchOnWindowFocus: true,
       refetchOnReconnect: true,
       retry: 2,
     },
@@ -181,6 +181,7 @@ const App = () => {
                 <Route path="/pro/availability" element={<ProtectedRoute requiredRole="pro"><ProAvailability /></ProtectedRoute>} />
 
                 {/* Admin Routes */}
+                <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/admin/login" element={<Navigate to="/login" replace />} />
                 <Route path="/admin/dashboard" element={<ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>} />
                 <Route path="/admin/orders" element={<ProtectedRoute requiredRole="admin"><AdminOrders /></ProtectedRoute>} />

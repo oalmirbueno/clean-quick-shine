@@ -16,14 +16,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminDashboard() {
-  const today = new Date().toISOString().split("T")[0];
-  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
 
   const { data: ordersToday = 0 } = useQuery({
-    queryKey: ["admin_orders_today"],
+    queryKey: ["admin_orders_today", today],
     queryFn: async () => {
-      const { count } = await supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", today);
+      const { count, error } = await supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", today);
+      if (error) console.error("admin_orders_today error:", error);
       return count || 0;
     },
   });
@@ -31,7 +33,8 @@ export default function AdminDashboard() {
   const { data: ordersMonth = 0 } = useQuery({
     queryKey: ["admin_orders_month"],
     queryFn: async () => {
-      const { count } = await supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", monthStart);
+      const { count, error } = await supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", monthStart);
+      if (error) console.error("admin_orders_month error:", error);
       return count || 0;
     },
   });
@@ -39,7 +42,8 @@ export default function AdminDashboard() {
   const { data: financials = { gmv: 0, commission: 0, avgTicket: 0 } } = useQuery({
     queryKey: ["admin_financials"],
     queryFn: async () => {
-      const { data } = await supabase.from("orders").select("total_price, status").in("status", ["completed", "rated", "paid_out"]);
+      const { data, error } = await supabase.from("orders").select("total_price, status").in("status", ["completed", "rated", "paid_out"]);
+      if (error) console.error("admin_financials error:", error);
       const gmv = data?.reduce((sum, o) => sum + Number(o.total_price), 0) || 0;
       const commission = gmv * 0.2;
       const avgTicket = data && data.length > 0 ? gmv / data.length : 0;

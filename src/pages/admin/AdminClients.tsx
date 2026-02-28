@@ -12,21 +12,30 @@ export default function AdminClients() {
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
 
-  const { data: clients = [] } = useQuery({
+  const { data: clients = [], isLoading } = useQuery({
     queryKey: ["admin_all_clients"],
     queryFn: async () => {
-      const { data: roles } = await supabase
+      const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id")
         .eq("role", "client");
       
+      if (rolesError) {
+        console.error("admin_all_clients roles error:", rolesError);
+        return [];
+      }
       if (!roles || roles.length === 0) return [];
       
       const userIds = roles.map(r => r.user_id);
-      const { data: profiles } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
         .in("user_id", userIds);
+      
+      if (profilesError) {
+        console.error("admin_all_clients profiles error:", profilesError);
+        return [];
+      }
       
       return profiles || [];
     },
