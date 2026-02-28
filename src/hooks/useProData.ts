@@ -62,6 +62,93 @@ export function useCurrentProData() {
   });
 }
 
+export interface AssignedOrder {
+  id: string;
+  serviceName: string;
+  clientName: string;
+  city: string;
+  neighborhood: string;
+  street: string;
+  number: string;
+  date: string;
+  time: string;
+  status: string;
+  totalPrice: number;
+  proEarning: number;
+  scheduledDate: string;
+  scheduledTime: string;
+  address?: { lat: number | null; lng: number | null };
+}
+
+export function useAssignedOrders() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["assigned_orders", user?.id],
+    queryFn: async (): Promise<AssignedOrder[]> => {
+      if (!user?.id) return [];
+
+      const { data: orders, error } = await supabase
+        .from("orders")
+        .select(`
+          id, total_price, status, scheduled_date, scheduled_time,
+          client_id,
+          services:service_id (name),
+          addresses:address_id (city, neighborhood, street, number, lat, lng)
+        `)
+        .eq("pro_id", user.id)
+        .in("status", ["confirmed", "en_route", "in_progress"])
+        .order("scheduled_date", { ascending: true })
+        .order("scheduled_time", { ascending: true });
+
+      if (error || !orders || orders.length === 0) return [];
+
+      // Fetch client names
+      const clientIds = [...new Set(orders.map(o => o.client_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name")
+        .in("user_id", clientIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      return orders.map(order => {
+        const scheduledDate = new Date(order.scheduled_date);
+        let dateLabel = scheduledDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+        if (scheduledDate.toDateString() === today.toDateString()) dateLabel = "Hoje";
+        else if (scheduledDate.toDateString() === tomorrow.toDateString()) dateLabel = "Amanhã";
+
+        return {
+          id: order.id,
+          serviceName: (order.services as any)?.name || "Serviço",
+          clientName: profileMap.get(order.client_id) || "Cliente",
+          city: (order.addresses as any)?.city || "",
+          neighborhood: (order.addresses as any)?.neighborhood || "",
+          street: (order.addresses as any)?.street || "",
+          number: (order.addresses as any)?.number || "",
+          date: dateLabel,
+          time: order.scheduled_time.slice(0, 5),
+          status: order.status || "confirmed",
+          totalPrice: Number(order.total_price),
+          proEarning: Number(order.total_price) * 0.8,
+          scheduledDate: order.scheduled_date,
+          scheduledTime: order.scheduled_time,
+          address: {
+            lat: (order.addresses as any)?.lat,
+            lng: (order.addresses as any)?.lng,
+          },
+        };
+      });
+    },
+    enabled: !!user?.id,
+    refetchInterval: 30000,
+  });
+}
+
 export interface AvailableOrder {
   id: string;
   serviceName: string;
