@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthLoading } from "@/components/ui/AuthLoading";
+import { AdminBackBanner } from "@/components/ui/AdminBackBanner";
 import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
@@ -63,5 +64,12 @@ export function ProtectedRoute({
     return <Navigate to="/access-denied" state={{ roles }} replace />;
   }
 
-  return <>{children}</>;
+  const showAdminBanner = hasRole("admin") && requiredRole && requiredRole !== "admin";
+
+  return (
+    <>
+      {showAdminBanner && <AdminBackBanner />}
+      {children}
+    </>
+  );
 }
