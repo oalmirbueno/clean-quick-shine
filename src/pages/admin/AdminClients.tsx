@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminTable } from "@/components/ui/AdminTable";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Search, Ban } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -63,7 +61,7 @@ export default function AdminClients() {
             setSelectedClient(c);
             setShowBlockModal(true);
           }}
-          className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+          className="p-2 rounded-xl hover:bg-destructive/10 text-destructive transition-colors"
         >
           <Ban className="w-4 h-4" />
         </button>
@@ -72,32 +70,26 @@ export default function AdminClients() {
   ];
 
   return (
-    <div className="min-h-screen bg-background safe-top">
-      <AdminSidebar />
-      
-      <main className="lg:ml-64 pt-14 lg:pt-0">
-        <div className="p-4 lg:p-6 space-y-6 animate-fade-in">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
-            <p className="text-muted-foreground">Gerenciar clientes cadastrados</p>
-          </div>
+    <AdminLayout>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
+        <p className="text-muted-foreground">Gerenciar clientes cadastrados</p>
+      </div>
 
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Buscar por nome ou telefone..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-          </div>
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Buscar por nome ou telefone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+        />
+      </div>
 
-          <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
-            <AdminTable columns={columns} data={filteredClients} keyField="id" />
-          </div>
-        </div>
-      </main>
+      <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
+        <AdminTable columns={columns} data={filteredClients} keyField="id" />
+      </div>
 
       <ConfirmModal
         isOpen={showBlockModal}
@@ -108,6 +100,6 @@ export default function AdminClients() {
         confirmText="Bloquear"
         variant="danger"
       />
-    </div>
+    </AdminLayout>
   );
 }

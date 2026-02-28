@@ -1,4 +1,4 @@
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { MiniChart } from "@/components/ui/MiniChart";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
     queryFn: async () => {
       const { data } = await supabase.from("orders").select("total_price, status").in("status", ["completed", "rated", "paid_out"]);
       const gmv = data?.reduce((sum, o) => sum + Number(o.total_price), 0) || 0;
-      const commission = gmv * 0.2; // 20% commission
+      const commission = gmv * 0.2;
       const avgTicket = data && data.length > 0 ? gmv / data.length : 0;
       return { gmv, commission, avgTicket };
     },
@@ -75,12 +75,16 @@ export default function AdminDashboard() {
   const { data: recentOrders = [] } = useQuery({
     queryKey: ["admin_recent_orders"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: orders } = await supabase
         .from("orders")
-        .select("id, total_price, scheduled_date, client_id, profiles!orders_client_id_fkey(full_name)")
+        .select("id, total_price, scheduled_date, client_id")
         .order("created_at", { ascending: false })
         .limit(5);
-      return data || [];
+      if (!orders || orders.length === 0) return [];
+      const clientIds = [...new Set(orders.map(o => o.client_id))];
+      const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").in("user_id", clientIds);
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+      return orders.map(o => ({ ...o, clientName: profileMap.get(o.client_id) || "Cliente" }));
     },
   });
 
@@ -88,103 +92,96 @@ export default function AdminDashboard() {
   const revenuePerDay = [250, 380, 320, 450, 400, 520, 480, 580, 510, 620, 550, 680, 600, 720];
 
   return (
-    <div className="min-h-screen bg-background safe-top">
-      <AdminSidebar />
-      
-      <main className="lg:ml-64 pt-14 lg:pt-0">
-        <div className="p-4 lg:p-6 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between"
-          >
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-muted-foreground">Visão geral do marketplace</p>
-            </div>
-            <ThemeToggle />
-          </motion.div>
-
-          <AnimatedSection delay={1}>
-            <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <AnimatedListItem>
-                <MetricCard title="Pedidos hoje" value={ordersToday} icon={ClipboardList} />
-              </AnimatedListItem>
-              <AnimatedListItem>
-                <MetricCard title="Pedidos no mês" value={ordersMonth} icon={ClipboardList} />
-              </AnimatedListItem>
-              <AnimatedListItem>
-                <MetricCard title="GMV Total" value={financials.gmv} icon={DollarSign} format="currency" />
-              </AnimatedListItem>
-              <AnimatedListItem>
-                <MetricCard title="Receita (Comissões)" value={financials.commission} icon={TrendingUp} format="currency" />
-              </AnimatedListItem>
-            </AnimatedList>
-          </AnimatedSection>
-
-          <AnimatedSection delay={2}>
-            <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <AnimatedListItem>
-                <MetricCard title="Ticket Médio" value={financials.avgTicket} format="currency" />
-              </AnimatedListItem>
-              <AnimatedListItem>
-                <MetricCard title="Taxa Cancelamento" value={cancelRate} format="percent" />
-              </AnimatedListItem>
-              <AnimatedListItem>
-                <MetricCard title="Novas Diaristas (7d)" value={newPros7d} icon={UserPlus} />
-              </AnimatedListItem>
-              <AnimatedListItem>
-                <MetricCard title="Clientes Ativos" value={activeClients} icon={Users} />
-              </AnimatedListItem>
-            </AnimatedList>
-          </AnimatedSection>
-
-          <AnimatedSection delay={3}>
-            <div className="grid lg:grid-cols-2 gap-6">
-              <motion.div whileHover={{ scale: 1.01 }} className="bg-card rounded-xl border border-border p-4 card-shadow">
-                <h3 className="font-semibold text-foreground mb-4">Pedidos por dia</h3>
-                <MiniChart data={ordersPerDay} height={120} />
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.01 }} className="bg-card rounded-xl border border-border p-4 card-shadow">
-                <h3 className="font-semibold text-foreground mb-4">Receita por dia (R$)</h3>
-                <MiniChart data={revenuePerDay} height={120} color="bg-success" />
-              </motion.div>
-            </div>
-          </AnimatedSection>
-
-          <AnimatedSection delay={4} className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
-            <div className="p-4 border-b border-border">
-              <h3 className="font-semibold text-foreground">Pedidos recentes</h3>
-            </div>
-            <div className="divide-y divide-border">
-              {recentOrders.map((order: any, index: number) => (
-                <motion.div 
-                  key={order.id} 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  whileHover={{ backgroundColor: "hsl(var(--muted) / 0.5)" }}
-                  className="p-4 flex items-center justify-between transition-colors"
-                >
-                  <div>
-                    <p className="font-medium text-foreground">#{order.id.slice(0, 8)}</p>
-                    <p className="text-sm text-muted-foreground">{order.profiles?.full_name || "Cliente"}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-foreground">
-                      R$ {Number(order.total_price).toFixed(2).replace(".", ",")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{order.scheduled_date}</p>
-                  </div>
-                </motion.div>
-              ))}
-              {recentOrders.length === 0 && (
-                <div className="p-8 text-center text-muted-foreground">Nenhum pedido encontrado</div>
-              )}
-            </div>
-          </AnimatedSection>
+    <AdminLayout>
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground">Visão geral do marketplace</p>
         </div>
-      </main>
-    </div>
+        <ThemeToggle />
+      </motion.div>
+
+      <AnimatedSection delay={1}>
+        <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <AnimatedListItem>
+            <MetricCard title="Pedidos hoje" value={ordersToday} icon={ClipboardList} />
+          </AnimatedListItem>
+          <AnimatedListItem>
+            <MetricCard title="Pedidos no mês" value={ordersMonth} icon={ClipboardList} />
+          </AnimatedListItem>
+          <AnimatedListItem>
+            <MetricCard title="GMV Total" value={financials.gmv} icon={DollarSign} format="currency" />
+          </AnimatedListItem>
+          <AnimatedListItem>
+            <MetricCard title="Receita (Comissões)" value={financials.commission} icon={TrendingUp} format="currency" />
+          </AnimatedListItem>
+        </AnimatedList>
+      </AnimatedSection>
+
+      <AnimatedSection delay={2}>
+        <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <AnimatedListItem>
+            <MetricCard title="Ticket Médio" value={financials.avgTicket} format="currency" />
+          </AnimatedListItem>
+          <AnimatedListItem>
+            <MetricCard title="Taxa Cancelamento" value={cancelRate} format="percent" />
+          </AnimatedListItem>
+          <AnimatedListItem>
+            <MetricCard title="Novas Diaristas (7d)" value={newPros7d} icon={UserPlus} />
+          </AnimatedListItem>
+          <AnimatedListItem>
+            <MetricCard title="Clientes Ativos" value={activeClients} icon={Users} />
+          </AnimatedListItem>
+        </AnimatedList>
+      </AnimatedSection>
+
+      <AnimatedSection delay={3}>
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div className="bg-card rounded-xl border border-border p-4 card-shadow">
+            <h3 className="font-semibold text-foreground mb-4">Pedidos por dia</h3>
+            <MiniChart data={ordersPerDay} height={120} />
+          </div>
+          <div className="bg-card rounded-xl border border-border p-4 card-shadow">
+            <h3 className="font-semibold text-foreground mb-4">Receita por dia (R$)</h3>
+            <MiniChart data={revenuePerDay} height={120} color="bg-success" />
+          </div>
+        </div>
+      </AnimatedSection>
+
+      <AnimatedSection delay={4} className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
+        <div className="p-4 border-b border-border">
+          <h3 className="font-semibold text-foreground">Pedidos recentes</h3>
+        </div>
+        <div className="divide-y divide-border">
+          {recentOrders.map((order: any, index: number) => (
+            <motion.div 
+              key={order.id} 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 + index * 0.1 }}
+              className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+            >
+              <div>
+                <p className="font-medium text-foreground">#{order.id.slice(0, 8)}</p>
+                <p className="text-sm text-muted-foreground">{order.clientName}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium text-foreground">
+                  R$ {Number(order.total_price).toFixed(2).replace(".", ",")}
+                </p>
+                <p className="text-xs text-muted-foreground">{order.scheduled_date}</p>
+              </div>
+            </motion.div>
+          ))}
+          {recentOrders.length === 0 && (
+            <div className="p-8 text-center text-muted-foreground">Nenhum pedido encontrado</div>
+          )}
+        </div>
+      </AnimatedSection>
+    </AdminLayout>
   );
 }
