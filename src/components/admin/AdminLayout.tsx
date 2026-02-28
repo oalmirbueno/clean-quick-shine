@@ -7,10 +7,10 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="h-screen flex flex-col bg-background safe-top overflow-hidden">
+    <div className="min-h-screen flex bg-background">
       <AdminSidebar />
-      <main className="lg:ml-64 pt-14 lg:pt-0 flex-1 min-h-0 overflow-y-auto">
-        <div className="p-4 lg:p-6 space-y-6 animate-fade-in">
+      <main className="lg:ml-64 flex-1 pt-14 lg:pt-0 min-h-screen overflow-y-auto">
+        <div className="p-4 lg:p-6 space-y-6 animate-fade-in pb-8">
           {children}
         </div>
       </main>
