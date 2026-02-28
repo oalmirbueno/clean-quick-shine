@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { } from "react";
 import { useViewportHeight } from "@/hooks/useViewportHeight";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -101,31 +101,8 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
   useViewportHeight();
 
-  useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true ||
-      document.referrer.includes("android-app://");
-
-    setIsInstalled(standalone);
-  }, []);
-
-  // Still detecting
-  if (isInstalled === null) return null;
-
-  // NOT installed → show install screen only
-  if (!isInstalled) {
-    return (
-      <ThemeProvider>
-        <InstallScreen />
-      </ThemeProvider>
-    );
-  }
-
-  // INSTALLED → normal app, no install prompts
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

@@ -116,14 +116,20 @@ export default function AdminPros() {
         </select>
       </div>
 
-      <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
-        <AdminTable
-          columns={columns}
-          data={filteredPros}
-          keyField="id"
-          onRowClick={(pro) => navigate(`/admin/pros/${pro.user_id}`)}
-        />
-      </div>
+      {isLoading ? (
+        <div className="bg-card rounded-xl border border-border p-8 text-center text-muted-foreground animate-pulse">
+          Carregando diaristas...
+        </div>
+      ) : (
+        <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
+          <AdminTable
+            columns={columns}
+            data={filteredPros}
+            keyField="id"
+            onRowClick={(pro) => navigate(`/admin/pros/${pro.user_id}`)}
+          />
+        </div>
+      )}
     </AdminLayout>
   );
 }
