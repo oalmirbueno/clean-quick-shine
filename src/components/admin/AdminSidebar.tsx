@@ -107,15 +107,15 @@ export function AdminSidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-background border-b border-border z-40 flex items-center px-4"
-        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b border-border z-40 flex items-center px-4"
+        style={{ paddingTop: 'env(safe-area-inset-top, 12px)', height: 'calc(4rem + env(safe-area-inset-top, 12px))' }}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 rounded-xl hover:bg-muted transition-colors"
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-6 h-6" />
         </button>
-        <Logo size="sm" className="ml-3" />
+        <Logo size="md" className="ml-3" />
       </div>
 
       {/* Mobile Sidebar Overlay */}
