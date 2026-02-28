@@ -12,14 +12,30 @@ export default function AdminPros() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data: pros = [] } = useQuery({
+  const { data: pros = [], isLoading } = useQuery({
     queryKey: ["admin_all_pros"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: proProfiles, error } = await supabase
         .from("pro_profiles")
-        .select("*, profiles!pro_profiles_user_id_fkey(full_name, avatar_url, phone)")
+        .select("*")
         .order("created_at", { ascending: false });
-      return data || [];
+      if (error) {
+        console.error("admin_all_pros error:", error);
+        return [];
+      }
+      if (!proProfiles || proProfiles.length === 0) return [];
+
+      const userIds = proProfiles.map(p => p.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, avatar_url, phone")
+        .in("user_id", userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      return proProfiles.map(pro => ({
+        ...pro,
+        profiles: profileMap.get(pro.user_id) || null,
+      }));
     },
   });
 

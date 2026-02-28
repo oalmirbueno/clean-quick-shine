@@ -12,10 +12,10 @@ export default function AdminOrders() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data: orders = [] } = useQuery({
+  const { data: orders = [], isLoading } = useQuery({
     queryKey: ["admin_all_orders"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("orders")
         .select(`
           id, total_price, base_price, discount, zone_fee, status, scheduled_date, scheduled_time,
@@ -25,6 +25,7 @@ export default function AdminOrders() {
         `)
         .order("created_at", { ascending: false })
         .limit(200);
+      if (error) console.error("admin_all_orders error:", error);
       return data || [];
     },
   });
