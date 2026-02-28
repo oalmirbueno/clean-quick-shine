@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 import { Calendar, Trophy, MapPin, Clock, Check, X, Shield, Crown, Sparkles, Radio, Activity, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { useCurrentProData, useAvailableOrdersForPro, useToggleProAvailability, useAcceptOrder, useDeclineOrder } from "@/hooks/useProData";
+import { useCurrentProData, useAvailableOrdersForPro, useAssignedOrders, useToggleProAvailability, useAcceptOrder, useDeclineOrder } from "@/hooks/useProData";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -29,6 +29,7 @@ export default function ProHome() {
 
   const { data: proData, isLoading: isLoadingPro } = useCurrentProData();
   const { data: availableOrders = [], isLoading: isLoadingOrders } = useAvailableOrdersForPro();
+  const { data: assignedOrders = [], isLoading: isLoadingAssigned } = useAssignedOrders();
   const { toggleAvailability } = useToggleProAvailability();
   const acceptOrderMutation = useAcceptOrder();
   const declineOrderMutation = useDeclineOrder();
@@ -425,6 +426,71 @@ export default function ProHome() {
               )}
               <span className="text-primary font-medium">→</span>
             </motion.button>
+          </AnimatedSection>
+        )}
+
+        {/* Active/Assigned Orders */}
+        {assignedOrders.length > 0 && (
+          <AnimatedSection delay={6}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-semibold text-foreground">
+                Meus pedidos ativos
+              </h2>
+              <span className="text-xs text-primary font-medium px-2 py-1 bg-primary/10 rounded-full">
+                {assignedOrders.length}
+              </span>
+            </div>
+            <AnimatedList className="space-y-3">
+              {assignedOrders.map((order) => {
+                const statusLabel: Record<string, string> = {
+                  confirmed: "Confirmado",
+                  en_route: "A caminho",
+                  in_progress: "Em andamento",
+                };
+                const statusColor: Record<string, string> = {
+                  confirmed: "bg-primary/10 text-primary",
+                  en_route: "bg-warning/10 text-warning",
+                  in_progress: "bg-success/10 text-success",
+                };
+                return (
+                  <AnimatedListItem key={order.id}>
+                    <motion.div
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => navigate(`/pro/order/${order.id}`)}
+                      className="p-4 bg-card rounded-xl border border-primary/30 card-shadow cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-foreground">{order.serviceName}</h3>
+                            <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", statusColor[order.status] || "bg-muted text-muted-foreground")}>
+                              {statusLabel[order.status] || order.status}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">Cliente: {order.clientName}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-success">
+                            R$ {order.proEarning.toFixed(2).replace(".", ",")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{order.street}, {order.number}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{order.date} • {order.time}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </AnimatedListItem>
+                );
+              })}
+            </AnimatedList>
           </AnimatedSection>
         )}
 
