@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminTable } from "@/components/ui/AdminTable";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { InputField } from "@/components/ui/InputField";
@@ -60,35 +60,30 @@ export default function AdminCoupons() {
   ];
 
   return (
-    <div className="min-h-screen bg-background safe-top">
-      <AdminSidebar />
-      <main className="lg:ml-64 pt-14 lg:pt-0">
-        <div className="p-4 lg:p-6 space-y-6 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Cupons</h1>
-              <p className="text-muted-foreground">Gerenciar cupons de desconto</p>
-            </div>
-            <PrimaryButton onClick={() => setShowCreateModal(true)}><Plus className="w-4 h-4 mr-2" />Novo cupom</PrimaryButton>
-          </div>
-          <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
-            <AdminTable columns={columns} data={coupons} keyField="id" />
-          </div>
+    <AdminLayout>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Cupons</h1>
+          <p className="text-muted-foreground">Gerenciar cupons de desconto</p>
         </div>
-      </main>
+        <PrimaryButton onClick={() => setShowCreateModal(true)}><Plus className="w-4 h-4 mr-2" />Novo cupom</PrimaryButton>
+      </div>
+      <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
+        <AdminTable columns={columns} data={coupons} keyField="id" />
+      </div>
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setShowCreateModal(false)} />
           <div className="relative bg-card rounded-xl border border-border p-6 w-full max-w-md card-shadow animate-scale-in">
-            <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 p-1 rounded-lg hover:bg-secondary transition-colors"><X className="w-5 h-5 text-muted-foreground" /></button>
+            <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 p-1 rounded-xl hover:bg-muted transition-colors"><X className="w-5 h-5 text-muted-foreground" /></button>
             <h2 className="text-xl font-bold text-foreground mb-6">Criar cupom</h2>
             <div className="space-y-4">
               <InputField label="Código" placeholder="PROMO20" value={newCoupon.code} onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })} />
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">Tipo</label>
-                  <select value={newCoupon.type} onChange={(e) => setNewCoupon({ ...newCoupon, type: e.target.value as any })} className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground">
+                  <select value={newCoupon.type} onChange={(e) => setNewCoupon({ ...newCoupon, type: e.target.value as any })} className="w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground">
                     <option value="percent">Porcentagem</option>
                     <option value="fixed">Valor fixo</option>
                   </select>
@@ -105,6 +100,6 @@ export default function AdminCoupons() {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 }

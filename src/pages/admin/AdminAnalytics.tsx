@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { MiniChart } from "@/components/ui/MiniChart";
 import { 
-  TrendingUp, Users, ShoppingCart, DollarSign, ArrowUpRight, ArrowDownRight,
-  Download, BarChart3, Target, Repeat
+  TrendingUp, Users, ShoppingCart, DollarSign,
+  BarChart3, Target, Repeat
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -49,104 +49,89 @@ export default function AdminAnalytics() {
   });
 
   return (
-    <div className="min-h-screen bg-background flex safe-top">
-      <AdminSidebar />
-      <main className="flex-1 lg:ml-64">
-        <div className="p-4 lg:p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <BarChart3 className="w-7 h-7 text-primary" /> Analytics
-              </h1>
-              <p className="text-muted-foreground">Métricas e performance do marketplace</p>
-            </div>
-            <div className="flex gap-2">
-              <div className="flex bg-card rounded-lg border border-border p-1">
-                {(["7d", "30d", "90d"] as const).map(p => (
-                  <button key={p} onClick={() => setPeriod(p)} className={cn("px-3 py-1.5 rounded text-sm transition-all", period === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
-                    {p === "7d" ? "7 dias" : p === "30d" ? "30 dias" : "90 dias"}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="p-4 bg-card rounded-xl border border-border">
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center"><DollarSign className="w-5 h-5 text-success" /></div>
-              </div>
-              <p className="text-sm text-muted-foreground">Receita (comissões)</p>
-              <p className="text-2xl font-bold text-foreground">R$ {metrics.totalRevenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</p>
-            </div>
-            <div className="p-4 bg-card rounded-xl border border-border">
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center"><ShoppingCart className="w-5 h-5 text-primary" /></div>
-              </div>
-              <p className="text-sm text-muted-foreground">GMV Total</p>
-              <p className="text-2xl font-bold text-foreground">R$ {metrics.totalGMV.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</p>
-            </div>
-            <div className="p-4 bg-card rounded-xl border border-border">
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center"><Target className="w-5 h-5 text-warning" /></div>
-              </div>
-              <p className="text-sm text-muted-foreground">Ticket médio</p>
-              <p className="text-2xl font-bold text-foreground">R$ {metrics.avgTicket.toFixed(2).replace(".", ",")}</p>
-            </div>
-            <div className="p-4 bg-card rounded-xl border border-border">
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center"><Repeat className="w-5 h-5 text-foreground" /></div>
-              </div>
-              <p className="text-sm text-muted-foreground">Taxa conversão</p>
-              <p className="text-2xl font-bold text-foreground">{metrics.conversionRate.toFixed(1)}%</p>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-6 mb-6">
-            <div className="p-4 bg-card rounded-xl border border-border">
-              <h3 className="font-semibold text-foreground mb-4">Receita por dia</h3>
-              <MiniChart data={revenueData} color="success" height={150} />
-            </div>
-            <div className="p-4 bg-card rounded-xl border border-border">
-              <h3 className="font-semibold text-foreground mb-4">Pedidos por dia</h3>
-              <MiniChart data={ordersData} color="primary" height={150} />
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-6">
-            <div className="p-4 bg-card rounded-xl border border-border">
-              <h3 className="font-semibold text-foreground mb-4">Serviços mais populares</h3>
-              <div className="space-y-4">
-                {topServices.map((service: any) => (
-                  <div key={service.name}>
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="font-medium text-foreground">{service.name}</p>
-                      <span className="text-sm text-muted-foreground">{service.percentage}%</span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${service.percentage}%` }} />
-                    </div>
-                  </div>
-                ))}
-                {topServices.length === 0 && <p className="text-muted-foreground text-sm">Sem dados suficientes</p>}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 flex gap-4">
-            <button onClick={() => navigate("/admin/funnel")} className="flex-1 p-4 bg-card rounded-xl border border-border hover:bg-accent transition-colors text-left">
-              <TrendingUp className="w-6 h-6 text-primary mb-2" />
-              <h4 className="font-medium text-foreground">Funil de Conversão</h4>
-              <p className="text-sm text-muted-foreground">Análise do funil de vendas</p>
+    <AdminLayout>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <BarChart3 className="w-7 h-7 text-primary" /> Analytics
+          </h1>
+          <p className="text-muted-foreground">Métricas e performance do marketplace</p>
+        </div>
+        <div className="flex bg-card rounded-xl border border-border p-1">
+          {(["7d", "30d", "90d"] as const).map(p => (
+            <button key={p} onClick={() => setPeriod(p)} className={cn("px-3 py-1.5 rounded-lg text-sm transition-all", period === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+              {p === "7d" ? "7 dias" : p === "30d" ? "30 dias" : "90 dias"}
             </button>
-            <button onClick={() => navigate("/admin/cohorts")} className="flex-1 p-4 bg-card rounded-xl border border-border hover:bg-accent transition-colors text-left">
-              <Users className="w-6 h-6 text-primary mb-2" />
-              <h4 className="font-medium text-foreground">Cohorts</h4>
-              <p className="text-sm text-muted-foreground">Análise de retenção</p>
-            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 bg-card rounded-xl border border-border">
+          <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center mb-2"><DollarSign className="w-5 h-5 text-success" /></div>
+          <p className="text-sm text-muted-foreground">Receita (comissões)</p>
+          <p className="text-2xl font-bold text-foreground">R$ {metrics.totalRevenue.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</p>
+        </div>
+        <div className="p-4 bg-card rounded-xl border border-border">
+          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mb-2"><ShoppingCart className="w-5 h-5 text-primary" /></div>
+          <p className="text-sm text-muted-foreground">GMV Total</p>
+          <p className="text-2xl font-bold text-foreground">R$ {metrics.totalGMV.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</p>
+        </div>
+        <div className="p-4 bg-card rounded-xl border border-border">
+          <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center mb-2"><Target className="w-5 h-5 text-warning" /></div>
+          <p className="text-sm text-muted-foreground">Ticket médio</p>
+          <p className="text-2xl font-bold text-foreground">R$ {metrics.avgTicket.toFixed(2).replace(".", ",")}</p>
+        </div>
+        <div className="p-4 bg-card rounded-xl border border-border">
+          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2"><Repeat className="w-5 h-5 text-foreground" /></div>
+          <p className="text-sm text-muted-foreground">Taxa conversão</p>
+          <p className="text-2xl font-bold text-foreground">{metrics.conversionRate.toFixed(1)}%</p>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="p-4 bg-card rounded-xl border border-border">
+          <h3 className="font-semibold text-foreground mb-4">Receita por dia</h3>
+          <MiniChart data={revenueData} color="success" height={150} />
+        </div>
+        <div className="p-4 bg-card rounded-xl border border-border">
+          <h3 className="font-semibold text-foreground mb-4">Pedidos por dia</h3>
+          <MiniChart data={ordersData} color="primary" height={150} />
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="p-4 bg-card rounded-xl border border-border">
+          <h3 className="font-semibold text-foreground mb-4">Serviços mais populares</h3>
+          <div className="space-y-4">
+            {topServices.map((service: any) => (
+              <div key={service.name}>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-medium text-foreground">{service.name}</p>
+                  <span className="text-sm text-muted-foreground">{service.percentage}%</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${service.percentage}%` }} />
+                </div>
+              </div>
+            ))}
+            {topServices.length === 0 && <p className="text-muted-foreground text-sm">Sem dados suficientes</p>}
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+
+      <div className="flex gap-4">
+        <button onClick={() => navigate("/admin/funnel")} className="flex-1 p-4 bg-card rounded-xl border border-border hover:bg-accent transition-colors text-left">
+          <TrendingUp className="w-6 h-6 text-primary mb-2" />
+          <h4 className="font-medium text-foreground">Funil de Conversão</h4>
+          <p className="text-sm text-muted-foreground">Análise do funil de vendas</p>
+        </button>
+        <button onClick={() => navigate("/admin/cohorts")} className="flex-1 p-4 bg-card rounded-xl border border-border hover:bg-accent transition-colors text-left">
+          <Users className="w-6 h-6 text-primary mb-2" />
+          <h4 className="font-medium text-foreground">Cohorts</h4>
+          <p className="text-sm text-muted-foreground">Análise de retenção</p>
+        </button>
+      </div>
+    </AdminLayout>
   );
 }
