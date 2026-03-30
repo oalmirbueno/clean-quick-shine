@@ -273,7 +273,7 @@ export function useAvailableOrdersForPro() {
           time: order.scheduled_time.slice(0, 5),
           proEarning,
           distance,
-          eliteOnly: isEliteOnly,
+          eliteOnly: isProOnly,
           scheduledDate: order.scheduled_date,
           scheduledTime: order.scheduled_time,
         };
