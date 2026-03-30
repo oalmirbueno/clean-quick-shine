@@ -58,8 +58,8 @@ export default function ClientService() {
         ) : (
           <div className="space-y-3">
             {services.map((service) => {
-              const IconComp = iconMap[(service as any).icon] || Sparkles;
-              const tag = tagMap[service.name];
+              const IconComp = getIcon((service as any).icon);
+              const tag = getBadge(service);
               const isSelected = selectedService === service.id;
               const isProOnly = (service as any).requires_pro_plan;
 
