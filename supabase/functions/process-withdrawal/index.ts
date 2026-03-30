@@ -7,12 +7,19 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const json = (body: Record<string, unknown>, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // --- Auth ---
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -28,19 +35,16 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Verify auth
     const {
       data: { user },
       error: authError,
     } = await supabaseClient.auth.getUser();
+
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Não autorizado" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "Não autorizado" }, 401);
     }
 
-    // Verify pro role
+    // --- Role check ---
     const { data: roles } = await supabaseAdmin
       .from("user_roles")
       .select("role")
@@ -48,78 +52,75 @@ serve(async (req) => {
       .eq("role", "pro");
 
     if (!roles || roles.length === 0) {
-      return new Response(
-        JSON.stringify({
-          error: "Apenas profissionais podem solicitar saques",
-        }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return json({ error: "Apenas profissionais podem solicitar saques" }, 403);
     }
 
-    const { amount, pixKeyType, pixKey } = await req.json();
+    // --- Input validation ---
+    const body = await req.json();
+    const amount = Number(body.amount);
+    const pixKeyType = String(body.pixKeyType || "").trim();
+    const pixKey = String(body.pixKey || "").trim();
 
-    // Validations
-    if (!amount || amount < 10) {
-      return new Response(
-        JSON.stringify({ error: "Valor mínimo de saque é R$ 10,00" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    if (!amount || !Number.isFinite(amount) || amount < 10) {
+      return json({ error: "Valor mínimo de saque é R$ 10,00" }, 400);
     }
 
-    if (!pixKey || !pixKeyType) {
-      return new Response(
-        JSON.stringify({ error: "Chave Pix é obrigatória" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    if (amount > 50000) {
+      return json({ error: "Valor máximo de saque é R$ 50.000,00" }, 400);
     }
 
-    // Calculate available balance
-    const { data: completedOrders } = await supabaseAdmin
-      .from("orders")
-      .select("total_price")
-      .eq("pro_id", user.id)
-      .in("status", ["completed", "rated", "paid_out"]);
+    if (!pixKey) {
+      return json({ error: "Chave Pix é obrigatória" }, 400);
+    }
 
-    const totalEarnings = (completedOrders || []).reduce(
-      (sum: number, o: any) => sum + (o.total_price || 0) * 0.8,
-      0
-    );
+    const validPixTypes = ["cpf", "email", "phone", "random"];
+    if (!validPixTypes.includes(pixKeyType)) {
+      return json({ error: "Tipo de chave Pix inválido" }, 400);
+    }
 
-    const { data: existingWithdrawals } = await supabaseAdmin
-      .from("withdrawals")
-      .select("amount, status")
-      .eq("user_id", user.id)
-      .in("status", ["pending", "processing", "completed"]);
+    // --- SERVER-SIDE BALANCE VALIDATION (atomic with advisory lock) ---
+    // This DB function uses pg_advisory_xact_lock to serialize concurrent requests
+    // for the same user, preventing race conditions.
+    const { data: balanceResult, error: balanceError } = await supabaseAdmin
+      .rpc("calculate_pro_available_balance", { p_user_id: user.id });
 
-    const totalWithdrawn = (existingWithdrawals || []).reduce(
-      (sum: number, w: any) => sum + (w.amount || 0),
-      0
-    );
+    if (balanceError) {
+      console.error("Balance calculation error:", balanceError);
+      return json({ error: "Erro ao calcular saldo" }, 500);
+    }
 
-    const availableBalance = totalEarnings - totalWithdrawn;
+    const availableBalance = Number(balanceResult) || 0;
 
     if (amount > availableBalance) {
-      return new Response(
-        JSON.stringify({
-          error: `Saldo insuficiente. Disponível: R$ ${availableBalance.toFixed(2)}`,
-        }),
+      return json(
         {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          error: `Saldo insuficiente. Disponível: R$ ${availableBalance
+            .toFixed(2)
+            .replace(".", ",")}`,
+        },
+        400
       );
     }
 
-    // Create Asaas transfer
+    // --- Insert withdrawal FIRST (reserves the balance before Asaas call) ---
+    const { data: withdrawal, error: insertError } = await supabaseAdmin
+      .from("withdrawals")
+      .insert({
+        user_id: user.id,
+        amount,
+        method: "pix",
+        status: "pending",
+        encrypted_pix_key: pixKey,
+      })
+      .select("id")
+      .single();
+
+    if (insertError) {
+      console.error("Error reserving withdrawal:", insertError);
+      return json({ error: "Erro ao reservar saque" }, 500);
+    }
+
+    // --- Asaas transfer ---
     const ASAAS_API_KEY = Deno.env.get("ASAAS_API_KEY");
     const ASAAS_ENV = Deno.env.get("ASAAS_ENVIRONMENT") || "sandbox";
     const baseUrl =
@@ -134,56 +135,64 @@ serve(async (req) => {
       random: "EVP",
     };
 
-    const transferRes = await fetch(`${baseUrl}/transfers`, {
-      method: "POST",
-      headers: {
-        access_token: ASAAS_API_KEY!,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        value: amount,
-        operationType: "PIX",
-        pixAddressKey: pixKey,
-        pixAddressKeyType: pixKeyTypeMap[pixKeyType] || "CPF",
-        description: `Saque JáLimpo - ${user.id.slice(0, 8)}`,
-      }),
-    });
+    let transferData: Record<string, unknown> | null = null;
 
-    const transferData = await transferRes.json();
-
-    if (!transferRes.ok) {
-      console.error("Asaas transfer error:", transferData);
-      return new Response(
-        JSON.stringify({
-          error: "Erro ao processar transferência",
-          details: transferData,
+    try {
+      const transferRes = await fetch(`${baseUrl}/transfers`, {
+        method: "POST",
+        headers: {
+          access_token: ASAAS_API_KEY!,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          value: amount,
+          operationType: "PIX",
+          pixAddressKey: pixKey,
+          pixAddressKeyType: pixKeyTypeMap[pixKeyType] || "CPF",
+          description: `Saque JáLimpo - ${user.id.slice(0, 8)}`,
         }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      });
+
+      transferData = await transferRes.json();
+
+      if (!transferRes.ok) {
+        console.error("Asaas transfer error:", transferData);
+        // Reject the withdrawal since Asaas failed
+        await supabaseAdmin
+          .from("withdrawals")
+          .update({ status: "rejected" })
+          .eq("id", withdrawal.id);
+
+        return json(
+          { error: "Erro ao processar transferência Pix" },
+          400
+        );
+      }
+    } catch (asaasError) {
+      console.error("Asaas network error:", asaasError);
+      // Reject the withdrawal on network failure
+      await supabaseAdmin
+        .from("withdrawals")
+        .update({ status: "rejected" })
+        .eq("id", withdrawal.id);
+
+      return json({ error: "Erro de comunicação com gateway de pagamento" }, 502);
     }
 
-    // Save withdrawal
-    const { data: withdrawal, error: insertError } = await supabaseAdmin
+    // --- Update withdrawal with Asaas data ---
+    const finalStatus =
+      (transferData as any)?.status === "DONE" ? "completed" : "processing";
+
+    await supabaseAdmin
       .from("withdrawals")
-      .insert({
-        user_id: user.id,
-        amount,
-        method: "pix",
-        status: transferData.status === "DONE" ? "completed" : "processing",
-        encrypted_pix_key: pixKey,
-        asaas_transfer_id: transferData.id,
+      .update({
+        status: finalStatus,
+        asaas_transfer_id: (transferData as any)?.id || null,
+        processed_at: finalStatus === "completed" ? new Date().toISOString() : null,
       })
-      .select()
-      .single();
+      .eq("id", withdrawal.id);
 
-    if (insertError) {
-      console.error("Error saving withdrawal:", insertError);
-    }
-
-    // Create notification
+    // --- Notification ---
     await supabaseAdmin.from("notifications").insert({
       user_id: user.id,
       title: "Saque solicitado! 💰",
@@ -194,26 +203,17 @@ serve(async (req) => {
       read: false,
     });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        withdrawal: {
-          id: withdrawal?.id || transferData.id,
-          amount,
-          status: transferData.status,
-          estimatedDate: transferData.scheduleDate || "Em instantes",
-        },
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return json({
+      success: true,
+      withdrawal: {
+        id: withdrawal.id,
+        amount,
+        status: finalStatus,
+        estimatedDate: (transferData as any)?.scheduleDate || "Em instantes",
+      },
+    });
   } catch (error) {
     console.error("General error:", error);
-    return new Response(JSON.stringify({ error: "Erro interno do servidor" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: "Erro interno do servidor" }, 500);
   }
 });

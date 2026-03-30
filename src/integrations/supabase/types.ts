@@ -1519,6 +1519,10 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_pro_available_balance: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       decrypt_field: { Args: { encrypted_text: string }; Returns: string }
       encrypt_field: { Args: { plain_text: string }; Returns: string }
       find_nearest_zone: {
