@@ -217,7 +217,7 @@ export default function Install() {
           <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                <StyledLogo size="sm" />
+                <Logo size="sm" iconOnly />
               </div>
               <div>
                 <p className="font-medium">Já Limpo</p>
