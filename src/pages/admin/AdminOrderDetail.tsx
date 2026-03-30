@@ -36,7 +36,7 @@ const getAvailableActions = (status: string | null): OrderAction[] => {
       targetStatus: "rated",
       label: "✅ Liberar Saldo",
       description: "Marca como avaliado e libera o valor (80%) para saque pela diarista. Use para liberar manualmente sem avaliação do cliente.",
-      variant: "default",
+      variant: "primary",
     });
   }
 
