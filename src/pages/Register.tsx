@@ -37,6 +37,7 @@ export default function Register() {
   // Form fields
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneDisplay, setPhoneDisplay] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [city, setCity] = useState("");
@@ -54,6 +55,19 @@ export default function Register() {
     setSelectedPeriods(prev => 
       prev.includes(period) ? prev.filter(p => p !== period) : [...prev, period]
     );
+  };
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 11);
+    setPhone(raw);
+    setPhoneDisplay(formatPhone(raw));
   };
 
   const validatePassword = (pwd: string): string | null => {
@@ -77,6 +91,12 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Phone validation
+    if (phone.length < 10 || phone.length > 11) {
+      toast.error("Telefone inválido. Use DDD + número (10 ou 11 dígitos).");
+      return;
+    }
+
     // Password validation
     const passwordError = validatePassword(password);
     if (passwordError) {
@@ -113,13 +133,19 @@ export default function Register() {
 
     // For pro users, create pro_profile
     if (userType === "pro") {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("pro_profiles").insert({
-          user_id: user.id,
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        const { error: profileError } = await supabase.from("pro_profiles").insert({
+          user_id: currentUser.id,
           radius_km: parseInt(radius),
           bio: `Disponível: ${selectedDays.join(", ")} - ${selectedPeriods.join(", ")}`,
         });
+        if (profileError) {
+          console.error("Pro profile insert error:", profileError);
+          toast.error("Erro ao criar perfil profissional. Tente novamente ou entre em contato com o suporte.");
+          setLoading(false);
+          return;
+        }
       }
     }
 
@@ -244,8 +270,8 @@ export default function Register() {
                 label="Telefone"
                 type="tel"
                 placeholder="(11) 99999-9999"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={phoneDisplay}
+                onChange={handlePhoneChange}
                 required
               />
               
@@ -284,11 +310,11 @@ export default function Register() {
                   </button>
                   <span className="text-sm text-muted-foreground">
                     Aceito os{" "}
-                    <a href="#" className="text-primary hover:underline">
+                    <a href="/terms" target="_blank" className="text-primary hover:underline">
                       termos de uso
                     </a>{" "}
                     e{" "}
-                    <a href="#" className="text-primary hover:underline">
+                    <a href="/privacy" target="_blank" className="text-primary hover:underline">
                       política de privacidade
                     </a>
                   </span>
@@ -408,11 +434,11 @@ export default function Register() {
                 </button>
                 <span className="text-sm text-muted-foreground">
                   Aceito os{" "}
-                  <a href="#" className="text-primary hover:underline">
+                  <a href="/terms" target="_blank" className="text-primary hover:underline">
                     termos de uso
                   </a>{" "}
                   e{" "}
-                  <a href="#" className="text-primary hover:underline">
+                  <a href="/privacy" target="_blank" className="text-primary hover:underline">
                     política de privacidade
                   </a>
                 </span>
