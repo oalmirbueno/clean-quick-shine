@@ -154,7 +154,7 @@ export default function Install() {
           </div>
           <div className="p-6 flex flex-col items-center">
             <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-3">
-              <StyledLogo size="sm" />
+              <Logo size="sm" iconOnly />
             </div>
             <span className="font-medium">Já Limpo</span>
           </div>
