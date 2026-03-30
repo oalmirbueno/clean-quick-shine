@@ -346,7 +346,7 @@ export default function Install() {
         className="flex-shrink-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
       >
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <StyledLogo size="sm" />
+          <Logo size="sm" />
           <button
             onClick={() => navigate(-1)}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"

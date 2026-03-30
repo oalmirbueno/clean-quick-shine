@@ -239,11 +239,13 @@ export default function Login() {
               transition={{ delay: 0.1 }}
               className="mb-8"
             >
-              <Logo size="lg" className="mb-6" />
-              <h1 className="text-2xl font-bold text-foreground">
+              <div className="flex justify-center mb-6">
+                <Logo size="lg" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground text-center">
                 {userType === "client" ? "Entrar como Cliente" : "Entrar como Diarista"}
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 text-center">
                 Digite seus dados para continuar
               </p>
             </motion.div>
