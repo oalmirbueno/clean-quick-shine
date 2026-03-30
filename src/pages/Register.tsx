@@ -70,7 +70,7 @@ export default function Register() {
     setPhoneDisplay(formatPhone(raw));
   };
 
-
+  const validatePassword = (pwd: string): string | null => {
     if (pwd.length < 8) return "Senha deve ter no mínimo 8 caracteres";
     if (!/[A-Z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra maiúscula";
     if (!/[a-z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra minúscula";
