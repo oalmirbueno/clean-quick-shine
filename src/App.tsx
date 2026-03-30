@@ -128,6 +128,8 @@ const App = () => {
                 <Route path="/onboarding/client" element={<OnboardingClient />} />
                 <Route path="/onboarding/pro" element={<OnboardingPro />} />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
+                <Route path="/terms" element={<TermsOfUse />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
 
                 {/* Client Routes */}
                 <Route path="/client/home" element={<ProtectedRoute requiredRole="client"><ClientHome /></ProtectedRoute>} />

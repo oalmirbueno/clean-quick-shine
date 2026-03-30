@@ -91,6 +91,12 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Phone validation
+    if (phone.length < 10 || phone.length > 11) {
+      toast.error("Telefone inválido. Use DDD + número (10 ou 11 dígitos).");
+      return;
+    }
+
     // Password validation
     const passwordError = validatePassword(password);
     if (passwordError) {
