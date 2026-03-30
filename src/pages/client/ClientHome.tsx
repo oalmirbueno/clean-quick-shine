@@ -8,7 +8,7 @@ import { AnimatedSection } from "@/components/ui/AnimatedCard";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
 import { AppTutorial, useAppTutorial } from "@/components/ui/AppTutorial";
 import { motion } from "framer-motion";
-import { Search, Home, Sparkles, HardHat, Building2, Sun, Sunrise, CalendarClock } from "lucide-react";
+import { Search, Home, Sparkles, HardHat, Building2, Sun, Sunrise, CalendarClock, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,9 +60,9 @@ export default function ClientHome() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex-shrink-0 glass border-b border-border/30 p-4"
+        className="flex-shrink-0 glass border-b border-border/30 px-5 py-4"
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <Logo size="lg" iconOnly />
           <div className="flex items-center gap-2">
             <NotificationsDropdown />
@@ -71,7 +71,7 @@ export default function ClientHome() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
-              className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium text-sm"
+              className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center text-primary font-semibold text-sm"
             >
               {userName.charAt(0).toUpperCase()}
             </motion.div>
@@ -82,14 +82,14 @@ export default function ClientHome() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <h1 className="text-xl font-semibold">
-            Olá, <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{userName}</span>
+          <h1 className="text-xl font-bold">
+            Olá, <span className="text-primary">{userName}</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">O que você precisa hoje?</p>
         </motion.div>
       </motion.header>
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+      <main className="flex-1 overflow-y-auto p-5 space-y-5">
         {/* Search */}
         <AnimatedSection delay={1}>
           <div className="relative">
@@ -97,21 +97,21 @@ export default function ClientHome() {
             <input
               type="text"
               placeholder="O que você precisa limpar?"
-              className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-border bg-card
-                text-foreground placeholder:text-muted-foreground card-shadow
+              className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-border/50 bg-card
+                text-foreground placeholder:text-muted-foreground
                 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
-                transition-all duration-200"
+                transition-all duration-200 shadow-sm"
             />
           </div>
         </AnimatedSection>
 
         {/* Service Categories */}
         <AnimatedSection delay={2}>
-          <h2 className="text-lg font-semibold text-foreground mb-3">
+          <h2 className="text-base font-bold text-foreground mb-3">
             Serviços
           </h2>
           <AnimatedList className="grid grid-cols-2 gap-3">
-            {serviceCategories.map((service, index) => (
+            {serviceCategories.map((service) => (
               <AnimatedListItem key={service.title}>
                 <ServiceCard
                   icon={service.icon}
@@ -126,24 +126,23 @@ export default function ClientHome() {
 
         {/* Quick Suggestions */}
         <AnimatedSection delay={3}>
-          <h2 className="text-lg font-semibold text-foreground mb-3">
+          <h2 className="text-base font-bold text-foreground mb-3">
             Sugestões rápidas
           </h2>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5">
             {quickSuggestions.map((suggestion, index) => (
               <motion.button
                 key={suggestion.label}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 + index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => navigate("/client/service")}
-                className="flex items-center gap-3 px-4 py-3 bg-card rounded-xl border border-border
-                  card-shadow hover:card-shadow-hover hover:border-primary/20 
+                className="flex items-center gap-3 px-4 py-3 bg-card rounded-2xl border border-border/50
+                  shadow-sm hover:shadow-md hover:border-primary/20 
                   transition-all duration-200 flex-shrink-0"
               >
-                <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <suggestion.icon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="text-left">
@@ -159,23 +158,25 @@ export default function ClientHome() {
           </div>
         </AnimatedSection>
 
-        {/* Recent Order Banner */}
-        <AnimatedSection delay={4} className="bg-accent rounded-xl p-4 border border-primary/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Próximo agendamento</p>
-              <p className="font-semibold text-foreground">Nenhum agendamento</p>
-              <p className="text-sm text-primary">Agende seu primeiro serviço</p>
+        {/* Next Appointment Banner */}
+        <AnimatedSection delay={4}>
+          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-5 border border-primary/15">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-primary uppercase tracking-wide">Próximo agendamento</p>
+                <p className="font-bold text-foreground mt-1">Nenhum agendamento</p>
+                <p className="text-sm text-muted-foreground mt-0.5">Agende seu primeiro serviço</p>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/client/service")}
+                className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold
+                  shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 transition-all flex items-center gap-1.5"
+              >
+                Agendar
+                <ArrowRight className="w-4 h-4" />
+              </motion.button>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/client/service")}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium
-                hover:opacity-90 transition-opacity"
-            >
-              Agendar
-            </motion.button>
           </div>
         </AnimatedSection>
       </main>
