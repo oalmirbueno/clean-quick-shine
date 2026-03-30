@@ -1,0 +1,1 @@
+ALTER TABLE public.services ADD COLUMN requires_pro_plan boolean NOT NULL DEFAULT false;

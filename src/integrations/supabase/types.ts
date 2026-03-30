@@ -1135,6 +1135,7 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          requires_pro_plan: boolean
         }
         Insert: {
           active?: boolean | null
@@ -1145,6 +1146,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          requires_pro_plan?: boolean
         }
         Update: {
           active?: boolean | null
@@ -1155,6 +1157,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          requires_pro_plan?: boolean
         }
         Relationships: []
       }

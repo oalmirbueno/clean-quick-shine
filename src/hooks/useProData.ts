@@ -212,7 +212,7 @@ export function useAvailableOrdersForPro() {
       const addressIds = [...new Set(filteredOrders.map(o => o.address_id))];
 
       const [servicesResult, addressesResult] = await Promise.all([
-        supabase.from("services").select("id, name").in("id", serviceIds),
+        supabase.from("services").select("id, name, requires_pro_plan").in("id", serviceIds),
         supabase.from("addresses").select("id, city, neighborhood, zone_id").in("id", addressIds),
       ]);
 
@@ -234,7 +234,7 @@ export function useAvailableOrdersForPro() {
         .eq("status", "active")
         .maybeSingle();
 
-      const proHasElite = subscription?.plan?.type === "elite";
+      const proHasPaidPlan = subscription?.plan?.type === "pro" || subscription?.plan?.type === "elite";
 
       // Format orders
       const today = new Date();
@@ -257,8 +257,8 @@ export function useAvailableOrdersForPro() {
         // Pro earns ~80% of total price
         const proEarning = Number(order.total_price) * 0.8;
 
-        // Check if this is a commercial/elite-only order (simplified: orders > R$150 are elite)
-        const isEliteOnly = Number(order.total_price) > 150;
+        // Check if this service requires a paid pro plan
+        const isProOnly = !!(service as any)?.requires_pro_plan;
 
         // Consistent distance based on order ID hash (deterministic)
         const hashCode = order.id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
@@ -273,13 +273,13 @@ export function useAvailableOrdersForPro() {
           time: order.scheduled_time.slice(0, 5),
           proEarning,
           distance,
-          eliteOnly: isEliteOnly,
+          eliteOnly: isProOnly,
           scheduledDate: order.scheduled_date,
           scheduledTime: order.scheduled_time,
         };
       }).filter(order => {
-        // Filter out elite-only orders if pro doesn't have elite plan
-        if (order.eliteOnly && !proHasElite) return false;
+        // Filter out pro-plan-only orders if pro doesn't have a paid plan
+        if (order.eliteOnly && !proHasPaidPlan) return false;
         return true;
       });
     },

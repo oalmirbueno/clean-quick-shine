@@ -8,17 +8,15 @@ import { AnimatedSection } from "@/components/ui/AnimatedCard";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
 import { AppTutorial, useAppTutorial } from "@/components/ui/AppTutorial";
 import { motion } from "framer-motion";
-import { Search, Home, Sparkles, HardHat, Building2, Sun, Sunrise, CalendarClock, ArrowRight } from "lucide-react";
+import { Search, Home, Sparkles, HardHat, Zap, Sun, Sunrise, CalendarClock, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useServices } from "@/hooks/useServices";
 
-const serviceCategories = [
-  { icon: Home, title: "Residencial", description: "Limpeza de casa" },
-  { icon: Sparkles, title: "Pesada", description: "Limpeza profunda" },
-  { icon: HardHat, title: "Pós-Obra", description: "Remoção de resíduos" },
-  { icon: Building2, title: "Comercial", description: "Escritórios e lojas" },
-];
+const iconMap: Record<string, any> = {
+  Home, Sparkles, HardHat, Zap,
+};
 
 const quickSuggestions = [
   { icon: Sun, label: "Hoje à tarde", time: "14:00" },
@@ -30,6 +28,8 @@ export default function ClientHome() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showTutorial, completeTutorial } = useAppTutorial("client");
+
+  const { data: services } = useServices();
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -111,16 +111,19 @@ export default function ClientHome() {
             Serviços
           </h2>
           <AnimatedList className="grid grid-cols-2 gap-3">
-            {serviceCategories.map((service) => (
-              <AnimatedListItem key={service.title}>
-                <ServiceCard
-                  icon={service.icon}
-                  title={service.title}
-                  description={service.description}
-                  onClick={() => navigate("/client/service")}
-                />
-              </AnimatedListItem>
-            ))}
+            {(services || []).map((service) => {
+              const IconComp = iconMap[service.icon || "Home"] || Home;
+              return (
+                <AnimatedListItem key={service.id}>
+                  <ServiceCard
+                    icon={IconComp}
+                    title={service.name}
+                    description={service.description || undefined}
+                    onClick={() => navigate("/client/service")}
+                  />
+                </AnimatedListItem>
+              );
+            })}
           </AnimatedList>
         </AnimatedSection>
 
