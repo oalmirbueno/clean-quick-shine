@@ -76,6 +76,8 @@ import AdminCohorts from "./pages/admin/AdminCohorts";
 import AdminMatchingDebug from "./pages/admin/AdminMatchingDebug";
 import AdminQuotes from "./pages/admin/AdminQuotes";
 import AdminDocuments from "./pages/admin/AdminDocuments";
+import AdminWithdrawals from "./pages/admin/AdminWithdrawals";
+import AdminWithdrawalDetail from "./pages/admin/AdminWithdrawalDetail";
 
 // Company Pages
 import CompanyOnboarding from "./pages/company/CompanyOnboarding";
