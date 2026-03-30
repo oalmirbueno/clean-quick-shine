@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { ChevronLeft, Check, Clock, Loader2 } from "lucide-react";
+import { ChevronLeft, Check, Clock, Loader2, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useServices } from "@/hooks/useServices";
 
