@@ -29,6 +29,8 @@ export default function ClientHome() {
   const { user } = useAuth();
   const { showTutorial, completeTutorial } = useAppTutorial("client");
 
+  const { data: services } = useServices();
+
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
