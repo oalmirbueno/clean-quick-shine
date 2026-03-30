@@ -264,8 +264,8 @@ export default function Register() {
                 label="Telefone"
                 type="tel"
                 placeholder="(11) 99999-9999"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={phoneDisplay}
+                onChange={handlePhoneChange}
                 required
               />
               
