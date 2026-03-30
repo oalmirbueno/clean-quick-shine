@@ -234,16 +234,30 @@ export default function ProHome() {
           )}
         </motion.div>
         {!isVerified && (
-          <motion.button 
+          <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            onClick={() => navigate("/pro/verification")}
-            className="mt-2 flex items-center gap-2 text-sm text-warning"
+            className="mt-3 p-3 bg-warning/10 border border-warning/30 rounded-xl"
           >
-            <Shield className="w-4 h-4" />
-            Complete sua verificação para receber pedidos
-          </motion.button>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-warning" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-foreground text-sm">Verificação pendente</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Envie seus documentos para começar a receber pedidos. Sem verificação, seu perfil fica invisível para clientes.
+                </p>
+                <button
+                  onClick={() => navigate("/pro/verification")}
+                  className="mt-2 px-4 py-2 bg-warning text-warning-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                >
+                  Enviar documentos agora
+                </button>
+              </div>
+            </div>
+          </motion.div>
         )}
       </motion.header>
 

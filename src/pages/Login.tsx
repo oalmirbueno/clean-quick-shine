@@ -46,10 +46,20 @@ export default function Login() {
       
       if (userRoles.includes("admin")) {
         navigate("/admin/dashboard");
+      } else if (userRoles.includes("pro")) {
+        // Check if pro is verified - if not, send to verification
+        const { data: proProfile } = await supabase
+          .from("pro_profiles")
+          .select("verified")
+          .eq("user_id", (await supabase.auth.getUser()).data.user?.id || "")
+          .maybeSingle();
+        if (proProfile && !proProfile.verified) {
+          navigate("/pro/verification");
+        } else {
+          navigate("/pro/home");
+        }
       } else if (userRoles.includes("client")) {
         navigate("/client/home");
-      } else if (userRoles.includes("pro")) {
-        navigate("/pro/home");
       } else if (userType) {
         navigate(userType === "client" ? "/client/home" : "/pro/home");
       } else {

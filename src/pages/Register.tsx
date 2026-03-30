@@ -113,13 +113,19 @@ export default function Register() {
 
     // For pro users, create pro_profile
     if (userType === "pro") {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("pro_profiles").insert({
-          user_id: user.id,
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        const { error: profileError } = await supabase.from("pro_profiles").insert({
+          user_id: currentUser.id,
           radius_km: parseInt(radius),
           bio: `Disponível: ${selectedDays.join(", ")} - ${selectedPeriods.join(", ")}`,
         });
+        if (profileError) {
+          console.error("Pro profile insert error:", profileError);
+          toast.error("Erro ao criar perfil profissional. Tente novamente ou entre em contato com o suporte.");
+          setLoading(false);
+          return;
+        }
       }
     }
 
