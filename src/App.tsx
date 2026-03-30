@@ -116,8 +116,8 @@ const App = () => {
             <Sonner />
             <OfflineBanner />
             <UpdatePrompt />
-            <InstallBanner />
             <BrowserRouter>
+              <InstallBanner />
               <Routes>
                 {/* Splash & Auth */}
                 <Route path="/" element={<Index />} />
