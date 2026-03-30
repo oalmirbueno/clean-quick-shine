@@ -43,7 +43,7 @@ export function useProBalance() {
       // rated = available for withdrawal
       const ratedEarnings = orders?.filter(o => o.status === "rated")
         .reduce((sum, o) => sum + calculateProEarning(o.total_price), 0) || 0;
-      // paid_out = already paid
+      // paid_out = already paid, NOT available
       const paidOutEarnings = orders?.filter(o => o.status === "paid_out")
         .reduce((sum, o) => sum + calculateProEarning(o.total_price), 0) || 0;
       // completed = waiting client rating
@@ -55,12 +55,12 @@ export function useProBalance() {
 
       const totalEarned = ratedEarnings + paidOutEarnings + pendingEarnings;
 
-      const completedWithdrawals = withdrawals?.filter(w => w.status === "completed")
-        .reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+      // Only deduct pending/processing from available (completed withdrawals already consumed rated→paid_out)
       const pendingWithdrawal = withdrawals?.filter(w => w.status === "pending" || w.status === "processing")
         .reduce((sum, w) => sum + Number(w.amount), 0) || 0;
 
-      const availableBalance = Math.max(0, ratedEarnings + paidOutEarnings - completedWithdrawals - pendingWithdrawal);
+      // ONLY rated earnings minus active withdrawal requests
+      const availableBalance = Math.max(0, ratedEarnings - pendingWithdrawal);
 
       return {
         availableBalance,
