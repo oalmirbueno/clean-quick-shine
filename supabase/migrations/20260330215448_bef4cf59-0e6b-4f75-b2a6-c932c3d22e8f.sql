@@ -1,0 +1,1 @@
+ALTER TABLE public.services ADD COLUMN category text NOT NULL DEFAULT 'limpeza';

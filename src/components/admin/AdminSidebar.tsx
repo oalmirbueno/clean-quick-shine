@@ -19,6 +19,7 @@ import {
   Building2,
   Eye,
   ArrowDownToLine,
+  Wrench,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -30,6 +31,7 @@ const menuItems = [
   { icon: Users, label: "Clientes", path: "/admin/clients" },
   { icon: Tag, label: "Cupons", path: "/admin/coupons" },
   { icon: ArrowDownToLine, label: "Saques", path: "/admin/withdrawals" },
+  { icon: Wrench, label: "Serviços", path: "/admin/services" },
   { icon: Building2, label: "Orçamentos", path: "/admin/quotes" },
   { icon: HeadphonesIcon, label: "Suporte", path: "/admin/support" },
   { icon: BarChart3, label: "Analytics", path: "/admin/analytics" },
