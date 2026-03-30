@@ -144,7 +144,7 @@ export default function AdminWithdrawalDetail() {
                 <div key={idx}>
                   <PrimaryButton
                     fullWidth
-                    variant={action.variant || "default"}
+                    variant={action.variant || "primary"}
                     onClick={() => setConfirmAction({ status: targets[idx], label: action.label, description: action.description })}
                     loading={updateStatus.isPending}
                   >
