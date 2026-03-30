@@ -8,17 +8,15 @@ import { AnimatedSection } from "@/components/ui/AnimatedCard";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/AnimatedList";
 import { AppTutorial, useAppTutorial } from "@/components/ui/AppTutorial";
 import { motion } from "framer-motion";
-import { Search, Home, Sparkles, HardHat, Building2, Sun, Sunrise, CalendarClock, ArrowRight } from "lucide-react";
+import { Search, Home, Sparkles, HardHat, Zap, Sun, Sunrise, CalendarClock, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useServices } from "@/hooks/useServices";
 
-const serviceCategories = [
-  { icon: Home, title: "Residencial", description: "Limpeza de casa" },
-  { icon: Sparkles, title: "Pesada", description: "Limpeza profunda" },
-  { icon: HardHat, title: "Pós-Obra", description: "Remoção de resíduos" },
-  { icon: Building2, title: "Comercial", description: "Escritórios e lojas" },
-];
+const iconMap: Record<string, any> = {
+  Home, Sparkles, HardHat, Zap,
+};
 
 const quickSuggestions = [
   { icon: Sun, label: "Hoje à tarde", time: "14:00" },
