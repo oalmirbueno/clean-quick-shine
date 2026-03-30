@@ -14,7 +14,7 @@ interface OrderAction {
   targetStatus: string;
   label: string;
   description: string;
-  variant: "default" | "outline";
+  variant: "primary" | "outline";
   destructive?: boolean;
 }
 
