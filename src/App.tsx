@@ -80,6 +80,7 @@ import AdminQuotes from "./pages/admin/AdminQuotes";
 import AdminDocuments from "./pages/admin/AdminDocuments";
 import AdminWithdrawals from "./pages/admin/AdminWithdrawals";
 import AdminWithdrawalDetail from "./pages/admin/AdminWithdrawalDetail";
+import AdminServices from "./pages/admin/AdminServices";
 
 // Company Pages
 import CompanyOnboarding from "./pages/company/CompanyOnboarding";
