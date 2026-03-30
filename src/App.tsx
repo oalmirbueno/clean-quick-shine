@@ -24,6 +24,8 @@ import OnboardingPro from "./pages/OnboardingPro";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import ConfirmEmail from "./pages/ConfirmEmail";
+import TermsOfUse from "./pages/TermsOfUse";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Client Pages
 import ClientHome from "./pages/client/ClientHome";
