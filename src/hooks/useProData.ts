@@ -278,8 +278,8 @@ export function useAvailableOrdersForPro() {
           scheduledTime: order.scheduled_time,
         };
       }).filter(order => {
-        // Filter out elite-only orders if pro doesn't have elite plan
-        if (order.eliteOnly && !proHasElite) return false;
+        // Filter out pro-plan-only orders if pro doesn't have a paid plan
+        if (order.eliteOnly && !proHasPaidPlan) return false;
         return true;
       });
     },
