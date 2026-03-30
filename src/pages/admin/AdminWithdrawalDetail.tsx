@@ -14,7 +14,7 @@ const statusActionMap: Record<string, { label: string; description: string; vari
     {
       label: "Aprovar e Processar",
       description: "Marca o saque como em processamento. A transferência Pix será iniciada.",
-      variant: "default",
+      variant: "primary",
     },
     {
       label: "Rejeitar Saque",
