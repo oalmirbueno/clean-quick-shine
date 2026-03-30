@@ -234,7 +234,7 @@ export function useAvailableOrdersForPro() {
         .eq("status", "active")
         .maybeSingle();
 
-      const proHasElite = subscription?.plan?.type === "elite";
+      const proHasPaidPlan = subscription?.plan?.type === "pro" || subscription?.plan?.type === "elite";
 
       // Format orders
       const today = new Date();
