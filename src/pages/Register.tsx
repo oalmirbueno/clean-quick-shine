@@ -304,11 +304,11 @@ export default function Register() {
                   </button>
                   <span className="text-sm text-muted-foreground">
                     Aceito os{" "}
-                    <a href="#" className="text-primary hover:underline">
+                    <a href="/terms" target="_blank" className="text-primary hover:underline">
                       termos de uso
                     </a>{" "}
                     e{" "}
-                    <a href="#" className="text-primary hover:underline">
+                    <a href="/privacy" target="_blank" className="text-primary hover:underline">
                       política de privacidade
                     </a>
                   </span>
