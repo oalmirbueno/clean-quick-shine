@@ -4,12 +4,28 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { MoneyBreakdown } from "@/components/ui/MoneyBreakdown";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ChevronLeft, User, Calendar, MapPin, Tag } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function AdminOrderDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
+
+  const updateOrderStatus = useMutation({
+    mutationFn: async (newStatus: string) => {
+      const updates: any = { status: newStatus };
+      if (newStatus === "paid_out") updates.completed_at = updates.completed_at || new Date().toISOString();
+      const { error } = await supabase.from("orders").update(updates).eq("id", id!);
+      if (error) throw error;
+    },
+    onSuccess: (_, newStatus) => {
+      toast.success(`Pedido atualizado para ${newStatus}`);
+      queryClient.invalidateQueries({ queryKey: ["admin_order_detail", id] });
+    },
+    onError: () => toast.error("Erro ao atualizar pedido"),
+  });
 
   const { data: order } = useQuery({
     queryKey: ["admin_order_detail", id],
@@ -100,16 +116,32 @@ export default function AdminOrderDetail() {
             </div>
           </div>
 
-          {order.status === "in_review" && (
-            <div className="bg-card rounded-xl border border-border p-4 card-shadow">
-              <h3 className="font-semibold text-foreground mb-4">Ações de mediação</h3>
-              <div className="space-y-2">
-                <PrimaryButton fullWidth variant="outline">Reembolso parcial</PrimaryButton>
-                <PrimaryButton fullWidth variant="outline">Reembolso total</PrimaryButton>
-                <PrimaryButton fullWidth>Liberar pagamento</PrimaryButton>
-              </div>
+          <div className="bg-card rounded-xl border border-border p-4 card-shadow">
+            <h3 className="font-semibold text-foreground mb-4">Ações do pedido</h3>
+            <div className="space-y-2">
+              {(order.status === "completed" || order.status === "rated") && (
+                <PrimaryButton fullWidth variant="outline" onClick={() => updateOrderStatus.mutate("in_review")} loading={updateOrderStatus.isPending}>
+                  Colocar em Análise
+                </PrimaryButton>
+              )}
+              {(order.status === "completed" || order.status === "in_review") && (
+                <PrimaryButton fullWidth variant="outline" onClick={() => updateOrderStatus.mutate("rated")} loading={updateOrderStatus.isPending}>
+                  Liberar para Avaliado
+                </PrimaryButton>
+              )}
+              {order.status === "rated" && (
+                <PrimaryButton fullWidth onClick={() => updateOrderStatus.mutate("paid_out")} loading={updateOrderStatus.isPending}>
+                  Marcar como Pago
+                </PrimaryButton>
+              )}
+              {order.status === "in_review" && (
+                <>
+                  <PrimaryButton fullWidth variant="outline">Reembolso parcial</PrimaryButton>
+                  <PrimaryButton fullWidth variant="outline">Reembolso total</PrimaryButton>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         <div className="bg-card rounded-xl border border-border p-4 card-shadow">

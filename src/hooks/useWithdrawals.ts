@@ -19,48 +19,53 @@ export function useProBalance() {
     queryFn: async () => {
       if (!user?.id) return { availableBalance: 0, pendingBalance: 0 };
 
-      // Get completed/rated orders that haven't been withdrawn yet
-      // Available = rated orders (client approved)
-      // Pending = completed orders (waiting for client rating)
+      // Fetch orders: completed, rated, in_review, paid_out
       const { data: orders, error } = await supabase
         .from("orders")
         .select("total_price, status")
         .eq("pro_id", user.id)
-        .in("status", ["completed", "rated"]);
+        .in("status", ["completed", "rated", "in_review", "paid_out"]);
 
       if (error) {
         console.error("Error fetching balance:", error);
         throw new Error("Erro ao buscar saldo");
       }
 
-      // Get total already withdrawn
+      // Get withdrawals (new statuses: pending, processing, completed, rejected)
       const { data: withdrawals } = await supabase
         .from("withdrawals")
         .select("amount, status")
         .eq("user_id", user.id)
-        .in("status", ["pending", "completed"]);
-
-      const totalWithdrawn = withdrawals?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
-      const pendingWithdrawal = withdrawals?.filter(w => w.status === "pending")
-        .reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+        .in("status", ["pending", "processing", "completed"]);
 
       const calculateProEarning = (totalPrice: number) => Number(totalPrice) * PRO_COMMISSION_RATE;
 
-      const totalEarned = orders?.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0) || 0;
+      // rated = available for withdrawal
       const ratedEarnings = orders?.filter(o => o.status === "rated")
         .reduce((sum, o) => sum + calculateProEarning(o.total_price), 0) || 0;
+      // paid_out = already paid
+      const paidOutEarnings = orders?.filter(o => o.status === "paid_out")
+        .reduce((sum, o) => sum + calculateProEarning(o.total_price), 0) || 0;
+      // completed = waiting client rating
       const pendingEarnings = orders?.filter(o => o.status === "completed")
         .reduce((sum, o) => sum + calculateProEarning(o.total_price), 0) || 0;
+      // in_review = blocked
+      const blockedEarnings = orders?.filter(o => o.status === "in_review")
+        .reduce((sum, o) => sum + calculateProEarning(o.total_price), 0) || 0;
 
-      // Available balance = rated earnings - completed withdrawals
+      const totalEarned = ratedEarnings + paidOutEarnings + pendingEarnings;
+
       const completedWithdrawals = withdrawals?.filter(w => w.status === "completed")
         .reduce((sum, w) => sum + Number(w.amount), 0) || 0;
-      
-      const availableBalance = Math.max(0, ratedEarnings - completedWithdrawals - pendingWithdrawal);
+      const pendingWithdrawal = withdrawals?.filter(w => w.status === "pending" || w.status === "processing")
+        .reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+
+      const availableBalance = Math.max(0, ratedEarnings + paidOutEarnings - completedWithdrawals - pendingWithdrawal);
 
       return {
         availableBalance,
         pendingBalance: pendingEarnings,
+        blockedBalance: blockedEarnings,
         pendingWithdrawal,
         totalEarned,
       };

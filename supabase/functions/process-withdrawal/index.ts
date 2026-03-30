@@ -96,7 +96,7 @@ serve(async (req) => {
 
     const { data: existingWithdrawals } = await supabaseAdmin
       .from("withdrawals")
-      .select("amount")
+      .select("amount, status")
       .eq("user_id", user.id)
       .in("status", ["pending", "processing", "completed"]);
 

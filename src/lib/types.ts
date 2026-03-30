@@ -16,7 +16,7 @@ export type OrderStatus =
 
 export type ProVerifiedStatus = "pending" | "approved" | "rejected";
 export type PaymentStatus = "pending" | "authorized" | "held" | "released" | "refunded";
-export type WithdrawalStatus = "requested" | "approved" | "paid";
+export type WithdrawalStatus = "pending" | "processing" | "completed" | "rejected";
 export type TicketStatus = "open" | "in_progress" | "resolved" | "closed";
 export type TicketPriority = "low" | "medium" | "high";
 export type QualityLevel = "A" | "B" | "C" | "D";
