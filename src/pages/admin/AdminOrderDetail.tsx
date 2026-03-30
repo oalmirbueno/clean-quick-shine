@@ -11,6 +11,21 @@ import { toast } from "sonner";
 export default function AdminOrderDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
+
+  const updateOrderStatus = useMutation({
+    mutationFn: async (newStatus: string) => {
+      const updates: any = { status: newStatus };
+      if (newStatus === "paid_out") updates.completed_at = updates.completed_at || new Date().toISOString();
+      const { error } = await supabase.from("orders").update(updates).eq("id", id!);
+      if (error) throw error;
+    },
+    onSuccess: (_, newStatus) => {
+      toast.success(`Pedido atualizado para ${newStatus}`);
+      queryClient.invalidateQueries({ queryKey: ["admin_order_detail", id] });
+    },
+    onError: () => toast.error("Erro ao atualizar pedido"),
+  });
 
   const { data: order } = useQuery({
     queryKey: ["admin_order_detail", id],
