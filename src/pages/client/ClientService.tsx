@@ -5,18 +5,19 @@ import { ChevronLeft, Check, Clock, Loader2, Crown, Zap, Home, Sparkles, HardHat
 import { cn } from "@/lib/utils";
 import { useServices } from "@/hooks/useServices";
 
-const iconMap: Record<string, React.ComponentType<any>> = {
-  Zap,
-  Home,
-  Sparkles,
-  HardHat,
+import * as LucideIcons from "lucide-react";
+
+const getIcon = (name: string | null): React.ComponentType<any> => {
+  if (!name) return Sparkles;
+  return (LucideIcons as any)[name] || Sparkles;
 };
 
-const tagMap: Record<string, { label: string; color: string } | null> = {
-  "Limpeza de Emergência": { label: "URGENTE", color: "bg-orange-500/15 text-orange-600" },
-  "Meio Período": { label: "POPULAR", color: "bg-primary/10 text-primary" },
-  "Dia Todo": { label: "COMPLETO", color: "bg-emerald-500/15 text-emerald-600" },
-  "Pós-Obra": null, // uses PRO badge instead
+const getBadge = (service: any): { label: string; color: string } | null => {
+  if (service.requires_pro_plan) return null; // PRO badge handled separately
+  if (service.duration_hours <= 2) return { label: "RÁPIDO", color: "bg-orange-500/15 text-orange-600" };
+  if (service.base_price <= 200) return { label: "POPULAR", color: "bg-primary/10 text-primary" };
+  if (service.duration_hours >= 8) return { label: "COMPLETO", color: "bg-emerald-500/15 text-emerald-600" };
+  return null;
 };
 
 export default function ClientService() {
