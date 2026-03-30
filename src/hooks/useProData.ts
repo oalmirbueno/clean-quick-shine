@@ -257,8 +257,8 @@ export function useAvailableOrdersForPro() {
         // Pro earns ~80% of total price
         const proEarning = Number(order.total_price) * 0.8;
 
-        // Check if this is a commercial/elite-only order (simplified: orders > R$150 are elite)
-        const isEliteOnly = Number(order.total_price) > 150;
+        // Check if this service requires a paid pro plan
+        const isProOnly = !!(service as any)?.requires_pro_plan;
 
         // Consistent distance based on order ID hash (deterministic)
         const hashCode = order.id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
