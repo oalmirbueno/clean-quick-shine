@@ -18,15 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-function StyledLogo({ size = "md" }: { size?: "sm" | "md" }) {
-  const textSize = size === "sm" ? "text-xl" : "text-3xl";
-  return (
-    <span className={`${textSize} font-bold tracking-tight`}>
-      <span className="text-primary">Já</span>
-      <span className="text-foreground ml-1">Limpo</span>
-    </span>
-  );
-}
+import { Logo } from "@/components/ui/Logo";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -162,7 +154,7 @@ export default function Install() {
           </div>
           <div className="p-6 flex flex-col items-center">
             <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-3">
-              <StyledLogo size="sm" />
+              <Logo size="sm" iconOnly />
             </div>
             <span className="font-medium">Já Limpo</span>
           </div>
@@ -225,7 +217,7 @@ export default function Install() {
           <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                <StyledLogo size="sm" />
+                <Logo size="sm" iconOnly />
               </div>
               <div>
                 <p className="font-medium">Já Limpo</p>
@@ -354,7 +346,7 @@ export default function Install() {
         className="flex-shrink-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
       >
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <StyledLogo size="sm" />
+          <Logo size="sm" />
           <button
             onClick={() => navigate(-1)}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
