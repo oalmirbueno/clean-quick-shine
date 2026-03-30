@@ -173,12 +173,12 @@ export default function AdminWithdrawalDetail() {
       {/* Confirmation Modal */}
       {confirmAction && (
         <ConfirmModal
-          open={!!confirmAction}
+          isOpen={!!confirmAction}
           onClose={() => setConfirmAction(null)}
           onConfirm={() => updateStatus.mutate(confirmAction.status)}
           title={confirmAction.label}
           description={confirmAction.description}
-          confirmLabel="Confirmar"
+          confirmText="Confirmar"
           loading={updateStatus.isPending}
         />
       )}

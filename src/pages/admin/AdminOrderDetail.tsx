@@ -228,12 +228,12 @@ export default function AdminOrderDetail() {
       {/* Confirmation Modal */}
       {confirmAction && (
         <ConfirmModal
-          open={!!confirmAction}
+          isOpen={!!confirmAction}
           onClose={() => setConfirmAction(null)}
           onConfirm={() => updateOrderStatus.mutate(confirmAction.targetStatus)}
           title={confirmAction.label.replace(/[⚠️✅💰]\s?/g, "")}
           description={confirmAction.description}
-          confirmLabel="Confirmar"
+          confirmText="Confirmar"
           loading={updateOrderStatus.isPending}
         />
       )}
