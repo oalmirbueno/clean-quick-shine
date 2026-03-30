@@ -42,11 +42,8 @@ const statusConfig: Record<string, { label: string; variant: string }> = {
   released: { label: "Liberado", variant: "bg-success/10 text-success" },
   refunded: { label: "Reembolsado", variant: "bg-destructive/10 text-destructive" },
   
-  // Withdrawal
+  // Withdrawal (pending/approved/rejected reuse existing keys above)
   processing: { label: "Processando", variant: "bg-primary/10 text-primary" },
-  // pending already defined above
-  // completed already defined above (Concluído)
-  rejected: { label: "Rejeitado", variant: "bg-destructive/10 text-destructive" },
 
   // Ticket
   open: { label: "Aberto", variant: "bg-warning/10 text-warning" },
