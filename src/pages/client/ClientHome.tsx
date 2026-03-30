@@ -111,16 +111,19 @@ export default function ClientHome() {
             Serviços
           </h2>
           <AnimatedList className="grid grid-cols-2 gap-3">
-            {serviceCategories.map((service) => (
-              <AnimatedListItem key={service.title}>
-                <ServiceCard
-                  icon={service.icon}
-                  title={service.title}
-                  description={service.description}
-                  onClick={() => navigate("/client/service")}
-                />
-              </AnimatedListItem>
-            ))}
+            {(services || []).map((service) => {
+              const IconComp = iconMap[service.icon || "Home"] || Home;
+              return (
+                <AnimatedListItem key={service.id}>
+                  <ServiceCard
+                    icon={IconComp}
+                    title={service.name}
+                    description={service.description || undefined}
+                    onClick={() => navigate("/client/service")}
+                  />
+                </AnimatedListItem>
+              );
+            })}
           </AnimatedList>
         </AnimatedSection>
 
