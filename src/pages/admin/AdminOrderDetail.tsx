@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { MoneyBreakdown } from "@/components/ui/MoneyBreakdown";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { ChevronLeft, User, Calendar, MapPin, Tag, AlertTriangle } from "lucide-react";
+import { ChevronLeft, User, Calendar, MapPin, Tag, AlertTriangle, Loader2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -82,7 +82,7 @@ export default function AdminOrderDetail() {
     },
   });
 
-  const { data: order } = useQuery({
+  const { data: order, isLoading } = useQuery({
     queryKey: ["admin_order_detail", id],
     queryFn: async () => {
       const { data } = await supabase
@@ -109,10 +109,20 @@ export default function AdminOrderDetail() {
     enabled: !!id,
   });
 
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
   if (!order) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-16">
           <p className="text-muted-foreground">Pedido não encontrado</p>
         </div>
       </AdminLayout>
@@ -132,54 +142,52 @@ export default function AdminOrderDetail() {
 
   return (
     <AdminLayout>
+      {/* Header */}
       <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors shrink-0">
+        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-card border border-border/60 flex items-center justify-center hover:bg-muted transition-colors shrink-0">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground">Pedido #{order.id.slice(0, 8)}</h1>
-          <p className="text-muted-foreground">Criado em {new Date(order.created_at).toLocaleDateString("pt-BR")}</p>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-bold text-foreground">Pedido #{order.id.slice(0, 8)}</h1>
+          <p className="text-sm text-muted-foreground">Criado em {new Date(order.created_at).toLocaleDateString("pt-BR")}</p>
         </div>
         <StatusBadge status={order.status || "draft"} />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className="bg-card rounded-xl border border-border p-4 card-shadow">
-            <h3 className="font-semibold text-foreground mb-4">Informações do pedido</h3>
+      <div className="grid lg:grid-cols-2 gap-5">
+        <div className="space-y-5">
+          {/* Order Info */}
+          <div className="bg-card rounded-2xl border border-border/60 p-5 shadow-sm">
+            <h3 className="font-bold text-foreground mb-4 text-sm uppercase tracking-wide text-muted-foreground">Informações do pedido</h3>
             <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <User className="w-5 h-5 text-muted-foreground mt-0.5" />
-                <div><p className="text-sm text-muted-foreground">Cliente</p><p className="font-medium text-foreground">{order.clientName}</p></div>
-              </div>
-              {order.proName && (
-                <div className="flex items-start gap-3">
-                  <User className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div><p className="text-sm text-muted-foreground">Diarista</p><p className="font-medium text-foreground">{order.proName}</p></div>
+              {[
+                { icon: User, label: "Cliente", value: order.clientName },
+                ...(order.proName ? [{ icon: User, label: "Diarista", value: order.proName }] : []),
+                { icon: Calendar, label: "Data e horário", value: `${order.scheduled_date} às ${order.scheduled_time}` },
+                { icon: MapPin, label: "Endereço", value: order.address, sub: order.city },
+                { icon: Tag, label: "Serviço", value: order.serviceName },
+              ].map((item: any, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center shrink-0 mt-0.5">
+                    <item.icon className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="font-medium text-foreground text-sm">{item.value}</p>
+                    {item.sub && <p className="text-xs text-muted-foreground">{item.sub}</p>}
+                  </div>
                 </div>
-              )}
-              <div className="flex items-start gap-3">
-                <Calendar className="w-5 h-5 text-muted-foreground mt-0.5" />
-                <div><p className="text-sm text-muted-foreground">Data e horário</p><p className="font-medium text-foreground">{order.scheduled_date} às {order.scheduled_time}</p></div>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
-                <div><p className="text-sm text-muted-foreground">Endereço</p><p className="font-medium text-foreground">{order.address}</p><p className="text-sm text-muted-foreground">{order.city}</p></div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Tag className="w-5 h-5 text-muted-foreground mt-0.5" />
-                <div><p className="text-sm text-muted-foreground">Serviço</p><p className="font-medium text-foreground">{order.serviceName}</p></div>
-              </div>
+              ))}
             </div>
           </div>
 
           {/* Order Actions */}
-          <div className="bg-card rounded-xl border border-border p-4 card-shadow">
-            <h3 className="font-semibold text-foreground mb-4">Ações do pedido</h3>
+          <div className="bg-card rounded-2xl border border-border/60 p-5 shadow-sm">
+            <h3 className="font-bold text-sm uppercase tracking-wide text-muted-foreground mb-4">Ações do pedido</h3>
             {actions.length > 0 ? (
               <div className="space-y-3">
                 {actions.map((action) => (
-                  <div key={action.targetStatus}>
+                  <div key={action.targetStatus} className="p-3 rounded-xl bg-muted/30 border border-border/40">
                     <PrimaryButton
                       fullWidth
                       variant={action.variant}
@@ -188,7 +196,7 @@ export default function AdminOrderDetail() {
                     >
                       {action.label}
                     </PrimaryButton>
-                    <p className="text-xs text-muted-foreground mt-1 ml-1">{action.description}</p>
+                    <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{action.description}</p>
                   </div>
                 ))}
               </div>
@@ -199,27 +207,28 @@ export default function AdminOrderDetail() {
             )}
 
             {order.status === "paid_out" && (
-              <div className="mt-3 p-3 bg-success/10 rounded-lg text-center">
-                <p className="text-sm font-medium text-success">✓ Pedido finalizado e pago</p>
+              <div className="mt-4 p-4 bg-success/10 rounded-xl text-center border border-success/20">
+                <p className="text-sm font-semibold text-success">✓ Pedido finalizado e pago</p>
               </div>
             )}
 
             {order.status === "in_review" && (
-              <div className="mt-3 p-3 bg-warning/10 rounded-lg flex items-start gap-2">
+              <div className="mt-4 p-4 bg-warning/10 rounded-xl flex items-start gap-2 border border-warning/20">
                 <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
-                <p className="text-xs text-warning">Saldo da diarista está bloqueado enquanto o pedido estiver em análise.</p>
+                <p className="text-xs text-warning leading-relaxed">Saldo da diarista está bloqueado enquanto o pedido estiver em análise.</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-card rounded-xl border border-border p-4 card-shadow">
-          <h3 className="font-semibold text-foreground mb-4">Detalhes financeiros</h3>
+        {/* Financial */}
+        <div className="bg-card rounded-2xl border border-border/60 p-5 shadow-sm h-fit">
+          <h3 className="font-bold text-sm uppercase tracking-wide text-muted-foreground mb-4">Detalhes financeiros</h3>
           <MoneyBreakdown items={breakdownItems} total={order.total_price} totalLabel="Total cobrado" />
-          <div className="mt-6 pt-4 border-t border-border">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Valor para diarista (80%)</span>
-              <span className="text-lg font-semibold text-success">R$ {proEarning.toFixed(2).replace(".", ",")}</span>
+          <div className="mt-6 pt-4 border-t border-border/60">
+            <div className="flex items-center justify-between p-3 bg-success/5 rounded-xl border border-success/15">
+              <span className="text-sm text-muted-foreground">Valor para diarista (80%)</span>
+              <span className="text-lg font-bold text-success">R$ {proEarning.toFixed(2).replace(".", ",")}</span>
             </div>
           </div>
         </div>

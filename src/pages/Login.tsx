@@ -4,7 +4,7 @@ import { Logo } from "@/components/ui/Logo";
 import { InputField } from "@/components/ui/InputField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { User, Briefcase, ChevronLeft, Shield, Clock, Star } from "lucide-react";
+import { User, Briefcase, ChevronLeft, Shield, Clock, Star, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -48,7 +48,6 @@ export default function Login() {
       if (userRoles.includes("admin")) {
         navigate("/admin/dashboard");
       } else if (userRoles.includes("pro")) {
-        // Check if pro is verified - if not, send to verification
         const { data: proProfile } = await supabase
           .from("pro_profiles")
           .select("verified")
@@ -79,27 +78,26 @@ export default function Login() {
       <PageTransition>
         <div className="h-full bg-background flex flex-col overflow-hidden"
           style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-          {/* Background Pattern */}
+          {/* Subtle gradient accent */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/5 to-transparent" />
-            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-primary/3 to-transparent" />
+            <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-primary/8 blur-3xl" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl" />
           </div>
 
-
           {/* Content */}
-          <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pt-4 lg:items-start lg:w-[45%]">
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-sm text-center lg:text-left lg:ml-auto lg:mr-12"
+              className="w-full max-w-sm"
             >
               {/* Logo */}
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                className="flex justify-center lg:justify-start mb-5"
+                className="flex justify-center mb-8"
               >
                 <Logo size="2xl" />
               </motion.div>
@@ -109,12 +107,12 @@ export default function Login() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="mb-6"
+                className="text-center mb-8"
               >
-                <h1 className="text-3xl font-bold text-foreground mb-2">
+                <h1 className="text-3xl font-bold text-foreground mb-1">
                   Bem-vindo
                 </h1>
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground">
                   Serviços de limpeza profissional
                 </p>
               </motion.div>
@@ -124,45 +122,41 @@ export default function Login() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25 }}
-                className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 mb-5 text-sm text-muted-foreground"
+                className="flex items-center justify-center gap-5 mb-8"
               >
-                <div className="flex items-center gap-1.5">
-                  <Shield className="w-4 h-4 text-primary" />
-                  <span>Verificado</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Star className="w-4 h-4 text-warning fill-warning" />
-                  <span>4.9</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-success" />
-                  <span>Rápido</span>
-                </div>
+                {[
+                  { icon: Shield, label: "Verificado", color: "text-primary" },
+                  { icon: Star, label: "4.9", color: "text-warning" },
+                  { icon: Clock, label: "Rápido", color: "text-success" },
+                ].map((badge) => (
+                  <div key={badge.label} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <badge.icon className={`w-4 h-4 ${badge.color} ${badge.label === "4.9" ? "fill-warning" : ""}`} />
+                    <span>{badge.label}</span>
+                  </div>
+                ))}
               </motion.div>
 
               {/* Options */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <motion.button
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                   whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setUserType("client")}
-                  className="w-full p-4 bg-card rounded-2xl border border-border
+                  className="w-full p-4 bg-card rounded-2xl border border-border/60
                     hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300
                     flex items-center gap-4 group"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
-                    <User className="w-7 h-7 text-primary" />
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                    <User className="w-6 h-6 text-primary" />
                   </div>
                   <div className="text-left flex-1">
-                    <h3 className="font-semibold text-foreground text-lg">Sou Cliente</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Quero contratar limpeza
-                    </p>
+                    <h3 className="font-semibold text-foreground">Sou Cliente</h3>
+                    <p className="text-sm text-muted-foreground">Quero contratar limpeza</p>
                   </div>
-                  <ChevronLeft className="w-5 h-5 text-muted-foreground/50 rotate-180 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                 </motion.button>
 
                 <motion.button
@@ -170,22 +164,20 @@ export default function Login() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                   whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setUserType("pro")}
-                  className="w-full p-4 bg-card rounded-2xl border border-border
+                  className="w-full p-4 bg-card rounded-2xl border border-border/60
                     hover:border-success/40 hover:shadow-lg hover:shadow-success/5 transition-all duration-300
                     flex items-center gap-4 group"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-success/10 flex items-center justify-center group-hover:bg-success/15 transition-colors">
-                    <Briefcase className="w-7 h-7 text-success" />
+                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:bg-success/15 transition-colors">
+                    <Briefcase className="w-6 h-6 text-success" />
                   </div>
                   <div className="text-left flex-1">
-                    <h3 className="font-semibold text-foreground text-lg">Sou Diarista</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Quero oferecer meus serviços
-                    </p>
+                    <h3 className="font-semibold text-foreground">Sou Diarista</h3>
+                    <p className="text-sm text-muted-foreground">Quero oferecer meus serviços</p>
                   </div>
-                  <ChevronLeft className="w-5 h-5 text-muted-foreground/50 rotate-180 group-hover:text-success group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-success group-hover:translate-x-0.5 transition-all" />
                 </motion.button>
               </div>
 
@@ -193,7 +185,7 @@ export default function Login() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-sm text-muted-foreground mt-4"
+                className="text-sm text-muted-foreground mt-6 text-center"
               >
                 Não tem conta?{" "}
                 <button 
@@ -214,43 +206,41 @@ export default function Login() {
     <PageTransition>
        <div className="h-full bg-background flex flex-col overflow-hidden"
           style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        {/* Background Pattern */}
+        {/* Subtle gradient */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-primary/5 to-transparent" />
+          <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-primary/8 blur-3xl" />
         </div>
 
-
         {/* Back button at top */}
-        <div className="relative z-10 px-4 py-2 shrink-0">
+        <div className="relative z-10 px-5 py-3 shrink-0">
           <motion.button
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setUserType(null)}
-            className="w-11 h-11 rounded-xl bg-card border border-border flex items-center justify-center hover:bg-muted transition-colors"
+            className="w-10 h-10 rounded-xl bg-card border border-border/60 flex items-center justify-center hover:bg-muted transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </motion.button>
         </div>
 
         {/* Content */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 pb-10 lg:w-[45%]">
+        <div className="relative z-10 flex-1 flex flex-col justify-center px-6 pb-10">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto lg:mr-12"
+            className="w-full max-w-sm mx-auto"
           >
-
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="mb-8"
             >
-              <Logo size="xl" />
-              <h1 className="text-2xl font-bold text-foreground mt-6">
+              <Logo size="lg" className="mb-6" />
+              <h1 className="text-2xl font-bold text-foreground">
                 {userType === "client" ? "Entrar como Cliente" : "Entrar como Diarista"}
               </h1>
               <p className="text-muted-foreground mt-1">
@@ -283,15 +273,17 @@ export default function Login() {
                 required
               />
 
-              <button
-                type="button"
-                onClick={() => navigate("/forgot-password")}
-                className="text-sm text-primary font-medium hover:underline"
-              >
-                Esqueceu a senha?
-              </button>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-sm text-primary font-medium hover:underline"
+                >
+                  Esqueceu a senha?
+                </button>
+              </div>
 
-              <PrimaryButton type="submit" fullWidth loading={loading}>
+              <PrimaryButton type="submit" fullWidth size="lg" loading={loading}>
                 Entrar
               </PrimaryButton>
             </motion.form>
@@ -300,7 +292,7 @@ export default function Login() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-sm text-muted-foreground mt-4"
+              className="text-sm text-muted-foreground mt-6 text-center"
             >
               Não tem conta?{" "}
               <button 

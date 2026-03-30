@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
 import { InputField } from "@/components/ui/InputField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { User, Briefcase, Check, ChevronLeft } from "lucide-react";
+import { User, Briefcase, Check, ChevronLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { motion } from "framer-motion";
 
 type UserType = "client" | "pro" | null;
 
@@ -34,7 +35,6 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  // Form fields
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneDisplay, setPhoneDisplay] = useState("");
@@ -91,20 +91,17 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Phone validation
     if (phone.length < 10 || phone.length > 11) {
       toast.error("Telefone inválido. Use DDD + número (10 ou 11 dígitos).");
       return;
     }
 
-    // Password validation
     const passwordError = validatePassword(password);
     if (passwordError) {
       toast.error(passwordError);
       return;
     }
 
-    // Pro step 2 validation
     if (userType === "pro" && step === 2) {
       if (selectedDays.length === 0) {
         toast.error("Selecione pelo menos um dia disponível");
@@ -131,7 +128,6 @@ export default function Register() {
       return;
     }
 
-    // For pro users, create pro_profile
     if (userType === "pro") {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (currentUser) {
@@ -155,64 +151,82 @@ export default function Register() {
 
   if (!userType) {
     return (
-      <div className="h-full bg-background flex flex-col items-center justify-center p-6 overflow-hidden"
+      <div className="h-full bg-background flex flex-col overflow-hidden"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        <div className="w-full max-w-sm animate-fade-in">
-          <div className="text-center mb-12">
-            <Logo size="lg" className="justify-center mb-4" />
-            <h1 className="text-xl font-semibold text-foreground mb-2">
-              Criar conta
-            </h1>
-            <p className="text-muted-foreground">
-              Como você quer usar o JáLimpo?
+        {/* Subtle gradient */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-primary/8 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-primary/5 blur-3xl" />
+        </div>
+
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-sm"
+          >
+            <div className="text-center mb-10">
+              <Logo size="xl" className="justify-center mb-5" />
+              <h1 className="text-2xl font-bold text-foreground mb-1">
+                Criar conta
+              </h1>
+              <p className="text-muted-foreground">
+                Como você quer usar o Já Limpo?
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <motion.button
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setUserType("client")}
+                className="w-full p-4 bg-card rounded-2xl border border-border/60
+                  hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300
+                  flex items-center gap-4 group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                  <User className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-left flex-1">
+                  <h3 className="font-semibold text-foreground">Sou Cliente</h3>
+                  <p className="text-sm text-muted-foreground">Quero contratar limpeza</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+              </motion.button>
+
+              <motion.button
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setUserType("pro")}
+                className="w-full p-4 bg-card rounded-2xl border border-border/60
+                  hover:border-success/40 hover:shadow-lg hover:shadow-success/5 transition-all duration-300
+                  flex items-center gap-4 group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:bg-success/15 transition-colors">
+                  <Briefcase className="w-6 h-6 text-success" />
+                </div>
+                <div className="text-left flex-1">
+                  <h3 className="font-semibold text-foreground">Sou Diarista</h3>
+                  <p className="text-sm text-muted-foreground">Quero oferecer meus serviços</p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-success group-hover:translate-x-0.5 transition-all" />
+              </motion.button>
+            </div>
+
+            <p className="text-center text-sm text-muted-foreground mt-8">
+              Já tem conta?{" "}
+              <button 
+                onClick={() => navigate("/login")}
+                className="text-primary font-semibold hover:underline"
+              >
+                Entrar
+              </button>
             </p>
-          </div>
-
-          <div className="space-y-4">
-            <button
-              onClick={() => setUserType("client")}
-              className="w-full p-5 bg-card rounded-xl border border-border card-shadow
-                hover:card-shadow-hover hover:border-primary/20 transition-all duration-200
-                flex items-center gap-4 active:scale-[0.98]"
-            >
-              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                <User className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-semibold text-foreground">Sou Cliente</h3>
-                <p className="text-sm text-muted-foreground">
-                  Quero contratar limpeza
-                </p>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setUserType("pro")}
-              className="w-full p-5 bg-card rounded-xl border border-border card-shadow
-                hover:card-shadow-hover hover:border-primary/20 transition-all duration-200
-                flex items-center gap-4 active:scale-[0.98]"
-            >
-              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-semibold text-foreground">Sou Diarista</h3>
-                <p className="text-sm text-muted-foreground">
-                  Quero oferecer meus serviços
-                </p>
-              </div>
-            </button>
-          </div>
-
-          <p className="text-center text-sm text-muted-foreground mt-8">
-            Já tem conta?{" "}
-            <button 
-              onClick={() => navigate("/login")}
-              className="text-primary font-medium hover:underline"
-            >
-              Entrar
-            </button>
-          </p>
+          </motion.div>
         </div>
       </div>
     );
@@ -222,28 +236,28 @@ export default function Register() {
     <div className="h-full bg-background flex flex-col"
       style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       {/* Header */}
-      <header className="flex-shrink-0 p-6 pb-0">
+      <header className="flex-shrink-0 px-5 pt-3 pb-0">
         <div className="w-full max-w-sm mx-auto">
           <button
             onClick={() => step === 1 ? setUserType(null) : setStep(1)}
-            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors mb-6"
+            className="w-10 h-10 rounded-xl bg-card border border-border/60 flex items-center justify-center hover:bg-muted transition-colors mb-5"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <div className="text-center mb-6">
-            <Logo size="md" className="justify-center mb-4" />
-            <h1 className="text-xl font-semibold text-foreground">
+          <div className="mb-5">
+            <Logo size="md" className="mb-4" />
+            <h1 className="text-xl font-bold text-foreground">
               {userType === "client" ? "Cadastro Cliente" : "Cadastro Diarista"}
             </h1>
             {userType === "pro" && (
-              <div className="flex justify-center gap-2 mt-4">
+              <div className="flex gap-2 mt-4">
                 <div className={cn(
-                  "w-8 h-1 rounded-full transition-colors",
+                  "flex-1 h-1 rounded-full transition-colors",
                   step >= 1 ? "bg-primary" : "bg-border"
                 )} />
                 <div className={cn(
-                  "w-8 h-1 rounded-full transition-colors",
+                  "flex-1 h-1 rounded-full transition-colors",
                   step >= 2 ? "bg-primary" : "bg-border"
                 )} />
               </div>
@@ -253,8 +267,8 @@ export default function Register() {
       </header>
 
       {/* Scrollable Form Area */}
-      <main className="flex-1 overflow-y-auto px-6">
-        <div className="w-full max-w-sm mx-auto animate-fade-in py-4">
+      <main className="flex-1 overflow-y-auto px-5">
+        <div className="w-full max-w-sm mx-auto py-4">
           <form onSubmit={handleSubmit} className="space-y-4">
           {step === 1 && (
             <>
@@ -324,7 +338,8 @@ export default function Register() {
               {userType === "client" ? (
                 <PrimaryButton 
                   type="submit" 
-                  fullWidth 
+                  fullWidth
+                  size="lg"
                   loading={loading}
                   disabled={!acceptTerms}
                 >
@@ -333,7 +348,8 @@ export default function Register() {
               ) : (
               <PrimaryButton 
                 type="button" 
-                fullWidth 
+                fullWidth
+                size="lg"
                 disabled={password.length < 8 || !name || !phone || !email}
                 onClick={() => setStep(2)}
               >
@@ -360,7 +376,7 @@ export default function Register() {
                 <select
                   value={radius}
                   onChange={(e) => setRadius(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-input bg-background
+                  className="w-full px-4 py-3 rounded-xl border border-border/50 bg-background
                     text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 
                     focus:border-primary transition-all duration-200"
                 >
@@ -383,10 +399,10 @@ export default function Register() {
                       type="button"
                       onClick={() => toggleDay(day.id)}
                       className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        "px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
                         selectedDays.includes(day.id)
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
                       )}
                     >
                       {day.label}
@@ -406,10 +422,10 @@ export default function Register() {
                       type="button"
                       onClick={() => togglePeriod(period.id)}
                       className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        "px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
                         selectedPeriods.includes(period.id)
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted"
                       )}
                     >
                       {period.label}
@@ -446,7 +462,8 @@ export default function Register() {
 
               <PrimaryButton 
                 type="submit" 
-                fullWidth 
+                fullWidth
+                size="lg"
                 loading={loading}
                 disabled={!acceptTerms}
               >
@@ -460,7 +477,7 @@ export default function Register() {
             Já tem conta?{" "}
             <button 
               onClick={() => navigate("/login")}
-              className="text-primary font-medium hover:underline"
+              className="text-primary font-semibold hover:underline"
             >
               Entrar
             </button>
