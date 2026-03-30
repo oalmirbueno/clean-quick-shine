@@ -18,15 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-function StyledLogo({ size = "md" }: { size?: "sm" | "md" }) {
-  const textSize = size === "sm" ? "text-xl" : "text-3xl";
-  return (
-    <span className={`${textSize} font-bold tracking-tight`}>
-      <span className="text-primary">Já</span>
-      <span className="text-foreground ml-1">Limpo</span>
-    </span>
-  );
-}
+import { Logo } from "@/components/ui/Logo";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
