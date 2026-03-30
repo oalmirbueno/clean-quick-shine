@@ -212,7 +212,7 @@ export function useAvailableOrdersForPro() {
       const addressIds = [...new Set(filteredOrders.map(o => o.address_id))];
 
       const [servicesResult, addressesResult] = await Promise.all([
-        supabase.from("services").select("id, name").in("id", serviceIds),
+        supabase.from("services").select("id, name, requires_pro_plan").in("id", serviceIds),
         supabase.from("addresses").select("id, city, neighborhood, zone_id").in("id", addressIds),
       ]);
 
