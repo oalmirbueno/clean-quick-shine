@@ -57,7 +57,20 @@ export default function Register() {
     );
   };
 
-  const validatePassword = (pwd: string): string | null => {
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 11);
+    setPhone(raw);
+    setPhoneDisplay(formatPhone(raw));
+  };
+
+
     if (pwd.length < 8) return "Senha deve ter no mínimo 8 caracteres";
     if (!/[A-Z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra maiúscula";
     if (!/[a-z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra minúscula";
