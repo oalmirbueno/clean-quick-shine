@@ -26,7 +26,7 @@ const statusActionMap: Record<string, { label: string; description: string; vari
     {
       label: "Confirmar Transferência",
       description: "Confirma que o Pix foi concluído. O valor sai do saldo da diarista definitivamente.",
-      variant: "default",
+      variant: "primary",
     },
     {
       label: "Rejeitar Saque",
