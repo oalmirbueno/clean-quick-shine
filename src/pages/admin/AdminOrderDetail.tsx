@@ -116,16 +116,32 @@ export default function AdminOrderDetail() {
             </div>
           </div>
 
-          {order.status === "in_review" && (
-            <div className="bg-card rounded-xl border border-border p-4 card-shadow">
-              <h3 className="font-semibold text-foreground mb-4">Ações de mediação</h3>
-              <div className="space-y-2">
-                <PrimaryButton fullWidth variant="outline">Reembolso parcial</PrimaryButton>
-                <PrimaryButton fullWidth variant="outline">Reembolso total</PrimaryButton>
-                <PrimaryButton fullWidth>Liberar pagamento</PrimaryButton>
-              </div>
+          <div className="bg-card rounded-xl border border-border p-4 card-shadow">
+            <h3 className="font-semibold text-foreground mb-4">Ações do pedido</h3>
+            <div className="space-y-2">
+              {(order.status === "completed" || order.status === "rated") && (
+                <PrimaryButton fullWidth variant="outline" onClick={() => updateOrderStatus.mutate("in_review")} loading={updateOrderStatus.isPending}>
+                  Colocar em Análise
+                </PrimaryButton>
+              )}
+              {(order.status === "completed" || order.status === "in_review") && (
+                <PrimaryButton fullWidth variant="outline" onClick={() => updateOrderStatus.mutate("rated")} loading={updateOrderStatus.isPending}>
+                  Liberar para Avaliado
+                </PrimaryButton>
+              )}
+              {order.status === "rated" && (
+                <PrimaryButton fullWidth onClick={() => updateOrderStatus.mutate("paid_out")} loading={updateOrderStatus.isPending}>
+                  Marcar como Pago
+                </PrimaryButton>
+              )}
+              {order.status === "in_review" && (
+                <>
+                  <PrimaryButton fullWidth variant="outline">Reembolso parcial</PrimaryButton>
+                  <PrimaryButton fullWidth variant="outline">Reembolso total</PrimaryButton>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         <div className="bg-card rounded-xl border border-border p-4 card-shadow">

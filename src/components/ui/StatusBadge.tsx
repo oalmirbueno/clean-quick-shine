@@ -43,8 +43,10 @@ const statusConfig: Record<string, { label: string; variant: string }> = {
   refunded: { label: "Reembolsado", variant: "bg-destructive/10 text-destructive" },
   
   // Withdrawal
-  requested: { label: "Solicitado", variant: "bg-warning/10 text-warning" },
-  paid: { label: "Pago", variant: "bg-success/10 text-success" },
+  processing: { label: "Processando", variant: "bg-primary/10 text-primary" },
+  // pending already defined above
+  // completed already defined above (Concluído)
+  rejected: { label: "Rejeitado", variant: "bg-destructive/10 text-destructive" },
 
   // Ticket
   open: { label: "Aberto", variant: "bg-warning/10 text-warning" },

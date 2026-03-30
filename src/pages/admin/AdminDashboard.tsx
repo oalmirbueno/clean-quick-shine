@@ -83,7 +83,7 @@ export default function AdminDashboard() {
       if (error) console.error("admin_withdrawals error:", error);
       const total = data?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
       const pending = data?.filter(w => w.status === "pending").reduce((sum, w) => sum + Number(w.amount), 0) || 0;
-      const processed = data?.filter(w => w.status === "processed" || w.status === "paid").reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+      const processed = data?.filter(w => w.status === "completed" || w.status === "processing").reduce((sum, w) => sum + Number(w.amount), 0) || 0;
       return { total, pending, processed };
     },
   });
