@@ -37,6 +37,7 @@ export default function Register() {
   // Form fields
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneDisplay, setPhoneDisplay] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [city, setCity] = useState("");

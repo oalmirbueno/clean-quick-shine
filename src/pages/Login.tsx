@@ -8,6 +8,7 @@ import { User, Briefcase, ChevronLeft, Shield, Clock, Star } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 type UserType = "client" | "pro" | null;
 
