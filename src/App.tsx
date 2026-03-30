@@ -10,7 +10,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { UpdatePrompt } from "@/components/ui/UpdatePrompt";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
-import InstallScreen from "@/pages/InstallScreen";
+import { InstallBanner } from "@/components/ui/InstallBanner";
 
 // Pages
 import Index from "./pages/Index";
@@ -116,6 +116,7 @@ const App = () => {
             <Sonner />
             <OfflineBanner />
             <UpdatePrompt />
+            <InstallBanner />
             <BrowserRouter>
               <Routes>
                 {/* Splash & Auth */}
