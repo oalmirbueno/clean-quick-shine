@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { InputField } from "@/components/ui/InputField";
-import { ChevronLeft, Wallet, ArrowDownToLine, Clock, Loader2, CheckCircle2, XCircle, Smartphone, Mail, CreditCard, Key } from "lucide-react";
+import { ChevronLeft, Wallet, ArrowDownToLine, Clock, Loader2, CheckCircle2, XCircle, Smartphone, Mail, CreditCard, Key, ShieldAlert, HelpCircle } from "lucide-react";
 import { useProBalance, useProWithdrawals } from "@/hooks/useWithdrawals";
 import { useWithdrawRequest } from "@/hooks/useWithdrawRequest";
 import { format } from "date-fns";
@@ -19,6 +19,8 @@ const pixKeyOptions: { type: PixKeyType; label: string; icon: React.ReactNode; p
   { type: "phone", label: "Telefone", icon: <Smartphone className="w-4 h-4" />, placeholder: "(41) 99999-9999" },
   { type: "random", label: "Aleatória", icon: <Key className="w-4 h-4" />, placeholder: "Cole sua chave aleatória" },
 ];
+
+const fmt = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
 
 export default function ProWithdraw() {
   const navigate = useNavigate();
@@ -58,8 +60,9 @@ export default function ProWithdraw() {
       case "completed":
         return <CheckCircle2 className="w-5 h-5 text-success" />;
       case "pending":
-      case "processing":
         return <Clock className="w-5 h-5 text-warning" />;
+      case "processing":
+        return <Loader2 className="w-5 h-5 text-primary animate-spin" />;
       case "rejected":
         return <XCircle className="w-5 h-5 text-destructive" />;
       default:
@@ -70,15 +73,15 @@ export default function ProWithdraw() {
   const getStatusLabel = (status: string | null) => {
     switch (status) {
       case "completed":
-        return "Pago";
+        return "Transferido ✓";
       case "pending":
-        return "Pendente";
+        return "Na fila";
       case "processing":
-        return "Processando";
+        return "Transferindo...";
       case "rejected":
-        return "Rejeitado";
+        return "Recusado";
       default:
-        return status || "Pendente";
+        return status || "Na fila";
     }
   };
 
@@ -87,8 +90,9 @@ export default function ProWithdraw() {
       case "completed":
         return "text-success";
       case "pending":
-      case "processing":
         return "text-warning";
+      case "processing":
+        return "text-primary";
       case "rejected":
         return "text-destructive";
       default:
@@ -99,6 +103,7 @@ export default function ProWithdraw() {
   const isLoading = balanceLoading || withdrawalsLoading;
   const availableBalance = balance?.availableBalance || 0;
   const pendingBalance = balance?.pendingBalance || 0;
+  const blockedBalance = balance?.blockedBalance || 0;
   const pendingWithdrawal = balance?.pendingWithdrawal || 0;
   const numAmount = parseFloat(amount.replace(",", ".")) || 0;
   const isValid = numAmount >= 10 && numAmount <= availableBalance && pixKey.trim().length > 0;
@@ -127,31 +132,78 @@ export default function ProWithdraw() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-6 animate-fade-in">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
         {/* Balance Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="p-5 bg-primary rounded-xl text-primary-foreground"
         >
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-1">
             <Wallet className="w-6 h-6" />
-            <span className="text-sm opacity-90">Saldo disponível</span>
+            <span className="text-sm font-medium opacity-90">Disponível para saque</span>
           </div>
           <p className="text-3xl font-bold">
-            R$ {availableBalance.toFixed(2).replace(".", ",")}
+            {fmt(availableBalance)}
           </p>
-          {pendingBalance > 0 && (
-            <p className="text-sm opacity-75 mt-1">
-              + R$ {pendingBalance.toFixed(2).replace(".", ",")} aguardando avaliação
-            </p>
-          )}
-          {pendingWithdrawal > 0 && (
-            <p className="text-sm opacity-75 mt-1">
-              R$ {pendingWithdrawal.toFixed(2).replace(".", ",")} em processamento
-            </p>
-          )}
+          <p className="text-xs opacity-70 mt-1">
+            Valor já liberado após avaliação do cliente
+          </p>
         </motion.div>
+
+        {/* Balance Breakdown */}
+        {(pendingBalance > 0 || blockedBalance > 0 || pendingWithdrawal > 0) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-card rounded-xl border border-border p-4 card-shadow space-y-3"
+          >
+            <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
+              <HelpCircle className="w-4 h-4 text-muted-foreground" />
+              Detalhes do saldo
+            </h3>
+
+            {pendingBalance > 0 && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-warning" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Aguardando avaliação</p>
+                    <p className="text-xs text-muted-foreground">Cliente ainda não avaliou</p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-warning">{fmt(pendingBalance)}</span>
+              </div>
+            )}
+
+            {blockedBalance > 0 && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-destructive" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Em análise</p>
+                    <p className="text-xs text-muted-foreground">Bloqueado até resolução</p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-destructive">{fmt(blockedBalance)}</span>
+              </div>
+            )}
+
+            {pendingWithdrawal > 0 && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Saque em andamento</p>
+                    <p className="text-xs text-muted-foreground">Transferência Pix em processamento</p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-primary">{fmt(pendingWithdrawal)}</span>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* Withdraw Form */}
         <motion.div
@@ -174,7 +226,7 @@ export default function ProWithdraw() {
             <p className="text-xs text-destructive">Valor mínimo: R$ 10,00</p>
           )}
           {numAmount > availableBalance && (
-            <p className="text-xs text-destructive">Saldo insuficiente</p>
+            <p className="text-xs text-destructive">Valor maior que o saldo disponível ({fmt(availableBalance)})</p>
           )}
 
           <div className="flex gap-2">
@@ -182,7 +234,7 @@ export default function ProWithdraw() {
               <button
                 key={value}
                 onClick={() => setAmount(String(Math.min(value, availableBalance)))}
-                disabled={availableBalance < value}
+                disabled={availableBalance < 10}
                 className={cn(
                   "flex-1 py-2 text-sm font-medium rounded-lg border transition-colors",
                   availableBalance >= value
@@ -195,10 +247,10 @@ export default function ProWithdraw() {
             ))}
             <button
               onClick={() => setAmount(String(availableBalance))}
-              disabled={availableBalance <= 0}
+              disabled={availableBalance < 10}
               className={cn(
                 "flex-1 py-2 text-sm font-medium rounded-lg border transition-colors",
-                availableBalance > 0
+                availableBalance >= 10
                   ? "border-primary text-primary hover:bg-primary/10"
                   : "border-muted text-muted-foreground cursor-not-allowed"
               )}
@@ -259,11 +311,11 @@ export default function ProWithdraw() {
             disabled={!isValid}
           >
             <ArrowDownToLine className="w-4 h-4 mr-2" />
-            Solicitar saque
+            Solicitar saque de {numAmount >= 10 ? fmt(numAmount) : "..."}
           </PrimaryButton>
 
           <p className="text-xs text-center text-muted-foreground mt-3">
-            Saques são processados via Pix em até 24 horas úteis.
+            Transferência Pix processada em até 24 horas úteis.
           </p>
         </motion.div>
 
@@ -289,7 +341,7 @@ export default function ProWithdraw() {
                     </div>
                     <div>
                       <p className="font-medium text-foreground">
-                        R$ {Number(withdrawal.amount).toFixed(2).replace(".", ",")}
+                        {fmt(Number(withdrawal.amount))}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {formatDate(withdrawal.created_at)}
@@ -309,6 +361,9 @@ export default function ProWithdraw() {
             </div>
           </motion.div>
         )}
+
+        {/* Spacer for bottom nav */}
+        <div className="h-4" />
       </main>
 
       <BottomNav variant="pro" />

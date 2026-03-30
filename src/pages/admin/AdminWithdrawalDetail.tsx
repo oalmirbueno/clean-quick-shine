@@ -2,15 +2,50 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { ChevronLeft, User, Calendar, Banknote } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { ChevronLeft, User, Calendar, Banknote, AlertTriangle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useState } from "react";
+
+const statusActionMap: Record<string, { label: string; description: string; variant?: "default" | "outline" }[]> = {
+  pending: [
+    {
+      label: "Aprovar e Processar",
+      description: "Marca o saque como em processamento. A transferência Pix será iniciada.",
+      variant: "default",
+    },
+    {
+      label: "Rejeitar Saque",
+      description: "O valor será devolvido ao saldo disponível da diarista.",
+      variant: "outline",
+    },
+  ],
+  processing: [
+    {
+      label: "Confirmar Transferência",
+      description: "Confirma que o Pix foi concluído. O valor sai do saldo da diarista definitivamente.",
+      variant: "default",
+    },
+    {
+      label: "Rejeitar Saque",
+      description: "A transferência falhou. O valor retorna ao saldo disponível da diarista.",
+      variant: "outline",
+    },
+  ],
+};
+
+const statusTargetMap: Record<string, string[]> = {
+  pending: ["processing", "rejected"],
+  processing: ["completed", "rejected"],
+};
 
 export default function AdminWithdrawalDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const queryClient = useQueryClient();
+  const [confirmAction, setConfirmAction] = useState<{ status: string; label: string; description: string } | null>(null);
 
   const { data: withdrawal } = useQuery({
     queryKey: ["admin_withdrawal_detail", id],
@@ -31,11 +66,20 @@ export default function AdminWithdrawalDetail() {
       if (error) throw error;
     },
     onSuccess: (_, newStatus) => {
-      toast.success(`Saque marcado como ${newStatus}`);
+      const msgs: Record<string, string> = {
+        processing: "Saque aprovado e em processamento",
+        completed: "Transferência confirmada com sucesso",
+        rejected: "Saque rejeitado — saldo devolvido à diarista",
+      };
+      toast.success(msgs[newStatus] || `Status atualizado para ${newStatus}`);
+      setConfirmAction(null);
       queryClient.invalidateQueries({ queryKey: ["admin_withdrawal_detail", id] });
       queryClient.invalidateQueries({ queryKey: ["admin_withdrawals"] });
     },
-    onError: () => toast.error("Erro ao atualizar saque"),
+    onError: () => {
+      toast.error("Erro ao atualizar saque");
+      setConfirmAction(null);
+    },
   });
 
   if (!withdrawal) {
@@ -49,6 +93,8 @@ export default function AdminWithdrawalDetail() {
   }
 
   const fmt = (v: number) => `R$ ${Number(v).toFixed(2).replace(".", ",")}`;
+  const actions = statusActionMap[withdrawal.status || ""] || [];
+  const targets = statusTargetMap[withdrawal.status || ""] || [];
 
   return (
     <AdminLayout>
@@ -72,7 +118,7 @@ export default function AdminWithdrawalDetail() {
           </div>
           <div className="flex items-start gap-3">
             <Banknote className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div><p className="text-sm text-muted-foreground">Valor</p><p className="font-medium text-foreground">{fmt(withdrawal.amount)}</p></div>
+            <div><p className="text-sm text-muted-foreground">Valor solicitado</p><p className="text-xl font-bold text-foreground">{fmt(withdrawal.amount)}</p></div>
           </div>
           <div className="flex items-start gap-3">
             <Calendar className="w-5 h-5 text-muted-foreground mt-0.5" />
@@ -85,41 +131,57 @@ export default function AdminWithdrawalDetail() {
             </div>
           )}
           {withdrawal.asaas_transfer_id && (
-            <div className="text-sm text-muted-foreground">Asaas ID: {withdrawal.asaas_transfer_id}</div>
+            <div className="text-sm text-muted-foreground">ID transferência: {withdrawal.asaas_transfer_id}</div>
           )}
         </div>
 
         <div className="bg-card rounded-xl border border-border p-4 card-shadow">
           <h3 className="font-semibold text-foreground mb-4">Ações</h3>
-          <div className="space-y-2">
-            {withdrawal.status === "pending" && (
-              <>
-                <PrimaryButton fullWidth onClick={() => updateStatus.mutate("processing")} loading={updateStatus.isPending}>
-                  Marcar como Processando
-                </PrimaryButton>
-                <PrimaryButton fullWidth variant="outline" onClick={() => updateStatus.mutate("rejected")} loading={updateStatus.isPending}>
-                  Rejeitar Saque
-                </PrimaryButton>
-              </>
-            )}
-            {withdrawal.status === "processing" && (
-              <>
-                <PrimaryButton fullWidth onClick={() => updateStatus.mutate("completed")} loading={updateStatus.isPending}>
-                  Marcar como Concluído
-                </PrimaryButton>
-                <PrimaryButton fullWidth variant="outline" onClick={() => updateStatus.mutate("rejected")} loading={updateStatus.isPending}>
-                  Rejeitar Saque
-                </PrimaryButton>
-              </>
-            )}
-            {(withdrawal.status === "completed" || withdrawal.status === "rejected") && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Este saque já foi {withdrawal.status === "completed" ? "concluído" : "rejeitado"}.
+
+          {actions.length > 0 ? (
+            <div className="space-y-3">
+              {actions.map((action, idx) => (
+                <div key={idx}>
+                  <PrimaryButton
+                    fullWidth
+                    variant={action.variant || "default"}
+                    onClick={() => setConfirmAction({ status: targets[idx], label: action.label, description: action.description })}
+                    loading={updateStatus.isPending}
+                  >
+                    {action.label}
+                  </PrimaryButton>
+                  <p className="text-xs text-muted-foreground mt-1 ml-1">{action.description}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-sm text-muted-foreground">
+                Este saque já foi {withdrawal.status === "completed" ? "concluído ✓" : "rejeitado ✗"}.
               </p>
-            )}
-          </div>
+              {withdrawal.status === "rejected" && (
+                <p className="text-xs text-muted-foreground mt-2 flex items-center justify-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  O valor foi devolvido ao saldo da diarista
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <ConfirmModal
+          open={!!confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={() => updateStatus.mutate(confirmAction.status)}
+          title={confirmAction.label}
+          description={confirmAction.description}
+          confirmLabel="Confirmar"
+          loading={updateStatus.isPending}
+        />
+      )}
     </AdminLayout>
   );
 }
