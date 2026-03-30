@@ -45,7 +45,7 @@ const getAvailableActions = (status: string | null): OrderAction[] => {
       targetStatus: "paid_out",
       label: "💰 Dar Baixa (Pago)",
       description: "Registra que o pagamento foi concluído. O valor sai definitivamente do saldo da diarista. Ação irreversível.",
-      variant: "default",
+      variant: "primary",
     });
   }
 
