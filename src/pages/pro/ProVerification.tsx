@@ -2,9 +2,10 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { ChevronLeft, Upload, CheckCircle2, Loader2, AlertCircle, CreditCard, Camera, Home, Shield, Clock, XCircle } from "lucide-react";
+import { ChevronLeft, Upload, CheckCircle2, Loader2, AlertCircle, CreditCard, Camera, Shield, Clock, XCircle, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProDocuments } from "@/hooks/useProDocuments";
+import { toast } from "sonner";
 
 interface DocConfig {
   id: string;
@@ -13,18 +14,92 @@ interface DocConfig {
   description: string;
   accept: string;
   required: boolean;
+  qualityTip: string;
 }
 
 const docConfigs: DocConfig[] = [
-  { id: "cpf", icon: CreditCard, title: "CPF", description: "Foto frente do CPF ou CNH", accept: "image/*", required: true },
-  { id: "rg", icon: CreditCard, title: "RG ou CNH", description: "Foto frente e verso do documento", accept: "image/*", required: true },
-  { id: "selfie", icon: Camera, title: "Selfie com documento", description: "Segurando seu RG ou CNH", accept: "image/*", required: true },
-  { id: "comprovante_endereco", icon: Home, title: "Comprovante de endereço", description: "Conta de luz, água ou internet (últimos 3 meses)", accept: "image/*,application/pdf", required: false },
-  { id: "antecedentes", icon: Shield, title: "Certidão de antecedentes", description: "Certidão negativa de antecedentes criminais", accept: "image/*,application/pdf", required: false },
+  {
+    id: "id_front",
+    icon: CreditCard,
+    title: "RG ou CNH (Frente)",
+    description: "Foto nítida da frente do documento",
+    accept: "image/*",
+    required: true,
+    qualityTip: "Documento inteiro visível, sem cortes, reflexos ou sombras",
+  },
+  {
+    id: "id_back",
+    icon: CreditCard,
+    title: "RG ou CNH (Verso)",
+    description: "Foto nítida do verso do documento",
+    accept: "image/*",
+    required: true,
+    qualityTip: "Todos os dados legíveis, sem desfoque",
+  },
+  {
+    id: "selfie",
+    icon: Camera,
+    title: "Selfie com documento",
+    description: "Selfie segurando seu RG ou CNH ao lado do rosto",
+    accept: "image/*",
+    required: true,
+    qualityTip: "Rosto e documento visíveis e legíveis na mesma foto",
+  },
+  {
+    id: "proof_residence",
+    icon: Shield,
+    title: "Comprovante de residência",
+    description: "Conta de luz, água ou internet (últimos 3 meses)",
+    accept: "image/*,application/pdf",
+    required: false,
+    qualityTip: "Nome e endereço legíveis",
+  },
 ];
 
 const requiredDocs = docConfigs.filter(d => d.required);
 const optionalDocs = docConfigs.filter(d => !d.required);
+
+const MIN_FILE_SIZE = 100 * 1024; // 100KB minimum
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB max
+const MIN_IMAGE_DIMENSION = 800; // px
+
+function validateImageQuality(file: File): Promise<{ valid: boolean; reason?: string }> {
+  return new Promise((resolve) => {
+    if (file.type.startsWith("application/pdf")) {
+      resolve({ valid: true });
+      return;
+    }
+
+    if (file.size < MIN_FILE_SIZE) {
+      resolve({ valid: false, reason: "Arquivo muito pequeno. Envie uma foto com melhor qualidade (mínimo 100KB)." });
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      resolve({ valid: false, reason: "Arquivo muito grande. Máximo permitido: 10MB." });
+      return;
+    }
+
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      if (img.width < MIN_IMAGE_DIMENSION && img.height < MIN_IMAGE_DIMENSION) {
+        resolve({
+          valid: false,
+          reason: `Imagem com resolução muito baixa (${img.width}x${img.height}). Mínimo recomendado: ${MIN_IMAGE_DIMENSION}px no maior lado.`,
+        });
+      } else {
+        resolve({ valid: true });
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve({ valid: false, reason: "Não foi possível ler a imagem. Tente outro arquivo." });
+    };
+    img.src = url;
+  });
+}
 
 export default function ProVerification() {
   const navigate = useNavigate();
@@ -34,7 +109,13 @@ export default function ProVerification() {
 
   const handleFileSelect = async (docId: string, file: File) => {
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) return;
+
+    const validation = await validateImageQuality(file);
+    if (!validation.valid) {
+      toast.error(validation.reason || "Documento inválido");
+      return;
+    }
+
     setUploadingType(docId);
     uploadDocument({ docType: docId, file }, {
       onSettled: () => setUploadingType(null),
@@ -52,9 +133,11 @@ export default function ProVerification() {
   };
 
   const allRequiredApproved = requiredDocs.every(d => getStatus(d.id) === "approved");
+  const allRequiredSent = requiredDocs.every(d => getStatus(d.id) !== "not_sent");
   const approvedCount = docConfigs.filter(d => getStatus(d.id) === "approved").length;
   const pendingCount = docConfigs.filter(d => getStatus(d.id) === "pending").length;
   const rejectedCount = docConfigs.filter(d => getStatus(d.id) === "rejected").length;
+  const notSentRequired = requiredDocs.filter(d => getStatus(d.id) === "not_sent").length;
 
   if (isLoading) {
     return (
@@ -82,6 +165,7 @@ export default function ProVerification() {
           type="file"
           ref={(el) => (fileInputRefs.current[doc.id] = el)}
           accept={doc.accept}
+          capture={doc.id === "selfie" ? "user" : undefined}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleFileSelect(doc.id, file);
@@ -100,21 +184,27 @@ export default function ProVerification() {
               <div className="flex items-center gap-2">
                 <h3 className="font-medium text-foreground">{doc.title}</h3>
                 {doc.required && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">Obrigatório</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-semibold">Obrigatório</span>
                 )}
               </div>
               {status !== "not_sent" && <StatusBadge status={status} />}
             </div>
             <p className="text-sm text-muted-foreground">{doc.description}</p>
 
+            {/* Quality tip */}
+            <div className="flex items-start gap-1.5 mt-1.5">
+              <ImageIcon className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-primary/80">{doc.qualityTip}</p>
+            </div>
+
             {docData?.file_name && status !== "rejected" && (
-              <p className="text-xs text-primary mt-1 truncate">{docData.file_name}</p>
+              <p className="text-xs text-muted-foreground mt-1 truncate">📎 {docData.file_name}</p>
             )}
 
             {status === "rejected" && docData?.rejection_reason && (
-              <div className="flex items-start gap-1.5 mt-2">
+              <div className="flex items-start gap-1.5 mt-2 p-2 bg-destructive/5 rounded-lg">
                 <AlertCircle className="w-3.5 h-3.5 text-destructive flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-destructive">{docData.rejection_reason}</p>
+                <p className="text-xs text-destructive font-medium">{docData.rejection_reason}</p>
               </div>
             )}
           </div>
@@ -200,6 +290,8 @@ export default function ProVerification() {
                   ? "Reenvie os documentos rejeitados"
                   : pendingCount > 0
                   ? "Retornaremos em até 48 horas"
+                  : notSentRequired > 0
+                  ? `Faltam ${notSentRequired} documento${notSentRequired > 1 ? "s" : ""} obrigatório${notSentRequired > 1 ? "s" : ""}`
                   : "Para receber pedidos, complete sua verificação"
                 }
               </p>
@@ -211,36 +303,45 @@ export default function ProVerification() {
             <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary rounded-full transition-all"
-                style={{ width: `${(approvedCount / docConfigs.length) * 100}%` }}
+                style={{ width: `${(approvedCount / requiredDocs.length) * 100}%` }}
               />
             </div>
             <span className="text-xs text-muted-foreground font-medium">
-              {approvedCount}/{docConfigs.length}
+              {approvedCount}/{requiredDocs.length}
             </span>
           </div>
         </div>
 
         {/* Required docs */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Documentos obrigatórios</h2>
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+            Documentos obrigatórios ({requiredDocs.length})
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Todos os documentos abaixo são obrigatórios para ativar seu perfil. Envie fotos nítidas e legíveis.
+          </p>
           {requiredDocs.map(renderDocCard)}
         </div>
 
         {/* Optional docs */}
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Documentos opcionais</h2>
-          <p className="text-xs text-muted-foreground">Aumentam sua credibilidade e prioridade no matching</p>
-          {optionalDocs.map(renderDocCard)}
-        </div>
+        {optionalDocs.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Documentos opcionais</h2>
+            <p className="text-xs text-muted-foreground">Aumentam sua credibilidade e prioridade no matching</p>
+            {optionalDocs.map(renderDocCard)}
+          </div>
+        )}
 
         {/* Tips */}
         <div className="p-4 bg-muted/50 rounded-xl">
-          <h4 className="font-medium text-foreground mb-2">Dicas para aprovação</h4>
-          <ul className="space-y-1 text-sm text-muted-foreground">
-            <li>• Fotos nítidas e sem reflexos</li>
-            <li>• Documento válido e não vencido</li>
-            <li>• Comprovante com menos de 3 meses</li>
-            <li>• Selfie com rosto visível e documento legível</li>
+          <h4 className="font-medium text-foreground mb-2">⚠️ Requisitos para aprovação</h4>
+          <ul className="space-y-1.5 text-sm text-muted-foreground">
+            <li>• Fotos <strong className="text-foreground">nítidas, sem reflexos e sem cortes</strong></li>
+            <li>• Documento inteiro visível e <strong className="text-foreground">todos os dados legíveis</strong></li>
+            <li>• Documento válido e <strong className="text-foreground">não vencido</strong></li>
+            <li>• Selfie com <strong className="text-foreground">rosto e documento claramente visíveis</strong></li>
+            <li>• Resolução mínima: <strong className="text-foreground">800px</strong> no maior lado</li>
+            <li>• Tamanho mínimo: <strong className="text-foreground">100KB</strong> por arquivo</li>
           </ul>
         </div>
       </main>
