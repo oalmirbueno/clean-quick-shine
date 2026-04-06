@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CheckCircle, XCircle, Eye, FileText, User, Clock, Filter, ChevronDown, ChevronRight, Phone, ShieldCheck, ShieldAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const docTypeNames: Record<string, string> = {
   cpf: "CPF",
@@ -74,19 +75,30 @@ export default function AdminDocuments() {
     const groups: UserGroup[] = [];
     groupMap.forEach((docs, userId) => {
       const firstDoc = docs[0];
-      const requiredDocs = docs.filter(d => REQUIRED_DOC_TYPES.includes(d.doc_type));
-      const requiredApproved = requiredDocs.filter(d => d.status === "approved").length;
+
+      // Sort: by doc_type order, then newest first within same type
+      const sortedDocs = docs.sort((a, b) => {
+        const order = ["id_front", "id_back", "selfie", "proof_residence", "comprovante_endereco", "antecedentes"];
+        const typeOrder = order.indexOf(a.doc_type) - order.indexOf(b.doc_type);
+        if (typeOrder !== 0) return typeOrder;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      // For verification check, only consider the latest of each required type
+      const latestByType = new Map<string, AdminDocument>();
+      sortedDocs.forEach(d => {
+        if (!latestByType.has(d.doc_type)) latestByType.set(d.doc_type, d);
+      });
+      const latestRequired = REQUIRED_DOC_TYPES.map(t => latestByType.get(t)).filter(Boolean);
+      const requiredApproved = latestRequired.filter(d => d!.status === "approved").length;
 
       groups.push({
         userId,
         name: firstDoc.profile?.full_name || "Sem nome",
         phone: firstDoc.profile?.phone || null,
-        documents: docs.sort((a, b) => {
-          const order = ["id_front", "id_back", "selfie", "proof_residence", "comprovante_endereco", "antecedentes"];
-          return order.indexOf(a.doc_type) - order.indexOf(b.doc_type);
-        }),
-        allApproved: requiredDocs.length >= REQUIRED_DOC_TYPES.length && requiredApproved >= REQUIRED_DOC_TYPES.length,
-        hasPending: docs.some(d => d.status === "pending"),
+        documents: sortedDocs,
+        allApproved: latestRequired.length >= REQUIRED_DOC_TYPES.length && requiredApproved >= REQUIRED_DOC_TYPES.length,
+        hasPending: sortedDocs.some(d => d.status === "pending"),
         hasRejected: docs.some(d => d.status === "rejected"),
         requiredApprovedCount: requiredApproved,
         requiredTotal: REQUIRED_DOC_TYPES.length,
@@ -280,8 +292,16 @@ export default function AdminDocuments() {
                       );
                     })()}
 
-                    {group.documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center gap-3 p-3 px-4 hover:bg-secondary/20 transition-colors">
+                    {group.documents.map((doc, idx) => {
+                      // Check if this is an older version (not the first of its type)
+                      const firstOfType = group.documents.findIndex(d => d.doc_type === doc.doc_type);
+                      const isOlderVersion = idx !== firstOfType;
+
+                      return (
+                      <div key={doc.id} className={cn(
+                        "flex items-center gap-3 p-3 px-4 hover:bg-secondary/20 transition-colors",
+                        isOlderVersion && "opacity-60 bg-muted/30"
+                      )}>
                         <div
                           className="w-16 h-16 rounded-lg bg-muted overflow-hidden cursor-pointer flex-shrink-0 border border-border"
                           onClick={() => handlePreview(doc)}
@@ -301,7 +321,10 @@ export default function AdminDocuments() {
                             <span className="font-medium text-sm text-foreground">
                               {docTypeNames[doc.doc_type] || doc.doc_type}
                             </span>
-                            {REQUIRED_DOC_TYPES.includes(doc.doc_type) && (
+                            {isOlderVersion && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium">Versão anterior</span>
+                            )}
+                            {!isOlderVersion && REQUIRED_DOC_TYPES.includes(doc.doc_type) && (
                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-semibold">Obrig.</span>
                             )}
                             <StatusBadge status={doc.status} />
@@ -320,7 +343,7 @@ export default function AdminDocuments() {
                           <Button variant="ghost" size="sm" onClick={() => handlePreview(doc)} className="h-8 w-8 p-0">
                             <Eye className="w-4 h-4" />
                           </Button>
-                          {doc.status === "pending" && (
+                          {doc.status === "pending" && !isOlderVersion && (
                             <>
                               <Button
                                 variant="default"
@@ -344,7 +367,8 @@ export default function AdminDocuments() {
                           )}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -56,42 +56,18 @@ export function useProDocuments() {
 
       if (uploadError) throw uploadError;
 
-      // Store only the storage path (not public URL) for security
-      // Check if document already exists
-      const { data: existing } = await supabase
+      // Always insert a new record to preserve full history
+      const { error: insertError } = await supabase
         .from("pro_documents")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("doc_type", docType)
-        .maybeSingle();
+        .insert({
+          user_id: user.id,
+          doc_type: docType,
+          file_url: filePath,
+          file_name: file.name,
+          status: "pending",
+        });
 
-      if (existing) {
-        // Update existing document
-        const { error: updateError } = await supabase
-          .from("pro_documents")
-          .update({
-            file_url: filePath,
-            file_name: file.name,
-            status: "pending",
-            rejection_reason: null,
-          })
-          .eq("id", existing.id);
-
-        if (updateError) throw updateError;
-      } else {
-        // Insert new document
-        const { error: insertError } = await supabase
-          .from("pro_documents")
-          .insert({
-            user_id: user.id,
-            doc_type: docType,
-            file_url: filePath,
-            file_name: file.name,
-            status: "pending",
-          });
-
-        if (insertError) throw insertError;
-      }
+      if (insertError) throw insertError;
 
       return { success: true };
     },
@@ -106,7 +82,11 @@ export function useProDocuments() {
   });
 
   const getDocumentStatus = (docType: string): ProDocument | undefined => {
-    return documents.find((d) => d.doc_type === docType);
+    // Return the most recent document of this type
+    const matching = documents
+      .filter((d) => d.doc_type === docType)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return matching[0];
   };
 
   const getSignedUrl = async (filePath: string): Promise<string | null> => {
