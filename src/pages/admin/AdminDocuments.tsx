@@ -297,7 +297,10 @@ export default function AdminDocuments() {
                       const isOlderVersion = idx !== firstOfType;
 
                       return (
-                      <div key={doc.id} className="flex items-center gap-3 p-3 px-4 hover:bg-secondary/20 transition-colors">
+                      <div key={doc.id} className={cn(
+                        "flex items-center gap-3 p-3 px-4 hover:bg-secondary/20 transition-colors",
+                        isOlderVersion && "opacity-60 bg-muted/30"
+                      )}>
                         <div
                           className="w-16 h-16 rounded-lg bg-muted overflow-hidden cursor-pointer flex-shrink-0 border border-border"
                           onClick={() => handlePreview(doc)}
@@ -317,7 +320,10 @@ export default function AdminDocuments() {
                             <span className="font-medium text-sm text-foreground">
                               {docTypeNames[doc.doc_type] || doc.doc_type}
                             </span>
-                            {REQUIRED_DOC_TYPES.includes(doc.doc_type) && (
+                            {isOlderVersion && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium">Versão anterior</span>
+                            )}
+                            {!isOlderVersion && REQUIRED_DOC_TYPES.includes(doc.doc_type) && (
                               <span className="text-[10px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-semibold">Obrig.</span>
                             )}
                             <StatusBadge status={doc.status} />
@@ -336,7 +342,7 @@ export default function AdminDocuments() {
                           <Button variant="ghost" size="sm" onClick={() => handlePreview(doc)} className="h-8 w-8 p-0">
                             <Eye className="w-4 h-4" />
                           </Button>
-                          {doc.status === "pending" && (
+                          {doc.status === "pending" && !isOlderVersion && (
                             <>
                               <Button
                                 variant="default"
@@ -360,7 +366,8 @@ export default function AdminDocuments() {
                           )}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
