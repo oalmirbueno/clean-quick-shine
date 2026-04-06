@@ -291,7 +291,12 @@ export default function AdminDocuments() {
                       );
                     })()}
 
-                    {group.documents.map((doc) => (
+                    {group.documents.map((doc, idx) => {
+                      // Check if this is an older version (not the first of its type)
+                      const firstOfType = group.documents.findIndex(d => d.doc_type === doc.doc_type);
+                      const isOlderVersion = idx !== firstOfType;
+
+                      return (
                       <div key={doc.id} className="flex items-center gap-3 p-3 px-4 hover:bg-secondary/20 transition-colors">
                         <div
                           className="w-16 h-16 rounded-lg bg-muted overflow-hidden cursor-pointer flex-shrink-0 border border-border"
