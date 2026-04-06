@@ -79,6 +79,8 @@ export function useAdminDocuments() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin_documents"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_pro_detail"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_pros"] });
       toast.success("Documento aprovado!");
     },
     onError: () => {
