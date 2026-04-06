@@ -5,26 +5,33 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const DISMISS_KEY = "jalimpo_update_dismissed";
-const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const DISMISS_VERSION_KEY = "jalimpo_update_dismissed_version";
 
 export function UpdatePrompt() {
-  const { needRefresh, updateServiceWorker } = useRegisterSW();
-  const [dismissed, setDismissed] = useState(true); // start hidden
+  const { needRefresh, updateServiceWorker, swVersion } = useRegisterSW();
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!needRefresh) return;
-    const lastDismissed = localStorage.getItem(DISMISS_KEY);
-    if (lastDismissed && Date.now() - parseInt(lastDismissed, 10) < COOLDOWN_MS) {
-      return;
-    }
-    setDismissed(false);
-  }, [needRefresh]);
 
-  if (!needRefresh || dismissed) return null;
+    // Check if this specific update was already dismissed
+    const dismissedVersion = localStorage.getItem(DISMISS_VERSION_KEY);
+    if (dismissedVersion === swVersion) return;
+
+    setVisible(true);
+  }, [needRefresh, swVersion]);
+
+  if (!visible) return null;
 
   const handleDismiss = () => {
-    setDismissed(true);
+    setVisible(false);
     localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    localStorage.setItem(DISMISS_VERSION_KEY, swVersion);
+  };
+
+  const handleUpdate = () => {
+    setVisible(false);
+    updateServiceWorker();
   };
 
   return (
@@ -44,7 +51,7 @@ export function UpdatePrompt() {
             <p className="text-xs text-muted-foreground">Atualize para a versão mais recente</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => updateServiceWorker()} className="text-xs rounded-xl">
+            <Button size="sm" onClick={handleUpdate} className="text-xs rounded-xl">
               Atualizar
             </Button>
             <button
