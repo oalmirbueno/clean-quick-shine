@@ -82,7 +82,11 @@ export function useProDocuments() {
   });
 
   const getDocumentStatus = (docType: string): ProDocument | undefined => {
-    return documents.find((d) => d.doc_type === docType);
+    // Return the most recent document of this type
+    const matching = documents
+      .filter((d) => d.doc_type === docType)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return matching[0];
   };
 
   const getSignedUrl = async (filePath: string): Promise<string | null> => {
