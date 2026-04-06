@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CheckCircle, XCircle, Eye, FileText, User, Clock, Filter, ChevronDown, ChevronRight, Phone, ShieldCheck, ShieldAlert } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const docTypeNames: Record<string, string> = {
   cpf: "CPF",
