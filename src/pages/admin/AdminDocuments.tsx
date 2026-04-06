@@ -74,19 +74,30 @@ export default function AdminDocuments() {
     const groups: UserGroup[] = [];
     groupMap.forEach((docs, userId) => {
       const firstDoc = docs[0];
-      const requiredDocs = docs.filter(d => REQUIRED_DOC_TYPES.includes(d.doc_type));
-      const requiredApproved = requiredDocs.filter(d => d.status === "approved").length;
+
+      // Sort: by doc_type order, then newest first within same type
+      const sortedDocs = docs.sort((a, b) => {
+        const order = ["id_front", "id_back", "selfie", "proof_residence", "comprovante_endereco", "antecedentes"];
+        const typeOrder = order.indexOf(a.doc_type) - order.indexOf(b.doc_type);
+        if (typeOrder !== 0) return typeOrder;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+
+      // For verification check, only consider the latest of each required type
+      const latestByType = new Map<string, AdminDocument>();
+      sortedDocs.forEach(d => {
+        if (!latestByType.has(d.doc_type)) latestByType.set(d.doc_type, d);
+      });
+      const latestRequired = REQUIRED_DOC_TYPES.map(t => latestByType.get(t)).filter(Boolean);
+      const requiredApproved = latestRequired.filter(d => d!.status === "approved").length;
 
       groups.push({
         userId,
         name: firstDoc.profile?.full_name || "Sem nome",
         phone: firstDoc.profile?.phone || null,
-        documents: docs.sort((a, b) => {
-          const order = ["id_front", "id_back", "selfie", "proof_residence", "comprovante_endereco", "antecedentes"];
-          return order.indexOf(a.doc_type) - order.indexOf(b.doc_type);
-        }),
-        allApproved: requiredDocs.length >= REQUIRED_DOC_TYPES.length && requiredApproved >= REQUIRED_DOC_TYPES.length,
-        hasPending: docs.some(d => d.status === "pending"),
+        documents: sortedDocs,
+        allApproved: latestRequired.length >= REQUIRED_DOC_TYPES.length && requiredApproved >= REQUIRED_DOC_TYPES.length,
+        hasPending: sortedDocs.some(d => d.status === "pending"),
         hasRejected: docs.some(d => d.status === "rejected"),
         requiredApprovedCount: requiredApproved,
         requiredTotal: REQUIRED_DOC_TYPES.length,
