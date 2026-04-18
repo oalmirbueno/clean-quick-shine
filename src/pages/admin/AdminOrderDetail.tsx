@@ -116,7 +116,7 @@ export default function AdminOrderDetail() {
         .eq("id", id!)
         .single();
       if (!data) return null;
-      const { data: clientProfile } = await supabase.from("profiles").select("full_name").eq("user_id", data.client_id).single();
+      const { data: clientProfile } = await supabase.from("profiles").select("full_name, cpf").eq("user_id", data.client_id).single();
       let proName = null;
       if (data.pro_id) {
         const { data: proProfile } = await supabase.from("profiles").select("full_name").eq("user_id", data.pro_id).single();
@@ -125,6 +125,7 @@ export default function AdminOrderDetail() {
       return {
         ...data,
         clientName: clientProfile?.full_name || "Cliente",
+        clientCpf: clientProfile?.cpf || null,
         proName,
         serviceName: (data as any).services?.name || "Serviço",
         address: `${(data as any).addresses?.street}, ${(data as any).addresses?.number}`,
@@ -133,6 +134,44 @@ export default function AdminOrderDetail() {
     },
     enabled: !!id,
   });
+
+  const { data: payment } = useQuery({
+    queryKey: ["admin_order_payment", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("order_id", id!)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const handleDownloadReceipt = async () => {
+    if (!order || !payment) return;
+    try {
+      const refundDate = payment.updated_at ? new Date(payment.updated_at) : new Date();
+      await downloadRefundReceipt({
+        orderId: order.id,
+        protocol: buildProtocol(order.id, refundDate),
+        refundDate,
+        clientName: order.clientName,
+        clientCpf: order.clientCpf,
+        serviceName: order.serviceName,
+        scheduledDate: `${order.scheduled_date} às ${order.scheduled_time}`,
+        amount: Number(order.total_price),
+        reason: extractRefundReason(order.notes),
+        asaasTransactionId: payment.asaas_payment_id,
+        paymentMethod: formatMethod(payment.method),
+      });
+      toast.success("Comprovante baixado");
+    } catch (err: any) {
+      toast.error("Erro ao gerar comprovante");
+    }
+  };
 
   if (isLoading) {
     return (
