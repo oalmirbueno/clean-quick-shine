@@ -297,7 +297,23 @@ export default function AdminOrderDetail() {
           </div>
 
           {/* Refund Section */}
-          {order.status !== "cancelled" && order.status !== "paid_out" && (
+          {payment?.status === "refunded" || (order.status === "cancelled" && extractRefundReason(order.notes)) ? (
+            <div className="bg-card rounded-2xl border border-success/30 p-5 shadow-sm">
+              <h3 className="font-bold text-sm uppercase tracking-wide text-success mb-2 flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" /> Estorno processado
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                Este pedido foi estornado ao cliente. O comprovante oficial está disponível para download.
+              </p>
+              <button
+                onClick={handleDownloadReceipt}
+                className="w-full py-3 px-4 rounded-xl font-semibold bg-success text-success-foreground hover:bg-success/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Baixar comprovante (PDF)
+              </button>
+            </div>
+          ) : order.status !== "cancelled" && order.status !== "paid_out" ? (
             <div className="bg-card rounded-2xl border border-destructive/30 p-5 shadow-sm">
               <h3 className="font-bold text-sm uppercase tracking-wide text-destructive mb-2 flex items-center gap-2">
                 <RefreshCw className="w-4 h-4" /> Estorno ao cliente
@@ -315,7 +331,7 @@ export default function AdminOrderDetail() {
                 Estornar agora ao cliente
               </button>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Financial */}
