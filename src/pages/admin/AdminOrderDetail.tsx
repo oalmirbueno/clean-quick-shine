@@ -412,9 +412,13 @@ export default function AdminOrderDetail() {
                 <RefreshCw className="w-5 h-5 text-destructive" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-foreground">Confirmar estorno ao cliente</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  {refundManual ? "Confirmar estorno manual" : "Confirmar estorno ao cliente"}
+                </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  R$ {Number(order.total_price).toFixed(2).replace(".", ",")} serão devolvidos via Asaas em até 7 dias úteis.
+                  {refundManual
+                    ? `R$ ${Number(order.total_price).toFixed(2).replace(".", ",")} — confirme apenas se o PIX já foi enviado ao cliente ou está pendente no Asaas.`
+                    : `R$ ${Number(order.total_price).toFixed(2).replace(".", ",")} serão devolvidos via Asaas em até 7 dias úteis.`}
                 </p>
               </div>
             </div>
@@ -423,7 +427,7 @@ export default function AdminOrderDetail() {
             <textarea
               value={refundReason}
               onChange={(e) => setRefundReason(e.target.value)}
-              placeholder="Ex: Diarista confirmou mas não compareceu ao serviço"
+              placeholder={refundManual ? "Ex: PIX enviado manualmente — diarista não compareceu" : "Ex: Diarista confirmou mas não compareceu ao serviço"}
               rows={3}
               className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               disabled={refundOrder.isPending}
@@ -434,11 +438,11 @@ export default function AdminOrderDetail() {
                 Cancelar
               </PrimaryButton>
               <button
-                onClick={() => refundOrder.mutate(refundReason.trim())}
+                onClick={() => refundOrder.mutate({ reason: refundReason.trim(), manual: refundManual })}
                 disabled={refundOrder.isPending || refundReason.trim().length < 5}
                 className="flex-1 py-3 px-4 rounded-lg font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {refundOrder.isPending ? "Processando..." : "Confirmar estorno"}
+                {refundOrder.isPending ? "Processando..." : refundManual ? "Confirmar manual" : "Confirmar estorno"}
               </button>
             </div>
           </div>
