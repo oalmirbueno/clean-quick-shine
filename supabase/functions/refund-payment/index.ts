@@ -165,13 +165,13 @@ serve(async (req) => {
     }
 
     // Cancel the order
+    const refundTag = isManual ? "[ESTORNO MANUAL]" : "[ESTORNO ADMIN]";
+    const refundNote = `${refundTag} ${reason || "Reembolso processado"}`;
     await supabaseAdmin
       .from("orders")
       .update({
         status: "cancelled",
-        notes: order.notes
-          ? `${order.notes}\n\n[ESTORNO ADMIN] ${reason || "Reembolso processado"}`
-          : `[ESTORNO ADMIN] ${reason || "Reembolso processado"}`,
+        notes: order.notes ? `${order.notes}\n\n${refundNote}` : refundNote,
         updated_at: new Date().toISOString(),
       })
       .eq("id", orderId);
