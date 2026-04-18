@@ -203,10 +203,13 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       refundedViaAsaas,
+      manual: isManual,
       asaasRefund: asaasRefundResult,
       message: refundedViaAsaas
         ? "Estorno processado com sucesso no Asaas. O valor retornará ao cliente em até 7 dias úteis."
-        : "Pedido cancelado e marcado como estornado.",
+        : isManual
+          ? "Estorno manual registrado. Pedido cancelado e comprovante disponível para download."
+          : "Pedido cancelado e marcado como estornado.",
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
