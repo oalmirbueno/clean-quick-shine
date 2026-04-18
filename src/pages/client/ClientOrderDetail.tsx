@@ -279,6 +279,33 @@ export default function ClientOrderDetail() {
           </section>
         )}
 
+        {/* Refund receipt */}
+        {payment?.status === "refunded" && (
+          <section className="p-4 border-t border-border">
+            <div className="rounded-2xl border border-success/30 bg-success/5 p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-success/15 flex items-center justify-center shrink-0">
+                  <RefreshCw className="w-5 h-5 text-success" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground text-sm">Pedido estornado</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Reembolso de R$ {Number(order.total_price).toFixed(2).replace(".", ",")} processado.
+                    Retorno em até 7 dias úteis.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleDownloadReceipt}
+                className="w-full py-3 px-4 rounded-xl font-semibold bg-success text-success-foreground hover:bg-success/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Baixar comprovante (PDF)
+              </button>
+            </div>
+          </section>
+        )}
+
         {/* Support */}
         <section className="p-4">
           <button
