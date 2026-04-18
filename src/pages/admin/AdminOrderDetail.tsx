@@ -19,6 +19,23 @@ interface OrderAction {
   destructive?: boolean;
 }
 
+function extractRefundReason(notes: string | null | undefined): string | undefined {
+  if (!notes) return undefined;
+  const m = notes.match(/\[ESTORNO ADMIN\]\s*(.+)$/s);
+  return m ? m[1].trim() : undefined;
+}
+
+function formatMethod(method: string | null | undefined): string | null {
+  if (!method) return null;
+  const map: Record<string, string> = { PIX: "PIX", CREDIT_CARD: "Cartão de crédito", BOLETO: "Boleto" };
+  return map[method.toUpperCase()] || method;
+}
+  label: string;
+  description: string;
+  variant: "primary" | "outline";
+  destructive?: boolean;
+}
+
 const getAvailableActions = (status: string | null): OrderAction[] => {
   const actions: OrderAction[] = [];
 
