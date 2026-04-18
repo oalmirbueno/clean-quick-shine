@@ -21,8 +21,12 @@ interface OrderAction {
 
 function extractRefundReason(notes: string | null | undefined): string | undefined {
   if (!notes) return undefined;
-  const m = notes.match(/\[ESTORNO ADMIN\]\s*(.+)$/s);
+  const m = notes.match(/\[ESTORNO (?:ADMIN|MANUAL)\]\s*(.+)$/s);
   return m ? m[1].trim() : undefined;
+}
+
+function isManualRefund(notes: string | null | undefined): boolean {
+  return !!notes && /\[ESTORNO MANUAL\]/.test(notes);
 }
 
 function formatMethod(method: string | null | undefined): string | null {
