@@ -30,11 +30,6 @@ function formatMethod(method: string | null | undefined): string | null {
   const map: Record<string, string> = { PIX: "PIX", CREDIT_CARD: "Cartão de crédito", BOLETO: "Boleto" };
   return map[method.toUpperCase()] || method;
 }
-  label: string;
-  description: string;
-  variant: "primary" | "outline";
-  destructive?: boolean;
-}
 
 const getAvailableActions = (status: string | null): OrderAction[] => {
   const actions: OrderAction[] = [];
