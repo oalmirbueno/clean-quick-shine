@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { MoneyBreakdown } from "@/components/ui/MoneyBreakdown";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { ChevronLeft, User, Calendar, MapPin, Tag, AlertTriangle, Loader2 } from "lucide-react";
+import { ChevronLeft, User, Calendar, MapPin, Tag, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -57,6 +57,8 @@ export default function AdminOrderDetail() {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const [confirmAction, setConfirmAction] = useState<OrderAction | null>(null);
+  const [refundOpen, setRefundOpen] = useState(false);
+  const [refundReason, setRefundReason] = useState("");
 
   const updateOrderStatus = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -79,6 +81,28 @@ export default function AdminOrderDetail() {
     onError: () => {
       toast.error("Erro ao atualizar pedido");
       setConfirmAction(null);
+    },
+  });
+
+  const refundOrder = useMutation({
+    mutationFn: async (reason: string) => {
+      const { data, error } = await supabase.functions.invoke("refund-payment", {
+        body: { orderId: id, reason, description: reason },
+      });
+      if (error) throw new Error(error.message || "Erro ao processar estorno");
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    },
+    onSuccess: (data: any) => {
+      toast.success(data?.message || "Estorno processado com sucesso");
+      setRefundOpen(false);
+      setRefundReason("");
+      queryClient.invalidateQueries({ queryKey: ["admin_order_detail", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_all_orders"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Erro ao processar estorno");
     },
   });
 
@@ -219,6 +243,27 @@ export default function AdminOrderDetail() {
               </div>
             )}
           </div>
+
+          {/* Refund Section */}
+          {order.status !== "cancelled" && order.status !== "paid_out" && (
+            <div className="bg-card rounded-2xl border border-destructive/30 p-5 shadow-sm">
+              <h3 className="font-bold text-sm uppercase tracking-wide text-destructive mb-2 flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" /> Estorno ao cliente
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                Cancela o pedido e processa o reembolso integral (R$ {Number(order.total_price).toFixed(2).replace(".", ",")}) no Asaas.
+                Use quando o serviço não foi realizado ou houver problema confirmado. Não pode ser desfeito.
+              </p>
+              <button
+                onClick={() => setRefundOpen(true)}
+                disabled={refundOrder.isPending}
+                className="w-full py-3 px-4 rounded-xl font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Estornar agora ao cliente
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Financial */}
@@ -245,6 +290,49 @@ export default function AdminOrderDetail() {
           confirmText="Confirmar"
           loading={updateOrderStatus.isPending}
         />
+      )}
+
+      {/* Refund Modal with reason */}
+      {refundOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => !refundOrder.isPending && setRefundOpen(false)} />
+          <div className="relative bg-card rounded-2xl border border-border p-6 w-full max-w-md shadow-xl animate-scale-in">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+                <RefreshCw className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-foreground">Confirmar estorno ao cliente</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  R$ {Number(order.total_price).toFixed(2).replace(".", ",")} serão devolvidos via Asaas em até 7 dias úteis.
+                </p>
+              </div>
+            </div>
+
+            <label className="text-sm font-medium text-foreground block mb-2">Motivo do estorno *</label>
+            <textarea
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+              placeholder="Ex: Diarista confirmou mas não compareceu ao serviço"
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              disabled={refundOrder.isPending}
+            />
+
+            <div className="flex gap-3 mt-6">
+              <PrimaryButton variant="outline" fullWidth onClick={() => setRefundOpen(false)} disabled={refundOrder.isPending}>
+                Cancelar
+              </PrimaryButton>
+              <button
+                onClick={() => refundOrder.mutate(refundReason.trim())}
+                disabled={refundOrder.isPending || refundReason.trim().length < 5}
+                className="flex-1 py-3 px-4 rounded-lg font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {refundOrder.isPending ? "Processando..." : "Confirmar estorno"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </AdminLayout>
   );
