@@ -127,6 +127,7 @@ export default function AdminOrderDetail() {
       toast.success(data?.message || "Estorno processado com sucesso");
       setRefundOpen(false);
       setRefundReason("");
+      setRefundManual(false);
       queryClient.invalidateQueries({ queryKey: ["admin_order_detail", id] });
       queryClient.invalidateQueries({ queryKey: ["admin_order_payment", id] });
       queryClient.invalidateQueries({ queryKey: ["admin_orders"] });
