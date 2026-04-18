@@ -103,9 +103,9 @@ export default function AdminOrderDetail() {
   });
 
   const refundOrder = useMutation({
-    mutationFn: async (reason: string) => {
+    mutationFn: async ({ reason, manual }: { reason: string; manual: boolean }) => {
       const { data, error } = await supabase.functions.invoke("refund-payment", {
-        body: { orderId: id, reason, description: reason },
+        body: { orderId: id, reason, description: reason, manual },
       });
       if (error) {
         let msg = error.message || "Erro ao processar estorno";
