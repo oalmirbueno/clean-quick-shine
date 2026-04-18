@@ -333,22 +333,45 @@ export default function AdminOrderDetail() {
               </button>
             </div>
           ) : order.status !== "cancelled" && order.status !== "paid_out" ? (
-            <div className="bg-card rounded-2xl border border-destructive/30 p-5 shadow-sm">
-              <h3 className="font-bold text-sm uppercase tracking-wide text-destructive mb-2 flex items-center gap-2">
-                <RefreshCw className="w-4 h-4" /> Estorno ao cliente
-              </h3>
-              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
-                Cancela o pedido e processa o reembolso integral (R$ {Number(order.total_price).toFixed(2).replace(".", ",")}) no Asaas.
-                Use quando o serviço não foi realizado ou houver problema confirmado. Não pode ser desfeito.
-              </p>
-              <button
-                onClick={() => setRefundOpen(true)}
-                disabled={refundOrder.isPending}
-                className="w-full py-3 px-4 rounded-xl font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Estornar agora ao cliente
-              </button>
+            <div className="bg-card rounded-2xl border border-destructive/30 p-5 shadow-sm space-y-4">
+              <div>
+                <h3 className="font-bold text-sm uppercase tracking-wide text-destructive mb-2 flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4" /> Estorno ao cliente
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Reembolso integral de <strong className="text-foreground">R$ {Number(order.total_price).toFixed(2).replace(".", ",")}</strong>. Escolha o método abaixo. Não pode ser desfeito.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <button
+                    onClick={() => { setRefundManual(false); setRefundOpen(true); }}
+                    disabled={refundOrder.isPending}
+                    className="w-full py-3 px-4 rounded-xl font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Estornar via Asaas (automático)
+                  </button>
+                  <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
+                    Requer saldo disponível na conta Asaas. Cliente recebe em até 7 dias úteis.
+                  </p>
+                </div>
+
+                <div>
+                  <button
+                    onClick={() => { setRefundManual(true); setRefundOpen(true); }}
+                    disabled={refundOrder.isPending}
+                    className="w-full py-3 px-4 rounded-xl font-semibold border-2 border-destructive/40 text-destructive hover:bg-destructive/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Marcar como estornado manualmente
+                  </button>
+                  <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
+                    Use quando o PIX já foi enviado direto ao cliente (ou quando a transferência manual está pendente no Asaas). Cancela o pedido, gera comprovante e notifica o cliente — sem chamar a API.
+                  </p>
+                </div>
+              </div>
             </div>
           ) : null}
         </div>
