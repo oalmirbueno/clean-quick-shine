@@ -182,9 +182,11 @@ serve(async (req) => {
       title: "Reembolso processado 💰",
       message: refundedViaAsaas
         ? `Seu reembolso de R$ ${Number(order.total_price).toFixed(2).replace(".", ",")} foi processado. Baixe o comprovante no detalhe do pedido. Retorno em até 7 dias úteis.`
-        : `Seu pedido foi cancelado e o estorno está em processamento. Baixe o comprovante no detalhe do pedido.`,
+        : isManual
+          ? `Seu reembolso de R$ ${Number(order.total_price).toFixed(2).replace(".", ",")} foi processado manualmente via PIX pela equipe Já Limpo. Baixe o comprovante no detalhe do pedido.`
+          : `Seu pedido foi cancelado e o estorno está em processamento. Baixe o comprovante no detalhe do pedido.`,
       type: "success",
-      data: { order_id: orderId, refund: true },
+      data: { order_id: orderId, refund: true, manual: isManual },
     });
 
     // Notify pro if assigned
