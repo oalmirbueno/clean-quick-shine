@@ -47,12 +47,13 @@ serve(async (req) => {
       });
     }
 
-    const { orderId, reason, description } = await req.json();
+    const { orderId, reason, description, manual } = await req.json();
     if (!orderId) {
       return new Response(JSON.stringify({ error: "orderId é obrigatório" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const isManual = manual === true;
 
     // Fetch order
     const { data: order, error: orderError } = await supabaseAdmin
