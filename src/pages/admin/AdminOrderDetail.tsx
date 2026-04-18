@@ -243,6 +243,27 @@ export default function AdminOrderDetail() {
               </div>
             )}
           </div>
+
+          {/* Refund Section */}
+          {order.status !== "cancelled" && order.status !== "paid_out" && (
+            <div className="bg-card rounded-2xl border border-destructive/30 p-5 shadow-sm">
+              <h3 className="font-bold text-sm uppercase tracking-wide text-destructive mb-2 flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" /> Estorno ao cliente
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                Cancela o pedido e processa o reembolso integral (R$ {Number(order.total_price).toFixed(2).replace(".", ",")}) no Asaas.
+                Use quando o serviço não foi realizado ou houver problema confirmado. Não pode ser desfeito.
+              </p>
+              <button
+                onClick={() => setRefundOpen(true)}
+                disabled={refundOrder.isPending}
+                className="w-full py-3 px-4 rounded-xl font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Estornar agora ao cliente
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Financial */}
@@ -269,6 +290,49 @@ export default function AdminOrderDetail() {
           confirmText="Confirmar"
           loading={updateOrderStatus.isPending}
         />
+      )}
+
+      {/* Refund Modal with reason */}
+      {refundOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => !refundOrder.isPending && setRefundOpen(false)} />
+          <div className="relative bg-card rounded-2xl border border-border p-6 w-full max-w-md shadow-xl animate-scale-in">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
+                <RefreshCw className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-foreground">Confirmar estorno ao cliente</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  R$ {Number(order.total_price).toFixed(2).replace(".", ",")} serão devolvidos via Asaas em até 7 dias úteis.
+                </p>
+              </div>
+            </div>
+
+            <label className="text-sm font-medium text-foreground block mb-2">Motivo do estorno *</label>
+            <textarea
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+              placeholder="Ex: Diarista confirmou mas não compareceu ao serviço"
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              disabled={refundOrder.isPending}
+            />
+
+            <div className="flex gap-3 mt-6">
+              <PrimaryButton variant="outline" fullWidth onClick={() => setRefundOpen(false)} disabled={refundOrder.isPending}>
+                Cancelar
+              </PrimaryButton>
+              <button
+                onClick={() => refundOrder.mutate(refundReason.trim())}
+                disabled={refundOrder.isPending || refundReason.trim().length < 5}
+                className="flex-1 py-3 px-4 rounded-lg font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {refundOrder.isPending ? "Processando..." : "Confirmar estorno"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </AdminLayout>
   );
