@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 function extractRefundReason(notes: string | null | undefined): string | undefined {
   if (!notes) return undefined;
-  const m = notes.match(/\[ESTORNO ADMIN\]\s*(.+)$/s);
+  const m = notes.match(/\[ESTORNO (?:ADMIN|MANUAL)\]\s*(.+)$/s);
   return m ? m[1].trim() : undefined;
 }
 
