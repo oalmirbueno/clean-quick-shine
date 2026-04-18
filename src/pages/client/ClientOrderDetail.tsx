@@ -1,15 +1,84 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { ChevronLeft, Calendar, Clock, MapPin, CreditCard, MessageCircle, HelpCircle, Loader2, Star, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, Calendar, Clock, MapPin, CreditCard, MessageCircle, HelpCircle, Loader2, Star, CheckCircle2, Download, RefreshCw } from "lucide-react";
 import { useOrder } from "@/hooks/useOrders";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { downloadRefundReceipt, buildProtocol } from "@/lib/refundReceipt";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
+function extractRefundReason(notes: string | null | undefined): string | undefined {
+  if (!notes) return undefined;
+  const m = notes.match(/\[ESTORNO ADMIN\]\s*(.+)$/s);
+  return m ? m[1].trim() : undefined;
+}
+
+function formatMethod(method: string | null | undefined): string | null {
+  if (!method) return null;
+  const map: Record<string, string> = { PIX: "PIX", CREDIT_CARD: "Cartão de crédito", BOLETO: "Boleto" };
+  return map[method.toUpperCase()] || method;
+}
 
 export default function ClientOrderDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
   const { data: order, isLoading } = useOrder(id || null);
+
+  const { data: payment } = useQuery({
+    queryKey: ["client_order_payment", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("order_id", id!)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: profile } = useQuery({
+    queryKey: ["client_profile_for_receipt", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, cpf")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const handleDownloadReceipt = async () => {
+    if (!order || !payment) return;
+    try {
+      const refundDate = payment.updated_at ? new Date(payment.updated_at) : new Date();
+      await downloadRefundReceipt({
+        orderId: order.id,
+        protocol: buildProtocol(order.id, refundDate),
+        refundDate,
+        clientName: profile?.full_name || "Cliente",
+        clientCpf: profile?.cpf || null,
+        serviceName: order.service?.name || "Serviço",
+        scheduledDate: `${order.scheduled_date} às ${order.scheduled_time}`,
+        amount: Number(order.total_price),
+        reason: extractRefundReason(order.notes as any),
+        asaasTransactionId: payment.asaas_payment_id,
+        paymentMethod: formatMethod(payment.method),
+      });
+      toast.success("Comprovante baixado");
+    } catch {
+      toast.error("Erro ao gerar comprovante");
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -207,6 +276,33 @@ export default function ClientOrderDetail() {
             {order.client_review && (
               <p className="text-sm text-muted-foreground mt-2">"{order.client_review}"</p>
             )}
+          </section>
+        )}
+
+        {/* Refund receipt */}
+        {payment?.status === "refunded" && (
+          <section className="p-4 border-t border-border">
+            <div className="rounded-2xl border border-success/30 bg-success/5 p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-success/15 flex items-center justify-center shrink-0">
+                  <RefreshCw className="w-5 h-5 text-success" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground text-sm">Pedido estornado</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Reembolso de R$ {Number(order.total_price).toFixed(2).replace(".", ",")} processado.
+                    Retorno em até 7 dias úteis.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleDownloadReceipt}
+                className="w-full py-3 px-4 rounded-xl font-semibold bg-success text-success-foreground hover:bg-success/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Baixar comprovante (PDF)
+              </button>
+            </div>
           </section>
         )}
 

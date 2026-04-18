@@ -5,10 +5,11 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { MoneyBreakdown } from "@/components/ui/MoneyBreakdown";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { ChevronLeft, User, Calendar, MapPin, Tag, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
+import { ChevronLeft, User, Calendar, MapPin, Tag, AlertTriangle, Loader2, RefreshCw, Download } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { downloadRefundReceipt, buildProtocol } from "@/lib/refundReceipt";
 
 interface OrderAction {
   targetStatus: string;
@@ -16,6 +17,18 @@ interface OrderAction {
   description: string;
   variant: "primary" | "outline";
   destructive?: boolean;
+}
+
+function extractRefundReason(notes: string | null | undefined): string | undefined {
+  if (!notes) return undefined;
+  const m = notes.match(/\[ESTORNO ADMIN\]\s*(.+)$/s);
+  return m ? m[1].trim() : undefined;
+}
+
+function formatMethod(method: string | null | undefined): string | null {
+  if (!method) return null;
+  const map: Record<string, string> = { PIX: "PIX", CREDIT_CARD: "Cartão de crédito", BOLETO: "Boleto" };
+  return map[method.toUpperCase()] || method;
 }
 
 const getAvailableActions = (status: string | null): OrderAction[] => {
@@ -98,6 +111,7 @@ export default function AdminOrderDetail() {
       setRefundOpen(false);
       setRefundReason("");
       queryClient.invalidateQueries({ queryKey: ["admin_order_detail", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin_order_payment", id] });
       queryClient.invalidateQueries({ queryKey: ["admin_orders"] });
       queryClient.invalidateQueries({ queryKey: ["admin_all_orders"] });
     },
@@ -115,7 +129,7 @@ export default function AdminOrderDetail() {
         .eq("id", id!)
         .single();
       if (!data) return null;
-      const { data: clientProfile } = await supabase.from("profiles").select("full_name").eq("user_id", data.client_id).single();
+      const { data: clientProfile } = await supabase.from("profiles").select("full_name, cpf").eq("user_id", data.client_id).single();
       let proName = null;
       if (data.pro_id) {
         const { data: proProfile } = await supabase.from("profiles").select("full_name").eq("user_id", data.pro_id).single();
@@ -124,6 +138,7 @@ export default function AdminOrderDetail() {
       return {
         ...data,
         clientName: clientProfile?.full_name || "Cliente",
+        clientCpf: clientProfile?.cpf || null,
         proName,
         serviceName: (data as any).services?.name || "Serviço",
         address: `${(data as any).addresses?.street}, ${(data as any).addresses?.number}`,
@@ -132,6 +147,44 @@ export default function AdminOrderDetail() {
     },
     enabled: !!id,
   });
+
+  const { data: payment } = useQuery({
+    queryKey: ["admin_order_payment", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("order_id", id!)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const handleDownloadReceipt = async () => {
+    if (!order || !payment) return;
+    try {
+      const refundDate = payment.updated_at ? new Date(payment.updated_at) : new Date();
+      await downloadRefundReceipt({
+        orderId: order.id,
+        protocol: buildProtocol(order.id, refundDate),
+        refundDate,
+        clientName: order.clientName,
+        clientCpf: order.clientCpf,
+        serviceName: order.serviceName,
+        scheduledDate: `${order.scheduled_date} às ${order.scheduled_time}`,
+        amount: Number(order.total_price),
+        reason: extractRefundReason(order.notes),
+        asaasTransactionId: payment.asaas_payment_id,
+        paymentMethod: formatMethod(payment.method),
+      });
+      toast.success("Comprovante baixado");
+    } catch (err: any) {
+      toast.error("Erro ao gerar comprovante");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -245,7 +298,23 @@ export default function AdminOrderDetail() {
           </div>
 
           {/* Refund Section */}
-          {order.status !== "cancelled" && order.status !== "paid_out" && (
+          {payment?.status === "refunded" || (order.status === "cancelled" && extractRefundReason(order.notes)) ? (
+            <div className="bg-card rounded-2xl border border-success/30 p-5 shadow-sm">
+              <h3 className="font-bold text-sm uppercase tracking-wide text-success mb-2 flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" /> Estorno processado
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                Este pedido foi estornado ao cliente. O comprovante oficial está disponível para download.
+              </p>
+              <button
+                onClick={handleDownloadReceipt}
+                className="w-full py-3 px-4 rounded-xl font-semibold bg-success text-success-foreground hover:bg-success/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Baixar comprovante (PDF)
+              </button>
+            </div>
+          ) : order.status !== "cancelled" && order.status !== "paid_out" ? (
             <div className="bg-card rounded-2xl border border-destructive/30 p-5 shadow-sm">
               <h3 className="font-bold text-sm uppercase tracking-wide text-destructive mb-2 flex items-center gap-2">
                 <RefreshCw className="w-4 h-4" /> Estorno ao cliente
@@ -263,7 +332,7 @@ export default function AdminOrderDetail() {
                 Estornar agora ao cliente
               </button>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Financial */}
