@@ -57,6 +57,8 @@ export default function AdminOrderDetail() {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const [confirmAction, setConfirmAction] = useState<OrderAction | null>(null);
+  const [refundOpen, setRefundOpen] = useState(false);
+  const [refundReason, setRefundReason] = useState("");
 
   const updateOrderStatus = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -79,6 +81,28 @@ export default function AdminOrderDetail() {
     onError: () => {
       toast.error("Erro ao atualizar pedido");
       setConfirmAction(null);
+    },
+  });
+
+  const refundOrder = useMutation({
+    mutationFn: async (reason: string) => {
+      const { data, error } = await supabase.functions.invoke("refund-payment", {
+        body: { orderId: id, reason, description: reason },
+      });
+      if (error) throw new Error(error.message || "Erro ao processar estorno");
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    },
+    onSuccess: (data: any) => {
+      toast.success(data?.message || "Estorno processado com sucesso");
+      setRefundOpen(false);
+      setRefundReason("");
+      queryClient.invalidateQueries({ queryKey: ["admin_order_detail", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_all_orders"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Erro ao processar estorno");
     },
   });
 
