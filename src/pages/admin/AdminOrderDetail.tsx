@@ -111,6 +111,7 @@ export default function AdminOrderDetail() {
       setRefundOpen(false);
       setRefundReason("");
       queryClient.invalidateQueries({ queryKey: ["admin_order_detail", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin_order_payment", id] });
       queryClient.invalidateQueries({ queryKey: ["admin_orders"] });
       queryClient.invalidateQueries({ queryKey: ["admin_all_orders"] });
     },
