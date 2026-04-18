@@ -126,8 +126,14 @@ serve(async (req) => {
 
       if (!refundResp.ok) {
         console.error("Asaas refund error:", refundData);
+        const asaasMsg = refundData?.errors?.[0]?.description || "";
+        let friendly = asaasMsg || "Falha ao processar estorno no Asaas";
+        if (asaasMsg.toLowerCase().includes("saldo")) {
+          friendly = "Saldo insuficiente na conta Asaas para realizar o estorno. Adicione saldo na sua conta Asaas (transferindo do seu saldo recebido) e tente novamente. Alternativamente, processe o estorno manualmente via PIX ao cliente.";
+        }
         return new Response(JSON.stringify({
-          error: refundData?.errors?.[0]?.description || "Falha ao processar estorno no Asaas",
+          error: friendly,
+          asaasError: asaasMsg,
           details: refundData,
         }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
