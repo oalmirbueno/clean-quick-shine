@@ -76,6 +76,7 @@ export default function AdminOrderDetail() {
   const [confirmAction, setConfirmAction] = useState<OrderAction | null>(null);
   const [refundOpen, setRefundOpen] = useState(false);
   const [refundReason, setRefundReason] = useState("");
+  const [refundManual, setRefundManual] = useState(false);
 
   const updateOrderStatus = useMutation({
     mutationFn: async (newStatus: string) => {
