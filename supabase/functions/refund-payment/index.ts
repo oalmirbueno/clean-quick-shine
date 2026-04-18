@@ -47,12 +47,13 @@ serve(async (req) => {
       });
     }
 
-    const { orderId, reason, description } = await req.json();
+    const { orderId, reason, description, manual } = await req.json();
     if (!orderId) {
       return new Response(JSON.stringify({ error: "orderId é obrigatório" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const isManual = manual === true;
 
     // Fetch order
     const { data: order, error: orderError } = await supabaseAdmin
@@ -100,7 +101,7 @@ serve(async (req) => {
     let asaasRefundResult: any = null;
     let refundedViaAsaas = false;
 
-    if (payment?.asaas_payment_id && (payment.status === "paid" || payment.status === "confirmed" || payment.asaas_status === "RECEIVED" || payment.asaas_status === "CONFIRMED")) {
+    if (!isManual && payment?.asaas_payment_id && (payment.status === "paid" || payment.status === "confirmed" || payment.asaas_status === "RECEIVED" || payment.asaas_status === "CONFIRMED")) {
       const asaasApiKey = Deno.env.get("ASAAS_API_KEY");
       const asaasEnv = Deno.env.get("ASAAS_ENVIRONMENT") || "production";
       const asaasBaseUrl = asaasEnv === "production" ? "https://api.asaas.com/v3" : "https://sandbox.asaas.com/api/v3";
@@ -164,13 +165,13 @@ serve(async (req) => {
     }
 
     // Cancel the order
+    const refundTag = isManual ? "[ESTORNO MANUAL]" : "[ESTORNO ADMIN]";
+    const refundNote = `${refundTag} ${reason || "Reembolso processado"}`;
     await supabaseAdmin
       .from("orders")
       .update({
         status: "cancelled",
-        notes: order.notes
-          ? `${order.notes}\n\n[ESTORNO ADMIN] ${reason || "Reembolso processado"}`
-          : `[ESTORNO ADMIN] ${reason || "Reembolso processado"}`,
+        notes: order.notes ? `${order.notes}\n\n${refundNote}` : refundNote,
         updated_at: new Date().toISOString(),
       })
       .eq("id", orderId);
@@ -181,9 +182,11 @@ serve(async (req) => {
       title: "Reembolso processado 💰",
       message: refundedViaAsaas
         ? `Seu reembolso de R$ ${Number(order.total_price).toFixed(2).replace(".", ",")} foi processado. Baixe o comprovante no detalhe do pedido. Retorno em até 7 dias úteis.`
-        : `Seu pedido foi cancelado e o estorno está em processamento. Baixe o comprovante no detalhe do pedido.`,
+        : isManual
+          ? `Seu reembolso de R$ ${Number(order.total_price).toFixed(2).replace(".", ",")} foi processado manualmente via PIX pela equipe Já Limpo. Baixe o comprovante no detalhe do pedido.`
+          : `Seu pedido foi cancelado e o estorno está em processamento. Baixe o comprovante no detalhe do pedido.`,
       type: "success",
-      data: { order_id: orderId, refund: true },
+      data: { order_id: orderId, refund: true, manual: isManual },
     });
 
     // Notify pro if assigned
@@ -200,10 +203,13 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       refundedViaAsaas,
+      manual: isManual,
       asaasRefund: asaasRefundResult,
       message: refundedViaAsaas
         ? "Estorno processado com sucesso no Asaas. O valor retornará ao cliente em até 7 dias úteis."
-        : "Pedido cancelado e marcado como estornado.",
+        : isManual
+          ? "Estorno manual registrado. Pedido cancelado e comprovante disponível para download."
+          : "Pedido cancelado e marcado como estornado.",
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
