@@ -174,8 +174,8 @@ serve(async (req) => {
       user_id: order.client_id,
       title: "Reembolso processado 💰",
       message: refundedViaAsaas
-        ? `Seu reembolso de R$ ${Number(order.total_price).toFixed(2).replace(".", ",")} foi processado. O valor retornará em até 7 dias úteis.`
-        : `Seu pedido foi cancelado e o estorno está em processamento.`,
+        ? `Seu reembolso de R$ ${Number(order.total_price).toFixed(2).replace(".", ",")} foi processado. Baixe o comprovante no detalhe do pedido. Retorno em até 7 dias úteis.`
+        : `Seu pedido foi cancelado e o estorno está em processamento. Baixe o comprovante no detalhe do pedido.`,
       type: "success",
       data: { order_id: orderId, refund: true },
     });
