@@ -102,7 +102,19 @@ export default function AdminOrderDetail() {
       const { data, error } = await supabase.functions.invoke("refund-payment", {
         body: { orderId: id, reason, description: reason },
       });
-      if (error) throw new Error(error.message || "Erro ao processar estorno");
+      if (error) {
+        let msg = error.message || "Erro ao processar estorno";
+        try {
+          const ctx: any = (error as any).context;
+          if (ctx && typeof ctx.json === "function") {
+            const body = await ctx.json();
+            if (body?.error) msg = body.error;
+          } else if ((data as any)?.error) {
+            msg = (data as any).error;
+          }
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
       return data;
     },
@@ -116,7 +128,7 @@ export default function AdminOrderDetail() {
       queryClient.invalidateQueries({ queryKey: ["admin_all_orders"] });
     },
     onError: (err: any) => {
-      toast.error(err?.message || "Erro ao processar estorno");
+      toast.error(err?.message || "Erro ao processar estorno", { duration: 8000 });
     },
   });
 
