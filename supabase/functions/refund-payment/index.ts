@@ -101,7 +101,7 @@ serve(async (req) => {
     let asaasRefundResult: any = null;
     let refundedViaAsaas = false;
 
-    if (payment?.asaas_payment_id && (payment.status === "paid" || payment.status === "confirmed" || payment.asaas_status === "RECEIVED" || payment.asaas_status === "CONFIRMED")) {
+    if (!isManual && payment?.asaas_payment_id && (payment.status === "paid" || payment.status === "confirmed" || payment.asaas_status === "RECEIVED" || payment.asaas_status === "CONFIRMED")) {
       const asaasApiKey = Deno.env.get("ASAAS_API_KEY");
       const asaasEnv = Deno.env.get("ASAAS_ENVIRONMENT") || "production";
       const asaasBaseUrl = asaasEnv === "production" ? "https://api.asaas.com/v3" : "https://sandbox.asaas.com/api/v3";
