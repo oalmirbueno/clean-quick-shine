@@ -20,8 +20,8 @@ export default function TermsOfUse() {
   const [tab, setTab] = useState(initial);
 
   return (
-    <div className="min-h-screen bg-background safe-top">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border/60">
+    <div className="h-full min-h-0 bg-background flex flex-col safe-top">
+      <header className="flex-shrink-0 bg-background/85 backdrop-blur-md border-b border-border/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -42,32 +42,37 @@ export default function TermsOfUse() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-16">
-        <Tabs
-          value={tab}
-          onValueChange={(v) => {
-            setTab(v);
-            setParams({ tab: v }, { replace: true });
-          }}
-        >
-          <TabsList className="w-full grid grid-cols-4 h-auto p-1 rounded-xl bg-muted/50 border border-border/40">
-            {ALL_TERMS.map((doc) => (
-              <TabsTrigger
-                key={doc.id}
-                value={doc.id}
-                className="text-[12px] font-medium py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground tracking-tight"
-              >
-                {doc.shortTitle}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+      <main
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-16 safe-bottom">
+          <Tabs
+            value={tab}
+            onValueChange={(v) => {
+              setTab(v);
+              setParams({ tab: v }, { replace: true });
+            }}
+          >
+            <TabsList className="w-full grid grid-cols-4 h-auto p-1 rounded-xl bg-muted/50 border border-border/40 sticky top-0 z-10">
+              {ALL_TERMS.map((doc) => (
+                <TabsTrigger
+                  key={doc.id}
+                  value={doc.id}
+                  className="text-[12px] font-medium py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground tracking-tight"
+                >
+                  {doc.shortTitle}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-          {ALL_TERMS.map((doc) => (
-            <TabsContent key={doc.id} value={doc.id} className="mt-6 focus:outline-none">
-              <LegalDocumentView document={doc} />
-            </TabsContent>
-          ))}
-        </Tabs>
+            {ALL_TERMS.map((doc) => (
+              <TabsContent key={doc.id} value={doc.id} className="mt-6 focus:outline-none">
+                <LegalDocumentView document={doc} />
+              </TabsContent>
+            ))}
+          </Tabs>
+        </div>
       </main>
     </div>
   );

@@ -8,8 +8,8 @@ export default function PrivacyPolicy() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background safe-top">
-      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border/60">
+    <div className="h-full min-h-0 bg-background flex flex-col safe-top">
+      <header className="flex-shrink-0 bg-background/85 backdrop-blur-md border-b border-border/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -30,8 +30,13 @@ export default function PrivacyPolicy() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 pb-16">
-        <LegalDocumentView document={PRIVACY_POLICY} />
+      <main
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 pb-16 safe-bottom">
+          <LegalDocumentView document={PRIVACY_POLICY} />
+        </div>
       </main>
     </div>
   );
