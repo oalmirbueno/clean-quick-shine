@@ -5,6 +5,7 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clientSteps, proSteps, type TutorialStep } from "./tutorial/steps";
+import { useViewportHeight } from "@/hooks/useViewportHeight";
 
 const CLIENT_TUTORIAL_KEY = "jalimpo_client_tutorial_completed";
 const PRO_TUTORIAL_KEY = "jalimpo_pro_tutorial_completed";
@@ -22,6 +23,8 @@ export function AppTutorial({ variant, onComplete }: AppTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isExiting, setIsExiting] = useState(false);
+
+  useViewportHeight();
 
   const steps = variant === "client" ? clientSteps : proSteps;
   const totalSteps = steps.length;
@@ -82,8 +85,11 @@ export function AppTutorial({ variant, onComplete }: AppTutorialProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.22 }}
-          className="fixed inset-0 z-[9999] bg-background flex flex-col overflow-hidden"
+          className="fixed inset-x-0 top-0 z-[9999] bg-background grid overflow-hidden"
           style={{
+            height: "var(--app-height, 100dvh)",
+            maxHeight: "var(--app-height, 100dvh)",
+            gridTemplateRows: "auto auto minmax(0, 1fr) auto",
             paddingTop: "max(env(safe-area-inset-top, 0px), 8px)",
             paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
             willChange: "opacity",
@@ -240,9 +246,12 @@ function SlideContent({ step, direction, isPro, onSwipeNext, onSwipePrev }: Slid
         else if (info.offset.x > SWIPE_THRESHOLD) onSwipePrev();
       }}
       className="absolute inset-0 overflow-y-auto overscroll-contain"
-      style={{ willChange: "transform, opacity" }}
+      style={{ willChange: "transform, opacity", WebkitOverflowScrolling: "touch" }}
     >
-      <div className="px-6 py-4 max-w-md mx-auto w-full text-center">
+      <div
+        className="min-h-full px-6 pt-4 max-w-md mx-auto w-full text-center flex flex-col justify-center"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)" }}
+      >
         {/* Icon */}
         <div
           className={cn(
