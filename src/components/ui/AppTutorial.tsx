@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { LucideIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/ui/Logo";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
@@ -13,7 +14,7 @@ const CLIENT_TUTORIAL_KEY = "jalimpo_client_tutorial_completed";
 const PRO_TUTORIAL_KEY = "jalimpo_pro_tutorial_completed";
 
 interface TutorialStep {
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   badge: string;
   title: string;
   description: string;
