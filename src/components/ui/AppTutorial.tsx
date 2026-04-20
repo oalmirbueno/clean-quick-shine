@@ -249,28 +249,28 @@ function SlideContent({ step, direction, isPro, onSwipeNext, onSwipePrev }: Slid
       style={{ willChange: "transform, opacity", WebkitOverflowScrolling: "touch" }}
     >
       <div
-        className="min-h-full px-6 pt-4 max-w-md mx-auto w-full text-center flex flex-col justify-center"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)" }}
+        className="min-h-full px-6 pt-2 max-w-md mx-auto w-full flex flex-col justify-center"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}
       >
         {/* Icon */}
         <div
           className={cn(
-            "w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-sm border",
+            "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 border",
             isPro
-              ? "bg-gradient-to-br from-success/15 to-success/5 border-success/20"
-              : "bg-gradient-to-br from-primary/15 to-primary/5 border-primary/20",
+              ? "bg-success/10 border-success/15"
+              : "bg-primary/10 border-primary/15",
           )}
         >
           <Icon
-            className={cn("w-10 h-10", isPro ? "text-success" : "text-primary")}
-            strokeWidth={1.8}
+            className={cn("w-8 h-8", isPro ? "text-success" : "text-primary")}
+            strokeWidth={1.75}
           />
         </div>
 
         {/* Badge */}
         <span
           className={cn(
-            "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium mb-3 tracking-tight",
+            "inline-flex items-center self-center px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-[0.08em] mb-3",
             isPro ? "bg-success/10 text-success" : "bg-primary/10 text-primary",
           )}
         >
@@ -278,28 +278,28 @@ function SlideContent({ step, direction, isPro, onSwipeNext, onSwipePrev }: Slid
         </span>
 
         {/* Title */}
-        <h2 className="text-[22px] sm:text-2xl font-semibold text-foreground leading-tight tracking-tight mb-3">
+        <h2 className="text-center text-[19px] sm:text-[20px] font-semibold text-foreground leading-[1.25] tracking-[-0.01em] mb-2.5 max-w-[20ch] mx-auto">
           {step.title}
         </h2>
 
         {/* Description */}
-        <p className="text-[14px] text-muted-foreground leading-relaxed mb-5">
+        <p className="text-center text-[14px] text-muted-foreground leading-[1.55] mb-6 max-w-[32ch] mx-auto">
           {step.description}
         </p>
 
         {/* Tips */}
         {step.tips && step.tips.length > 0 && (
-          <ul className="space-y-2 text-left bg-muted/40 rounded-2xl p-4 border border-border/60">
+          <ul className="space-y-2.5 text-left bg-muted/30 rounded-xl p-4 border border-border/50">
             {step.tips.map((tip, i) => (
               <li key={i} className="flex items-start gap-2.5">
                 <CheckCircle2
                   className={cn(
-                    "w-4 h-4 mt-0.5 flex-shrink-0",
+                    "w-3.5 h-3.5 mt-[3px] flex-shrink-0",
                     isPro ? "text-success" : "text-primary",
                   )}
-                  strokeWidth={2}
+                  strokeWidth={2.25}
                 />
-                <span className="text-[13px] text-foreground leading-snug tracking-tight">
+                <span className="text-[13px] text-foreground/85 leading-[1.45]">
                   {tip}
                 </span>
               </li>
