@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Logo } from "@/components/ui/Logo";
-import { InputField } from "@/components/ui/InputField";
-import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { PageTransition } from "@/components/ui/PageTransition";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { validatePassword } from "@/lib/passwordValidation";
+import { AuthLayout } from "@/components/auth/AuthLayout";
+import { PasswordField } from "@/components/auth/PasswordField";
+import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
+import { PrimaryButton } from "@/components/ui/PrimaryButton";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -14,175 +15,122 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // Check if we have a valid session from the reset link
-    const checkSession = async () => {
+    let mounted = true;
+    (async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!mounted) return;
       if (!session) {
-        toast.error("Link inválido ou expirado. Solicite um novo link.");
-        navigate("/forgot-password");
+        toast.error("Link inválido ou expirado. Solicite um novo.");
+        navigate("/forgot-password", { replace: true });
+        return;
       }
+      setChecking(false);
+    })();
+    return () => {
+      mounted = false;
     };
-    
-    checkSession();
   }, [navigate]);
-
-  const validatePassword = (pwd: string): string | null => {
-    if (pwd.length < 8) return "Senha deve ter no mínimo 8 caracteres";
-    if (!/[A-Z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra maiúscula";
-    if (!/[a-z]/.test(pwd)) return "Senha deve ter pelo menos 1 letra minúscula";
-    if (!/[0-9]/.test(pwd)) return "Senha deve ter pelo menos 1 número";
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) return "Senha deve ter pelo menos 1 caractere especial";
-    const commonPasswords = [
-      "12345678", "password", "123456789", "qwerty123", "password1",
-      "11111111", "abc12345", "iloveyou", "admin123", "welcome1",
-    ];
-    if (commonPasswords.includes(pwd.toLowerCase())) {
-      return "Esta senha é muito comum. Escolha uma senha mais segura.";
-    }
-    return null;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      toast.error(passwordError);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("As senhas não coincidem");
-      return;
-    }
+    const pwdError = validatePassword(password);
+    if (pwdError) return toast.error(pwdError);
+    if (password !== confirmPassword) return toast.error("As senhas não coincidem");
 
     setLoading(true);
-
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      });
-
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) return toast.error(error.message);
 
       setSuccess(true);
       toast.success("Senha atualizada com sucesso!");
-      
-      // Sign out after password reset
       await supabase.auth.signOut();
     } catch (err) {
-      console.error("Error resetting password:", err);
-      toast.error("Erro ao redefinir senha. Tente novamente.");
+      console.error("Reset password error:", err);
+      toast.error("Erro ao redefinir senha.");
     } finally {
       setLoading(false);
     }
   };
 
+  if (checking) {
+    return <AuthLayout hideMarketing showTrust={false}><div /></AuthLayout>;
+  }
+
   if (success) {
     return (
-      <PageTransition>
-        <div className="h-full bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
-          <div className="w-full max-w-sm animate-fade-in">
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                <CheckCircle className="w-10 h-10 text-primary" />
-              </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">
-                Senha atualizada!
-              </h1>
-              <p className="text-muted-foreground">
-                Sua senha foi redefinida com sucesso. Agora você pode fazer login com sua nova senha.
-              </p>
-            </div>
-
-            <PrimaryButton 
-              fullWidth 
-              onClick={() => navigate("/login")}
-            >
-              Ir para o login
-            </PrimaryButton>
+      <AuthLayout hideMarketing showTrust={false}>
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-success/10 flex items-center justify-center">
+            <CheckCircle2 className="w-8 h-8 text-success" />
           </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Senha atualizada!
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Agora você pode entrar com sua nova senha.
+          </p>
         </div>
-      </PageTransition>
+        <PrimaryButton
+          fullWidth
+          size="lg"
+          className="mt-6"
+          onClick={() => navigate("/login")}
+        >
+          Ir para o login
+        </PrimaryButton>
+      </AuthLayout>
     );
   }
 
   return (
-    <PageTransition>
-      <div className="h-full bg-background flex flex-col items-center justify-center p-6 overflow-hidden safe-top safe-bottom">
-        <div className="w-full max-w-sm animate-fade-in">
-          <div className="text-center mb-8">
-            <Logo size="md" className="justify-center mb-4" />
-            <h1 className="text-xl font-semibold text-foreground mb-2">
-              Redefinir senha
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Digite sua nova senha abaixo.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="relative">
-              <InputField
-                label="Nova senha"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-
-            <div className="relative">
-              <InputField
-                label="Confirmar nova senha"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              Mínimo 8 caracteres com maiúscula, minúscula, número e especial.
-            </p>
-
-            <PrimaryButton type="submit" fullWidth loading={loading}>
-              Redefinir senha
-            </PrimaryButton>
-          </form>
+    <AuthLayout
+      hideMarketing
+      showTrust={false}
+      eyebrow="Recuperação"
+      title="Crie uma nova senha"
+      subtitle="Use uma senha forte que você lembre."
+    >
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <div className="space-y-2">
+          <PasswordField
+            label="Nova senha"
+            autoComplete="new-password"
+            placeholder="Mínimo 8 caracteres"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <PasswordStrengthMeter password={password} />
         </div>
-      </div>
-    </PageTransition>
+
+        <PasswordField
+          label="Confirmar nova senha"
+          autoComplete="new-password"
+          placeholder="Repita a senha"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          error={
+            confirmPassword && confirmPassword !== password
+              ? "As senhas não coincidem"
+              : undefined
+          }
+        />
+
+        <PrimaryButton
+          type="submit"
+          fullWidth
+          size="lg"
+          loading={loading}
+          disabled={!password || password !== confirmPassword}
+        >
+          Redefinir senha
+        </PrimaryButton>
+      </form>
+    </AuthLayout>
   );
 }
