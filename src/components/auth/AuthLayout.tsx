@@ -10,11 +10,11 @@ interface AuthLayoutProps {
   /** Show back button at top of form column. */
   onBack?: () => void;
   /** Eyebrow text above title. */
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   /** Main heading inside the form column. */
-  title?: string;
+  title?: ReactNode;
   /** Supporting subtitle below the heading. */
-  subtitle?: string;
+  subtitle?: ReactNode;
   /** Optional tagline shown on the marketing column (desktop only). */
   marketingTitle?: string;
   marketingSubtitle?: string;
