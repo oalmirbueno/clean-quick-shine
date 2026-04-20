@@ -100,8 +100,8 @@ export default function ClientHome() {
                   <CalendarClock className="w-5 h-5" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="font-semibold text-[15px] leading-tight">Agendar limpeza</p>
-                  <p className="text-xs opacity-80 mt-0.5">Profissionais verificadas, em poucos toques</p>
+                  <p className="font-semibold text-[15px] leading-tight tracking-tight">Agendar limpeza</p>
+                  <p className="text-[12px] opacity-80 mt-1 leading-snug">Profissionais verificadas em poucos toques</p>
                 </div>
                 <ArrowRight className="w-5 h-5 opacity-70 shrink-0" />
               </motion.button>
@@ -110,7 +110,7 @@ export default function ClientHome() {
             {/* Services Grid */}
             <motion.div variants={item}>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-base font-bold text-foreground">Serviços</h2>
+                <h2 className="text-[15px] font-semibold text-foreground tracking-tight">Serviços</h2>
               </div>
               <div className="grid grid-cols-2 gap-2.5">
                 {(services || []).map((service) => {
@@ -125,7 +125,7 @@ export default function ClientHome() {
                       <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0">
                         <IconComp className="w-5 h-5 text-primary" />
                       </div>
-                      <span className="text-sm font-medium text-foreground leading-tight line-clamp-2">
+                      <span className="text-[13px] font-medium text-foreground leading-tight line-clamp-2 tracking-tight">
                         {service.name}
                       </span>
                     </motion.button>
@@ -145,8 +145,8 @@ export default function ClientHome() {
                   <CalendarClock className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-primary uppercase tracking-wider">Próximo agendamento</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5 truncate">Nenhum agendamento</p>
+                  <p className="text-[10px] font-semibold text-primary uppercase tracking-[0.08em]">Próximo agendamento</p>
+                  <p className="text-[14px] font-medium text-foreground mt-1 truncate tracking-tight">Nenhum agendamento</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
               </motion.button>
