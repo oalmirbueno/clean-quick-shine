@@ -104,7 +104,7 @@ serve(async (req) => {
 
     if (!paymentRes.ok) {
       console.error("Erro Asaas payment:", paymentData);
-      return new Response(JSON.stringify({ error: "Erro ao criar cobrança", details: paymentData }), {
+      return new Response(JSON.stringify({ error: "Erro ao criar cobrança" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
