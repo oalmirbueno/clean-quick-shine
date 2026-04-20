@@ -137,6 +137,10 @@ export default function ProVerification() {
   };
 
   const handleUploadClick = (docId: string) => {
+    if (!acceptedTerms) {
+      toast.error("Aceite os termos do profissional para continuar");
+      return;
+    }
     fileInputRefs.current[docId]?.click();
   };
 
