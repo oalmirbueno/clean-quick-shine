@@ -1,69 +1,37 @@
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { LegalDocumentView } from "@/components/legal/LegalDocumentView";
+import { LEGAL_LAST_UPDATE, PRIVACY_POLICY } from "@/lib/legalContent";
 
 export default function PrivacyPolicy() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background safe-top">
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border/60">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+            className="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center hover:bg-muted/60 active:scale-95 transition-all"
+            aria-label="Voltar"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
           <Logo size="sm" iconOnly />
-          <h1 className="text-lg font-semibold text-foreground">Política de Privacidade</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-[15px] font-semibold text-foreground tracking-[-0.01em] leading-none">
+              Política de Privacidade
+            </h1>
+            <p className="text-[11px] text-muted-foreground/80 mt-0.5">
+              Última atualização: {LEGAL_LAST_UPDATE}
+            </p>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto p-6 space-y-6 text-foreground">
-        <p className="text-sm text-muted-foreground">Última atualização: 30 de março de 2026</p>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">1. Dados Coletados</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Coletamos nome, e-mail, telefone, CPF (para profissionais), endereço e dados de localização para a prestação do serviço. Dados de pagamento são processados por parceiros seguros e não ficam armazenados na plataforma.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">2. Uso dos Dados</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Seus dados são utilizados para: criação e manutenção da conta, agendamento de serviços, processamento de pagamentos, comunicação sobre pedidos e melhorias na plataforma.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">3. Compartilhamento</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Compartilhamos dados apenas com: a profissional designada para o serviço (nome e endereço), processadores de pagamento e autoridades quando exigido por lei.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">4. Segurança</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Utilizamos criptografia para proteger dados sensíveis como chaves Pix e informações bancárias. Documentos de verificação são armazenados com acesso restrito e URLs temporárias.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">5. Seus Direitos</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Você pode solicitar acesso, correção ou exclusão dos seus dados a qualquer momento pelo suporte no aplicativo, conforme a Lei Geral de Proteção de Dados (LGPD).
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">6. Contato</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Para exercer seus direitos ou esclarecer dúvidas sobre privacidade, entre em contato pelo suporte dentro do aplicativo.
-          </p>
-        </section>
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-6 pb-16">
+        <LegalDocumentView document={PRIVACY_POLICY} />
       </main>
     </div>
   );
