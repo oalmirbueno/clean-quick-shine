@@ -58,12 +58,12 @@ export default function ClientHome() {
         style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
       >
         {/* ── Header ── */}
-        <header className="shrink-0 px-5 pt-3 pb-4">
+        <header className="shrink-0 px-5 pt-3 pb-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Olá,</p>
-              <h1 className="text-xl font-bold text-foreground leading-tight">
-                {userName} 👋
+              <p className="text-[13px] text-muted-foreground tracking-tight">Bem-vindo de volta</p>
+              <h1 className="text-[22px] font-semibold text-foreground leading-tight tracking-tight mt-0.5">
+                {userName}
               </h1>
             </div>
             <div className="flex items-center gap-1.5">
