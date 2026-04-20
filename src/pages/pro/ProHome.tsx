@@ -59,7 +59,7 @@ export default function ProHome() {
     if (!availableOrders || availableOrders.length === 0) { prevOrderCountRef.current = 0; return; }
     if (availableOrders.length > prevOrderCountRef.current && prevOrderCountRef.current > 0 && document.hidden) {
       const o = availableOrders[0] as any;
-      showLocalNotification("Novo pedido disponível! 🧹", {
+      showLocalNotification("Novo pedido disponível", {
         body: `${o?.serviceName || "Serviço"} - R$ ${o?.totalPrice?.toFixed(2).replace(".", ",")}`,
         data: { url: "/pro/home" }, tag: "new-order",
       } as any);
@@ -146,19 +146,19 @@ export default function ProHome() {
                 )}
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Olá,</p>
+                <p className="text-[13px] text-muted-foreground tracking-tight">Bem-vindo</p>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-bold text-foreground leading-tight">
+                  <h1 className="text-[18px] font-semibold text-foreground leading-tight tracking-tight">
                     {proName.split(" ")[0]}
                   </h1>
                   {metrics?.quality_level && <QualityBadge level={metrics.quality_level} size="sm" />}
                   {planType === "elite" && (
-                    <span className="px-1.5 py-0.5 bg-gradient-to-r from-amber-500 to-yellow-400 text-white rounded-full text-[10px] font-bold flex items-center gap-0.5">
+                    <span className="px-1.5 py-0.5 bg-warning/15 text-warning rounded-full text-[10px] font-semibold flex items-center gap-0.5">
                       <Sparkles className="w-2.5 h-2.5" /> ELITE
                     </span>
                   )}
                   {planType === "pro" && (
-                    <span className="px-1.5 py-0.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold flex items-center gap-0.5">
+                    <span className="px-1.5 py-0.5 bg-primary/10 text-primary rounded-full text-[10px] font-semibold flex items-center gap-0.5">
                       <Crown className="w-2.5 h-2.5" /> PRO
                     </span>
                   )}
