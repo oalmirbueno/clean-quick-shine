@@ -19,8 +19,6 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
-import OnboardingClient from "./pages/OnboardingClient";
-import OnboardingPro from "./pages/OnboardingPro";
 import NotFound from "./pages/NotFound";
 import AccessDenied from "./pages/AccessDenied";
 import ConfirmEmail from "./pages/ConfirmEmail";
@@ -127,8 +125,8 @@ const App = () => {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/onboarding/client" element={<OnboardingClient />} />
-                <Route path="/onboarding/pro" element={<OnboardingPro />} />
+                <Route path="/onboarding/client" element={<Navigate to="/register" replace />} />
+                <Route path="/onboarding/pro" element={<Navigate to="/register" replace />} />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
                 <Route path="/terms" element={<TermsOfUse />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
