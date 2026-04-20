@@ -1,76 +1,73 @@
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { LegalDocumentView } from "@/components/legal/LegalDocumentView";
+import {
+  ALL_TERMS,
+  LEGAL_LAST_UPDATE,
+  TERMS_PLATFORM,
+} from "@/lib/legalContent";
 
 export default function TermsOfUse() {
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const initial = useMemo(() => {
+    const t = params.get("tab");
+    return ALL_TERMS.find((d) => d.id === t)?.id ?? TERMS_PLATFORM.id;
+  }, [params]);
+  const [tab, setTab] = useState(initial);
 
   return (
     <div className="min-h-screen bg-background safe-top">
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur-md border-b border-border/60">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
+            className="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center hover:bg-muted/60 active:scale-95 transition-all"
+            aria-label="Voltar"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
           <Logo size="sm" iconOnly />
-          <h1 className="text-lg font-semibold text-foreground">Termos de Uso</h1>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-[15px] font-semibold text-foreground tracking-[-0.01em] leading-none">
+              Termos de Uso
+            </h1>
+            <p className="text-[11px] text-muted-foreground/80 mt-0.5">
+              Última atualização: {LEGAL_LAST_UPDATE}
+            </p>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto p-6 space-y-6 text-foreground">
-        <p className="text-sm text-muted-foreground">Última atualização: 30 de março de 2026</p>
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-16">
+        <Tabs
+          value={tab}
+          onValueChange={(v) => {
+            setTab(v);
+            setParams({ tab: v }, { replace: true });
+          }}
+        >
+          <TabsList className="w-full grid grid-cols-4 h-auto p-1 rounded-xl bg-muted/50 border border-border/40">
+            {ALL_TERMS.map((doc) => (
+              <TabsTrigger
+                key={doc.id}
+                value={doc.id}
+                className="text-[12px] font-medium py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground tracking-tight"
+              >
+                {doc.shortTitle}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">1. Aceitação dos Termos</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Ao utilizar o aplicativo Já Limpo, você concorda com estes Termos de Uso. Se não concordar, não utilize o serviço.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">2. Descrição do Serviço</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            O Já Limpo é uma plataforma que conecta clientes a profissionais de limpeza (diaristas). Atuamos como intermediários, facilitando o agendamento, pagamento e comunicação entre as partes.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">3. Cadastro</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Para utilizar o serviço, é necessário criar uma conta com informações verdadeiras e atualizadas. Você é responsável por manter a segurança da sua senha e conta.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">4. Pagamentos</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Os pagamentos são processados por meio de parceiros de pagamento. O valor do serviço é definido pela plataforma com base no tipo de limpeza, duração e localidade. A profissional recebe 80% do valor após a avaliação do cliente.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">5. Cancelamentos</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Cancelamentos podem ser realizados conforme a política vigente. Cancelamentos frequentes podem resultar em restrições na conta.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">6. Responsabilidades</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            O Já Limpo não é empregador das profissionais. A relação entre cliente e diarista é de prestação de serviço autônomo. A plataforma não se responsabiliza por danos materiais durante a execução do serviço, mas oferece canais de suporte para mediação.
-          </p>
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">7. Contato</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Para dúvidas sobre estes termos, entre em contato pelo suporte dentro do aplicativo.
-          </p>
-        </section>
+          {ALL_TERMS.map((doc) => (
+            <TabsContent key={doc.id} value={doc.id} className="mt-6 focus:outline-none">
+              <LegalDocumentView document={doc} />
+            </TabsContent>
+          ))}
+        </Tabs>
       </main>
     </div>
   );
