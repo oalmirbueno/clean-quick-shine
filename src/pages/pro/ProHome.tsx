@@ -59,7 +59,7 @@ export default function ProHome() {
     if (!availableOrders || availableOrders.length === 0) { prevOrderCountRef.current = 0; return; }
     if (availableOrders.length > prevOrderCountRef.current && prevOrderCountRef.current > 0 && document.hidden) {
       const o = availableOrders[0] as any;
-      showLocalNotification("Novo pedido disponível! 🧹", {
+      showLocalNotification("Novo pedido disponível", {
         body: `${o?.serviceName || "Serviço"} - R$ ${o?.totalPrice?.toFixed(2).replace(".", ",")}`,
         data: { url: "/pro/home" }, tag: "new-order",
       } as any);
