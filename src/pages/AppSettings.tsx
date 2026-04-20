@@ -20,6 +20,9 @@ import {
   RefreshCw,
   Check,
   Loader2,
+  FileText,
+  Lock,
+  XCircle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
@@ -239,16 +242,35 @@ export default function AppSettings() {
               onClick={() => navigate(userRole === "pro" ? "/pro/support" : "/client/support")}
             />
             <SettingItem
-              icon={<Shield className="w-5 h-5" />}
-              label="Privacidade e termos"
-              description="Políticas do app"
-              onClick={() => {}}
-            />
-            <SettingItem
               icon={<Globe className="w-5 h-5" />}
               label="Idioma"
               description="Português (Brasil)"
               action={<span className="text-sm text-muted-foreground">PT-BR</span>}
+            />
+          </div>
+        </motion.section>
+
+        {/* Legal */}
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Legal</h3>
+          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+            <SettingItem
+              icon={<FileText className="w-5 h-5" />}
+              label="Termos de uso"
+              description="Plataforma, contratante e profissional"
+              onClick={() => navigate(userRole === "pro" ? "/terms?tab=pro" : "/terms?tab=client")}
+            />
+            <SettingItem
+              icon={<Lock className="w-5 h-5" />}
+              label="Política de privacidade"
+              description="Como tratamos seus dados (LGPD)"
+              onClick={() => navigate("/privacy")}
+            />
+            <SettingItem
+              icon={<XCircle className="w-5 h-5" />}
+              label="Cancelamento e reembolso"
+              description="Regras e prazos"
+              onClick={() => navigate("/terms?tab=cancellation")}
             />
           </div>
         </motion.section>

@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { ChevronLeft, Upload, CheckCircle2, Loader2, AlertCircle, CreditCard, Camera, Shield, Clock, XCircle, ImageIcon } from "lucide-react";
+import { ChevronLeft, Upload, CheckCircle2, Loader2, AlertCircle, CreditCard, Camera, Shield, Clock, XCircle, ImageIcon, FileText, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProDocuments } from "@/hooks/useProDocuments";
 import { toast } from "sonner";
@@ -106,9 +106,23 @@ export default function ProVerification() {
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const { documents, isLoading, uploadDocument, isUploading, getDocumentStatus } = useProDocuments();
   const [uploadingType, setUploadingType] = useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState<boolean>(() => {
+    return localStorage.getItem("pro_terms_accepted") === "true";
+  });
+
+  const handleAcceptTerms = (next: boolean) => {
+    setAcceptedTerms(next);
+    if (next) localStorage.setItem("pro_terms_accepted", "true");
+    else localStorage.removeItem("pro_terms_accepted");
+  };
 
   const handleFileSelect = async (docId: string, file: File) => {
     if (!file) return;
+
+    if (!acceptedTerms) {
+      toast.error("Aceite os termos do profissional para enviar documentos");
+      return;
+    }
 
     const validation = await validateImageQuality(file);
     if (!validation.valid) {
@@ -123,6 +137,10 @@ export default function ProVerification() {
   };
 
   const handleUploadClick = (docId: string) => {
+    if (!acceptedTerms) {
+      toast.error("Aceite os termos do profissional para continuar");
+      return;
+    }
     fileInputRefs.current[docId]?.click();
   };
 
@@ -213,11 +231,12 @@ export default function ProVerification() {
         {(status === "not_sent" || status === "rejected") && (
           <button
             onClick={() => handleUploadClick(doc.id)}
-            disabled={isUploading || isCurrentlyUploading}
+            disabled={isUploading || isCurrentlyUploading || !acceptedTerms}
+            title={!acceptedTerms ? "Aceite os termos para enviar documentos" : undefined}
             className={cn(
               "mt-3 w-full py-2.5 rounded-lg border border-dashed",
               "flex items-center justify-center gap-2 font-medium text-sm",
-              "transition-colors disabled:opacity-50",
+              "transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
               status === "rejected"
                 ? "border-destructive/30 text-destructive hover:bg-destructive/5"
                 : "border-primary/30 text-primary hover:bg-primary/5"
@@ -228,7 +247,9 @@ export default function ProVerification() {
             ) : (
               <Upload className="w-4 h-4" />
             )}
-            {status === "rejected" ? "Reenviar documento" : "Enviar documento"}
+            {!acceptedTerms
+              ? "Aceite os termos para enviar"
+              : status === "rejected" ? "Reenviar documento" : "Enviar documento"}
           </button>
         )}
       </div>
@@ -311,6 +332,74 @@ export default function ProVerification() {
             </span>
           </div>
         </div>
+
+        {/* Terms acceptance — required before uploading */}
+        {!allRequiredApproved && (
+          <div className={cn(
+            "p-4 rounded-xl border transition-colors",
+            acceptedTerms
+              ? "bg-success/5 border-success/20"
+              : "bg-card border-border"
+          )}>
+            <div className="flex items-start gap-3">
+              <div className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                acceptedTerms ? "bg-success/10" : "bg-primary/10"
+              )}>
+                <FileText className={cn("w-5 h-5", acceptedTerms ? "text-success" : "text-primary")} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-foreground text-sm">
+                  Termos do profissional diarista
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Leia e aceite os termos antes de enviar seus documentos.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/terms?tab=pro")}
+                  className="text-xs text-primary font-medium hover:underline mt-1.5"
+                >
+                  Ler termos completos →
+                </button>
+              </div>
+            </div>
+
+            <label className="flex items-start gap-3 mt-3 pt-3 border-t border-border/60 cursor-pointer select-none">
+              <button
+                type="button"
+                onClick={() => handleAcceptTerms(!acceptedTerms)}
+                aria-pressed={acceptedTerms}
+                className={cn(
+                  "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 transition-all",
+                  acceptedTerms
+                    ? "bg-primary border-primary"
+                    : "border-input hover:border-primary/50"
+                )}
+              >
+                {acceptedTerms && <Check className="w-3 h-3 text-primary-foreground" />}
+              </button>
+              <span className="text-xs text-foreground leading-relaxed">
+                Li e aceito os <strong>Termos do Profissional</strong>, a{" "}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); navigate("/privacy"); }}
+                  className="text-primary hover:underline"
+                >
+                  Política de Privacidade
+                </button>{" "}
+                e a{" "}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); navigate("/terms?tab=cancellation"); }}
+                  className="text-primary hover:underline"
+                >
+                  Política de Cancelamento
+                </button>.
+              </span>
+            </label>
+          </div>
+        )}
 
         {/* Required docs */}
         <div className="space-y-3">
