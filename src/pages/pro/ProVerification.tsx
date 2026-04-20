@@ -106,9 +106,23 @@ export default function ProVerification() {
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const { documents, isLoading, uploadDocument, isUploading, getDocumentStatus } = useProDocuments();
   const [uploadingType, setUploadingType] = useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState<boolean>(() => {
+    return localStorage.getItem("pro_terms_accepted") === "true";
+  });
+
+  const handleAcceptTerms = (next: boolean) => {
+    setAcceptedTerms(next);
+    if (next) localStorage.setItem("pro_terms_accepted", "true");
+    else localStorage.removeItem("pro_terms_accepted");
+  };
 
   const handleFileSelect = async (docId: string, file: File) => {
     if (!file) return;
+
+    if (!acceptedTerms) {
+      toast.error("Aceite os termos do profissional para enviar documentos");
+      return;
+    }
 
     const validation = await validateImageQuality(file);
     if (!validation.valid) {
