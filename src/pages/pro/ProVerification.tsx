@@ -231,11 +231,12 @@ export default function ProVerification() {
         {(status === "not_sent" || status === "rejected") && (
           <button
             onClick={() => handleUploadClick(doc.id)}
-            disabled={isUploading || isCurrentlyUploading}
+            disabled={isUploading || isCurrentlyUploading || !acceptedTerms}
+            title={!acceptedTerms ? "Aceite os termos para enviar documentos" : undefined}
             className={cn(
               "mt-3 w-full py-2.5 rounded-lg border border-dashed",
               "flex items-center justify-center gap-2 font-medium text-sm",
-              "transition-colors disabled:opacity-50",
+              "transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
               status === "rejected"
                 ? "border-destructive/30 text-destructive hover:bg-destructive/5"
                 : "border-primary/30 text-primary hover:bg-primary/5"
@@ -246,7 +247,9 @@ export default function ProVerification() {
             ) : (
               <Upload className="w-4 h-4" />
             )}
-            {status === "rejected" ? "Reenviar documento" : "Enviar documento"}
+            {!acceptedTerms
+              ? "Aceite os termos para enviar"
+              : status === "rejected" ? "Reenviar documento" : "Enviar documento"}
           </button>
         )}
       </div>
