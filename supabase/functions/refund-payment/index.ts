@@ -214,8 +214,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Refund error:", error);
-    return new Response(JSON.stringify({ error: error.message || "Erro interno" }), {
+    console.error("Refund error details:", error);
+    return new Response(JSON.stringify({ error: "Erro ao processar estorno" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
