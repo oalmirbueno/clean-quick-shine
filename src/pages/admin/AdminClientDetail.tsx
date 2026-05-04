@@ -18,7 +18,7 @@ export default function AdminClientDetail() {
   const [notifyTitle, setNotifyTitle] = useState("");
   const [notifyMsg, setNotifyMsg] = useState("");
 
-  const { data: client } = useQuery({
+  const { data: client, isLoading } = useQuery({
     queryKey: ["admin_client_detail", id],
     queryFn: async () => {
       const [{ data: profile }, { data: orders }, { data: blocks }] = await Promise.all([
