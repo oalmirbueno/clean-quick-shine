@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { UpdatePrompt } from "@/components/ui/UpdatePrompt";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { InstallBanner } from "@/components/ui/InstallBanner";
+import { MobilePwaGate } from "@/components/MobilePwaGate";
 
 // Pages
 import Index from "./pages/Index";
@@ -121,11 +122,11 @@ const App = () => {
               <Routes>
                 {/* Splash & Auth */}
                 <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/login" element={<MobilePwaGate><Login /></MobilePwaGate>} />
+                <Route path="/register" element={<MobilePwaGate><Register /></MobilePwaGate>} />
+                <Route path="/forgot-password" element={<MobilePwaGate><ForgotPassword /></MobilePwaGate>} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/onboarding" element={<MobilePwaGate><Onboarding /></MobilePwaGate>} />
                 <Route path="/onboarding/client" element={<Navigate to="/register" replace />} />
                 <Route path="/onboarding/pro" element={<Navigate to="/register" replace />} />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />

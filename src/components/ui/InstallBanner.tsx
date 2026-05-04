@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Download, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -8,9 +8,13 @@ const COOLDOWN_DAYS = 7;
 
 export function InstallBanner() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    // Never show on the install page itself or auth pages where it'd overlap
+    if (location.pathname.startsWith("/install")) return;
+
     // Never show in standalone/PWA mode
     if (window.matchMedia("(display-mode: standalone)").matches) return;
     if ((window.navigator as any).standalone === true) return;
@@ -22,6 +26,12 @@ export function InstallBanner() {
       return;
     }
 
+    // On mobile the user is already routed to /install via MobilePwaGate,
+    // so this banner is only a hint for desktop browsers.
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isMobile = /iphone|ipad|ipod|android/.test(ua);
+    if (isMobile) return;
+
     // Check cooldown
     const dismissed = localStorage.getItem(DISMISS_KEY);
     if (dismissed) {
@@ -32,7 +42,8 @@ export function InstallBanner() {
     // Show after short delay
     const timer = setTimeout(() => setShow(true), 3000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [location.pathname]);
+
 
   const handleDismiss = () => {
     setShow(false);
