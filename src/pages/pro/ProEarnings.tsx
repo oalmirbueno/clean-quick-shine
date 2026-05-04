@@ -21,11 +21,9 @@ export default function ProEarnings() {
   if (isLoading) {
     return (
       <div className="h-full bg-background flex flex-col safe-top">
-        <header className="flex-shrink-0 bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Meus ganhos</h1>
-        </header>
+        <ProPageHeader title="Meus ganhos" />
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <Loader2 className="w-7 h-7 animate-spin text-primary" />
         </div>
         <BottomNav variant="pro" />
       </div>
@@ -38,36 +36,39 @@ export default function ProEarnings() {
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      {/* Header */}
-      <header className="flex-shrink-0 bg-card border-b border-border p-4">
-        <h1 className="text-xl font-semibold text-foreground">
-          Meus ganhos
-        </h1>
-      </header>
+      <ProPageHeader title="Meus ganhos" subtitle="Acompanhe seu saldo e repasses" />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
-        {/* Balance Card */}
-        <div className="p-5 bg-primary rounded-xl text-primary-foreground">
-          <p className="text-sm opacity-90">Saldo disponível</p>
-          <p className="text-3xl font-bold mt-1">
-            R$ {(earnings?.availableBalance || 0).toFixed(2).replace(".", ",")}
-          </p>
-          {earnings && earnings.pendingBalance > 0 && (
-            <p className="text-sm opacity-75 mt-1">
-              + R$ {earnings.pendingBalance.toFixed(2).replace(".", ",")} pendente
-            </p>
-          )}
-          <PrimaryButton 
-            variant="secondary" 
-            size="sm" 
-            className="mt-4 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-            onClick={() => navigate("/pro/withdraw")}
-            disabled={(earnings?.availableBalance || 0) <= 0}
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <motion.div variants={container} initial="hidden" animate="show" className="px-5 pb-6 space-y-4">
+          {/* Hero Saldo */}
+          <motion.div
+            variants={item}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-5 shadow-sm"
           >
-            <ArrowDownToLine className="w-4 h-4 mr-2" />
-            Solicitar saque
-          </PrimaryButton>
-        </div>
+            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute right-4 top-4 opacity-20">
+              <Wallet className="w-20 h-20" />
+            </div>
+            <p className="text-xs uppercase tracking-wider opacity-80 font-medium">Saldo disponível</p>
+            <p className="text-[34px] font-bold leading-none mt-1.5">
+              R$ {(earnings?.availableBalance || 0).toFixed(2).replace(".", ",")}
+            </p>
+            {earnings && earnings.pendingBalance > 0 && (
+              <p className="text-xs opacity-80 mt-2">
+                + R$ {earnings.pendingBalance.toFixed(2).replace(".", ",")} pendente
+              </p>
+            )}
+            <PrimaryButton
+              variant="secondary"
+              size="sm"
+              className="mt-4 bg-white text-primary hover:bg-white/90"
+              onClick={() => navigate("/pro/withdraw")}
+              disabled={(earnings?.availableBalance || 0) <= 0}
+            >
+              <ArrowDownToLine className="w-4 h-4 mr-2" />
+              Solicitar saque
+            </PrimaryButton>
+          </motion.div>
 
         {/* Period Tabs */}
         <div className="flex bg-secondary rounded-lg p-1">
