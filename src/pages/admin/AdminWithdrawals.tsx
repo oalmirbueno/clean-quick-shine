@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowDownToLine, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { logAdminAction, type AuditAction } from "@/lib/auditLog";
 
 export default function AdminWithdrawals() {
   const navigate = useNavigate();
