@@ -157,7 +157,6 @@ export default function AdminNotifications() {
         .update({ read: true })
         .in("id", targets.map((t) => t.id));
       if (error) throw error;
-      // Audit (não bloqueia em caso de falha)
       await Promise.allSettled(
         targets.map((t) =>
           logAdminAction({
@@ -173,14 +172,22 @@ export default function AdminNotifications() {
     },
     onMutate: async (ids) => {
       await qc.cancelQueries({ queryKey: ["admin_notifications"] });
-      const prev = qc.getQueryData<Notif[]>(["admin_notifications"]);
-      qc.setQueryData<Notif[]>(["admin_notifications"], (old = []) =>
-        old.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n))
-      );
+      const prev = qc.getQueriesData<any>({ queryKey: ["admin_notifications"] });
+      // Atualiza otimisticamente todas as páginas em cache
+      qc.setQueriesData<any>({ queryKey: ["admin_notifications"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((p: any) => ({
+            ...p,
+            items: p.items.map((n: Notif) => (ids.includes(n.id) ? { ...n, read: true } : n)),
+          })),
+        };
+      });
       return { prev };
     },
     onError: (e: any, _v, ctx: any) => {
-      if (ctx?.prev) qc.setQueryData(["admin_notifications"], ctx.prev);
+      if (ctx?.prev) ctx.prev.forEach(([key, val]: any) => qc.setQueryData(key, val));
       toast.error(e.message || "Erro ao marcar como lida");
     },
     onSuccess: (res) => {
@@ -189,7 +196,10 @@ export default function AdminNotifications() {
       else toast.success(c === 1 ? "Notificação marcada como lida" : `${c} notificações marcadas como lidas`);
       setSelected(new Set());
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["admin_notifications"] }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["admin_notifications"] });
+      qc.invalidateQueries({ queryKey: ["admin_notifications_counts"] });
+    },
   });
 
   const toggle = (id: string) => {
