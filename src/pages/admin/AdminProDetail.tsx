@@ -21,7 +21,7 @@ export default function AdminProDetail() {
   const [notifyMsg, setNotifyMsg] = useState("");
 
   const { data: pro, isLoading } = useQuery({
-    queryKey: ["admin_pro_detail", id],
+    queryKey: adminKeys.proDetail(id),
     queryFn: async () => {
       const [{ data: profile }, { data: proProfile }, { data: metrics }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", id!).maybeSingle(),
