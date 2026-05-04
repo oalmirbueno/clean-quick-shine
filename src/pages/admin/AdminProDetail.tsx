@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { logAdminAction } from "@/lib/auditLog";
 
 export default function AdminProDetail() {
   const navigate = useNavigate();
