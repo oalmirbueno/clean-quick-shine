@@ -334,27 +334,36 @@ function SlideContent({ step, direction, isPro, onSwipeNext, onSwipePrev }: Slid
 
 /* ─────────── Hook ─────────── */
 
-export function useAppTutorial(variant: "client" | "pro") {
+export function useAppTutorial(variant: "client" | "pro", userId?: string | null) {
   const [showTutorial, setShowTutorial] = useState(false);
-  const storageKey = variant === "client" ? CLIENT_TUTORIAL_KEY : PRO_TUTORIAL_KEY;
+  const baseKey = variant === "client" ? CLIENT_TUTORIAL_KEY : PRO_TUTORIAL_KEY;
+  const storageKey = makeKey(baseKey, userId);
 
   useEffect(() => {
-    const completed = localStorage.getItem(storageKey) === "true";
-    if (!completed) {
-      const timer = setTimeout(() => setShowTutorial(true), 400);
-      return () => clearTimeout(timer);
+    // Per-user OR legacy device-wide flag both count as completed.
+    const completed =
+      localStorage.getItem(storageKey) === "true" ||
+      localStorage.getItem(baseKey) === "true";
+    if (completed) {
+      setShowTutorial(false);
+      return;
     }
-  }, [storageKey]);
+    const timer = setTimeout(() => setShowTutorial(true), 400);
+    return () => clearTimeout(timer);
+  }, [storageKey, baseKey]);
 
   const completeTutorial = useCallback(() => {
     localStorage.setItem(storageKey, "true");
+    localStorage.setItem(baseKey, "true");
     setShowTutorial(false);
-  }, [storageKey]);
+  }, [storageKey, baseKey]);
 
   const resetTutorial = useCallback(() => {
     localStorage.removeItem(storageKey);
+    localStorage.removeItem(baseKey);
     setShowTutorial(true);
-  }, [storageKey]);
+  }, [storageKey, baseKey]);
 
   return { showTutorial, completeTutorial, resetTutorial };
 }
+
