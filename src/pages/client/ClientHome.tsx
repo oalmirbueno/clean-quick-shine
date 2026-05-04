@@ -40,7 +40,7 @@ const item: Variants = {
 export default function ClientHome() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { showTutorial, completeTutorial } = useAppTutorial("client");
+  const { showTutorial, completeTutorial } = useAppTutorial("client", user?.id);
   const { data: services } = useServices();
 
   const { data: profile } = useQuery({
