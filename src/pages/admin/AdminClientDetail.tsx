@@ -4,10 +4,11 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { ChevronLeft, Phone, Mail, Calendar, Ban, ShieldCheck, MessageSquareWarning, ShoppingBag } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
 
 export default function AdminClientDetail() {
   const navigate = useNavigate();
