@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info } from "lucide-react";
+import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info, CheckCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
+import { logAdminAction } from "@/lib/auditLog";
 
 type Notif = {
   id: string;
@@ -28,9 +30,11 @@ const typeIcon = (t: string) => {
 };
 
 export default function AdminNotifications() {
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "sent">("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const { data: notifications = [], isLoading } = useQuery<Notif[]>({
     queryKey: ["admin_notifications"],
@@ -80,6 +84,78 @@ export default function AdminNotifications() {
     pending: notifications.filter((n) => !n.read).length,
     sent: notifications.filter((n) => n.read).length,
   }), [notifications]);
+
+  const markRead = useMutation({
+    mutationFn: async (ids: string[]) => {
+      if (ids.length === 0) throw new Error("Nenhuma notificação selecionada");
+      const targets = notifications.filter((n) => ids.includes(n.id) && !n.read);
+      if (targets.length === 0) return { count: 0 };
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .in("id", targets.map((t) => t.id));
+      if (error) throw error;
+      // Audit (não bloqueia em caso de falha)
+      await Promise.allSettled(
+        targets.map((t) =>
+          logAdminAction({
+            action: "notification_marked_read",
+            targetType: "notification",
+            targetId: t.id,
+            targetName: t.title,
+            metadata: { recipient_user_id: t.user_id, bulk: targets.length > 1 },
+          })
+        )
+      );
+      return { count: targets.length };
+    },
+    onMutate: async (ids) => {
+      await qc.cancelQueries({ queryKey: ["admin_notifications"] });
+      const prev = qc.getQueryData<Notif[]>(["admin_notifications"]);
+      qc.setQueryData<Notif[]>(["admin_notifications"], (old = []) =>
+        old.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n))
+      );
+      return { prev };
+    },
+    onError: (e: any, _v, ctx: any) => {
+      if (ctx?.prev) qc.setQueryData(["admin_notifications"], ctx.prev);
+      toast.error(e.message || "Erro ao marcar como lida");
+    },
+    onSuccess: (res) => {
+      const c = (res as any)?.count ?? 0;
+      if (c === 0) toast.info("Nenhuma notificação pendente na seleção");
+      else toast.success(c === 1 ? "Notificação marcada como lida" : `${c} notificações marcadas como lidas`);
+      setSelected(new Set());
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["admin_notifications"] }),
+  });
+
+  const toggle = (id: string) => {
+    setSelected((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  };
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every((n) => selected.has(n.id));
+  const toggleAll = () => {
+    setSelected((s) => {
+      if (allFilteredSelected) {
+        const n = new Set(s);
+        filtered.forEach((f) => n.delete(f.id));
+        return n;
+      }
+      const n = new Set(s);
+      filtered.forEach((f) => n.add(f.id));
+      return n;
+    });
+  };
+
+  const selectedPendingCount = useMemo(
+    () => notifications.filter((n) => selected.has(n.id) && !n.read).length,
+    [notifications, selected]
+  );
 
   return (
     <AdminLayout>
@@ -153,6 +229,43 @@ export default function AdminNotifications() {
           </div>
         </div>
 
+        {/* Bulk action bar */}
+        {filtered.length > 0 && (
+          <div className="flex items-center justify-between gap-3 p-3 rounded-2xl border border-border/60 bg-card shadow-sm">
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={allFilteredSelected}
+                onChange={toggleAll}
+                className="w-4 h-4 accent-primary"
+              />
+              <span className="text-muted-foreground">
+                {selected.size > 0 ? `${selected.size} selecionada(s)` : "Selecionar todas"}
+              </span>
+            </label>
+            <div className="flex items-center gap-2">
+              {counts.pending > 0 && (
+                <button
+                  onClick={() => markRead.mutate(notifications.filter((n) => !n.read).map((n) => n.id))}
+                  disabled={markRead.isPending}
+                  className="text-xs font-medium px-3 py-1.5 rounded-full border border-border/60 hover:bg-muted transition-colors disabled:opacity-50"
+                >
+                  Marcar todas como lidas
+                </button>
+              )}
+              <button
+                onClick={() => markRead.mutate(Array.from(selected))}
+                disabled={markRead.isPending || selectedPendingCount === 0}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <CheckCheck className="w-3.5 h-3.5" />
+                Marcar selecionadas como lidas
+                {selectedPendingCount > 0 && ` (${selectedPendingCount})`}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* List */}
         {isLoading ? (
           <div className="space-y-2">
@@ -172,9 +285,17 @@ export default function AdminNotifications() {
                 key={n.id}
                 className={cn(
                   "flex items-start gap-3 p-4 rounded-2xl border border-border/60 bg-card shadow-sm transition-colors",
-                  !n.read && "border-primary/30 bg-primary/[0.02]"
+                  !n.read && "border-primary/30 bg-primary/[0.02]",
+                  selected.has(n.id) && "ring-2 ring-primary/30"
                 )}
               >
+                <input
+                  type="checkbox"
+                  checked={selected.has(n.id)}
+                  onChange={() => toggle(n.id)}
+                  className="mt-1.5 w-4 h-4 accent-primary shrink-0"
+                  aria-label="Selecionar notificação"
+                />
                 <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
                   {typeIcon(n.type)}
                 </div>
@@ -197,6 +318,15 @@ export default function AdminNotifications() {
                     <span>{formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}</span>
                   </div>
                 </div>
+                {!n.read && (
+                  <button
+                    onClick={() => markRead.mutate([n.id])}
+                    disabled={markRead.isPending}
+                    className="self-center text-[11px] font-medium px-2.5 py-1 rounded-full border border-border/60 hover:bg-muted transition-colors disabled:opacity-50 shrink-0"
+                  >
+                    Marcar lida
+                  </button>
+                )}
               </div>
             ))}
           </div>
