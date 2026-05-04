@@ -108,47 +108,11 @@ export function AdminSidebar() {
     </>
   );
 
+  // Hide on mobile (mobile uses AdminBottomNav). Sidebar is desktop-only now.
+  void isOpen; void setIsOpen;
   return (
-    <>
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background border-b border-border z-40 flex items-center px-4"
-        style={{ paddingTop: 'env(safe-area-inset-top, 12px)', height: 'calc(4rem + env(safe-area-inset-top, 12px))' }}>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="p-2 rounded-xl hover:bg-muted transition-colors"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-        <Logo size="md" className="ml-3" />
-      </div>
-
-      {/* Mobile Sidebar Overlay */}
-      {isOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Mobile Sidebar */}
-      <div className={cn(
-        "lg:hidden fixed top-0 left-0 bottom-0 w-64 bg-background border-r border-border z-50",
-        "flex flex-col transition-transform duration-300",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        <button
-          onClick={() => setIsOpen(false)}
-          className="absolute top-4 right-4 p-2 rounded-xl hover:bg-muted transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-        <NavContent />
-      </div>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-background border-r border-border">
-        <NavContent />
-      </div>
-    </>
+    <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-background border-r border-border">
+      <NavContent />
+    </div>
   );
 }
