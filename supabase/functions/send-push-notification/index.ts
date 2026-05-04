@@ -59,6 +59,7 @@ serve(async (req) => {
       typeof body.message === "string" ? body.message.slice(0, 1000) : "";
     const type = typeof body.type === "string" ? body.type.slice(0, 50) : "general";
     const data = body.data ?? null;
+    const skipDbInsert = body.skipDbInsert === true;
 
     if (!userId || !title) {
       return new Response(
@@ -97,14 +98,16 @@ serve(async (req) => {
     }
 
     // ---- 1. Save in-app notification ----
-    await supabaseAdmin.from("notifications").insert({
-      user_id: userId,
-      title,
-      message,
-      type,
-      read: false,
-      data,
-    });
+    if (!skipDbInsert) {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: userId,
+        title,
+        message,
+        type,
+        read: false,
+        data,
+      });
+    }
 
     // ---- 2. Get push subscriptions ----
     const { data: subscriptions } = await supabaseAdmin
