@@ -44,7 +44,7 @@ export default function AdminProDetail() {
   });
 
   const { data: proOrders = [] } = useQuery({
-    queryKey: ["admin_pro_orders", id],
+    queryKey: adminKeys.proOrders(id),
     queryFn: async () => {
       const { data } = await supabase.from("orders").select("*, services(name)").eq("pro_id", id!).order("created_at", { ascending: false }).limit(8);
       return data || [];
