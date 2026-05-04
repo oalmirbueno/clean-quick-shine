@@ -98,14 +98,16 @@ serve(async (req) => {
     }
 
     // ---- 1. Save in-app notification ----
-    await supabaseAdmin.from("notifications").insert({
-      user_id: userId,
-      title,
-      message,
-      type,
-      read: false,
-      data,
-    });
+    if (!skipDbInsert) {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: userId,
+        title,
+        message,
+        type,
+        read: false,
+        data,
+      });
+    }
 
     // ---- 2. Get push subscriptions ----
     const { data: subscriptions } = await supabaseAdmin
