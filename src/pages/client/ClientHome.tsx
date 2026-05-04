@@ -225,7 +225,7 @@ export default function ClientHome() {
             </motion.div>
 
             {/* Ações rápidas - 2 atalhos largos */}
-            <motion.div variants={item} className="grid grid-cols-2 gap-3">
+            <motion.div variants={item} className="grid grid-cols-2 gap-3 shrink-0">
               <button
                 onClick={() => navigate("/client/orders")}
                 className="flex items-center gap-3 p-4 rounded-2xl border border-border/60 bg-card text-left shadow-sm hover:border-primary/40 transition-colors"
