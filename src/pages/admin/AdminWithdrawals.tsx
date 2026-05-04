@@ -66,16 +66,16 @@ export default function AdminWithdrawals() {
       );
     },
     onMutate: async (action) => {
-      await qc.cancelQueries({ queryKey: ["admin_withdrawals_list"] });
-      const prev = qc.getQueryData<any[]>(["admin_withdrawals_list"]);
+      await qc.cancelQueries({ queryKey: adminKeys.withdrawalsList() });
+      const prev = qc.getQueryData<any[]>(adminKeys.withdrawalsList());
       const newStatus = action === "approve" ? "processing" : action === "reject" ? "rejected" : "completed";
-      qc.setQueryData<any[]>(["admin_withdrawals_list"], (old = []) =>
+      qc.setQueryData<any[]>(adminKeys.withdrawalsList(), (old = []) =>
         old.map((w) => (selected.has(w.id) ? { ...w, status: newStatus, processed_at: newStatus === "completed" ? new Date().toISOString() : w.processed_at } : w))
       );
       return { prev };
     },
     onError: (e: any, _action, ctx: any) => {
-      if (ctx?.prev) qc.setQueryData(["admin_withdrawals_list"], ctx.prev);
+      if (ctx?.prev) qc.setQueryData(adminKeys.withdrawalsList(), ctx.prev);
       toast.error(e.message);
       setBulkConfirm(null);
     },
@@ -85,11 +85,7 @@ export default function AdminWithdrawals() {
       setSelected(new Set());
       setBulkConfirm(null);
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["admin_withdrawals_list"] });
-      qc.invalidateQueries({ queryKey: ["admin_withdrawals"] });
-      qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
-    },
+    onSettled: () => invalidateWithdrawals(),
   });
 
   return (
