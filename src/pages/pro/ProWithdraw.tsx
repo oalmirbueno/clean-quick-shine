@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { InputField } from "@/components/ui/InputField";
-import { ChevronLeft, Wallet, ArrowDownToLine, Clock, Loader2, CheckCircle2, XCircle, Smartphone, Mail, CreditCard, Key, ShieldAlert, HelpCircle } from "lucide-react";
+import { Wallet, ArrowDownToLine, Clock, Loader2, CheckCircle2, XCircle, Smartphone, Mail, CreditCard, Key, ShieldAlert, HelpCircle } from "lucide-react";
 import { useProBalance, useProWithdrawals } from "@/hooks/useWithdrawals";
 import { useWithdrawRequest } from "@/hooks/useWithdrawRequest";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 type PixKeyType = "cpf" | "email" | "phone" | "random";
 
@@ -23,7 +26,6 @@ const pixKeyOptions: { type: PixKeyType; label: string; icon: React.ReactNode; p
 const fmt = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
 
 export default function ProWithdraw() {
-  const navigate = useNavigate();
   const { data: balance, isLoading: balanceLoading } = useProBalance();
   const { data: withdrawals = [], isLoading: withdrawalsLoading } = useProWithdrawals();
   const withdrawRequest = useWithdrawRequest();
@@ -111,259 +113,230 @@ export default function ProWithdraw() {
 
   if (isLoading) {
     return (
-      <div className="h-full bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="h-full bg-background flex flex-col safe-top">
+        <ProPageHeader title="Solicitar saque" />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-7 h-7 animate-spin text-primary" />
+        </div>
+        <BottomNav variant="pro" />
       </div>
     );
   }
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      {/* Header */}
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-foreground" />
-          </button>
-          <h1 className="text-lg font-semibold text-foreground">Solicitar Saque</h1>
-        </div>
-      </header>
+      <ProPageHeader title="Solicitar saque" subtitle="Transfira para sua chave Pix" />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
-        {/* Balance Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-5 bg-primary rounded-xl text-primary-foreground"
-        >
-          <div className="flex items-center gap-3 mb-1">
-            <Wallet className="w-6 h-6" />
-            <span className="text-sm font-medium opacity-90">Disponível para saque</span>
-          </div>
-          <p className="text-3xl font-bold">
-            {fmt(availableBalance)}
-          </p>
-          <p className="text-xs opacity-70 mt-1">
-            Valor já liberado após avaliação do cliente
-          </p>
-        </motion.div>
-
-        {/* Balance Breakdown */}
-        {(pendingBalance > 0 || blockedBalance > 0 || pendingWithdrawal > 0) && (
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <motion.div variants={container} initial="hidden" animate="show" className="px-5 pb-6 space-y-4">
+          {/* Hero Saldo */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="bg-card rounded-xl border border-border p-4 card-shadow space-y-3"
+            variants={item}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-5 shadow-sm"
           >
-            <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-muted-foreground" />
-              Detalhes do saldo
-            </h3>
-
-            {pendingBalance > 0 && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-warning" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Aguardando avaliação</p>
-                    <p className="text-xs text-muted-foreground">Cliente ainda não avaliou</p>
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-warning">{fmt(pendingBalance)}</span>
-              </div>
-            )}
-
-            {blockedBalance > 0 && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-destructive" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Em análise</p>
-                    <p className="text-xs text-muted-foreground">Bloqueado até resolução</p>
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-destructive">{fmt(blockedBalance)}</span>
-              </div>
-            )}
-
-            {pendingWithdrawal > 0 && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Saque em andamento</p>
-                    <p className="text-xs text-muted-foreground">Transferência Pix em processamento</p>
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-primary">{fmt(pendingWithdrawal)}</span>
-              </div>
-            )}
+            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute right-4 top-4 opacity-20">
+              <Wallet className="w-20 h-20" />
+            </div>
+            <p className="text-xs uppercase tracking-wider opacity-80 font-medium">Disponível para saque</p>
+            <p className="text-[34px] font-bold leading-none mt-1.5">{fmt(availableBalance)}</p>
+            <p className="text-xs opacity-80 mt-2">Liberado após avaliação do cliente</p>
           </motion.div>
-        )}
 
-        {/* Withdraw Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-card rounded-xl border border-border p-4 card-shadow space-y-4"
-        >
-          <h3 className="font-semibold text-foreground">Valor do saque</h3>
+          {/* Balance Breakdown */}
+          {(pendingBalance > 0 || blockedBalance > 0 || pendingWithdrawal > 0) && (
+            <motion.div
+              variants={item}
+              className="bg-card rounded-2xl border border-border/60 p-4 shadow-sm space-y-3"
+            >
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                Detalhes do saldo
+              </h3>
 
-          <InputField
-            label="Valor (R$)"
-            type="number"
-            placeholder="0,00"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
+              {pendingBalance > 0 && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-warning" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Aguardando avaliação</p>
+                      <p className="text-xs text-muted-foreground">Cliente ainda não avaliou</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold text-warning">{fmt(pendingBalance)}</span>
+                </div>
+              )}
 
-          {numAmount > 0 && numAmount < 10 && (
-            <p className="text-xs text-destructive">Valor mínimo: R$ 10,00</p>
+              {blockedBalance > 0 && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-destructive" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Em análise</p>
+                      <p className="text-xs text-muted-foreground">Bloqueado até resolução</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold text-destructive">{fmt(blockedBalance)}</span>
+                </div>
+              )}
+
+              {pendingWithdrawal > 0 && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Saque em andamento</p>
+                      <p className="text-xs text-muted-foreground">Transferência em processamento</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold text-primary">{fmt(pendingWithdrawal)}</span>
+                </div>
+              )}
+            </motion.div>
           )}
-          {numAmount > availableBalance && (
-            <p className="text-xs text-destructive">Valor maior que o saldo disponível ({fmt(availableBalance)})</p>
-          )}
 
-          <div className="flex gap-2">
-            {[50, 100, 200].map((value) => (
+          {/* Withdraw Form */}
+          <motion.div
+            variants={item}
+            className="bg-card rounded-2xl border border-border/60 p-4 shadow-sm space-y-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground">Valor do saque</h3>
+
+            <InputField
+              label="Valor (R$)"
+              type="number"
+              placeholder="0,00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+
+            {numAmount > 0 && numAmount < 10 && (
+              <p className="text-xs text-destructive">Valor mínimo: R$ 10,00</p>
+            )}
+            {numAmount > availableBalance && (
+              <p className="text-xs text-destructive">Valor maior que o saldo disponível ({fmt(availableBalance)})</p>
+            )}
+
+            <div className="flex gap-2">
+              {[50, 100, 200].map((value) => (
+                <button
+                  key={value}
+                  onClick={() => setAmount(String(Math.min(value, availableBalance)))}
+                  disabled={availableBalance < 10}
+                  className={cn(
+                    "flex-1 py-2 text-xs font-semibold rounded-xl border transition-colors",
+                    availableBalance >= value
+                      ? "border-primary/40 text-primary hover:bg-primary/10"
+                      : "border-border text-muted-foreground cursor-not-allowed"
+                  )}
+                >
+                  R$ {value}
+                </button>
+              ))}
               <button
-                key={value}
-                onClick={() => setAmount(String(Math.min(value, availableBalance)))}
+                onClick={() => setAmount(String(availableBalance))}
                 disabled={availableBalance < 10}
                 className={cn(
-                  "flex-1 py-2 text-sm font-medium rounded-lg border transition-colors",
-                  availableBalance >= value
-                    ? "border-primary text-primary hover:bg-primary/10"
-                    : "border-muted text-muted-foreground cursor-not-allowed"
+                  "flex-1 py-2 text-xs font-semibold rounded-xl border transition-colors",
+                  availableBalance >= 10
+                    ? "border-primary/40 text-primary hover:bg-primary/10"
+                    : "border-border text-muted-foreground cursor-not-allowed"
                 )}
               >
-                R$ {value}
+                Tudo
               </button>
-            ))}
-            <button
-              onClick={() => setAmount(String(availableBalance))}
-              disabled={availableBalance < 10}
-              className={cn(
-                "flex-1 py-2 text-sm font-medium rounded-lg border transition-colors",
-                availableBalance >= 10
-                  ? "border-primary text-primary hover:bg-primary/10"
-                  : "border-muted text-muted-foreground cursor-not-allowed"
-              )}
-            >
-              Tudo
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Pix Key */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-card rounded-xl border border-border p-4 card-shadow space-y-4"
-        >
-          <h3 className="font-semibold text-foreground">Chave Pix</h3>
-
-          <div className="grid grid-cols-4 gap-2">
-            {pixKeyOptions.map((option) => (
-              <button
-                key={option.type}
-                onClick={() => {
-                  setPixKeyType(option.type);
-                  setPixKey("");
-                }}
-                className={cn(
-                  "flex flex-col items-center gap-1 p-3 rounded-xl border text-xs font-medium transition-colors",
-                  pixKeyType === option.type
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:bg-muted/50"
-                )}
-              >
-                {option.icon}
-                {option.label}
-              </button>
-            ))}
-          </div>
-
-          <InputField
-            label="Sua chave Pix"
-            placeholder={currentPlaceholder}
-            value={pixKey}
-            onChange={(e) => setPixKey(e.target.value)}
-          />
-        </motion.div>
-
-        {/* Submit */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <PrimaryButton
-            fullWidth
-            loading={withdrawRequest.isPending}
-            onClick={handleWithdraw}
-            disabled={!isValid}
-          >
-            <ArrowDownToLine className="w-4 h-4 mr-2" />
-            Solicitar saque de {numAmount >= 10 ? fmt(numAmount) : "..."}
-          </PrimaryButton>
-
-          <p className="text-xs text-center text-muted-foreground mt-3">
-            Transferência Pix processada em até 24 horas úteis.
-          </p>
-        </motion.div>
-
-        {/* Withdrawals History */}
-        {withdrawals.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-card rounded-xl border border-border p-4 card-shadow"
-          >
-            <h3 className="font-semibold text-foreground mb-4">Histórico de saques</h3>
-
-            <div className="space-y-3">
-              {withdrawals.map((withdrawal) => (
-                <div
-                  key={withdrawal.id}
-                  className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                      {getStatusIcon(withdrawal.status)}
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {fmt(Number(withdrawal.amount))}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(withdrawal.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={cn(
-                      "text-sm font-medium",
-                      getStatusColor(withdrawal.status)
-                    )}
-                  >
-                    {getStatusLabel(withdrawal.status)}
-                  </span>
-                </div>
-              ))}
             </div>
           </motion.div>
-        )}
 
-        {/* Spacer for bottom nav */}
-        <div className="h-4" />
+          {/* Pix Key */}
+          <motion.div
+            variants={item}
+            className="bg-card rounded-2xl border border-border/60 p-4 shadow-sm space-y-4"
+          >
+            <h3 className="text-sm font-semibold text-foreground">Chave Pix</h3>
+
+            <div className="grid grid-cols-4 gap-2">
+              {pixKeyOptions.map((option) => (
+                <button
+                  key={option.type}
+                  onClick={() => {
+                    setPixKeyType(option.type);
+                    setPixKey("");
+                  }}
+                  className={cn(
+                    "flex flex-col items-center gap-1 p-3 rounded-xl border text-[11px] font-medium transition-colors",
+                    pixKeyType === option.type
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border/60 text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {option.icon}
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <InputField
+              label="Sua chave Pix"
+              placeholder={currentPlaceholder}
+              value={pixKey}
+              onChange={(e) => setPixKey(e.target.value)}
+            />
+          </motion.div>
+
+          {/* Submit */}
+          <motion.div variants={item}>
+            <PrimaryButton
+              fullWidth
+              loading={withdrawRequest.isPending}
+              onClick={handleWithdraw}
+              disabled={!isValid}
+            >
+              <ArrowDownToLine className="w-4 h-4 mr-2" />
+              Solicitar saque de {numAmount >= 10 ? fmt(numAmount) : "..."}
+            </PrimaryButton>
+
+            <p className="text-xs text-center text-muted-foreground mt-3">
+              Transferência Pix processada em até 24 horas úteis.
+            </p>
+          </motion.div>
+
+          {/* Withdrawals History */}
+          {withdrawals.length > 0 && (
+            <motion.div
+              variants={item}
+              className="bg-card rounded-2xl border border-border/60 p-4 shadow-sm"
+            >
+              <h3 className="text-sm font-semibold text-foreground mb-3">Histórico de saques</h3>
+
+              <div className="space-y-2">
+                {withdrawals.map((withdrawal) => (
+                  <div
+                    key={withdrawal.id}
+                    className="flex items-center justify-between p-3 bg-muted/40 rounded-xl"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-card flex items-center justify-center shrink-0">
+                        {getStatusIcon(withdrawal.status)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground">
+                          {fmt(Number(withdrawal.amount))}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(withdrawal.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={cn("text-xs font-semibold shrink-0", getStatusColor(withdrawal.status))}>
+                      {getStatusLabel(withdrawal.status)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
       </main>
 
       <BottomNav variant="pro" />

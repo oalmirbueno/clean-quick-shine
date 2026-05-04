@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  ChevronLeft, 
+import {
   ChevronRight,
-  Settings,
   Bell,
   BellOff,
   Moon,
   Sun,
   Trash2,
-  Download,
   Smartphone,
   Globe,
-  Shield,
   HelpCircle,
   LogOut,
   Database,
@@ -27,6 +23,10 @@ import {
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/ui/Logo";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 interface SettingItemProps {
   icon: React.ReactNode;
@@ -133,32 +133,15 @@ export default function AppSettings() {
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex-shrink-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
-      >
-        <div className="flex items-center gap-4 p-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold">Configurações</h1>
-          </div>
-        </div>
-      </motion.header>
+      <ProPageHeader title="Configurações" subtitle="Personalize sua experiência" />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-6 pb-8 safe-bottom">
-        {/* App Info */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border"
-        >
+      <main className="flex-1 overflow-y-auto min-h-0 px-5 pb-8 safe-bottom">
+        <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
+          {/* App Info */}
+          <motion.section
+            variants={item}
+            className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/60 shadow-sm"
+          >
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Logo size="sm" iconOnly />
           </div>
@@ -175,9 +158,9 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Appearance */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Aparência</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm">
             <SettingItem
               icon={theme === "dark" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               label="Tema escuro"
@@ -188,9 +171,9 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Notifications */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Notificações</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm">
             <SettingItem
               icon={notifications ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
               label="Notificações push"
@@ -201,9 +184,9 @@ export default function AppSettings() {
         </motion.section>
 
         {/* App & Data */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">App e Dados</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm divide-y divide-border">
             <SettingItem
               icon={<Database className="w-5 h-5" />}
               label="Dados em cache"
@@ -232,9 +215,9 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Support */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Suporte</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm divide-y divide-border">
             <SettingItem
               icon={<HelpCircle className="w-5 h-5" />}
               label="Central de ajuda"
@@ -251,9 +234,9 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Legal */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Legal</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm divide-y divide-border">
             <SettingItem
               icon={<FileText className="w-5 h-5" />}
               label="Termos de uso"
@@ -277,9 +260,9 @@ export default function AppSettings() {
 
         {/* Account */}
         {user && (
-          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <motion.section variants={item}>
             <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Conta</h3>
-            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm">
               <SettingItem
                 icon={<LogOut className="w-5 h-5" />}
                 label="Sair da conta"
@@ -292,8 +275,9 @@ export default function AppSettings() {
         )}
 
         {/* Footer */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="text-center pt-4">
+        <motion.div variants={item} className="text-center pt-4">
           <p className="text-xs text-muted-foreground">Já Limpo © 2025. Todos os direitos reservados.</p>
+        </motion.div>
         </motion.div>
       </main>
     </div>

@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { InputField } from "@/components/ui/InputField";
 import { TicketCard } from "@/components/ui/TicketCard";
-import { ChevronLeft, Plus, X } from "lucide-react";
+import { Plus, X, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProSupport() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [showNewTicket, setShowNewTicket] = useState(false);
@@ -44,29 +44,53 @@ export default function ProSupport() {
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"><ChevronLeft className="w-6 h-6 text-foreground" /></button>
-            <h1 className="text-lg font-semibold text-foreground">Suporte</h1>
-          </div>
-          <button onClick={() => setShowNewTicket(true)} className="p-2 rounded-lg bg-primary text-primary-foreground"><Plus className="w-5 h-5" /></button>
-        </div>
-      </header>
+      <ProPageHeader
+        title="Suporte"
+        subtitle="Tire dúvidas e abra chamados"
+        rightAction={
+          <button
+            onClick={() => setShowNewTicket(true)}
+            className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold flex items-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" />
+            Novo
+          </button>
+        }
+      />
 
-      <main className="flex-1 overflow-y-auto p-4 animate-fade-in">
-        {tickets.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Você não tem tickets abertos</p>
-            <PrimaryButton onClick={() => setShowNewTicket(true)}>Abrir novo ticket</PrimaryButton>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {tickets.map((ticket: any) => (
-              <TicketCard key={ticket.id} id={ticket.id} subject={ticket.subject} createdBy="Você" status={ticket.status} priority={ticket.priority || "medium"} createdAt={new Date(ticket.created_at).toLocaleDateString("pt-BR")} lastMessage={ticket.description} orderId={ticket.order_id} />
-            ))}
-          </div>
-        )}
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="px-5 pb-6"
+        >
+          {tickets.length === 0 ? (
+            <div className="text-center py-12 bg-card rounded-2xl border border-border/60 shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
+                <MessageCircle className="w-5 h-5 text-primary" />
+              </div>
+              <p className="text-sm text-foreground font-medium mb-1">Nenhum ticket aberto</p>
+              <p className="text-xs text-muted-foreground mb-4">Estamos aqui para ajudar quando precisar</p>
+              <PrimaryButton onClick={() => setShowNewTicket(true)}>Abrir novo ticket</PrimaryButton>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {tickets.map((ticket: any) => (
+                <TicketCard
+                  key={ticket.id}
+                  id={ticket.id}
+                  subject={ticket.subject}
+                  createdBy="Você"
+                  status={ticket.status}
+                  priority={ticket.priority || "medium"}
+                  createdAt={new Date(ticket.created_at).toLocaleDateString("pt-BR")}
+                  lastMessage={ticket.description}
+                  orderId={ticket.order_id}
+                />
+              ))}
+            </div>
+          )}
+        </motion.div>
       </main>
 
       {showNewTicket && (
