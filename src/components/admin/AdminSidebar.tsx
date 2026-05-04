@@ -116,7 +116,7 @@ export function AdminSidebar() {
   // Hide on mobile (mobile uses AdminBottomNav). Sidebar is desktop-only now.
   void isOpen; void setIsOpen;
   return (
-    <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-background border-r border-border">
+    <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 liquid-glass-bar border-r">
       <NavContent />
     </div>
   );
