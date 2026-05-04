@@ -118,7 +118,7 @@ export default function AdminProDetail() {
       setConfirm(null); setRejectReason("");
     },
     onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
-    onSettled: invalidatePro,
+    onSettled: (_d, _e, _v, ctx: any) => settledPro(ctx),
   });
 
   const suspend = useMutation({
@@ -131,7 +131,7 @@ export default function AdminProDetail() {
     onMutate: () => optimisticPro({ status: "suspended", available_now: false }),
     onSuccess: () => { toast.warning("Suspensa"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
-    onSettled: invalidatePro,
+    onSettled: (_d, _e, _v, ctx: any) => settledPro(ctx),
   });
 
   const reactivate = useMutation({
@@ -144,7 +144,7 @@ export default function AdminProDetail() {
     onMutate: () => optimisticPro({ status: "active" }),
     onSuccess: () => { toast.success("Reativada"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
-    onSettled: invalidatePro,
+    onSettled: (_d, _e, _v, ctx: any) => settledPro(ctx),
   });
 
   const sendNotify = useMutation({
