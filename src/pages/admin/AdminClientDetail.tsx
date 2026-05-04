@@ -116,7 +116,7 @@ export default function AdminClientDetail() {
     onMutate: () => optimisticBlock(false),
     onSuccess: () => { toast.success("Cliente desbloqueado e notificado"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollback(ctx); toast.error(e.message || "Erro"); },
-    onSettled: settledClient,
+    onSettled: (_d, _e, _v, ctx: any) => settledClient(ctx),
   });
 
   const sendNotify = useMutation({
