@@ -26,7 +26,6 @@ const pixKeyOptions: { type: PixKeyType; label: string; icon: React.ReactNode; p
 const fmt = (v: number) => `R$ ${v.toFixed(2).replace(".", ",")}`;
 
 export default function ProWithdraw() {
-  const navigate = useNavigate();
   const { data: balance, isLoading: balanceLoading } = useProBalance();
   const { data: withdrawals = [], isLoading: withdrawalsLoading } = useProWithdrawals();
   const withdrawRequest = useWithdrawRequest();
