@@ -20,6 +20,15 @@ type Notif = {
   created_at: string;
   data?: any;
   recipientName?: string;
+  recipientEmail?: string;
+};
+
+const extractOrderId = (n: { data?: any; message?: string }): string => {
+  const d = n.data || {};
+  const fromData = d.order_id || d.orderId || d.order?.id || d.orderID;
+  if (fromData) return String(fromData);
+  const m = (n.message || "").match(/#([a-f0-9-]{6,})/i);
+  return m ? m[1] : "";
 };
 
 const typeIcon = (t: string) => {
@@ -260,19 +269,27 @@ export default function AdminNotifications() {
     }
     const userIds = Array.from(new Set(all.map((n) => n.user_id)));
     let nameMap = new Map<string, string>();
+    let emailMap = new Map<string, string>();
     if (userIds.length) {
-      const { data: profiles } = await supabase
-        .from("profiles").select("user_id, full_name").in("user_id", userIds);
+      const [{ data: profiles }, { data: emails }] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name").in("user_id", userIds),
+        supabase.rpc("get_users_emails", { _user_ids: userIds }),
+      ]);
       nameMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
+      emailMap = new Map((emails || []).map((e: any) => [e.user_id, e.email]));
     }
-    let items: Notif[] = all.map((n) => ({ ...n, recipientName: nameMap.get(n.user_id) || "Usuário" }));
-    // Refina busca com nome do destinatário (igual ao client-side da listagem)
+    let items: Notif[] = all.map((n) => ({
+      ...n,
+      recipientName: nameMap.get(n.user_id) || "Usuário",
+      recipientEmail: emailMap.get(n.user_id) || "",
+    }));
     if (debouncedSearch) {
       const q = debouncedSearch.toLowerCase();
       items = items.filter((n) =>
         n.title.toLowerCase().includes(q) ||
         n.message.toLowerCase().includes(q) ||
-        (n.recipientName || "").toLowerCase().includes(q)
+        (n.recipientName || "").toLowerCase().includes(q) ||
+        (n.recipientEmail || "").toLowerCase().includes(q)
       );
     }
     return items;
@@ -288,7 +305,7 @@ export default function AdminNotifications() {
       setExporting("csv");
       const items = await fetchAllForExport();
       if (items.length === 0) { toast.info("Nenhuma notificação para exportar"); return; }
-      const headers = ["ID", "Data/Hora", "Status", "Tipo", "Destinatário", "ID do usuário", "Título", "Mensagem", "Payload"];
+      const headers = ["ID", "Data/Hora", "Status", "Tipo", "Destinatário", "Email", "ID do usuário", "Pedido", "Título", "Mensagem", "Payload"];
       const escape = (v: any) => {
         const s = v == null ? "" : String(v);
         return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -299,7 +316,9 @@ export default function AdminNotifications() {
         n.read ? "Lida" : "Pendente",
         n.type,
         n.recipientName || "",
+        n.recipientEmail || "",
         n.user_id,
+        extractOrderId(n),
         n.title,
         n.message,
         n.data ? JSON.stringify(n.data) : "",
@@ -351,13 +370,16 @@ export default function AdminNotifications() {
       doc.setTextColor(0);
 
       // Cabeçalho da tabela
+      const fixedW = 88 + 50 + 60 + 110 + 130 + 70 + 110;
       const cols = [
-        { label: "Data/Hora", w: 100 },
-        { label: "Status", w: 55 },
-        { label: "Tipo", w: 70 },
-        { label: "Destinatário", w: 130 },
-        { label: "Título", w: 160 },
-        { label: "Mensagem", w: pageW - margin * 2 - 100 - 55 - 70 - 130 - 160 },
+        { label: "Data/Hora", w: 88 },
+        { label: "Status", w: 50 },
+        { label: "Tipo", w: 60 },
+        { label: "Destinatário", w: 110 },
+        { label: "Email", w: 130 },
+        { label: "Pedido", w: 70 },
+        { label: "Título", w: 110 },
+        { label: "Mensagem", w: pageW - margin * 2 - fixedW },
       ];
       const drawHeader = () => {
         doc.setFillColor(240, 240, 240);
@@ -373,11 +395,14 @@ export default function AdminNotifications() {
 
       doc.setFontSize(8);
       items.forEach((n) => {
+        const orderId = extractOrderId(n);
         const cells = [
           format(new Date(n.created_at), "dd/MM/yy HH:mm"),
           n.read ? "Lida" : "Pendente",
           n.type || "",
           n.recipientName || "",
+          n.recipientEmail || "",
+          orderId ? `#${orderId.slice(0, 8)}` : "",
           n.title || "",
           n.message || "",
         ];
