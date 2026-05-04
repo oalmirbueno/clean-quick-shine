@@ -131,7 +131,7 @@ export default function ProHome() {
 
   return (
     <>
-      {showTutorial && <AppTutorial variant="pro" onComplete={completeTutorial} />}
+      {showTutorial && <AppTutorial variant="pro" userId={user?.id} onComplete={completeTutorial} />}
 
       <div className="h-full bg-background flex flex-col safe-top">
         {/* ── Header ── */}
