@@ -174,13 +174,13 @@ export default function ClientHome() {
                       key={service.id}
                       whileTap={{ scale: 0.96 }}
                       onClick={() => navigate("/client/service")}
-                      className="relative flex items-center gap-3 p-3.5 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl hover:border-primary/40 hover:bg-card/80 transition-all text-left overflow-hidden"
+                      className="relative flex items-center gap-3 p-3.5 rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl hover:border-primary/40 hover:bg-card/90 transition-all text-left overflow-hidden"
                       style={{
                         boxShadow:
-                          "0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -16px hsl(var(--foreground) / 0.15)",
+                          "0 1px 0 hsl(var(--primary-foreground) / 0.08) inset, 0 10px 24px -18px hsl(var(--foreground) / 0.2)",
                       }}
                     >
-                      <div className="w-10 h-10 rounded-xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-2xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
                         <IconComp className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                       </div>
                       <span className="text-[12.5px] font-medium text-foreground leading-tight line-clamp-2 tracking-tight">
@@ -197,13 +197,13 @@ export default function ClientHome() {
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/client/orders")}
-                className="w-full p-4 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl flex items-center gap-3 text-left hover:bg-card/80 transition-colors"
+                className="w-full p-4 rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl flex items-center gap-3 text-left hover:bg-card/90 transition-colors"
                 style={{
                   boxShadow:
-                    "0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -16px hsl(var(--foreground) / 0.15)",
+                    "0 1px 0 hsl(var(--primary-foreground) / 0.08) inset, 0 10px 24px -18px hsl(var(--foreground) / 0.2)",
                 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
                   <CalendarClock className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
