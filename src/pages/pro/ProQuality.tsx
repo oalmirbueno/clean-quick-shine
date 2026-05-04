@@ -55,90 +55,87 @@ export default function ProQuality() {
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 hover:bg-secondary rounded-lg">
-            <ChevronRight className="w-5 h-5 rotate-180" />
-          </button>
-          <h1 className="text-lg font-semibold">Qualidade e SLA</h1>
-        </div>
-      </header>
+      <ProPageHeader title="Qualidade e SLA" subtitle="Suas métricas de desempenho" />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-6 animate-fade-in">
-        <QualityCard
-          level={displayMetrics.qualityLevel as "A" | "B" | "C" | "D"}
-          metrics={{
-            onTimeRate: displayMetrics.onTimeRate,
-            cancelRate: displayMetrics.cancelRate,
-            responseTimeAvg: displayMetrics.responseTimeAvg,
-          }}
-        />
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <motion.div variants={container} initial="hidden" animate="show" className="px-5 pb-6 space-y-4">
+          <motion.div variants={item}>
+            <QualityCard
+              level={displayMetrics.qualityLevel as "A" | "B" | "C" | "D"}
+              metrics={{
+                onTimeRate: displayMetrics.onTimeRate,
+                cancelRate: displayMetrics.cancelRate,
+                responseTimeAvg: displayMetrics.responseTimeAvg,
+              }}
+            />
+          </motion.div>
 
-        <section>
-          <h3 className="font-semibold text-foreground mb-3">Metas para subir de nível</h3>
-          <div className="space-y-3">
-            {tips.map((tip, i) => (
-              <div
-                key={i}
-                className={`p-4 rounded-xl border flex items-center gap-3 ${
-                  tip.met ? "bg-success/5 border-success/20" : "bg-card border-border"
-                }`}
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  tip.met ? "bg-success/10" : "bg-secondary"
-                }`}>
-                  <tip.icon className={`w-5 h-5 ${tip.met ? "text-success" : "text-muted-foreground"}`} />
+          <motion.section variants={item}>
+            <h3 className="text-sm font-bold text-foreground mb-2.5">Metas para subir de nível</h3>
+            <div className="space-y-2">
+              {tips.map((tip, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "p-4 rounded-2xl border flex items-center gap-3 shadow-sm",
+                    tip.met ? "bg-success/5 border-success/25" : "bg-card border-border/60"
+                  )}
+                >
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                    tip.met ? "bg-success/15" : "bg-muted"
+                  )}>
+                    <tip.icon className={cn("w-4.5 h-4.5", tip.met ? "text-success" : "text-muted-foreground")} />
+                  </div>
+                  <p className={cn("text-sm", tip.met ? "text-success font-medium" : "text-muted-foreground")}>
+                    {tip.met && "✓ "}{tip.text}
+                  </p>
                 </div>
-                <p className={`text-sm ${tip.met ? "text-success" : "text-muted-foreground"}`}>
-                  {tip.met && "✓ "}{tip.text}
+              ))}
+            </div>
+          </motion.section>
+
+          <motion.section variants={item} className="p-4 bg-accent rounded-2xl border border-border/60">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-1">Por que isso importa?</h4>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Profissionais com nível A recebem até 3x mais pedidos e têm prioridade no matching.
                 </p>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+          </motion.section>
 
-        <section className="p-4 bg-accent rounded-xl">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-primary mt-0.5" />
-            <div>
-              <h4 className="font-medium text-foreground mb-1">Por que isso importa?</h4>
-              <p className="text-sm text-muted-foreground">
-                Profissionais com nível A recebem até 3x mais pedidos e têm prioridade no matching.
-                Mantenha boas métricas para aumentar seus ganhos!
-              </p>
+          <motion.section variants={item}>
+            <h3 className="text-sm font-bold text-foreground mb-2.5">Histórico (últimos 30 dias)</h3>
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="p-4 bg-card rounded-2xl border border-border/60 text-center shadow-sm">
+                <p className="text-2xl font-bold text-foreground">{displayMetrics.last30dJobs}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mt-1">Serviços</p>
+              </div>
+              <div className="p-4 bg-card rounded-2xl border border-border/60 text-center shadow-sm">
+                <p className="text-2xl font-bold text-foreground">{displayMetrics.last7dCancels}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mt-1">Cancel. (7d)</p>
+              </div>
             </div>
-          </div>
-        </section>
+          </motion.section>
 
-        <section>
-          <h3 className="font-semibold text-foreground mb-3">Histórico (últimos 30 dias)</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-4 bg-card rounded-xl border border-border text-center">
-              <p className="text-3xl font-bold text-foreground">{displayMetrics.last30dJobs}</p>
-              <p className="text-sm text-muted-foreground">Serviços</p>
+          <motion.section variants={item}>
+            <div className="p-4 bg-card rounded-2xl border border-border/60 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-foreground">Taxa de aceitação</span>
+                <span className="text-base font-bold text-primary">{displayMetrics.acceptanceRate.toFixed(1)}%</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: `${Math.min(displayMetrics.acceptanceRate, 100)}%` }}
+                />
+              </div>
             </div>
-            <div className="p-4 bg-card rounded-xl border border-border text-center">
-              <p className="text-3xl font-bold text-foreground">{displayMetrics.last7dCancels}</p>
-              <p className="text-sm text-muted-foreground">Cancelamentos (7d)</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Acceptance Rate Card */}
-        <section>
-          <div className="p-4 bg-card rounded-xl border border-border">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-foreground">Taxa de aceitação</span>
-              <span className="text-lg font-bold text-primary">{displayMetrics.acceptanceRate.toFixed(1)}%</span>
-            </div>
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary rounded-full transition-all" 
-                style={{ width: `${Math.min(displayMetrics.acceptanceRate, 100)}%` }} 
-              />
-            </div>
-          </div>
-        </section>
+          </motion.section>
+        </motion.div>
       </main>
 
       <BottomNav variant="pro" />
