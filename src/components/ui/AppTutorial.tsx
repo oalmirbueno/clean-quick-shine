@@ -6,6 +6,7 @@ import { CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clientSteps, proSteps, type TutorialStep } from "./tutorial/steps";
 import { useViewportHeight } from "@/hooks/useViewportHeight";
+import { supabase } from "@/integrations/supabase/client";
 
 const CLIENT_TUTORIAL_KEY = "jalimpo_client_tutorial_completed";
 const PRO_TUTORIAL_KEY = "jalimpo_pro_tutorial_completed";
@@ -18,12 +19,48 @@ function makeKey(base: string, userId?: string | null) {
   return userId ? `${base}:${userId}` : base;
 }
 
+const profileColumn = (variant: "client" | "pro") =>
+  variant === "client" ? "tutorial_client_completed_at" : "tutorial_pro_completed_at";
+
+/** Marks tutorial as completed in the user profile (cross-device). */
+async function markTutorialCompletedRemote(
+  variant: "client" | "pro",
+  userId: string,
+) {
+  try {
+    await supabase
+      .from("profiles")
+      .update({ [profileColumn(variant)]: new Date().toISOString() } as any)
+      .eq("user_id", userId);
+  } catch (e) {
+    // Best-effort; local flag still keeps the user from seeing it again
+    console.warn("[tutorial] failed to sync completion to profile", e);
+  }
+}
+
+/** Clears tutorial completion remotely (used by "Refazer tutorial"). */
+async function clearTutorialCompletedRemote(
+  variant: "client" | "pro",
+  userId: string,
+) {
+  try {
+    await supabase
+      .from("profiles")
+      .update({ [profileColumn(variant)]: null } as any)
+      .eq("user_id", userId);
+  } catch (e) {
+    console.warn("[tutorial] failed to reset profile flag", e);
+  }
+}
+
 /** Public helpers so other screens can reset/check completion. */
 export function resetTutorialFor(variant: "client" | "pro", userId?: string | null) {
   const base = variant === "client" ? CLIENT_TUTORIAL_KEY : PRO_TUTORIAL_KEY;
   localStorage.removeItem(makeKey(base, userId));
   localStorage.removeItem(base); // legacy device-wide key
+  if (userId) void clearTutorialCompletedRemote(variant, userId);
 }
+
 
 
 interface AppTutorialProps {
