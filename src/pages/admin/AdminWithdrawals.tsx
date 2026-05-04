@@ -3,20 +3,21 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ArrowDownToLine, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
 
 export default function AdminWithdrawals() {
   const navigate = useNavigate();
-  const qc = useQueryClient();
+  const { qc, withdrawals: invalidateWithdrawals } = useAdminInvalidate();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkConfirm, setBulkConfirm] = useState<null | "approve" | "reject" | "complete">(null);
 
   const { data: withdrawals = [], isLoading } = useQuery({
-    queryKey: ["admin_withdrawals_list"],
+    queryKey: adminKeys.withdrawalsList(),
     queryFn: async () => {
       const { data, error } = await supabase.from("withdrawals").select("*").order("created_at", { ascending: false });
       if (error) throw error;
@@ -65,16 +66,16 @@ export default function AdminWithdrawals() {
       );
     },
     onMutate: async (action) => {
-      await qc.cancelQueries({ queryKey: ["admin_withdrawals_list"] });
-      const prev = qc.getQueryData<any[]>(["admin_withdrawals_list"]);
+      await qc.cancelQueries({ queryKey: adminKeys.withdrawalsList() });
+      const prev = qc.getQueryData<any[]>(adminKeys.withdrawalsList());
       const newStatus = action === "approve" ? "processing" : action === "reject" ? "rejected" : "completed";
-      qc.setQueryData<any[]>(["admin_withdrawals_list"], (old = []) =>
+      qc.setQueryData<any[]>(adminKeys.withdrawalsList(), (old = []) =>
         old.map((w) => (selected.has(w.id) ? { ...w, status: newStatus, processed_at: newStatus === "completed" ? new Date().toISOString() : w.processed_at } : w))
       );
       return { prev };
     },
     onError: (e: any, _action, ctx: any) => {
-      if (ctx?.prev) qc.setQueryData(["admin_withdrawals_list"], ctx.prev);
+      if (ctx?.prev) qc.setQueryData(adminKeys.withdrawalsList(), ctx.prev);
       toast.error(e.message);
       setBulkConfirm(null);
     },
@@ -84,11 +85,7 @@ export default function AdminWithdrawals() {
       setSelected(new Set());
       setBulkConfirm(null);
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["admin_withdrawals_list"] });
-      qc.invalidateQueries({ queryKey: ["admin_withdrawals"] });
-      qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
-    },
+    onSettled: () => invalidateWithdrawals(),
   });
 
   return (
