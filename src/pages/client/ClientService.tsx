@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { ChevronLeft, Check, Clock, Loader2, Crown, Sparkles } from "lucide-react";
+import { ChevronLeft, Check, Clock, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useServices } from "@/hooks/useServices";
 
@@ -10,14 +10,6 @@ import * as LucideIcons from "lucide-react";
 const getIcon = (name: string | null): React.ComponentType<any> => {
   if (!name) return Sparkles;
   return (LucideIcons as any)[name] || Sparkles;
-};
-
-const getBadge = (service: any): { label: string; color: string } | null => {
-  if (service.requires_pro_plan) return null; // PRO badge handled separately
-  if (service.duration_hours <= 2) return { label: "RÁPIDO", color: "bg-orange-500/15 text-orange-600" };
-  if (service.base_price <= 200) return { label: "POPULAR", color: "bg-primary/10 text-primary" };
-  if (service.duration_hours >= 8) return { label: "COMPLETO", color: "bg-emerald-500/15 text-emerald-600" };
-  return null;
 };
 
 export default function ClientService() {
@@ -44,8 +36,7 @@ export default function ClientService() {
             <ChevronLeft className="w-6 h-6 text-foreground" />
           </button>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Escolha o serviço</h1>
-            <p className="text-xs text-muted-foreground">Selecione o tipo de limpeza ideal para você</p>
+            <h1 className="text-lg font-semibold text-foreground">Serviço</h1>
           </div>
         </div>
       </header>
@@ -59,7 +50,6 @@ export default function ClientService() {
           <div className="space-y-3">
             {services.map((service) => {
               const IconComp = getIcon((service as any).icon);
-              const tag = getBadge(service);
               const isSelected = selectedService === service.id;
               const isProOnly = (service as any).requires_pro_plan;
 
@@ -76,7 +66,6 @@ export default function ClientService() {
                   )}
                 >
                   <div className="flex gap-3">
-                    {/* Icon */}
                     <div className={cn(
                       "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 mt-0.5",
                       isSelected ? "bg-primary/15" : "bg-muted/60"
@@ -84,20 +73,15 @@ export default function ClientService() {
                       <IconComp className={cn("w-5 h-5", isSelected ? "text-primary" : "text-muted-foreground")} />
                     </div>
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="font-semibold text-foreground text-[15px]">{service.name}</h3>
+                        <div className="flex items-start gap-2">
+                          <h3 className="font-semibold text-foreground text-[15px] leading-tight flex-1 min-w-0">
+                            {service.name}
+                          </h3>
 
                         {isProOnly && (
-                          <span className="px-1.5 py-0.5 bg-amber-500/15 text-amber-600 rounded text-[10px] font-bold flex items-center gap-0.5 uppercase tracking-wide">
-                            <Crown className="w-3 h-3" /> PRO
-                          </span>
-                        )}
-
-                        {tag && !isProOnly && (
-                          <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide", tag.color)}>
-                            {tag.label}
+                            <span className="px-1.5 py-0.5 bg-primary/10 text-primary rounded-md text-[10px] font-bold uppercase tracking-wide shrink-0">
+                              PRO
                           </span>
                         )}
 
@@ -108,14 +92,10 @@ export default function ClientService() {
                         )}
                       </div>
 
-                      <p className="text-sm text-muted-foreground leading-snug mb-2 line-clamp-2">
-                        {service.description}
-                      </p>
-
-                      <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Clock className="w-3.5 h-3.5" />
-                          <span>{service.duration_hours}h estimadas</span>
+                            <span>{service.duration_hours}h</span>
                         </div>
                         <p className="text-lg font-bold text-primary">
                           R$ {Number(service.base_price).toFixed(2).replace(".", ",")}
