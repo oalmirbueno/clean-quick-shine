@@ -59,6 +59,7 @@ serve(async (req) => {
       typeof body.message === "string" ? body.message.slice(0, 1000) : "";
     const type = typeof body.type === "string" ? body.type.slice(0, 50) : "general";
     const data = body.data ?? null;
+    const skipDbInsert = body.skipDbInsert === true;
 
     if (!userId || !title) {
       return new Response(
