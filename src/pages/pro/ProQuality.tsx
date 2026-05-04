@@ -4,6 +4,7 @@ import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { QualityCard } from "@/components/ui/QualityBadge";
 import { Clock, Target, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
 import { useProMetrics, useSlaRules } from "@/hooks/useProMetrics";
+import { cn } from "@/lib/utils";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
