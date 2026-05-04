@@ -1,6 +1,34 @@
 import { useQueryClient } from "@tanstack/react-query";
 
 /**
+ * Concurrency control: monotonic version tokens per scope.
+ * When multiple admin actions hit the same entity in quick succession,
+ * only the LAST started mutation may rollback or trigger invalidation —
+ * stale responses are dropped to preserve the most recent optimistic state.
+ */
+const mutationVersions = new Map<string, number>();
+let _seq = 0;
+
+export function beginMutation(scope: string): number {
+  const token = ++_seq;
+  mutationVersions.set(scope, token);
+  return token;
+}
+
+export function isLatestMutation(scope: string, token: number): boolean {
+  return mutationVersions.get(scope) === token;
+}
+
+/** Convenience scope builders to avoid typos across callers. */
+export const mutationScopes = {
+  pro: (id?: string) => `pro:${id ?? "_"}`,
+  client: (id?: string) => `client:${id ?? "_"}`,
+  withdrawal: (id?: string) => `withdrawal:${id ?? "_"}`,
+  withdrawalsBulk: () => `withdrawals:bulk`,
+};
+
+
+/**
  * Centralizes all React Query keys used in the Admin panel.
  * Use these instead of inline string arrays to keep lists, details
  * and dashboard stats in sync after mutations.

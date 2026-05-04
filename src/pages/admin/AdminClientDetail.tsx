@@ -8,7 +8,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
-import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction } from "@/lib/auditLog";
 
 export default function AdminClientDetail() {
@@ -35,21 +35,28 @@ export default function AdminClientDetail() {
     enabled: !!id,
   });
 
+  const clientScope = () => mutationScopes.client(id);
+
   const optimisticBlock = async (blocked: boolean) => {
+    const token = beginMutation(clientScope());
     await qc.cancelQueries({ queryKey: adminKeys.clientDetail(id) });
     const prevDetail = qc.getQueryData<any>(adminKeys.clientDetail(id));
     const prevList = qc.getQueryData<any[]>(adminKeys.allClients());
     if (prevDetail) qc.setQueryData(adminKeys.clientDetail(id), { ...prevDetail, blocked });
     if (prevList) qc.setQueryData<any[]>(adminKeys.allClients(), prevList.map((c) => (c.user_id === id ? { ...c, blocked } : c)));
-    return { prevDetail, prevList };
+    return { prevDetail, prevList, token };
   };
 
   const rollback = (ctx: any) => {
+    if (!ctx?.token || !isLatestMutation(clientScope(), ctx.token)) return;
     if (ctx?.prevDetail) qc.setQueryData(adminKeys.clientDetail(id), ctx.prevDetail);
     if (ctx?.prevList) qc.setQueryData(adminKeys.allClients(), ctx.prevList);
   };
 
-  const settledClient = () => invalidateClient(id);
+  const settledClient = (ctx?: any) => {
+    if (ctx?.token && !isLatestMutation(clientScope(), ctx.token)) return;
+    invalidateClient(id);
+  };
 
   const notifyClient = async (title: string, message: string, type: "info" | "success" | "warning" = "info") => {
     try {
@@ -86,7 +93,7 @@ export default function AdminClientDetail() {
     onMutate: () => optimisticBlock(true),
     onSuccess: () => { toast.success("Cliente bloqueado e notificado"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollback(ctx); toast.error(e.message || "Erro ao bloquear"); },
-    onSettled: settledClient,
+    onSettled: (_d, _e, _v, ctx: any) => settledClient(ctx),
   });
 
   const unblock = useMutation({
@@ -109,7 +116,7 @@ export default function AdminClientDetail() {
     onMutate: () => optimisticBlock(false),
     onSuccess: () => { toast.success("Cliente desbloqueado e notificado"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollback(ctx); toast.error(e.message || "Erro"); },
-    onSettled: settledClient,
+    onSettled: (_d, _e, _v, ctx: any) => settledClient(ctx),
   });
 
   const sendNotify = useMutation({

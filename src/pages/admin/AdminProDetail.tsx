@@ -8,7 +8,7 @@ import { ChevronLeft, Star, MapPin, Phone, FileText, CheckCircle2, XCircle, Aler
 import { toast } from "sonner";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction } from "@/lib/auditLog";
 
 export default function AdminProDetail() {
@@ -65,19 +65,29 @@ export default function AdminProDetail() {
   };
 
   const invalidatePro = () => invalidateProGroup(id);
+  const proScope = () => mutationScopes.pro(id);
 
   const optimisticPro = async (patch: Record<string, any>) => {
+    const token = beginMutation(proScope());
     await qc.cancelQueries({ queryKey: adminKeys.proDetail(id) });
     const prevDetail = qc.getQueryData<any>(adminKeys.proDetail(id));
     const prevList = qc.getQueryData<any[]>(adminKeys.allPros());
     if (prevDetail) qc.setQueryData(adminKeys.proDetail(id), { ...prevDetail, ...patch });
     if (prevList) qc.setQueryData<any[]>(adminKeys.allPros(), prevList.map((p) => (p.user_id === id ? { ...p, ...patch } : p)));
-    return { prevDetail, prevList };
+    return { prevDetail, prevList, token };
   };
 
   const rollbackPro = (ctx: any) => {
+    // Drop stale rollback if a newer mutation already started
+    if (!ctx?.token || !isLatestMutation(proScope(), ctx.token)) return;
     if (ctx?.prevDetail) qc.setQueryData(adminKeys.proDetail(id), ctx.prevDetail);
     if (ctx?.prevList) qc.setQueryData(adminKeys.allPros(), ctx.prevList);
+  };
+
+  const settledPro = (ctx?: any) => {
+    // Only the latest mutation refetches, so older responses don't clobber newer optimistic state
+    if (ctx?.token && !isLatestMutation(proScope(), ctx.token)) return;
+    invalidatePro();
   };
 
   const approve = useMutation({
@@ -90,7 +100,7 @@ export default function AdminProDetail() {
     onMutate: () => optimisticPro({ verified: true, status: "active" }),
     onSuccess: () => { toast.success("Diarista aprovada"); },
     onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
-    onSettled: invalidatePro,
+    onSettled: (_d, _e, _v, ctx: any) => settledPro(ctx),
   });
 
   const reject = useMutation({
@@ -108,7 +118,7 @@ export default function AdminProDetail() {
       setConfirm(null); setRejectReason("");
     },
     onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
-    onSettled: invalidatePro,
+    onSettled: (_d, _e, _v, ctx: any) => settledPro(ctx),
   });
 
   const suspend = useMutation({
@@ -121,7 +131,7 @@ export default function AdminProDetail() {
     onMutate: () => optimisticPro({ status: "suspended", available_now: false }),
     onSuccess: () => { toast.warning("Suspensa"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
-    onSettled: invalidatePro,
+    onSettled: (_d, _e, _v, ctx: any) => settledPro(ctx),
   });
 
   const reactivate = useMutation({
@@ -134,7 +144,7 @@ export default function AdminProDetail() {
     onMutate: () => optimisticPro({ status: "active" }),
     onSuccess: () => { toast.success("Reativada"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
-    onSettled: invalidatePro,
+    onSettled: (_d, _e, _v, ctx: any) => settledPro(ctx),
   });
 
   const sendNotify = useMutation({

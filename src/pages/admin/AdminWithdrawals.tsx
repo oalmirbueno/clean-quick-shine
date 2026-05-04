@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ArrowDownToLine, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction, type AuditAction } from "@/lib/auditLog";
 
 export default function AdminWithdrawals() {
@@ -77,16 +77,22 @@ export default function AdminWithdrawals() {
       );
     },
     onMutate: async (action) => {
+      const token = beginMutation(mutationScopes.withdrawalsBulk());
       await qc.cancelQueries({ queryKey: adminKeys.withdrawalsList() });
       const prev = qc.getQueryData<any[]>(adminKeys.withdrawalsList());
       const newStatus = action === "approve" ? "processing" : action === "reject" ? "rejected" : "completed";
+      const affectedIds = Array.from(selected);
       qc.setQueryData<any[]>(adminKeys.withdrawalsList(), (old = []) =>
         old.map((w) => (selected.has(w.id) ? { ...w, status: newStatus, processed_at: newStatus === "completed" ? new Date().toISOString() : w.processed_at } : w))
       );
-      return { prev };
+      // Also bump per-row scopes so a later single-row action wins over this bulk
+      affectedIds.forEach((wid) => beginMutation(mutationScopes.withdrawal(wid)));
+      return { prev, token };
     },
     onError: (e: any, _action, ctx: any) => {
-      if (ctx?.prev) qc.setQueryData(adminKeys.withdrawalsList(), ctx.prev);
+      if (ctx?.token && isLatestMutation(mutationScopes.withdrawalsBulk(), ctx.token) && ctx?.prev) {
+        qc.setQueryData(adminKeys.withdrawalsList(), ctx.prev);
+      }
       toast.error(e.message);
       setBulkConfirm(null);
     },
@@ -96,7 +102,10 @@ export default function AdminWithdrawals() {
       setSelected(new Set());
       setBulkConfirm(null);
     },
-    onSettled: () => invalidateWithdrawals(),
+    onSettled: (_d, _e, _v, ctx: any) => {
+      if (ctx?.token && !isLatestMutation(mutationScopes.withdrawalsBulk(), ctx.token)) return;
+      invalidateWithdrawals();
+    },
   });
 
   return (
