@@ -423,6 +423,10 @@ html.app-standalone .app-bottom-nav {
   transform: translate3d(0, 0, 0);
 }
 
+html.app-standalone .bottom-nav-spacer {
+  height: var(--bottom-nav-height, 56px) !important;
+}
+
 html.app-standalone .app-scroll-container,
 .app-scroll-container {
   min-height: 0;
