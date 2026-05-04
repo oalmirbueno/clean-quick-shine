@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction } from "@/lib/auditLog";
+import { clientTemplates, adminCustomMessage } from "@/lib/adminNotificationTemplates";
 
 export default function AdminClientDetail() {
   const navigate = useNavigate();
@@ -84,11 +85,10 @@ export default function AdminClientDetail() {
         targetName: client?.profile?.full_name,
         reason: "Bloqueado pelo administrador",
       });
-      await notifyClient(
-        "Conta bloqueada",
-        "Sua conta foi bloqueada pela equipe Já Limpo. Entre em contato com o suporte.",
-        "warning"
-      );
+      {
+        const t = clientTemplates.blocked();
+        await notifyClient(t.title, t.message, t.type);
+      }
     },
     onMutate: () => optimisticBlock(true),
     onSuccess: () => { toast.success("Cliente bloqueado e notificado"); setConfirm(null); },
@@ -111,7 +111,7 @@ export default function AdminClientDetail() {
         targetId: id!,
         targetName: client?.profile?.full_name,
       });
-      await notifyClient("Conta reativada", "Sua conta foi reativada. Bem-vindo de volta!", "success");
+      { const t = clientTemplates.unblocked(); await notifyClient(t.title, t.message, t.type); }
     },
     onMutate: () => optimisticBlock(false),
     onSuccess: () => { toast.success("Cliente desbloqueado e notificado"); setConfirm(null); },
@@ -122,7 +122,7 @@ export default function AdminClientDetail() {
   const sendNotify = useMutation({
     mutationFn: async () => {
       if (!notifyTitle.trim() || !notifyMsg.trim()) throw new Error("Preencha título e mensagem");
-      await notifyClient(notifyTitle.trim(), notifyMsg.trim(), "info");
+      { const t = adminCustomMessage(notifyTitle, notifyMsg); await notifyClient(t.title, t.message, t.type); }
     },
     onSuccess: () => {
       toast.success("Mensagem enviada ao cliente");
