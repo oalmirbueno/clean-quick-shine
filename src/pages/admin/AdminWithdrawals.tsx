@@ -17,7 +17,7 @@ export default function AdminWithdrawals() {
   const [bulkConfirm, setBulkConfirm] = useState<null | "approve" | "reject" | "complete">(null);
 
   const { data: withdrawals = [], isLoading } = useQuery({
-    queryKey: ["admin_withdrawals_list"],
+    queryKey: adminKeys.withdrawalsList(),
     queryFn: async () => {
       const { data, error } = await supabase.from("withdrawals").select("*").order("created_at", { ascending: false });
       if (error) throw error;
