@@ -19,11 +19,15 @@ import {
   FileText,
   Lock,
   XCircle,
+  PlayCircle,
+  BookOpen,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/ui/Logo";
 import { ProPageHeader } from "@/components/ui/ProPageHeader";
+import { TUTORIAL_PRESERVE_KEYS, resetTutorialFor } from "@/components/ui/AppTutorial";
+import { toast } from "sonner";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
@@ -111,11 +115,23 @@ export default function AppSettings() {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map(name => caches.delete(name)));
       }
+      // Preserve auth + tutorial-completion flags across cache clear
       const authData = localStorage.getItem('sb-mdgiviynypoyixpskmpu-auth-token');
+      const preserved: Record<string, string> = {};
+      const tutorialKeyPrefixes = TUTORIAL_PRESERVE_KEYS;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (tutorialKeyPrefixes.some((base) => k === base || k.startsWith(`${base}:`))) {
+          const v = localStorage.getItem(k);
+          if (v != null) preserved[k] = v;
+        }
+      }
       localStorage.clear();
       if (authData) {
         localStorage.setItem('sb-mdgiviynypoyixpskmpu-auth-token', authData);
       }
+      Object.entries(preserved).forEach(([k, v]) => localStorage.setItem(k, v));
       setCleared(true);
       setCacheSize("0 MB");
       setTimeout(() => setCleared(false), 2000);
@@ -124,6 +140,16 @@ export default function AppSettings() {
     } finally {
       setIsClearing(false);
     }
+  };
+
+  const handleReplayTutorial = () => {
+    if (userRole !== "client" && userRole !== "pro") {
+      toast.info("O tutorial guiado está disponível para clientes e diaristas.");
+      return;
+    }
+    resetTutorialFor(userRole, user?.id);
+    toast.success("Tutorial reiniciado. Abra a tela inicial para começar.");
+    navigate(userRole === "pro" ? "/pro/home" : "/client/home");
   };
 
   const handleLogout = async () => {
@@ -214,14 +240,26 @@ export default function AppSettings() {
           </div>
         </motion.section>
 
-        {/* Support */}
+        {/* Help & Tutorial */}
         <motion.section variants={item}>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Suporte</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Ajuda</h3>
           <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm divide-y divide-border">
+            <SettingItem
+              icon={<PlayCircle className="w-5 h-5" />}
+              label="Refazer tutorial guiado"
+              description="Passo a passo de como usar o app"
+              onClick={handleReplayTutorial}
+            />
+            <SettingItem
+              icon={<BookOpen className="w-5 h-5" />}
+              label="Documentação do app"
+              description="Guia completo com todas as funções"
+              onClick={() => navigate("/help")}
+            />
             <SettingItem
               icon={<HelpCircle className="w-5 h-5" />}
               label="Central de ajuda"
-              description="Dúvidas frequentes"
+              description="Dúvidas frequentes e suporte"
               onClick={() => navigate(userRole === "pro" ? "/pro/support" : "/client/support")}
             />
             <SettingItem

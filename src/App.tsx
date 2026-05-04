@@ -92,6 +92,7 @@ import ProjectDocumentation from "./pages/dev/ProjectDocumentation";
 import Install from "./pages/Install";
 import AppSettings from "./pages/AppSettings";
 import Offline from "./pages/Offline";
+import HelpDocs from "./pages/HelpDocs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -202,6 +203,7 @@ const App = () => {
                 {/* Install & Settings Routes */}
                 <Route path="/install" element={<Install />} />
                 <Route path="/settings" element={<AppSettings />} />
+                <Route path="/help" element={<HelpDocs />} />
                 <Route path="/offline" element={<Offline />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
 
