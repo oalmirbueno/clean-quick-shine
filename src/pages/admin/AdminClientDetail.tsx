@@ -98,6 +98,12 @@ export default function AdminClientDetail() {
         .eq("action", "block")
         .eq("active", true);
       if (error) throw error;
+      await logAdminAction({
+        action: "client_unblocked",
+        targetType: "client",
+        targetId: id!,
+        targetName: client?.profile?.full_name,
+      });
       await notifyClient("Conta reativada", "Sua conta foi reativada. Bem-vindo de volta!", "success");
     },
     onMutate: () => optimisticBlock(false),
