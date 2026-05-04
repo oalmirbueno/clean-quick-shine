@@ -278,6 +278,7 @@ export default function AppSettings() {
         <motion.div variants={item} className="text-center pt-4">
           <p className="text-xs text-muted-foreground">Já Limpo © 2025. Todos os direitos reservados.</p>
         </motion.div>
+        </motion.div>
       </main>
     </div>
   );
