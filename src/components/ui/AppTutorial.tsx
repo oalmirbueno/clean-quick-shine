@@ -10,6 +10,22 @@ import { useViewportHeight } from "@/hooks/useViewportHeight";
 const CLIENT_TUTORIAL_KEY = "jalimpo_client_tutorial_completed";
 const PRO_TUTORIAL_KEY = "jalimpo_pro_tutorial_completed";
 
+/** Keys preserved across "clear cache" — list also used in AppSettings. */
+export const TUTORIAL_PRESERVE_KEYS = [CLIENT_TUTORIAL_KEY, PRO_TUTORIAL_KEY];
+
+/** Per-user storage key (falls back to device-wide when no user is given). */
+function makeKey(base: string, userId?: string | null) {
+  return userId ? `${base}:${userId}` : base;
+}
+
+/** Public helpers so other screens can reset/check completion. */
+export function resetTutorialFor(variant: "client" | "pro", userId?: string | null) {
+  const base = variant === "client" ? CLIENT_TUTORIAL_KEY : PRO_TUTORIAL_KEY;
+  localStorage.removeItem(makeKey(base, userId));
+  localStorage.removeItem(base); // legacy device-wide key
+}
+
+
 interface AppTutorialProps {
   variant: "client" | "pro";
   onComplete: () => void;
