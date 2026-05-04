@@ -65,6 +65,15 @@ export default function AdminWithdrawalDetail() {
       const { error } = await supabase.from("withdrawals").update(updates).eq("id", id!);
       if (error) throw error;
     },
+    onMutate: async (newStatus) => {
+      await queryClient.cancelQueries({ queryKey: ["admin_withdrawal_detail", id] });
+      const prevDetail = queryClient.getQueryData<any>(["admin_withdrawal_detail", id]);
+      const prevList = queryClient.getQueryData<any[]>(["admin_withdrawals_list"]);
+      const patch = { status: newStatus, processed_at: newStatus === "completed" ? new Date().toISOString() : prevDetail?.processed_at };
+      if (prevDetail) queryClient.setQueryData(["admin_withdrawal_detail", id], { ...prevDetail, ...patch });
+      if (prevList) queryClient.setQueryData<any[]>(["admin_withdrawals_list"], prevList.map((w) => (w.id === id ? { ...w, ...patch } : w)));
+      return { prevDetail, prevList };
+    },
     onSuccess: (_, newStatus) => {
       const msgs: Record<string, string> = {
         processing: "Saque aprovado e em processamento",
@@ -73,14 +82,18 @@ export default function AdminWithdrawalDetail() {
       };
       toast.success(msgs[newStatus] || `Status atualizado para ${newStatus}`);
       setConfirmAction(null);
+    },
+    onError: (_e, _newStatus, ctx: any) => {
+      if (ctx?.prevDetail) queryClient.setQueryData(["admin_withdrawal_detail", id], ctx.prevDetail);
+      if (ctx?.prevList) queryClient.setQueryData(["admin_withdrawals_list"], ctx.prevList);
+      toast.error("Erro ao atualizar saque");
+      setConfirmAction(null);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["admin_withdrawal_detail", id] });
       queryClient.invalidateQueries({ queryKey: ["admin_withdrawals_list"] });
       queryClient.invalidateQueries({ queryKey: ["admin_withdrawals"] });
       queryClient.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
-    },
-    onError: () => {
-      toast.error("Erro ao atualizar saque");
-      setConfirmAction(null);
     },
   });
 
