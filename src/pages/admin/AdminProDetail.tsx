@@ -19,7 +19,7 @@ export default function AdminProDetail() {
   const [notifyTitle, setNotifyTitle] = useState("");
   const [notifyMsg, setNotifyMsg] = useState("");
 
-  const { data: pro } = useQuery({
+  const { data: pro, isLoading } = useQuery({
     queryKey: ["admin_pro_detail", id],
     queryFn: async () => {
       const [{ data: profile }, { data: proProfile }, { data: metrics }] = await Promise.all([
