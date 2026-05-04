@@ -49,8 +49,8 @@ export default function ProHome() {
   const balance = proData?.balance || 0;
   const planType = proData?.plan?.type || "free";
   const metrics = proData?.metrics;
-  const rating = Number(metrics?.rating_avg || 0);
-  const jobsDone = metrics?.jobs_done || 0;
+  const rating = Number((proData?.proProfile as any)?.rating_avg || 0);
+  const jobsDone = Number(metrics?.last_30d_jobs || 0);
   const [proLocation, setProLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
