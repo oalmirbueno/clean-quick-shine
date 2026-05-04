@@ -12,9 +12,10 @@ export type AuditAction =
   | "withdrawal_approved"
   | "withdrawal_rejected"
   | "withdrawal_completed"
-  | "notification_sent";
+  | "notification_sent"
+  | "notification_marked_read";
 
-export type AuditTarget = "client" | "pro" | "withdrawal" | "document" | "order";
+export type AuditTarget = "client" | "pro" | "withdrawal" | "document" | "order" | "notification";
 
 interface LogParams {
   action: AuditAction;
