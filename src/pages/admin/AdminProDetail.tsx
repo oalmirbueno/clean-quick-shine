@@ -19,7 +19,7 @@ export default function AdminProDetail() {
   const [notifyTitle, setNotifyTitle] = useState("");
   const [notifyMsg, setNotifyMsg] = useState("");
 
-  const { data: pro } = useQuery({
+  const { data: pro, isLoading } = useQuery({
     queryKey: ["admin_pro_detail", id],
     queryFn: async () => {
       const [{ data: profile }, { data: proProfile }, { data: metrics }] = await Promise.all([
@@ -109,9 +109,41 @@ export default function AdminProDetail() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted shrink-0">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="h-5 w-40 rounded-md bg-muted animate-pulse" />
+            <div className="h-3 w-24 rounded-md bg-muted animate-pulse" />
+          </div>
+        </div>
+        <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="lg:col-span-1 space-y-4">
+            <div className="h-40 rounded-2xl bg-card border border-border/60 animate-pulse" />
+            <div className="h-32 rounded-2xl bg-card border border-border/60 animate-pulse" />
+          </div>
+          <div className="lg:col-span-2 space-y-4">
+            <div className="h-40 rounded-2xl bg-card border border-border/60 animate-pulse" />
+            <div className="h-40 rounded-2xl bg-card border border-border/60 animate-pulse" />
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   if (!pro) {
     return (
       <AdminLayout>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted shrink-0">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg font-semibold">Profissional</h1>
+        </div>
         <div className="flex items-center justify-center py-12">
           <p className="text-muted-foreground">Profissional não encontrada</p>
         </div>

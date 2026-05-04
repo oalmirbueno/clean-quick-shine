@@ -4,11 +4,12 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminTable } from "@/components/ui/AdminTable";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Search, Star } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminPros() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -126,7 +127,13 @@ export default function AdminPros() {
             columns={columns}
             data={filteredPros}
             keyField="id"
-            onRowClick={(pro) => navigate(`/admin/pros/${pro.user_id}`)}
+            onRowClick={(pro) => {
+              // Seed the detail cache for instant render
+              qc.setQueryData(["admin_pro_detail", pro.user_id], (old: any) =>
+                old ?? { ...(pro.profiles || {}), ...pro, metrics: null }
+              );
+              navigate(`/admin/pros/${pro.user_id}`);
+            }}
           />
         </div>
       )}

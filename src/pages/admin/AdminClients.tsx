@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminTable } from "@/components/ui/AdminTable";
 import { Search, Ban, ShieldCheck } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminClients() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "blocked">("all");
 
@@ -130,7 +131,13 @@ export default function AdminClients() {
             columns={columns}
             data={filtered}
             keyField="id"
-            onRowClick={(c) => navigate(`/admin/clients/${c.user_id}`)}
+            onRowClick={(c) => {
+              // Seed the detail cache for instant render
+              qc.setQueryData(["admin_client_detail", c.user_id], (old: any) =>
+                old ?? { profile: c, orders: [], blocked: !!c.blocked, totalSpent: Number(c.spent || 0) }
+              );
+              navigate(`/admin/clients/${c.user_id}`);
+            }}
             emptyMessage="Nenhum cliente encontrado"
           />
         </div>
