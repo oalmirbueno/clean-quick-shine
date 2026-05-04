@@ -370,13 +370,16 @@ export default function AdminNotifications() {
       doc.setTextColor(0);
 
       // Cabeçalho da tabela
+      const fixedW = 88 + 50 + 60 + 110 + 130 + 70 + 110;
       const cols = [
-        { label: "Data/Hora", w: 100 },
-        { label: "Status", w: 55 },
-        { label: "Tipo", w: 70 },
-        { label: "Destinatário", w: 130 },
-        { label: "Título", w: 160 },
-        { label: "Mensagem", w: pageW - margin * 2 - 100 - 55 - 70 - 130 - 160 },
+        { label: "Data/Hora", w: 88 },
+        { label: "Status", w: 50 },
+        { label: "Tipo", w: 60 },
+        { label: "Destinatário", w: 110 },
+        { label: "Email", w: 130 },
+        { label: "Pedido", w: 70 },
+        { label: "Título", w: 110 },
+        { label: "Mensagem", w: pageW - margin * 2 - fixedW },
       ];
       const drawHeader = () => {
         doc.setFillColor(240, 240, 240);
@@ -392,11 +395,14 @@ export default function AdminNotifications() {
 
       doc.setFontSize(8);
       items.forEach((n) => {
+        const orderId = extractOrderId(n);
         const cells = [
           format(new Date(n.created_at), "dd/MM/yy HH:mm"),
           n.read ? "Lida" : "Pendente",
           n.type || "",
           n.recipientName || "",
+          n.recipientEmail || "",
+          orderId ? `#${orderId.slice(0, 8)}` : "",
           n.title || "",
           n.message || "",
         ];
