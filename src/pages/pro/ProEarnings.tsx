@@ -70,147 +70,122 @@ export default function ProEarnings() {
             </PrimaryButton>
           </motion.div>
 
-        {/* Period Tabs */}
-        <div className="flex bg-secondary rounded-lg p-1">
-          <button
-            onClick={() => setPeriod("week")}
-            className={cn(
-              "flex-1 py-2 text-sm font-medium rounded-md transition-colors",
-              period === "week" 
-                ? "bg-background text-foreground shadow-sm" 
-                : "text-muted-foreground"
-            )}
-          >
-            Semana
-          </button>
-          <button
-            onClick={() => setPeriod("month")}
-            className={cn(
-              "flex-1 py-2 text-sm font-medium rounded-md transition-colors",
-              period === "month" 
-                ? "bg-background text-foreground shadow-sm" 
-                : "text-muted-foreground"
-            )}
-          >
-            Mês
-          </button>
-        </div>
+          {/* Period Tabs */}
+          <motion.div variants={item} className="flex bg-muted/60 rounded-2xl p-1">
+            <button
+              onClick={() => setPeriod("week")}
+              className={cn(
+                "flex-1 py-2 text-sm font-medium rounded-xl transition-colors",
+                period === "week" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              )}
+            >
+              Semana
+            </button>
+            <button
+              onClick={() => setPeriod("month")}
+              className={cn(
+                "flex-1 py-2 text-sm font-medium rounded-xl transition-colors",
+                period === "month" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              )}
+            >
+              Mês
+            </button>
+          </motion.div>
 
-        {/* Weekly Chart */}
-        <div className="bg-card rounded-xl border border-border p-4 card-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Total {period === "week" ? "da semana" : "do mês"}
-              </p>
-              <p className="text-xl font-bold text-foreground">
-                R$ {totalPeriod.toFixed(2).replace(".", ",")}
-              </p>
-            </div>
-            {period === "week" && weekChange !== 0 && (
-              <div className={cn(
-                "flex items-center gap-1 text-sm",
-                weekChange >= 0 ? "text-success" : "text-destructive"
-              )}>
-                {weekChange >= 0 ? (
-                  <TrendingUp className="w-4 h-4" />
-                ) : (
-                  <TrendingDown className="w-4 h-4" />
-                )}
-                <span>{weekChange >= 0 ? "+" : ""}{weekChange}%</span>
-              </div>
-            )}
-          </div>
-
-          {/* Bar Chart */}
-          {period === "week" && earnings?.weeklyData && (
-            <div className="flex items-end justify-between gap-2 h-32">
-              {earnings.weeklyData.map((day) => (
-                <div key={day.day} className="flex-1 flex flex-col items-center gap-2">
-                  <div 
-                    className={cn(
-                      "w-full rounded-t-md transition-all",
-                      day.value > 0 ? "bg-primary" : "bg-secondary"
-                    )}
-                    style={{ 
-                      height: day.value > 0 ? `${(day.value / maxValue) * 100}%` : "4px",
-                      minHeight: "4px"
-                    }}
-                  />
-                  <span className="text-xs text-muted-foreground">{day.day}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Monthly summary */}
-          {period === "month" && (
-            <div className="flex items-center justify-center h-32">
-              <div className="text-center">
-                <Wallet className="w-12 h-12 text-primary mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  {earnings?.transactions.length || 0} serviços concluídos
+          {/* Chart Card */}
+          <motion.div variants={item} className="bg-card rounded-2xl border border-border/60 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
+                  Total {period === "week" ? "da semana" : "do mês"}
+                </p>
+                <p className="text-xl font-bold text-foreground mt-0.5">
+                  R$ {totalPeriod.toFixed(2).replace(".", ",")}
                 </p>
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Transaction History */}
-        <section>
-          <h2 className="font-semibold text-foreground mb-3">Histórico de repasses</h2>
-          
-          {!earnings?.transactions.length ? (
-            <div className="bg-card rounded-xl border border-border p-8 text-center card-shadow">
-              <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">Nenhum repasse ainda</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Complete serviços para começar a ganhar
-              </p>
-            </div>
-          ) : (
-            <div className="bg-card rounded-xl border border-border overflow-hidden card-shadow">
-              {earnings.transactions.map((tx, index) => (
-                <div 
-                  key={tx.id}
-                  className={cn(
-                    "flex items-center justify-between p-4",
-                    index !== earnings.transactions.length - 1 && "border-b border-border"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{tx.service}</p>
-                      <p className="text-sm text-muted-foreground">{tx.date}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-success">
-                      +R$ {tx.value.toFixed(2).replace(".", ",")}
-                    </p>
-                    <p className={cn(
-                      "text-xs",
-                      tx.status === "paid_out" 
-                        ? "text-muted-foreground" 
-                        : tx.status === "completed" 
-                          ? "text-success"
-                          : "text-warning"
-                    )}>
-                      {tx.status === "paid_out" 
-                        ? "Pago" 
-                        : tx.status === "completed"
-                          ? "Disponível"
-                          : "Pendente"}
-                    </p>
-                  </div>
+              {period === "week" && weekChange !== 0 && (
+                <div className={cn(
+                  "flex items-center gap-1 text-sm font-medium",
+                  weekChange >= 0 ? "text-success" : "text-destructive"
+                )}>
+                  {weekChange >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                  <span>{weekChange >= 0 ? "+" : ""}{weekChange}%</span>
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </section>
+
+            {period === "week" && earnings?.weeklyData && (
+              <div className="flex items-end justify-between gap-2 h-32">
+                {earnings.weeklyData.map((day) => (
+                  <div key={day.day} className="flex-1 flex flex-col items-center gap-2">
+                    <div
+                      className={cn("w-full rounded-t-md transition-all", day.value > 0 ? "bg-primary" : "bg-muted")}
+                      style={{ height: day.value > 0 ? `${(day.value / maxValue) * 100}%` : "4px", minHeight: "4px" }}
+                    />
+                    <span className="text-[10px] text-muted-foreground">{day.day}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {period === "month" && (
+              <div className="flex items-center justify-center h-32">
+                <div className="text-center">
+                  <Wallet className="w-10 h-10 text-primary mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {earnings?.transactions.length || 0} serviços concluídos
+                  </p>
+                </div>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Transactions */}
+          <motion.section variants={item}>
+            <h2 className="text-sm font-bold text-foreground mb-2.5">Histórico de repasses</h2>
+            {!earnings?.transactions.length ? (
+              <div className="bg-card rounded-2xl border border-border/60 p-8 text-center shadow-sm">
+                <Calendar className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-foreground font-medium">Nenhum repasse ainda</p>
+                <p className="text-xs text-muted-foreground mt-1">Complete serviços para começar a ganhar</p>
+              </div>
+            ) : (
+              <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm">
+                {earnings.transactions.map((tx, index) => (
+                  <div
+                    key={tx.id}
+                    className={cn(
+                      "flex items-center justify-between p-4",
+                      index !== earnings.transactions.length - 1 && "border-b border-border/60"
+                    )}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+                        <Calendar className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{tx.service}</p>
+                        <p className="text-xs text-muted-foreground">{tx.date}</p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-semibold text-success">
+                        +R$ {tx.value.toFixed(2).replace(".", ",")}
+                      </p>
+                      <p className={cn(
+                        "text-[10px] font-medium",
+                        tx.status === "paid_out" ? "text-muted-foreground"
+                          : tx.status === "completed" ? "text-success" : "text-warning"
+                      )}>
+                        {tx.status === "paid_out" ? "Pago" : tx.status === "completed" ? "Disponível" : "Pendente"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.section>
+        </motion.div>
       </main>
 
       <BottomNav variant="pro" />
