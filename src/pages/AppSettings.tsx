@@ -115,11 +115,23 @@ export default function AppSettings() {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map(name => caches.delete(name)));
       }
+      // Preserve auth + tutorial-completion flags across cache clear
       const authData = localStorage.getItem('sb-mdgiviynypoyixpskmpu-auth-token');
+      const preserved: Record<string, string> = {};
+      const tutorialKeyPrefixes = TUTORIAL_PRESERVE_KEYS;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (tutorialKeyPrefixes.some((base) => k === base || k.startsWith(`${base}:`))) {
+          const v = localStorage.getItem(k);
+          if (v != null) preserved[k] = v;
+        }
+      }
       localStorage.clear();
       if (authData) {
         localStorage.setItem('sb-mdgiviynypoyixpskmpu-auth-token', authData);
       }
+      Object.entries(preserved).forEach(([k, v]) => localStorage.setItem(k, v));
       setCleared(true);
       setCacheSize("0 MB");
       setTimeout(() => setCleared(false), 2000);
@@ -128,6 +140,16 @@ export default function AppSettings() {
     } finally {
       setIsClearing(false);
     }
+  };
+
+  const handleReplayTutorial = () => {
+    if (userRole !== "client" && userRole !== "pro") {
+      toast.info("O tutorial guiado está disponível para clientes e diaristas.");
+      return;
+    }
+    resetTutorialFor(userRole, user?.id);
+    toast.success("Tutorial reiniciado. Abra a tela inicial para começar.");
+    navigate(userRole === "pro" ? "/pro/home" : "/client/home");
   };
 
   const handleLogout = async () => {
