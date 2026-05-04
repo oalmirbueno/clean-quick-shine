@@ -33,6 +33,28 @@ export default function AdminClientDetail() {
     enabled: !!id,
   });
 
+  const optimisticBlock = async (blocked: boolean) => {
+    await qc.cancelQueries({ queryKey: ["admin_client_detail", id] });
+    const prevDetail = qc.getQueryData<any>(["admin_client_detail", id]);
+    const prevList = qc.getQueryData<any[]>(["admin_all_clients_v2"]);
+    if (prevDetail) qc.setQueryData(["admin_client_detail", id], { ...prevDetail, blocked });
+    if (prevList) qc.setQueryData<any[]>(["admin_all_clients_v2"], prevList.map((c) => (c.user_id === id ? { ...c, blocked } : c)));
+    return { prevDetail, prevList };
+  };
+
+  const rollback = (ctx: any) => {
+    if (ctx?.prevDetail) qc.setQueryData(["admin_client_detail", id], ctx.prevDetail);
+    if (ctx?.prevList) qc.setQueryData(["admin_all_clients_v2"], ctx.prevList);
+  };
+
+  const settledClient = () => {
+    qc.invalidateQueries({ queryKey: ["admin_client_detail", id] });
+    qc.invalidateQueries({ queryKey: ["admin_all_clients_v2"] });
+    qc.invalidateQueries({ queryKey: ["admin_risk_actions"] });
+    qc.invalidateQueries({ queryKey: ["admin_risk_flags"] });
+    qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
+  };
+
   const block = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("risk_actions").insert({
@@ -49,16 +71,10 @@ export default function AdminClientDetail() {
         type: "warning",
       });
     },
-    onSuccess: () => {
-      toast.success("Cliente bloqueado e notificado");
-      setConfirm(null);
-      qc.invalidateQueries({ queryKey: ["admin_client_detail", id] });
-      qc.invalidateQueries({ queryKey: ["admin_all_clients_v2"] });
-      qc.invalidateQueries({ queryKey: ["admin_risk_actions"] });
-      qc.invalidateQueries({ queryKey: ["admin_risk_flags"] });
-      qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
-    },
-    onError: (e: any) => toast.error(e.message || "Erro ao bloquear"),
+    onMutate: () => optimisticBlock(true),
+    onSuccess: () => { toast.success("Cliente bloqueado e notificado"); setConfirm(null); },
+    onError: (e: any, _v, ctx: any) => { rollback(ctx); toast.error(e.message || "Erro ao bloquear"); },
+    onSettled: settledClient,
   });
 
   const unblock = useMutation({
@@ -77,16 +93,10 @@ export default function AdminClientDetail() {
         type: "success",
       });
     },
-    onSuccess: () => {
-      toast.success("Cliente desbloqueado");
-      setConfirm(null);
-      qc.invalidateQueries({ queryKey: ["admin_client_detail", id] });
-      qc.invalidateQueries({ queryKey: ["admin_all_clients_v2"] });
-      qc.invalidateQueries({ queryKey: ["admin_risk_actions"] });
-      qc.invalidateQueries({ queryKey: ["admin_risk_flags"] });
-      qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
-    },
-    onError: (e: any) => toast.error(e.message || "Erro"),
+    onMutate: () => optimisticBlock(false),
+    onSuccess: () => { toast.success("Cliente desbloqueado"); setConfirm(null); },
+    onError: (e: any, _v, ctx: any) => { rollback(ctx); toast.error(e.message || "Erro"); },
+    onSettled: settledClient,
   });
 
   const sendNotify = useMutation({
