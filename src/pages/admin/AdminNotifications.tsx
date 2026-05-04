@@ -20,6 +20,15 @@ type Notif = {
   created_at: string;
   data?: any;
   recipientName?: string;
+  recipientEmail?: string;
+};
+
+const extractOrderId = (n: { data?: any; message?: string }): string => {
+  const d = n.data || {};
+  const fromData = d.order_id || d.orderId || d.order?.id || d.orderID;
+  if (fromData) return String(fromData);
+  const m = (n.message || "").match(/#([a-f0-9-]{6,})/i);
+  return m ? m[1] : "";
 };
 
 const typeIcon = (t: string) => {
