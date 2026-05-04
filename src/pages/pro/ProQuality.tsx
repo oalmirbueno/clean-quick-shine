@@ -9,14 +9,17 @@ const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { st
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 export default function ProQuality() {
-  const navigate = useNavigate();
   const { metrics, loading, error } = useProMetrics();
   const { data: slaRules } = useSlaRules();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="h-full bg-background flex flex-col safe-top">
+        <ProPageHeader title="Qualidade e SLA" />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-7 h-7 text-primary animate-spin" />
+        </div>
+        <BottomNav variant="pro" />
       </div>
     );
   }
