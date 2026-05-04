@@ -3,6 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 
 const PREVIEW_CACHE_RESET_KEY = "jalimpo_preview_cache_reset_simple_home_v4";
+const PWA_CACHE_RESET_KEY = "jalimpo_pwa_cache_reset_bottom_nav_v2";
 
 function isLovablePreview() {
   try {
@@ -37,6 +38,30 @@ async function resetPreviewCacheOnce() {
   window.location.replace(window.location.href);
 }
 
+async function resetInstalledPwaCacheOnce() {
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+  if (!isStandalone || isLovablePreview()) return;
+  if (localStorage.getItem(PWA_CACHE_RESET_KEY) === "done") return;
+
+  localStorage.setItem(PWA_CACHE_RESET_KEY, "done");
+
+  const registrations = "serviceWorker" in navigator
+    ? await navigator.serviceWorker.getRegistrations()
+    : [];
+  const cacheNames = "caches" in window ? await caches.keys() : [];
+
+  await Promise.all([
+    ...registrations.map((registration) => registration.update()),
+    ...cacheNames.map((cacheName) => caches.delete(cacheName)),
+  ]);
+
+  window.location.reload();
+}
+
 void resetPreviewCacheOnce();
+void resetInstalledPwaCacheOnce();
 
 createRoot(document.getElementById("root")!).render(<App />);
