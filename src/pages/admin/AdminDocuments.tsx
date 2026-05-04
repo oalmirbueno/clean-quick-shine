@@ -60,7 +60,9 @@ export default function AdminDocuments() {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">(
+    () => "all"
+  );
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
 
   // Group documents by user
