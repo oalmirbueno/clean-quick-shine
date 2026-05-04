@@ -93,13 +93,15 @@ export default function AdminWithdrawalDetail() {
       }
     },
     onMutate: async (newStatus) => {
+      const scope = mutationScopes.withdrawal(id);
+      const token = beginMutation(scope);
       await queryClient.cancelQueries({ queryKey: adminKeys.withdrawalDetail(id) });
       const prevDetail = queryClient.getQueryData<any>(adminKeys.withdrawalDetail(id));
       const prevList = queryClient.getQueryData<any[]>(adminKeys.withdrawalsList());
       const patch = { status: newStatus, processed_at: newStatus === "completed" ? new Date().toISOString() : prevDetail?.processed_at };
       if (prevDetail) queryClient.setQueryData(adminKeys.withdrawalDetail(id), { ...prevDetail, ...patch });
       if (prevList) queryClient.setQueryData<any[]>(adminKeys.withdrawalsList(), prevList.map((w) => (w.id === id ? { ...w, ...patch } : w)));
-      return { prevDetail, prevList };
+      return { prevDetail, prevList, token };
     },
     onSuccess: (_, newStatus) => {
       const msgs: Record<string, string> = {
@@ -111,12 +113,18 @@ export default function AdminWithdrawalDetail() {
       setConfirmAction(null);
     },
     onError: (_e, _newStatus, ctx: any) => {
-      if (ctx?.prevDetail) queryClient.setQueryData(adminKeys.withdrawalDetail(id), ctx.prevDetail);
-      if (ctx?.prevList) queryClient.setQueryData(adminKeys.withdrawalsList(), ctx.prevList);
+      // Skip stale rollback if a newer action superseded this one
+      if (ctx?.token && isLatestMutation(mutationScopes.withdrawal(id), ctx.token)) {
+        if (ctx?.prevDetail) queryClient.setQueryData(adminKeys.withdrawalDetail(id), ctx.prevDetail);
+        if (ctx?.prevList) queryClient.setQueryData(adminKeys.withdrawalsList(), ctx.prevList);
+      }
       toast.error("Erro ao atualizar saque");
       setConfirmAction(null);
     },
-    onSettled: () => invalidateWithdrawals(id),
+    onSettled: (_d, _e, _v, ctx: any) => {
+      if (ctx?.token && !isLatestMutation(mutationScopes.withdrawal(id), ctx.token)) return;
+      invalidateWithdrawals(id);
+    },
   });
 
   if (!withdrawal) {
