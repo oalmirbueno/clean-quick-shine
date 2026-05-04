@@ -14,29 +14,25 @@ import {
   ChevronRight,
   Tag,
   HelpCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useServices } from "@/hooks/useServices";
 
-const iconMap: Record<string, any> = {
-  Home,
-  Sparkles,
-  HardHat,
-  Zap,
-};
+const iconMap: Record<string, any> = { Home, Sparkles, HardHat, Zap };
 
 const container: Variants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+  show: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
 };
 const item: Variants = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: 10 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring" as const, stiffness: 220, damping: 24 },
+    transition: { type: "spring" as const, stiffness: 240, damping: 26 },
   },
 };
 
@@ -52,7 +48,7 @@ export default function ClientHome() {
       if (!user?.id) return null;
       const { data } = await supabase
         .from("profiles")
-        .select("*")
+        .select("full_name")
         .eq("user_id", user.id)
         .maybeSingle();
       return data;
@@ -60,8 +56,42 @@ export default function ClientHome() {
     enabled: !!user?.id,
   });
 
+  // Próximo pedido ativo (se houver)
+  const { data: nextOrder } = useQuery({
+    queryKey: ["next_order", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("orders")
+        .select("id, status, scheduled_date, scheduled_time, services(name)")
+        .eq("client_id", user.id)
+        .in("status", ["confirmed", "scheduled", "matching", "en_route", "in_progress"])
+        .order("scheduled_date", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+    refetchInterval: 30_000,
+  });
+
   const userName =
     profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Usuário";
+
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Bom dia";
+    if (h < 18) return "Boa tarde";
+    return "Boa noite";
+  })();
+
+  const statusLabel: Record<string, string> = {
+    matching: "Procurando profissional",
+    scheduled: "Agendado",
+    confirmed: "Confirmado",
+    en_route: "A caminho",
+    in_progress: "Em andamento",
+  };
 
   return (
     <>
@@ -71,17 +101,15 @@ export default function ClientHome() {
 
       <div
         className="h-full flex flex-col relative overflow-hidden bg-background"
-        style={{
-          paddingTop: "max(env(safe-area-inset-top, 0px), 12px)",
-        }}
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
       >
-        {/* Background orgânico */}
+        {/* Glow sutil de fundo */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[55%]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[40%]"
           style={{
             background:
-              "radial-gradient(120% 80% at 50% 0%, hsl(var(--primary) / 0.22) 0%, hsl(var(--primary) / 0.06) 45%, transparent 75%)",
+              "radial-gradient(100% 70% at 50% 0%, hsl(var(--primary) / 0.14) 0%, hsl(var(--primary) / 0.04) 50%, transparent 80%)",
           }}
         />
 
@@ -89,8 +117,8 @@ export default function ClientHome() {
         <header className="relative shrink-0 px-5 pt-3 pb-3 z-10">
           <div className="mx-auto flex w-full max-w-lg items-center justify-between">
             <div className="min-w-0">
-              <p className="text-[12px] text-muted-foreground leading-none mb-1">
-                Bem-vindo
+              <p className="text-[12px] text-muted-foreground leading-none mb-1.5">
+                {greeting}
               </p>
               <h1 className="text-[22px] font-semibold text-foreground leading-tight tracking-tight truncate">
                 {userName}
@@ -101,15 +129,11 @@ export default function ClientHome() {
               <ThemeToggle />
               <motion.button
                 onClick={() => navigate("/client/profile")}
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 20,
-                  delay: 0.1,
-                }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 22, delay: 0.1 }}
                 className="w-9 h-9 rounded-2xl bg-card border border-border/60 flex items-center justify-center text-primary font-semibold text-sm shadow-sm"
+                aria-label="Perfil"
               >
                 {userName.charAt(0).toUpperCase()}
               </motion.button>
@@ -117,67 +141,54 @@ export default function ClientHome() {
           </div>
         </header>
 
-        {/* Content - flex column que preenche toda a altura disponível */}
+        {/* Content */}
         <main className="relative flex-1 overflow-y-auto min-h-0 z-10">
           <motion.div
             variants={container}
             initial="hidden"
             animate="show"
-            className="mx-auto w-full max-w-lg px-5 pb-5 flex flex-col gap-3.5 min-h-full"
+            className="mx-auto w-full max-w-lg px-5 pb-5 flex flex-col gap-3 min-h-full"
           >
-            {/* Hero CTA */}
+            {/* Hero CTA — mais leve */}
             <motion.div variants={item} className="shrink-0">
               <motion.button
-                whileTap={{ scale: 0.98 }}
+                whileTap={{ scale: 0.985 }}
                 onClick={() => navigate("/client/service")}
-                className="relative w-full overflow-hidden text-left rounded-3xl border border-primary/25 p-5"
+                className="relative w-full overflow-hidden text-left rounded-3xl p-5 border border-primary/20"
                 style={{
                   background:
-                    "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.85) 100%)",
+                    "linear-gradient(135deg, hsl(var(--primary) / 0.95) 0%, hsl(var(--primary) / 0.80) 100%)",
                   boxShadow:
-                    "0 24px 50px -22px hsl(var(--primary) / 0.55), inset 0 1px 0 hsl(0 0% 100% / 0.2)",
-                  minHeight: 160,
+                    "0 18px 40px -22px hsl(var(--primary) / 0.45), inset 0 1px 0 hsl(0 0% 100% / 0.18)",
+                  minHeight: 148,
                 }}
               >
                 <div
                   aria-hidden
-                  className="absolute -right-10 -top-10 w-44 h-44 rounded-full"
+                  className="absolute -right-12 -top-12 w-44 h-44 rounded-full"
                   style={{
                     background:
-                      "radial-gradient(circle, hsl(0 0% 100% / 0.18), transparent 70%)",
-                  }}
-                />
-                <div
-                  aria-hidden
-                  className="absolute -left-8 -bottom-12 w-40 h-40 rounded-full"
-                  style={{
-                    background:
-                      "radial-gradient(circle, hsl(0 0% 100% / 0.12), transparent 70%)",
+                      "radial-gradient(circle, hsl(0 0% 100% / 0.16), transparent 70%)",
                   }}
                 />
 
                 <div className="relative h-full flex flex-col justify-between gap-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-                      <CalendarClock
-                        className="w-6 h-6 text-primary-foreground"
-                        strokeWidth={2}
-                      />
-                    </div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-primary-foreground/80 bg-white/15 px-2 py-1 rounded-full">
-                      Rápido
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                      <ShieldCheck className="w-3 h-3" strokeWidth={2.5} />
+                      Verificadas
                     </span>
                   </div>
 
                   <div>
-                    <p className="text-primary-foreground/80 text-[13px] mb-1">
-                      Pronto para começar?
+                    <p className="text-primary-foreground/85 text-[13px] mb-1">
+                      Chamou, tá limpo
                     </p>
                     <div className="flex items-center justify-between gap-3">
                       <h2 className="text-primary-foreground font-bold text-[24px] leading-tight tracking-tight">
                         Agendar limpeza
                       </h2>
-                      <div className="w-10 h-10 rounded-full bg-primary-foreground text-primary flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-primary-foreground text-primary flex items-center justify-center shrink-0 shadow-sm">
                         <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
                       </div>
                     </div>
@@ -186,10 +197,39 @@ export default function ClientHome() {
               </motion.button>
             </motion.div>
 
-            {/* Serviços - estica para preencher altura */}
+            {/* Próximo pedido (se houver) */}
+            {nextOrder && (
+              <motion.button
+                variants={item}
+                onClick={() =>
+                  navigate("/client/order-tracking", {
+                    state: { orderId: nextOrder.id },
+                  })
+                }
+                whileTap={{ scale: 0.99 }}
+                className="shrink-0 w-full text-left rounded-2xl border border-primary/30 bg-primary/5 p-3.5 flex items-center gap-3"
+              >
+                <span className="relative flex w-2.5 h-2.5 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] text-muted-foreground leading-none mb-1">
+                    {statusLabel[nextOrder.status] || "Pedido ativo"}
+                  </p>
+                  <p className="text-[14px] font-semibold text-foreground leading-tight truncate">
+                    {(nextOrder as any).services?.name || "Limpeza"} •{" "}
+                    {nextOrder.scheduled_time?.slice(0, 5)}
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </motion.button>
+            )}
+
+            {/* Serviços */}
             <motion.div variants={item} className="flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between mb-2.5 px-1 shrink-0">
-                <h2 className="text-[15px] font-semibold text-foreground tracking-tight">
+              <div className="flex items-center justify-between mb-2 px-1 shrink-0">
+                <h2 className="text-[14px] font-semibold text-foreground tracking-tight">
                   Serviços
                 </h2>
                 <button
@@ -199,23 +239,21 @@ export default function ClientHome() {
                   Ver todos
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-3 flex-1 auto-rows-fr">
+              <div className="grid grid-cols-2 gap-2.5 flex-1 auto-rows-fr">
                 {(services || []).slice(0, 4).map((service) => {
                   const IconComp = iconMap[service.icon || "Home"] || Home;
                   return (
                     <motion.button
                       key={service.id}
-                      whileTap={{ scale: 0.96 }}
+                      whileTap={{ scale: 0.97 }}
+                      whileHover={{ y: -2 }}
                       onClick={() => navigate("/client/service")}
-                      className="relative flex flex-col items-start justify-between gap-3 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 transition-all text-left shadow-sm h-full min-h-[110px]"
+                      className="relative flex flex-col items-start justify-between gap-3 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 transition-colors text-left shadow-sm h-full min-h-[104px]"
                     >
-                      <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <IconComp
-                          className="w-5 h-5 text-primary"
-                          strokeWidth={2}
-                        />
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <IconComp className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                       </div>
-                      <span className="text-[14px] font-semibold text-foreground leading-tight tracking-tight line-clamp-2">
+                      <span className="text-[13.5px] font-semibold text-foreground leading-tight tracking-tight line-clamp-2">
                         {service.name}
                       </span>
                     </motion.button>
@@ -224,67 +262,47 @@ export default function ClientHome() {
               </div>
             </motion.div>
 
-            {/* Ações rápidas - 2 atalhos largos */}
-            <motion.div variants={item} className="grid grid-cols-2 gap-3 shrink-0">
+            {/* Ações rápidas */}
+            <motion.div variants={item} className="grid grid-cols-2 gap-2.5 shrink-0">
               <button
                 onClick={() => navigate("/client/orders")}
-                className="flex items-center gap-3 p-4 rounded-2xl border border-border/60 bg-card text-left shadow-sm hover:border-primary/40 transition-colors"
+                className="flex items-center gap-3 p-3.5 rounded-2xl border border-border/60 bg-card text-left shadow-sm hover:border-primary/40 transition-colors"
               >
-                <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <CalendarClock
-                    className="w-[18px] h-[18px] text-primary"
-                    strokeWidth={2}
-                  />
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <CalendarClock className="w-[17px] h-[17px] text-primary" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-foreground leading-tight">
-                    Pedidos
-                  </p>
-                  <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
-                    Histórico
-                  </p>
+                  <p className="text-[13px] font-semibold text-foreground leading-tight">Pedidos</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">Histórico</p>
                 </div>
               </button>
 
               <button
                 onClick={() => navigate("/client/referral")}
-                className="flex items-center gap-3 p-4 rounded-2xl border border-border/60 bg-card text-left shadow-sm hover:border-primary/40 transition-colors"
+                className="flex items-center gap-3 p-3.5 rounded-2xl border border-border/60 bg-card text-left shadow-sm hover:border-primary/40 transition-colors"
               >
-                <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Tag
-                    className="w-[18px] h-[18px] text-primary"
-                    strokeWidth={2}
-                  />
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Tag className="w-[17px] h-[17px] text-primary" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-foreground leading-tight">
-                    Indique
-                  </p>
-                  <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
-                    Ganhe créditos
-                  </p>
+                  <p className="text-[13px] font-semibold text-foreground leading-tight">Indique</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">Ganhe créditos</p>
                 </div>
               </button>
             </motion.div>
 
-            {/* Suporte - linha discreta */}
+            {/* Suporte */}
             <motion.button
               variants={item}
               onClick={() => navigate("/client/support")}
-              className="w-full p-3.5 rounded-2xl border border-border/60 bg-card flex items-center gap-3 text-left shadow-sm hover:border-primary/40 transition-colors shrink-0"
+              className="w-full p-3 rounded-2xl border border-border/60 bg-card flex items-center gap-3 text-left shadow-sm hover:border-primary/40 transition-colors shrink-0"
             >
-              <div className="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                <HelpCircle
-                  className="w-[18px] h-[18px] text-primary"
-                  strokeWidth={2}
-                />
+              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <HelpCircle className="w-4 h-4 text-primary" strokeWidth={2} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-semibold text-foreground leading-tight">
                   Precisa de ajuda?
-                </p>
-                <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
-                  Fale com o suporte
                 </p>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
