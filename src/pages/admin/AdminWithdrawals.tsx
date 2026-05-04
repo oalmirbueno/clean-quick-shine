@@ -10,6 +10,7 @@ import { ArrowDownToLine, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction, type AuditAction } from "@/lib/auditLog";
+import { withdrawalTemplates } from "@/lib/adminNotificationTemplates";
 
 export default function AdminWithdrawals() {
   const navigate = useNavigate();
@@ -55,13 +56,12 @@ export default function AdminWithdrawals() {
       const newStatusForData = action === "approve" ? "processing" : action === "reject" ? "rejected" : "completed";
       await Promise.allSettled(
         affected.flatMap((w: any) => {
-          const title = action === "approve" ? "Saque em processamento" : action === "complete" ? "Saque concluído ✅" : "Saque rejeitado";
-          const message = action === "approve"
-            ? `Seu saque de ${fmt(w.amount)} está sendo processado.`
+          const tpl = action === "approve"
+            ? withdrawalTemplates.approved(w.amount)
             : action === "complete"
-              ? `Saque de ${fmt(w.amount)} concluído.`
-              : `Saque de ${fmt(w.amount)} rejeitado. Valor devolvido ao saldo.`;
-          const type = action === "reject" ? "warning" : "success";
+              ? withdrawalTemplates.completed(w.amount)
+              : withdrawalTemplates.rejected(w.amount);
+          const { title, message, type } = tpl;
           const data = { withdrawal_id: w.id, new_status: newStatusForData, bulk: true };
           return [
             // In-app garantido
