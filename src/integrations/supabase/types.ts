@@ -627,6 +627,45 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_locations: {
+        Row: {
+          accuracy: number | null
+          created_at: string
+          heading: number | null
+          id: string
+          lat: number
+          lng: number
+          order_id: string | null
+          recorded_at: string
+          speed: number | null
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          lat: number
+          lng: number
+          order_id?: string | null
+          recorded_at?: string
+          speed?: number | null
+          user_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          lat?: number
+          lng?: number
+          order_id?: string | null
+          recorded_at?: string
+          speed?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       pro_metrics: {
         Row: {
           acceptance_rate: number | null
