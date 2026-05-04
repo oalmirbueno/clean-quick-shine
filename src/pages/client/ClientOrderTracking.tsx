@@ -30,26 +30,53 @@ export default function ClientOrderTracking() {
 
   const [proLocation, setProLocation] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Poll pro location when en_route
+  // Wave 2: Realtime tracking — subscribe to pro_locations for this order
   useEffect(() => {
-    if (order?.status !== "en_route" || !order?.pro_id) return;
+    if (!orderId) return;
+    const activeStatuses = ["confirmed", "en_route", "in_progress"];
+    if (!order?.status || !activeStatuses.includes(order.status)) return;
 
-    const fetchProLocation = async () => {
+    let cancelled = false;
+
+    // Initial fetch: latest location for this order
+    (async () => {
       const { data } = await supabase
-        .from("pro_profiles")
-        .select("current_lat, current_lng")
-        .eq("user_id", order.pro_id!)
+        .from("pro_locations")
+        .select("lat, lng")
+        .eq("order_id", orderId)
+        .order("recorded_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
-
-      if (data?.current_lat && data?.current_lng) {
-        setProLocation({ lat: Number(data.current_lat), lng: Number(data.current_lng) });
+      if (!cancelled && data?.lat && data?.lng) {
+        setProLocation({ lat: Number(data.lat), lng: Number(data.lng) });
       }
-    };
+    })();
 
-    fetchProLocation();
-    const interval = setInterval(fetchProLocation, 15000);
-    return () => clearInterval(interval);
-  }, [order?.status, order?.pro_id]);
+    // Realtime subscription for new GPS samples
+    const channel = supabase
+      .channel(`pro-locations-${orderId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "pro_locations",
+          filter: `order_id=eq.${orderId}`,
+        },
+        (payload) => {
+          const row = payload.new as { lat: number; lng: number };
+          if (row?.lat && row?.lng) {
+            setProLocation({ lat: Number(row.lat), lng: Number(row.lng) });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, [orderId, order?.status]);
 
   const timelineSteps = useMemo(() => {
     const formatTime = (status: string) => {

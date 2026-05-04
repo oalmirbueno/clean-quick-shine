@@ -4,16 +4,26 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ChevronLeft, Calendar, Clock, MapPin, User, MessageCircle, HelpCircle, Navigation, Loader2, Phone, CheckCircle2, Play, Flag } from "lucide-react";
 import { useOrder } from "@/hooks/useOrders";
 import { useUpdateOrderStatus } from "@/hooks/useUpdateOrderStatus";
+import { useProLocationTracking } from "@/hooks/useProLocationTracking";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 export default function ProOrderDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  
+  const { user } = useAuth();
+
   const { data: order, isLoading } = useOrder(id || null);
   const updateStatusMutation = useUpdateOrderStatus();
 
   const status = order?.status || "scheduled";
+
+  // Wave 2: GPS tracking every 30s while order is active
+  useProLocationTracking({
+    enabled: status === "en_route" || status === "in_progress",
+    userId: user?.id,
+    orderId: order?.id,
+  });
   const proEarning = Number(order?.total_price || 0) * 0.8;
 
   const handleUpdateStatus = async (newStatus: "en_route" | "in_progress" | "completed") => {
