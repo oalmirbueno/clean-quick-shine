@@ -113,36 +113,35 @@ export default function ProWithdraw() {
 
   if (isLoading) {
     return (
-      <div className="h-full bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="h-full bg-background flex flex-col safe-top">
+        <ProPageHeader title="Solicitar saque" />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-7 h-7 animate-spin text-primary" />
+        </div>
+        <BottomNav variant="pro" />
       </div>
     );
   }
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      {/* Header */}
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-foreground" />
-          </button>
-          <h1 className="text-lg font-semibold text-foreground">Solicitar Saque</h1>
-        </div>
-      </header>
+      <ProPageHeader title="Solicitar saque" subtitle="Transfira para sua chave Pix" />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
-        {/* Balance Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-5 bg-primary rounded-xl text-primary-foreground"
-        >
-          <div className="flex items-center gap-3 mb-1">
-            <Wallet className="w-6 h-6" />
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <motion.div variants={container} initial="hidden" animate="show" className="px-5 pb-6 space-y-4">
+          {/* Hero Saldo */}
+          <motion.div
+            variants={item}
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-5 shadow-sm"
+          >
+            <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute right-4 top-4 opacity-20">
+              <Wallet className="w-20 h-20" />
+            </div>
+            <p className="text-xs uppercase tracking-wider opacity-80 font-medium">Disponível para saque</p>
+            <p className="text-[34px] font-bold leading-none mt-1.5">{fmt(availableBalance)}</p>
+            <p className="text-xs opacity-80 mt-2">Liberado após avaliação do cliente</p>
+          </motion.div>
             <span className="text-sm font-medium opacity-90">Disponível para saque</span>
           </div>
           <p className="text-3xl font-bold">
