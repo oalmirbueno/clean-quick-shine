@@ -130,9 +130,76 @@
 
   /* Glass effect for modern headers */
   .glass {
-    background: hsl(var(--background) / 0.8);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: hsl(var(--background) / 0.65);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-color: hsl(var(--border) / 0.4);
+  }
+
+  /* Liquid Glass — translucent surface with soft highlight & shadow */
+  .liquid-glass {
+    position: relative;
+    background:
+      linear-gradient(
+        135deg,
+        hsl(var(--card) / 0.55) 0%,
+        hsl(var(--card) / 0.35) 100%
+      );
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid hsl(var(--border) / 0.45);
+    box-shadow:
+      0 8px 32px -12px hsl(220 25% 12% / 0.18),
+      inset 0 1px 0 hsl(0 0% 100% / 0.35);
+  }
+  .liquid-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      hsl(0 0% 100% / 0.18) 0%,
+      hsl(0 0% 100% / 0) 45%
+    );
+  }
+  .dark .liquid-glass {
+    background:
+      linear-gradient(
+        135deg,
+        hsl(var(--card) / 0.55) 0%,
+        hsl(var(--card) / 0.30) 100%
+      );
+    border-color: hsl(0 0% 100% / 0.08);
+    box-shadow:
+      0 8px 32px -10px hsl(0 0% 0% / 0.55),
+      inset 0 1px 0 hsl(0 0% 100% / 0.06);
+  }
+  .dark .liquid-glass::before {
+    background: linear-gradient(
+      180deg,
+      hsl(0 0% 100% / 0.06) 0%,
+      hsl(0 0% 100% / 0) 50%
+    );
+  }
+
+  /* Liquid Glass bar — for fixed top/bottom navs */
+  .liquid-glass-bar {
+    background: hsl(var(--background) / 0.55);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border-color: hsl(var(--border) / 0.4);
+    box-shadow:
+      0 -8px 24px -12px hsl(220 25% 12% / 0.12),
+      inset 0 1px 0 hsl(0 0% 100% / 0.25);
+  }
+  .dark .liquid-glass-bar {
+    background: hsl(var(--background) / 0.55);
+    border-color: hsl(0 0% 100% / 0.06);
+    box-shadow:
+      0 -8px 24px -10px hsl(0 0% 0% / 0.5),
+      inset 0 1px 0 hsl(0 0% 100% / 0.05);
   }
 
   /* Gradient card */
