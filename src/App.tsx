@@ -203,6 +203,7 @@ const App = () => {
                 {/* Install & Settings Routes */}
                 <Route path="/install" element={<Install />} />
                 <Route path="/settings" element={<AppSettings />} />
+                <Route path="/help" element={<HelpDocs />} />
                 <Route path="/offline" element={<Offline />} />
                 <Route path="/access-denied" element={<AccessDenied />} />
 
