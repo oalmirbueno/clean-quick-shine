@@ -45,7 +45,7 @@ export const BottomNav = forwardRef<HTMLDivElement, BottomNavProps>(
       <>
         {/* Spacer */}
         <div
-          className="shrink-0 w-full"
+          className="bottom-nav-spacer shrink-0 w-full"
           style={{ height: "var(--bottom-nav-height, 56px)" }}
         />
 
