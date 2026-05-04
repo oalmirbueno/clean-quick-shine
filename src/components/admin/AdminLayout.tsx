@@ -8,13 +8,13 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="h-full min-h-0 flex bg-background">
+    <div className="h-full min-h-0 overflow-hidden flex bg-background">
       <AdminSidebar />
       <main
-        className="lg:ml-64 flex-1 h-full min-h-0 overflow-y-auto overscroll-contain"
+        className="app-scroll-container lg:ml-64 flex-1 h-full min-h-0"
         style={{
           paddingTop: "env(safe-area-inset-top, 0px)",
-          paddingBottom: "4rem",
+          paddingBottom: "var(--bottom-nav-height, 56px)",
           WebkitOverflowScrolling: "touch",
         }}
       >
