@@ -8,7 +8,7 @@ import { ChevronLeft, Star, MapPin, Phone, FileText, CheckCircle2, XCircle, Aler
 import { toast } from "sonner";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction } from "@/lib/auditLog";
 
 export default function AdminProDetail() {
