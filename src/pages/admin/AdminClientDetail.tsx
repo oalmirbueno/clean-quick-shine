@@ -20,7 +20,7 @@ export default function AdminClientDetail() {
   const [notifyMsg, setNotifyMsg] = useState("");
 
   const { data: client, isLoading } = useQuery({
-    queryKey: ["admin_client_detail", id],
+    queryKey: adminKeys.clientDetail(id),
     queryFn: async () => {
       const [{ data: profile }, { data: orders }, { data: blocks }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", id!).maybeSingle(),
