@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown, Calendar, ArrowDownToLine, Loader2, Wallet } from "lucide-react";
 import { useProEarnings } from "@/hooks/useProEarnings";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 type Period = "week" | "month";
 
