@@ -74,7 +74,9 @@ export default function AdminWithdrawalDetail() {
       toast.success(msgs[newStatus] || `Status atualizado para ${newStatus}`);
       setConfirmAction(null);
       queryClient.invalidateQueries({ queryKey: ["admin_withdrawal_detail", id] });
+      queryClient.invalidateQueries({ queryKey: ["admin_withdrawals_list"] });
       queryClient.invalidateQueries({ queryKey: ["admin_withdrawals"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
     },
     onError: () => {
       toast.error("Erro ao atualizar saque");

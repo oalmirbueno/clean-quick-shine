@@ -64,6 +64,8 @@ export default function AdminWithdrawals() {
       setSelected(new Set());
       setBulkConfirm(null);
       qc.invalidateQueries({ queryKey: ["admin_withdrawals_list"] });
+      qc.invalidateQueries({ queryKey: ["admin_withdrawals"] });
+      qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
     },
     onError: (e: any) => { toast.error(e.message); setBulkConfirm(null); },
   });

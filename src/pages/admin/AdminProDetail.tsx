@@ -55,13 +55,21 @@ export default function AdminProDetail() {
     await supabase.from("notifications").insert({ user_id: id!, title, message, type });
   };
 
+  const invalidatePro = () => {
+    qc.invalidateQueries({ queryKey: ["admin_pro_detail", id] });
+    qc.invalidateQueries({ queryKey: ["admin_pro_docs", id] });
+    qc.invalidateQueries({ queryKey: ["admin_all_pros"] });
+    qc.invalidateQueries({ queryKey: ["admin_pending_docs"] });
+    qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
+  };
+
   const approve = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("pro_profiles").update({ verified: true, status: "active" }).eq("user_id", id!);
       if (error) throw error;
       await notifyPro("Cadastro aprovado! 🎉", "Sua verificação foi concluída. Você já pode receber pedidos.", "success");
     },
-    onSuccess: () => { toast.success("Diarista aprovada"); qc.invalidateQueries({ queryKey: ["admin_pro_detail", id] }); },
+    onSuccess: () => { toast.success("Diarista aprovada"); invalidatePro(); },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -76,8 +84,7 @@ export default function AdminProDetail() {
     onSuccess: () => {
       toast.warning("Diarista reprovada");
       setConfirm(null); setRejectReason("");
-      qc.invalidateQueries({ queryKey: ["admin_pro_detail", id] });
-      qc.invalidateQueries({ queryKey: ["admin_pro_docs", id] });
+      invalidatePro();
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -88,7 +95,7 @@ export default function AdminProDetail() {
       if (error) throw error;
       await notifyPro("Conta suspensa", "Sua conta foi suspensa pela equipe Já Limpo. Entre em contato com o suporte.", "warning");
     },
-    onSuccess: () => { toast.warning("Suspensa"); setConfirm(null); qc.invalidateQueries({ queryKey: ["admin_pro_detail", id] }); },
+    onSuccess: () => { toast.warning("Suspensa"); setConfirm(null); invalidatePro(); },
   });
 
   const reactivate = useMutation({
@@ -97,7 +104,7 @@ export default function AdminProDetail() {
       if (error) throw error;
       await notifyPro("Conta reativada", "Sua conta foi reativada. Bem-vinda de volta!", "success");
     },
-    onSuccess: () => { toast.success("Reativada"); setConfirm(null); qc.invalidateQueries({ queryKey: ["admin_pro_detail", id] }); },
+    onSuccess: () => { toast.success("Reativada"); setConfirm(null); invalidatePro(); },
   });
 
   const sendNotify = useMutation({
