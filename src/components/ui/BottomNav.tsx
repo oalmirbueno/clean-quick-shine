@@ -46,13 +46,12 @@ export const BottomNav = forwardRef<HTMLDivElement, BottomNavProps>(
         {/* Spacer */}
         <div
           className="shrink-0 w-full"
-          style={{ height: "calc(var(--bottom-nav-height, 56px) + var(--bottom-nav-safe-area, 0px))" }}
+          style={{ height: "var(--bottom-nav-height, 56px)" }}
         />
 
         <nav
           ref={ref}
           className="fixed inset-x-0 bottom-0 z-50 border-t liquid-glass-bar"
-          style={{ paddingBottom: "var(--bottom-nav-safe-area, 0px)" }}
         >
           <div className="max-w-lg mx-auto flex" style={{ height: "var(--bottom-nav-height, 56px)" }}>
             {items.map((navItem) => {
