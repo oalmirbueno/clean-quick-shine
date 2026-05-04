@@ -240,14 +240,26 @@ export default function AppSettings() {
           </div>
         </motion.section>
 
-        {/* Support */}
+        {/* Help & Tutorial */}
         <motion.section variants={item}>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Suporte</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Ajuda</h3>
           <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm divide-y divide-border">
+            <SettingItem
+              icon={<PlayCircle className="w-5 h-5" />}
+              label="Refazer tutorial guiado"
+              description="Passo a passo de como usar o app"
+              onClick={handleReplayTutorial}
+            />
+            <SettingItem
+              icon={<BookOpen className="w-5 h-5" />}
+              label="Documentação do app"
+              description="Guia completo com todas as funções"
+              onClick={() => navigate("/help")}
+            />
             <SettingItem
               icon={<HelpCircle className="w-5 h-5" />}
               label="Central de ajuda"
-              description="Dúvidas frequentes"
+              description="Dúvidas frequentes e suporte"
               onClick={() => navigate(userRole === "pro" ? "/pro/support" : "/client/support")}
             />
             <SettingItem
