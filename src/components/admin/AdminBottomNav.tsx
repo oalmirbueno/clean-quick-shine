@@ -75,7 +75,7 @@ export function AdminBottomNav() {
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div
-            className="absolute bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-3xl p-5 animate-slide-in-from-bottom"
+            className="absolute bottom-0 left-0 right-0 liquid-glass border-t rounded-t-3xl p-5 animate-slide-in-from-bottom"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
           >
             <div className="flex items-center justify-between mb-4">
