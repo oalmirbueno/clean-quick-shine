@@ -340,7 +340,131 @@ export default function AdminNotifications() {
           </div>
         )}
       </div>
+
+      <NotificationDetailDialog
+        notif={notifications.find((n) => n.id === detailId) || null}
+        onClose={() => setDetailId(null)}
+        onMarkRead={(id) => markRead.mutate([id])}
+        marking={markRead.isPending}
+      />
     </AdminLayout>
+  );
+}
+
+function NotificationDetailDialog({
+  notif,
+  onClose,
+  onMarkRead,
+  marking,
+}: {
+  notif: Notif | null;
+  onClose: () => void;
+  onMarkRead: (id: string) => void;
+  marking: boolean;
+}) {
+  const open = !!notif;
+  const data = notif?.data;
+  const hasPayload = data && typeof data === "object" && Object.keys(data as any).length > 0;
+  const payloadStr = hasPayload ? JSON.stringify(data, null, 2) : null;
+
+  const copyPayload = async () => {
+    if (!payloadStr) return;
+    try {
+      await navigator.clipboard.writeText(payloadStr);
+      toast.success("Payload copiado");
+    } catch {
+      toast.error("Não foi possível copiar");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="max-w-lg">
+        {notif && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-base">
+                {notif.title}
+                <span className={cn(
+                  "text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full font-medium",
+                  notif.read ? "bg-muted text-muted-foreground" : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                )}>
+                  {notif.read ? "Lida" : "Pendente"}
+                </span>
+              </DialogTitle>
+              <DialogDescription className="text-xs flex items-center gap-1.5">
+                <Send className="w-3 h-3" />
+                Enviada por sistema Já Limpo · <span className="capitalize">{notif.type}</span>
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="rounded-xl border border-border/60 bg-muted/30 p-3">
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">{notif.message}</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 text-xs">
+                <DetailRow icon={<UserIcon className="w-3.5 h-3.5" />} label="Destinatário" value={notif.recipientName || "Usuário"} />
+                <DetailRow icon={<Hash className="w-3.5 h-3.5" />} label="ID do usuário" value={notif.user_id} mono />
+                <DetailRow icon={<Hash className="w-3.5 h-3.5" />} label="ID da notificação" value={notif.id} mono />
+                <DetailRow
+                  icon={<Calendar className="w-3.5 h-3.5" />}
+                  label="Enviada em"
+                  value={`${format(new Date(notif.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} (${formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: ptBR })})`}
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Payload</span>
+                  {payloadStr && (
+                    <button onClick={copyPayload} className="text-[11px] font-medium text-primary hover:underline">
+                      Copiar
+                    </button>
+                  )}
+                </div>
+                {payloadStr ? (
+                  <pre className="text-[11px] leading-relaxed bg-muted/50 border border-border/60 rounded-xl p-3 overflow-auto max-h-48 font-mono">
+                    {payloadStr}
+                  </pre>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">Sem payload adicional.</p>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-2">
+              <button
+                onClick={onClose}
+                className="text-sm font-medium px-4 py-2 rounded-xl border border-border/60 hover:bg-muted transition-colors"
+              >
+                Fechar
+              </button>
+              <button
+                onClick={() => { onMarkRead(notif.id); onClose(); }}
+                disabled={notif.read || marking}
+                className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <CheckCheck className="w-4 h-4" />
+                {notif.read ? "Já lida" : "Marcar como lida"}
+              </button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DetailRow({ icon, label, value, mono }: { icon: React.ReactNode; label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/30 border border-border/60">
+      <span className="mt-0.5 text-muted-foreground">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">{label}</p>
+        <p className={cn("text-xs break-all", mono && "font-mono")}>{value}</p>
+      </div>
+    </div>
   );
 }
 
