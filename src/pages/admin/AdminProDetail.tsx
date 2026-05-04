@@ -10,6 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction } from "@/lib/auditLog";
+import { proTemplates, adminCustomMessage } from "@/lib/adminNotificationTemplates";
 
 export default function AdminProDetail() {
   const navigate = useNavigate();
@@ -97,7 +98,7 @@ export default function AdminProDetail() {
       const { error } = await supabase.from("pro_profiles").update({ verified: true, status: "active" }).eq("user_id", id!);
       if (error) throw error;
       await logAdminAction({ action: "pro_approved", targetType: "pro", targetId: id!, targetName: pro?.full_name });
-      await notifyPro("Cadastro aprovado! 🎉", "Sua verificação foi concluída. Você já pode receber pedidos.", "success");
+      { const t = proTemplates.approved(); await notifyPro(t.title, t.message, t.type); }
     },
     onMutate: () => optimisticPro({ verified: true, status: "active" }),
     onSuccess: () => { toast.success("Diarista aprovada"); },
@@ -112,7 +113,7 @@ export default function AdminProDetail() {
       if (error) throw error;
       await supabase.from("pro_documents").update({ status: "rejected", rejection_reason: rejectReason.trim() }).eq("user_id", id!).eq("status", "pending");
       await logAdminAction({ action: "pro_rejected", targetType: "pro", targetId: id!, targetName: pro?.full_name, reason: rejectReason.trim() });
-      await notifyPro("Verificação reprovada", `Motivo: ${rejectReason.trim()}. Reenvie seus documentos para uma nova análise.`, "warning");
+      { const t = proTemplates.rejected(rejectReason); await notifyPro(t.title, t.message, t.type); }
     },
     onMutate: () => optimisticPro({ verified: false, status: "rejected", available_now: false }),
     onSuccess: () => {
@@ -128,7 +129,7 @@ export default function AdminProDetail() {
       const { error } = await supabase.from("pro_profiles").update({ status: "suspended", available_now: false }).eq("user_id", id!);
       if (error) throw error;
       await logAdminAction({ action: "pro_suspended", targetType: "pro", targetId: id!, targetName: pro?.full_name });
-      await notifyPro("Conta suspensa", "Sua conta foi suspensa pela equipe Já Limpo. Entre em contato com o suporte.", "warning");
+      { const t = proTemplates.suspended(); await notifyPro(t.title, t.message, t.type); }
     },
     onMutate: () => optimisticPro({ status: "suspended", available_now: false }),
     onSuccess: () => { toast.warning("Suspensa"); setConfirm(null); },
@@ -141,7 +142,7 @@ export default function AdminProDetail() {
       const { error } = await supabase.from("pro_profiles").update({ status: "active" }).eq("user_id", id!);
       if (error) throw error;
       await logAdminAction({ action: "pro_reactivated", targetType: "pro", targetId: id!, targetName: pro?.full_name });
-      await notifyPro("Conta reativada", "Sua conta foi reativada. Bem-vinda de volta!", "success");
+      { const t = proTemplates.reactivated(); await notifyPro(t.title, t.message, t.type); }
     },
     onMutate: () => optimisticPro({ status: "active" }),
     onSuccess: () => { toast.success("Reativada"); setConfirm(null); },
@@ -152,7 +153,8 @@ export default function AdminProDetail() {
   const sendNotify = useMutation({
     mutationFn: async () => {
       if (!notifyTitle.trim() || !notifyMsg.trim()) throw new Error("Preencha título e mensagem");
-      await notifyPro(notifyTitle.trim(), notifyMsg.trim(), "info");
+      const t = adminCustomMessage(notifyTitle, notifyMsg);
+      await notifyPro(t.title, t.message, t.type);
     },
     onSuccess: () => { toast.success("Mensagem enviada"); setNotifyOpen(false); setNotifyTitle(""); setNotifyMsg(""); },
     onError: (e: any) => toast.error(e.message),
