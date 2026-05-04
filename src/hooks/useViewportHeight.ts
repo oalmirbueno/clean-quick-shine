@@ -21,14 +21,7 @@ export function useViewportHeight() {
           activeEl.tagName === "TEXTAREA" ||
           activeEl.getAttribute("contenteditable") === "true");
 
-      // Installed PWA must fill the real device screen, not the shortened
-      // visual viewport that leaves a fake bottom gap above the home bar.
-      if (isStandalone && !isInputFocused) {
-        document.documentElement.style.setProperty("--app-height", "100lvh");
-        return;
-      }
-
-      const viewportHeight = isInputFocused && visualViewportHeight
+      const viewportHeight = visualViewportHeight && (isStandalone || isInputFocused)
         ? visualViewportHeight
         : windowHeight;
 
