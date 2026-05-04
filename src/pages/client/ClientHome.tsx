@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Logo } from "@/components/ui/Logo";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { NotificationsDropdown } from "@/components/ui/NotificationsDropdown";
@@ -10,7 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useServices } from "@/hooks/useServices";
-import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, any> = {
   Home, Sparkles, HardHat, Zap,
@@ -18,11 +16,11 @@ const iconMap: Record<string, any> = {
 
 const container = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+  show: { opacity: 1, transition: { staggerChildren: 0.07 } },
 };
 const item = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 220, damping: 24 } },
 };
 
 export default function ClientHome() {
@@ -54,14 +52,21 @@ export default function ClientHome() {
       )}
 
       <div
-        className="h-full bg-background flex flex-col"
+        className="h-full bg-background flex flex-col relative overflow-hidden"
         style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
       >
+        {/* Ambient gradient backdrop */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0">
+          <div className="absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full bg-primary/25 blur-[120px]" />
+          <div className="absolute top-40 -right-24 w-[340px] h-[340px] rounded-full bg-primary/15 blur-[110px]" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[360px] h-[260px] rounded-full bg-primary/10 blur-[100px]" />
+        </div>
+
         {/* ── Header ── */}
-        <header className="shrink-0 px-5 pt-3 pb-5">
+        <header className="relative shrink-0 px-5 pt-3 pb-4 z-10">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[13px] text-muted-foreground tracking-tight">Bem-vindo de volta</p>
+              <p className="text-[12px] text-muted-foreground tracking-tight">Bem-vindo de volta</p>
               <h1 className="text-[22px] font-semibold text-foreground leading-tight tracking-tight mt-0.5">
                 {userName}
               </h1>
@@ -73,7 +78,7 @@ export default function ClientHome() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
-                className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center text-primary font-semibold text-sm"
+                className="w-9 h-9 rounded-full bg-primary/15 backdrop-blur-md border border-primary/20 flex items-center justify-center text-primary font-semibold text-sm"
               >
                 {userName.charAt(0).toUpperCase()}
               </motion.div>
@@ -82,35 +87,61 @@ export default function ClientHome() {
         </header>
 
         {/* ── Content ── */}
-        <main className="flex-1 overflow-y-auto min-h-0">
+        <main className="relative flex-1 overflow-y-auto min-h-0 z-10">
           <motion.div
             variants={container}
             initial="hidden"
             animate="show"
-            className="px-5 pb-4 space-y-5"
+            className="px-5 pb-6 space-y-4"
           >
-            {/* CTA Banner */}
+            {/* Hero Glass CTA */}
             <motion.div variants={item}>
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/client/service")}
-                className="w-full p-4 rounded-2xl bg-primary text-primary-foreground flex items-center gap-4 shadow-md shadow-primary/20"
+                className="relative w-full p-5 rounded-3xl overflow-hidden text-left group"
+                style={{
+                  background:
+                    "linear-gradient(135deg, hsl(var(--primary) / 0.95), hsl(var(--primary) / 0.75))",
+                  boxShadow:
+                    "0 20px 40px -20px hsl(var(--primary) / 0.55), inset 0 1px 0 hsl(0 0% 100% / 0.2)",
+                }}
               >
-                <div className="w-11 h-11 rounded-xl bg-primary-foreground/20 flex items-center justify-center shrink-0">
-                  <CalendarClock className="w-5 h-5" />
+                {/* Glass shine */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/15 blur-2xl pointer-events-none" />
+
+                <div className="relative flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shrink-0">
+                    <CalendarClock className="w-6 h-6 text-white" strokeWidth={2} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-white/70 font-semibold">
+                      Chamou, tá limpo
+                    </p>
+                    <p className="font-semibold text-white text-[16px] leading-tight tracking-tight mt-1">
+                      Agendar limpeza
+                    </p>
+                    <p className="text-[12px] text-white/80 mt-0.5 leading-snug">
+                      Profissionais verificadas em poucos toques
+                    </p>
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shrink-0 group-active:translate-x-0.5 transition-transform">
+                    <ArrowRight className="w-4 h-4 text-white" />
+                  </div>
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="font-semibold text-[15px] leading-tight tracking-tight">Agendar limpeza</p>
-                  <p className="text-[12px] opacity-80 mt-1 leading-snug">Profissionais verificadas em poucos toques</p>
-                </div>
-                <ArrowRight className="w-5 h-5 opacity-70 shrink-0" />
               </motion.button>
             </motion.div>
 
-            {/* Services Grid */}
+            {/* Services Grid - Glass cards */}
             <motion.div variants={item}>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[15px] font-semibold text-foreground tracking-tight">Serviços</h2>
+              <div className="flex items-center justify-between mb-2.5 px-1">
+                <h2 className="text-[13px] font-semibold text-foreground/90 tracking-tight">
+                  Serviços
+                </h2>
+                <span className="text-[11px] text-muted-foreground">
+                  {services?.length || 0} disponíveis
+                </span>
               </div>
               <div className="grid grid-cols-2 gap-2.5">
                 {(services || []).map((service) => {
@@ -120,12 +151,16 @@ export default function ClientHome() {
                       key={service.id}
                       whileTap={{ scale: 0.96 }}
                       onClick={() => navigate("/client/service")}
-                      className="flex items-center gap-3 p-3.5 bg-card rounded-xl border border-border/40 hover:border-primary/30 transition-colors text-left"
+                      className="relative flex items-center gap-3 p-3.5 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl hover:border-primary/40 hover:bg-card/80 transition-all text-left overflow-hidden"
+                      style={{
+                        boxShadow:
+                          "0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -16px hsl(var(--foreground) / 0.15)",
+                      }}
                     >
-                      <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0">
-                        <IconComp className="w-5 h-5 text-primary" />
+                      <div className="w-10 h-10 rounded-xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
+                        <IconComp className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                       </div>
-                      <span className="text-[13px] font-medium text-foreground leading-tight line-clamp-2 tracking-tight">
+                      <span className="text-[12.5px] font-medium text-foreground leading-tight line-clamp-2 tracking-tight">
                         {service.name}
                       </span>
                     </motion.button>
@@ -134,19 +169,27 @@ export default function ClientHome() {
               </div>
             </motion.div>
 
-            {/* Next Appointment */}
+            {/* Next Appointment - Glass */}
             <motion.div variants={item}>
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/client/orders")}
-                className="w-full p-4 rounded-2xl bg-card border border-border/40 flex items-center gap-3 text-left"
+                className="w-full p-4 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl flex items-center gap-3 text-left hover:bg-card/80 transition-colors"
+                style={{
+                  boxShadow:
+                    "0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -16px hsl(var(--foreground) / 0.15)",
+                }}
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <CalendarClock className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
+                  <CalendarClock className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold text-primary uppercase tracking-[0.08em]">Próximo agendamento</p>
-                  <p className="text-[14px] font-medium text-foreground mt-1 truncate tracking-tight">Nenhum agendamento</p>
+                  <p className="text-[10px] font-semibold text-primary uppercase tracking-[0.1em]">
+                    Próximo agendamento
+                  </p>
+                  <p className="text-[13.5px] font-medium text-foreground mt-0.5 truncate tracking-tight">
+                    Nenhum agendamento
+                  </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
               </motion.button>
