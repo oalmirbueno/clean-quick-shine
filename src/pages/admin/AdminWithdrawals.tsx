@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowDownToLine, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { logAdminAction, type AuditAction } from "@/lib/auditLog";
 
 export default function AdminWithdrawals() {
   const navigate = useNavigate();
@@ -50,8 +51,9 @@ export default function AdminWithdrawals() {
       const { error } = await supabase.from("withdrawals").update(updates).in("id", ids);
       if (error) throw error;
       const affected = withdrawals.filter((w: any) => selected.has(w.id));
+      const auditAction: AuditAction = action === "approve" ? "withdrawal_approved" : action === "reject" ? "withdrawal_rejected" : "withdrawal_completed";
       await Promise.all(
-        affected.map((w: any) => {
+        affected.flatMap((w: any) => {
           const title = action === "approve" ? "Saque em processamento" : action === "complete" ? "Saque concluído ✅" : "Saque rejeitado";
           const message = action === "approve"
             ? `Seu saque de ${fmt(w.amount)} está sendo processado.`
@@ -59,9 +61,18 @@ export default function AdminWithdrawals() {
               ? `Saque de ${fmt(w.amount)} concluído.`
               : `Saque de ${fmt(w.amount)} rejeitado. Valor devolvido ao saldo.`;
           const type = action === "reject" ? "warning" : "success";
-          return supabase.functions
-            .invoke("send-push-notification", { body: { userId: w.user_id, title, message, type } })
-            .catch(() => supabase.from("notifications").insert({ user_id: w.user_id, title, message, type }));
+          return [
+            supabase.functions
+              .invoke("send-push-notification", { body: { userId: w.user_id, title, message, type } })
+              .catch(() => supabase.from("notifications").insert({ user_id: w.user_id, title, message, type })),
+            logAdminAction({
+              action: auditAction,
+              targetType: "withdrawal",
+              targetId: w.id,
+              targetName: w.proName,
+              metadata: { amount: w.amount, user_id: w.user_id, bulk: true },
+            }),
+          ];
         })
       );
     },

@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { logAdminAction } from "@/lib/auditLog";
 
 export default function AdminClientDetail() {
   const navigate = useNavigate();
@@ -69,6 +70,13 @@ export default function AdminClientDetail() {
         active: true,
       });
       if (error) throw error;
+      await logAdminAction({
+        action: "client_blocked",
+        targetType: "client",
+        targetId: id!,
+        targetName: client?.profile?.full_name,
+        reason: "Bloqueado pelo administrador",
+      });
       await notifyClient(
         "Conta bloqueada",
         "Sua conta foi bloqueada pela equipe Já Limpo. Entre em contato com o suporte.",
@@ -90,6 +98,12 @@ export default function AdminClientDetail() {
         .eq("action", "block")
         .eq("active", true);
       if (error) throw error;
+      await logAdminAction({
+        action: "client_unblocked",
+        targetType: "client",
+        targetId: id!,
+        targetName: client?.profile?.full_name,
+      });
       await notifyClient("Conta reativada", "Sua conta foi reativada. Bem-vindo de volta!", "success");
     },
     onMutate: () => optimisticBlock(false),

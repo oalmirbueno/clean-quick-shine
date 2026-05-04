@@ -76,6 +76,45 @@ export type Database = {
           },
         ]
       }
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_id: string
+          admin_name: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          reason: string | null
+          target_id: string | null
+          target_name: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          admin_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          target_id?: string | null
+          target_name?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          admin_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string | null
+          target_id?: string | null
+          target_name?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
       app_config: {
         Row: {
           created_at: string

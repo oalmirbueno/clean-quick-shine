@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { logAdminAction } from "@/lib/auditLog";
 
 export default function AdminProDetail() {
   const navigate = useNavigate();
@@ -83,6 +84,7 @@ export default function AdminProDetail() {
     mutationFn: async () => {
       const { error } = await supabase.from("pro_profiles").update({ verified: true, status: "active" }).eq("user_id", id!);
       if (error) throw error;
+      await logAdminAction({ action: "pro_approved", targetType: "pro", targetId: id!, targetName: pro?.full_name });
       await notifyPro("Cadastro aprovado! 🎉", "Sua verificação foi concluída. Você já pode receber pedidos.", "success");
     },
     onMutate: () => optimisticPro({ verified: true, status: "active" }),
@@ -97,6 +99,7 @@ export default function AdminProDetail() {
       const { error } = await supabase.from("pro_profiles").update({ verified: false, status: "rejected", available_now: false }).eq("user_id", id!);
       if (error) throw error;
       await supabase.from("pro_documents").update({ status: "rejected", rejection_reason: rejectReason.trim() }).eq("user_id", id!).eq("status", "pending");
+      await logAdminAction({ action: "pro_rejected", targetType: "pro", targetId: id!, targetName: pro?.full_name, reason: rejectReason.trim() });
       await notifyPro("Verificação reprovada", `Motivo: ${rejectReason.trim()}. Reenvie seus documentos para uma nova análise.`, "warning");
     },
     onMutate: () => optimisticPro({ verified: false, status: "rejected", available_now: false }),
@@ -112,6 +115,7 @@ export default function AdminProDetail() {
     mutationFn: async () => {
       const { error } = await supabase.from("pro_profiles").update({ status: "suspended", available_now: false }).eq("user_id", id!);
       if (error) throw error;
+      await logAdminAction({ action: "pro_suspended", targetType: "pro", targetId: id!, targetName: pro?.full_name });
       await notifyPro("Conta suspensa", "Sua conta foi suspensa pela equipe Já Limpo. Entre em contato com o suporte.", "warning");
     },
     onMutate: () => optimisticPro({ status: "suspended", available_now: false }),
@@ -124,6 +128,7 @@ export default function AdminProDetail() {
     mutationFn: async () => {
       const { error } = await supabase.from("pro_profiles").update({ status: "active" }).eq("user_id", id!);
       if (error) throw error;
+      await logAdminAction({ action: "pro_reactivated", targetType: "pro", targetId: id!, targetName: pro?.full_name });
       await notifyPro("Conta reativada", "Sua conta foi reativada. Bem-vinda de volta!", "success");
     },
     onMutate: () => optimisticPro({ status: "active" }),

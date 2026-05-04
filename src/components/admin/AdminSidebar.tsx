@@ -36,6 +36,7 @@ const menuItems = [
   { icon: Building2, label: "Orçamentos", path: "/admin/quotes" },
   { icon: HeadphonesIcon, label: "Suporte", path: "/admin/support" },
   { icon: Bell, label: "Notificações", path: "/admin/notifications" },
+  { icon: Shield, label: "Auditoria", path: "/admin/audit" },
   { icon: BarChart3, label: "Analytics", path: "/admin/analytics" },
   { icon: Shield, label: "Risco", path: "/admin/risk" },
   { icon: Settings, label: "Configurações", path: "/admin/settings" },
