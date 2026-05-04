@@ -93,7 +93,7 @@ export default function AdminClientDetail() {
     onMutate: () => optimisticBlock(true),
     onSuccess: () => { toast.success("Cliente bloqueado e notificado"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollback(ctx); toast.error(e.message || "Erro ao bloquear"); },
-    onSettled: settledClient,
+    onSettled: (_d, _e, _v, ctx: any) => settledClient(ctx),
   });
 
   const unblock = useMutation({
