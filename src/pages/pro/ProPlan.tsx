@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { ChevronLeft, Check, Crown, Zap, Sparkles, Building2, Clock, Star, TrendingUp, Shield } from "lucide-react";
+import { Check, Crown, Zap, Sparkles, Star, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 export default function ProPlan() {
   const navigate = useNavigate();
