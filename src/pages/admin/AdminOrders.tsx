@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminTable } from "@/components/ui/AdminTable";
@@ -12,7 +12,7 @@ export default function AdminOrders() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: orders = [] } = useQuery({
     queryKey: ["admin_all_orders"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -30,26 +30,67 @@ export default function AdminOrders() {
     },
   });
 
-  const filteredOrders = orders.filter((order: any) => {
-    const matchesSearch = 
-      order.id.includes(search) ||
-      (order.services?.name || "").toLowerCase().includes(search.toLowerCase());
+  const clientIds = useMemo(
+    () => Array.from(new Set((orders as any[]).map((o) => o.client_id).filter(Boolean))),
+    [orders]
+  );
+
+  const { data: clientMap = {} } = useQuery({
+    queryKey: ["admin_orders_clients", clientIds],
+    enabled: clientIds.length > 0,
+    queryFn: async () => {
+      const [profilesRes, emailsRes] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name").in("user_id", clientIds as string[]),
+        supabase.rpc("get_users_emails", { _user_ids: clientIds as string[] }),
+      ]);
+      const map: Record<string, { name: string; email: string }> = {};
+      (profilesRes.data || []).forEach((p: any) => {
+        map[p.user_id] = { name: p.full_name || "", email: map[p.user_id]?.email || "" };
+      });
+      (emailsRes.data || []).forEach((e: any) => {
+        map[e.user_id] = { name: map[e.user_id]?.name || "", email: e.email || "" };
+      });
+      return map;
+    },
+  });
+
+  const filteredOrders = (orders as any[]).filter((order: any) => {
+    const c = clientMap[order.client_id] || { name: "", email: "" };
+    const q = search.toLowerCase();
+    const matchesSearch =
+      !q ||
+      order.id.toLowerCase().includes(q) ||
+      (order.services?.name || "").toLowerCase().includes(q) ||
+      c.name.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q);
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const columns = [
-    { key: "id", header: "ID", render: (o: any) => `#${o.id.slice(0, 8)}` },
+    { key: "id", header: "Pedido", render: (o: any) => `#${o.id.slice(0, 8)}` },
     { key: "service", header: "Serviço", render: (o: any) => o.services?.name || "—" },
-    { 
-      key: "totalPrice", 
-      header: "Total", 
-      render: (o: any) => `R$ ${Number(o.total_price).toFixed(2).replace(".", ",")}` 
+    {
+      key: "client",
+      header: "Cliente",
+      render: (o: any) => clientMap[o.client_id]?.name || "—",
     },
-    { 
-      key: "status", 
-      header: "Status", 
-      render: (o: any) => <StatusBadge status={o.status} /> 
+    {
+      key: "email",
+      header: "Email",
+      render: (o: any) => (
+        <span className="text-xs text-muted-foreground">{clientMap[o.client_id]?.email || "—"}</span>
+      ),
+    },
+    {
+      key: "totalPrice",
+      header: "Total",
+      render: (o: any) => `R$ ${Number(o.total_price).toFixed(2).replace(".", ",")}`,
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (o: any) => <StatusBadge status={o.status} />,
     },
     { key: "date", header: "Data", render: (o: any) => o.scheduled_date },
   ];
@@ -66,7 +107,7 @@ export default function AdminOrders() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar por ID ou serviço..."
+            placeholder="Buscar por pedido, serviço, cliente ou email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
