@@ -373,19 +373,21 @@ button, a, input, select, textarea, [role="button"] {
   }
 }
 
-/* Global viewport fix for mobile — Chrome-first approach */
+/* Global viewport fix: root is fixed, only app content panes scroll */
 html,
 body {
   margin: 0;
   padding: 0;
   background-color: hsl(var(--background));
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100dvh;
   height: var(--app-height);
+  min-height: 0;
   overflow: hidden;
+  touch-action: manipulation;
 }
 
 #root {
@@ -393,6 +395,7 @@ body {
   inset: 0;
   height: 100dvh;
   height: var(--app-height);
+  min-height: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -407,15 +410,26 @@ html.app-standalone {
 html.app-standalone,
 html.app-standalone body,
 html.app-standalone #root {
-  height: 100lvh;
-  min-height: 100lvh;
-  max-height: 100lvh;
+  height: var(--app-height);
+  min-height: 0;
+  max-height: var(--app-height);
 }
 
 html.app-standalone .app-bottom-nav {
   bottom: 0 !important;
   padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  height: var(--bottom-nav-height, 56px) !important;
   transform: translate3d(0, 0, 0);
+}
+
+html.app-standalone .app-scroll-container,
+.app-scroll-container {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 /* Safari-only fallback: detected via -webkit-touch-callout (Safari iOS) */
