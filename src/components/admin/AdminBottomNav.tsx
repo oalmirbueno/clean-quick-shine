@@ -37,7 +37,7 @@ export function AdminBottomNav() {
     <>
       {/* Bottom Nav (mobile only) */}
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t liquid-glass-bar"
+        className="app-bottom-nav lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t liquid-glass-bar"
       >
         <div className="grid grid-cols-6 h-16">
           {primary.map((item) => {

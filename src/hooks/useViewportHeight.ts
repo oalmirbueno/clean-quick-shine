@@ -21,19 +21,18 @@ export function useViewportHeight() {
           activeEl.tagName === "TEXTAREA" ||
           activeEl.getAttribute("contenteditable") === "true");
 
-      // In installed PWA mode, behave like a native app: lock to the real
-      // viewport and ignore browser/safe-area chrome movement.
-      const viewportHeight =
-        isStandalone
-          ? windowHeight
-          : isInputFocused && visualViewportHeight
-          ? visualViewportHeight
-          : windowHeight;
+      // Installed PWA must fill the real device screen, not the shortened
+      // visual viewport that leaves a fake bottom gap above the home bar.
+      if (isStandalone && !isInputFocused) {
+        document.documentElement.style.setProperty("--app-height", "100lvh");
+        return;
+      }
 
-      document.documentElement.style.setProperty(
-        "--app-height",
-        `${Math.round(viewportHeight)}px`
-      );
+      const viewportHeight = isInputFocused && visualViewportHeight
+        ? visualViewportHeight
+        : windowHeight;
+
+      document.documentElement.style.setProperty("--app-height", `${Math.round(viewportHeight)}px`);
     };
 
     const setViewportHeightDeferred = () => {
