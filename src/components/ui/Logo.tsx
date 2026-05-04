@@ -9,11 +9,11 @@ interface LogoProps {
 }
 
 const sizes = {
-  sm: { icon: "h-8", full: "h-8" },
-  md: { icon: "h-10", full: "h-10" },
-  lg: { icon: "h-14", full: "h-14" },
-  xl: { icon: "h-24", full: "h-28" },
-  "2xl": { icon: "h-32", full: "h-36" },
+  sm: { icon: "h-12", full: "h-12" },
+  md: { icon: "h-16", full: "h-16" },
+  lg: { icon: "h-20", full: "h-20" },
+  xl: { icon: "h-32", full: "h-36" },
+  "2xl": { icon: "h-44", full: "h-48" },
 };
 
 export function Logo({ size = "md", className, iconOnly = false }: LogoProps) {
