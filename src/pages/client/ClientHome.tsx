@@ -293,25 +293,27 @@ export default function ClientHome() {
               </button>
             </motion.div>
 
-            {/* Modo demo */}
-            <motion.button
-              variants={item}
-              onClick={() => navigate("/client/demo")}
-              className="w-full p-3 rounded-2xl border border-primary/30 bg-primary/5 flex items-center gap-3 text-left shadow-sm hover:bg-primary/10 transition-colors shrink-0"
-            >
-              <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                <PlayCircle className="w-4 h-4 text-primary" strokeWidth={2} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-foreground leading-tight">
-                  Ver simulação do app
-                </p>
-                <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
-                  Home → busca → tempo real
-                </p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-            </motion.button>
+            {/* Modo demo (apenas admin) */}
+            {isAdmin && (
+              <motion.button
+                variants={item}
+                onClick={() => navigate("/client/demo")}
+                className="w-full p-3 rounded-2xl border border-primary/30 bg-primary/5 flex items-center gap-3 text-left shadow-sm hover:bg-primary/10 transition-colors shrink-0"
+              >
+                <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                  <PlayCircle className="w-4 h-4 text-primary" strokeWidth={2} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-foreground leading-tight">
+                    Ver simulação do app
+                  </p>
+                  <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                    Home → busca → tempo real
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </motion.button>
+            )}
 
             {/* Suporte */}
             <motion.button
