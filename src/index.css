@@ -404,6 +404,20 @@ html.app-standalone {
   --bottom-nav-safe-area: 0px;
 }
 
+html.app-standalone,
+html.app-standalone body,
+html.app-standalone #root {
+  height: 100lvh;
+  min-height: 100lvh;
+  max-height: 100lvh;
+}
+
+html.app-standalone .app-bottom-nav {
+  bottom: 0 !important;
+  padding-bottom: 0 !important;
+  transform: translate3d(0, 0, 0);
+}
+
 /* Safari-only fallback: detected via -webkit-touch-callout (Safari iOS) */
 @supports (-webkit-touch-callout: none) {
   html,
