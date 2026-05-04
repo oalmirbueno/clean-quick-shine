@@ -49,7 +49,7 @@ export default function AdminWithdrawalDetail() {
   const [confirmAction, setConfirmAction] = useState<{ status: string; label: string; description: string } | null>(null);
 
   const { data: withdrawal } = useQuery({
-    queryKey: ["admin_withdrawal_detail", id],
+    queryKey: adminKeys.withdrawalDetail(id),
     queryFn: async () => {
       const { data } = await supabase.from("withdrawals").select("*").eq("id", id!).single();
       if (!data) return null;
