@@ -3,7 +3,7 @@ import { BottomNav } from "@/components/ui/BottomNav";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { NotificationsDropdown } from "@/components/ui/NotificationsDropdown";
 import { AppTutorial, useAppTutorial } from "@/components/ui/AppTutorial";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { Home, Sparkles, HardHat, Zap, ArrowRight, CalendarClock, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
