@@ -271,7 +271,7 @@ export default function ClientHome() {
             <motion.button
               variants={item}
               onClick={() => navigate("/client/support")}
-              className="w-full p-3.5 rounded-2xl border border-border/60 bg-card flex items-center gap-3 text-left shadow-sm hover:border-primary/40 transition-colors"
+              className="w-full p-3.5 rounded-2xl border border-border/60 bg-card flex items-center gap-3 text-left shadow-sm hover:border-primary/40 transition-colors shrink-0"
             >
               <div className="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                 <HelpCircle
