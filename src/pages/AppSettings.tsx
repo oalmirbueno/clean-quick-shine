@@ -19,11 +19,15 @@ import {
   FileText,
   Lock,
   XCircle,
+  PlayCircle,
+  BookOpen,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/ui/Logo";
 import { ProPageHeader } from "@/components/ui/ProPageHeader";
+import { TUTORIAL_PRESERVE_KEYS, resetTutorialFor } from "@/components/ui/AppTutorial";
+import { toast } from "sonner";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
