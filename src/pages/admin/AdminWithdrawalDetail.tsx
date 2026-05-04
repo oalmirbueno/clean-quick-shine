@@ -64,6 +64,23 @@ export default function AdminWithdrawalDetail() {
       if (newStatus === "completed") updates.processed_at = new Date().toISOString();
       const { error } = await supabase.from("withdrawals").update(updates).eq("id", id!);
       if (error) throw error;
+      if (withdrawal?.user_id) {
+        const title = newStatus === "processing" ? "Saque em processamento" : newStatus === "completed" ? "Saque concluído ✅" : "Saque rejeitado";
+        const amount = withdrawal.amount ? `R$ ${Number(withdrawal.amount).toFixed(2).replace(".", ",")}` : "";
+        const message = newStatus === "processing"
+          ? `Seu saque de ${amount} está sendo processado.`
+          : newStatus === "completed"
+            ? `Saque de ${amount} concluído.`
+            : `Saque de ${amount} rejeitado. Valor devolvido ao saldo.`;
+        const type = newStatus === "rejected" ? "warning" : "success";
+        try {
+          await supabase.functions.invoke("send-push-notification", {
+            body: { userId: withdrawal.user_id, title, message, type },
+          });
+        } catch {
+          await supabase.from("notifications").insert({ user_id: withdrawal.user_id, title, message, type });
+        }
+      }
     },
     onMutate: async (newStatus) => {
       await queryClient.cancelQueries({ queryKey: ["admin_withdrawal_detail", id] });

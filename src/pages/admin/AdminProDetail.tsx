@@ -52,7 +52,14 @@ export default function AdminProDetail() {
   });
 
   const notifyPro = async (title: string, message: string, type: "info" | "success" | "warning" = "info") => {
-    await supabase.from("notifications").insert({ user_id: id!, title, message, type });
+    try {
+      await supabase.functions.invoke("send-push-notification", {
+        body: { userId: id!, title, message, type },
+      });
+    } catch (e) {
+      // Fallback: ao menos grava in-app
+      await supabase.from("notifications").insert({ user_id: id!, title, message, type });
+    }
   };
 
   const invalidatePro = () => {

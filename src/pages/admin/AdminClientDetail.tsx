@@ -55,6 +55,16 @@ export default function AdminClientDetail() {
     qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
   };
 
+  const notifyClient = async (title: string, message: string, type: "info" | "success" | "warning" = "info") => {
+    try {
+      await supabase.functions.invoke("send-push-notification", {
+        body: { userId: id!, title, message, type },
+      });
+    } catch {
+      await supabase.from("notifications").insert({ user_id: id!, title, message, type });
+    }
+  };
+
   const block = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("risk_actions").insert({
@@ -64,12 +74,11 @@ export default function AdminClientDetail() {
         active: true,
       });
       if (error) throw error;
-      await supabase.from("notifications").insert({
-        user_id: id!,
-        title: "Conta bloqueada",
-        message: "Sua conta foi bloqueada pela equipe Já Limpo. Entre em contato com o suporte.",
-        type: "warning",
-      });
+      await notifyClient(
+        "Conta bloqueada",
+        "Sua conta foi bloqueada pela equipe Já Limpo. Entre em contato com o suporte.",
+        "warning"
+      );
     },
     onMutate: () => optimisticBlock(true),
     onSuccess: () => { toast.success("Cliente bloqueado e notificado"); setConfirm(null); },
@@ -86,15 +95,10 @@ export default function AdminClientDetail() {
         .eq("action", "block")
         .eq("active", true);
       if (error) throw error;
-      await supabase.from("notifications").insert({
-        user_id: id!,
-        title: "Conta reativada",
-        message: "Sua conta foi reativada. Bem-vindo de volta!",
-        type: "success",
-      });
+      await notifyClient("Conta reativada", "Sua conta foi reativada. Bem-vindo de volta!", "success");
     },
     onMutate: () => optimisticBlock(false),
-    onSuccess: () => { toast.success("Cliente desbloqueado"); setConfirm(null); },
+    onSuccess: () => { toast.success("Cliente desbloqueado e notificado"); setConfirm(null); },
     onError: (e: any, _v, ctx: any) => { rollback(ctx); toast.error(e.message || "Erro"); },
     onSettled: settledClient,
   });
@@ -102,13 +106,7 @@ export default function AdminClientDetail() {
   const sendNotify = useMutation({
     mutationFn: async () => {
       if (!notifyTitle.trim() || !notifyMsg.trim()) throw new Error("Preencha título e mensagem");
-      const { error } = await supabase.from("notifications").insert({
-        user_id: id!,
-        title: notifyTitle.trim(),
-        message: notifyMsg.trim(),
-        type: "info",
-      });
-      if (error) throw error;
+      await notifyClient(notifyTitle.trim(), notifyMsg.trim(), "info");
     },
     onSuccess: () => {
       toast.success("Mensagem enviada ao cliente");
