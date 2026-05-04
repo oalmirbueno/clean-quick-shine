@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AdminTable } from "@/components/ui/AdminTable";
 import { Search, Ban, ShieldCheck } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminClients() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "blocked">("all");
 
