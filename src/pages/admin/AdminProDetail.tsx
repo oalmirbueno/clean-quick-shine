@@ -63,26 +63,20 @@ export default function AdminProDetail() {
     }
   };
 
-  const invalidatePro = () => {
-    qc.invalidateQueries({ queryKey: ["admin_pro_detail", id] });
-    qc.invalidateQueries({ queryKey: ["admin_pro_docs", id] });
-    qc.invalidateQueries({ queryKey: ["admin_all_pros"] });
-    qc.invalidateQueries({ queryKey: ["admin_pending_docs"] });
-    qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
-  };
+  const invalidatePro = () => invalidateProGroup(id);
 
   const optimisticPro = async (patch: Record<string, any>) => {
-    await qc.cancelQueries({ queryKey: ["admin_pro_detail", id] });
-    const prevDetail = qc.getQueryData<any>(["admin_pro_detail", id]);
-    const prevList = qc.getQueryData<any[]>(["admin_all_pros"]);
-    if (prevDetail) qc.setQueryData(["admin_pro_detail", id], { ...prevDetail, ...patch });
-    if (prevList) qc.setQueryData<any[]>(["admin_all_pros"], prevList.map((p) => (p.user_id === id ? { ...p, ...patch } : p)));
+    await qc.cancelQueries({ queryKey: adminKeys.proDetail(id) });
+    const prevDetail = qc.getQueryData<any>(adminKeys.proDetail(id));
+    const prevList = qc.getQueryData<any[]>(adminKeys.allPros());
+    if (prevDetail) qc.setQueryData(adminKeys.proDetail(id), { ...prevDetail, ...patch });
+    if (prevList) qc.setQueryData<any[]>(adminKeys.allPros(), prevList.map((p) => (p.user_id === id ? { ...p, ...patch } : p)));
     return { prevDetail, prevList };
   };
 
   const rollbackPro = (ctx: any) => {
-    if (ctx?.prevDetail) qc.setQueryData(["admin_pro_detail", id], ctx.prevDetail);
-    if (ctx?.prevList) qc.setQueryData(["admin_all_pros"], ctx.prevList);
+    if (ctx?.prevDetail) qc.setQueryData(adminKeys.proDetail(id), ctx.prevDetail);
+    if (ctx?.prevList) qc.setQueryData(adminKeys.allPros(), ctx.prevList);
   };
 
   const approve = useMutation({
