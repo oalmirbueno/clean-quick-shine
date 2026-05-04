@@ -381,6 +381,7 @@ export function useAppTutorial(variant: "client" | "pro", userId?: string | null
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     const localCompleted =
       localStorage.getItem(storageKey) === "true" ||
@@ -393,12 +394,10 @@ export function useAppTutorial(variant: "client" | "pro", userId?: string | null
     }
 
     if (!userId) {
-      // No user yet — defer; once user logs in this effect re-runs.
       setChecking(false);
       return;
     }
 
-    // Ask the backend before showing the tutorial to support cross-device.
     setChecking(true);
     (async () => {
       const { data, error } = await supabase
@@ -409,22 +408,20 @@ export function useAppTutorial(variant: "client" | "pro", userId?: string | null
       if (cancelled) return;
       const remoteCompleted = !error && data && (data as any)[column] != null;
       if (remoteCompleted) {
-        // Backfill local cache so future loads are instant
         localStorage.setItem(storageKey, "true");
         localStorage.setItem(baseKey, "true");
         setShowTutorial(false);
       } else {
-        const t = setTimeout(() => !cancelled && setShowTutorial(true), 400);
-        // store cleanup via outer cancel
-        (cancelled as any) || (window as any).clearTimeout;
-        // ensure we still clear the timer
-        return () => clearTimeout(t);
+        timer = setTimeout(() => {
+          if (!cancelled) setShowTutorial(true);
+        }, 400);
       }
       setChecking(false);
     })();
 
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, [storageKey, baseKey, userId, column]);
 
