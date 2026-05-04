@@ -47,59 +47,105 @@ export default function ProPlan() {
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"><ChevronLeft className="w-6 h-6 text-foreground" /></button>
-          <h1 className="text-lg font-semibold text-foreground">Planos</h1>
-        </div>
-      </header>
+      <ProPageHeader title="Planos" subtitle={`Atual: ${currentPlan === "elite" ? "ELITE" : currentPlan === "pro" ? "PRO" : "Free"}`} />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
-        <div className="text-center py-4">
-          <p className="text-sm text-muted-foreground">Seu plano atual</p>
-          <p className="text-xl font-bold text-foreground capitalize">{currentPlan === "elite" ? "ELITE" : currentPlan === "pro" ? "PRO" : "Free"}</p>
-        </div>
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <motion.div variants={container} initial="hidden" animate="show" className="px-5 pb-6 space-y-3">
+          {plans.map((plan) => {
+            const Icon = plan.icon;
+            const isCurrentPlan = currentPlan === plan.id;
+            const canUpgrade = (plan.id === "pro" && currentPlan === "free") || (plan.id === "elite" && currentPlan !== "elite");
 
-        {plans.map((plan) => {
-          const Icon = plan.icon;
-          const isCurrentPlan = currentPlan === plan.id;
-          const canUpgrade = (plan.id === "pro" && currentPlan === "free") || (plan.id === "elite" && currentPlan !== "elite");
-
-          return (
-            <div key={plan.id} className={cn("p-5 rounded-xl border relative overflow-hidden", isCurrentPlan ? `${plan.bgColor} ${plan.borderColor}` : "bg-card border-border")}>
-              {plan.recommended && currentPlan === "free" && <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-bl-lg">Recomendado</div>}
-              <div className="flex items-center gap-3 mb-4">
-                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", plan.id === "elite" ? "bg-gradient-to-r from-amber-500 to-yellow-400" : plan.bgColor)}>
-                  <Icon className={cn("w-5 h-5", plan.id === "elite" ? "text-white" : plan.color)} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    {plan.price === 0 ? <p className="text-2xl font-bold text-foreground">Grátis</p> : <><p className="text-2xl font-bold text-foreground">R$ {plan.price.toFixed(2).replace(".", ",")}</p><span className="text-sm text-muted-foreground">/mês</span></>}
+            return (
+              <motion.div
+                variants={item}
+                key={plan.id}
+                className={cn(
+                  "p-5 rounded-2xl border relative overflow-hidden shadow-sm",
+                  isCurrentPlan ? `${plan.bgColor} ${plan.borderColor}` : "bg-card border-border/60"
+                )}
+              >
+                {plan.recommended && currentPlan === "free" && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-bl-2xl tracking-wide">
+                    RECOMENDADO
                   </div>
+                )}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={cn(
+                    "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
+                    plan.id === "elite" ? "bg-gradient-to-r from-amber-500 to-yellow-400" : plan.bgColor
+                  )}>
+                    <Icon className={cn("w-5 h-5", plan.id === "elite" ? "text-white" : plan.color)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-semibold text-foreground">{plan.name}</h3>
+                    <div className="flex items-baseline gap-1">
+                      {plan.price === 0 ? (
+                        <p className="text-xl font-bold text-foreground">Grátis</p>
+                      ) : (
+                        <>
+                          <p className="text-xl font-bold text-foreground">R$ {plan.price.toFixed(2).replace(".", ",")}</p>
+                          <span className="text-xs text-muted-foreground">/mês</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  {isCurrentPlan && (
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-primary text-primary-foreground shrink-0">ATUAL</span>
+                  )}
                 </div>
-                {isCurrentPlan && <span className="px-3 py-1 rounded-full text-sm font-medium bg-primary text-primary-foreground">Atual</span>}
-              </div>
-              <ul className="space-y-2 mb-4">
-                {plan.features.map((feature, i) => <li key={i} className="flex items-center gap-2 text-sm text-foreground"><Check className={cn("w-4 h-4", plan.id === "elite" ? "text-amber-500" : "text-success")} />{feature}</li>)}
-                {plan.limitations?.map((limitation, i) => <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground line-through">{limitation}</li>)}
-              </ul>
-              {canUpgrade && (
-                <PrimaryButton fullWidth loading={loading === plan.id} onClick={() => handleUpgrade(plan.name)} className={cn(plan.id === "elite" && "bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500")}>
-                  {plan.id === "elite" ? <><Sparkles className="w-4 h-4 mr-2" />Seja ELITE</> : <><Zap className="w-4 h-4 mr-2" />Assinar PRO</>}
-                </PrimaryButton>
-              )}
-            </div>
-          );
-        })}
+                <ul className="space-y-1.5 mb-4">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-xs text-foreground">
+                      <Check className={cn("w-3.5 h-3.5 shrink-0", plan.id === "elite" ? "text-amber-500" : "text-success")} />
+                      {feature}
+                    </li>
+                  ))}
+                  {plan.limitations?.map((limitation, i) => (
+                    <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground line-through">{limitation}</li>
+                  ))}
+                </ul>
+                {canUpgrade && (
+                  <PrimaryButton
+                    fullWidth
+                    loading={loading === plan.id}
+                    onClick={() => handleUpgrade(plan.name)}
+                    className={cn(plan.id === "elite" && "bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500")}
+                  >
+                    {plan.id === "elite" ? <><Sparkles className="w-4 h-4 mr-2" />Seja ELITE</> : <><Zap className="w-4 h-4 mr-2" />Assinar PRO</>}
+                  </PrimaryButton>
+                )}
+              </motion.div>
+            );
+          })}
 
-        <div className="p-4 bg-accent rounded-xl">
-          <h4 className="font-medium text-foreground mb-3 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" />Por que fazer upgrade?</h4>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-3"><div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"><Crown className="w-4 h-4 text-primary" /></div><div><p className="font-medium text-foreground">PRO recebe 3x mais</p><p className="text-muted-foreground">Prioridade no matching = mais pedidos</p></div></div>
-            <div className="flex items-start gap-3"><div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0"><Sparkles className="w-4 h-4 text-amber-500" /></div><div><p className="font-medium text-foreground">ELITE domina a cidade</p><p className="text-muted-foreground">Acesso a comercial e máxima prioridade</p></div></div>
-          </div>
-        </div>
+          <motion.div variants={item} className="p-4 bg-accent rounded-2xl border border-border/60">
+            <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              Por que fazer upgrade?
+            </h4>
+            <div className="space-y-3 text-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Crown className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">PRO recebe 3x mais</p>
+                  <p className="text-muted-foreground">Prioridade no matching = mais pedidos</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">ELITE domina a cidade</p>
+                  <p className="text-muted-foreground">Acesso a comercial e máxima prioridade</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
       </main>
 
       <BottomNav variant="pro" />
