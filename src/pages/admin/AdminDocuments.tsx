@@ -227,9 +227,18 @@ export default function AdminDocuments() {
           </h3>
           <p className="text-muted-foreground">
             {filter === "pending"
-              ? "Não há documentos pendentes de revisão"
-              : "Não há diaristas nesta categoria"}
+              ? "Não há documentos pendentes de revisão no momento."
+              : filter === "approved"
+              ? "Nenhuma diarista com todos os documentos obrigatórios aprovados."
+              : filter === "rejected"
+              ? "Nenhuma diarista com documentos rejeitados."
+              : "Nenhum documento foi enviado ainda."}
           </p>
+          {filter !== "all" && userGroups.length > 0 && (
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => setFilter("all")}>
+              Ver todas ({userGroups.length})
+            </Button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
