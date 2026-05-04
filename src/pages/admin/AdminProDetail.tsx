@@ -6,13 +6,14 @@ import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { ChevronLeft, Star, MapPin, Phone, FileText, CheckCircle2, XCircle, AlertTriangle, MessageSquareWarning, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
 
 export default function AdminProDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const qc = useQueryClient();
+  const { qc, pro: invalidateProGroup } = useAdminInvalidate();
   const [confirm, setConfirm] = useState<null | "suspend" | "reactivate" | "reject">(null);
   const [rejectReason, setRejectReason] = useState("");
   const [notifyOpen, setNotifyOpen] = useState(false);
