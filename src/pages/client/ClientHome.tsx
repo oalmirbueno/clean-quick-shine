@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { NotificationsDropdown } from "@/components/ui/NotificationsDropdown";
 import { AppTutorial, useAppTutorial } from "@/components/ui/AppTutorial";
 import { motion, type Variants } from "framer-motion";
-import { Home, Sparkles, HardHat, Zap, ArrowRight, CalendarClock, ChevronRight, ShieldCheck, Star, Clock3 } from "lucide-react";
+import { Home, Sparkles, HardHat, Zap, ArrowRight, CalendarClock, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,9 +72,8 @@ export default function ClientHome() {
         <header className="relative shrink-0 px-5 pt-3 pb-4 z-10">
           <div className="mx-auto flex w-full max-w-lg items-center justify-between">
             <div>
-              <p className="text-[12px] text-muted-foreground tracking-tight">Bem-vindo de volta</p>
-              <h1 className="text-[22px] font-semibold text-foreground leading-tight tracking-tight mt-0.5">
-                {userName}
+              <h1 className="text-[22px] font-semibold text-foreground leading-tight tracking-tight">
+                Olá, {userName}
               </h1>
             </div>
             <div className="flex items-center gap-1.5">
@@ -119,53 +118,24 @@ export default function ClientHome() {
                 />
 
                 <div className="relative flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground border border-primary/30 flex items-center justify-center shrink-0 shadow-sm">
+                  <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-sm">
                     <CalendarClock className="w-6 h-6" strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] uppercase tracking-[0.12em] text-primary font-semibold">
-                      Chamou, tá limpo
-                    </p>
-                    <p className="font-semibold text-foreground text-[18px] leading-tight tracking-tight mt-1">
+                    <p className="font-semibold text-foreground text-[18px] leading-tight tracking-tight">
                       Agendar limpeza
                     </p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
-                      Profissionais verificadas em poucos toques
-                    </p>
                   </div>
-                  <div className="w-9 h-9 rounded-2xl bg-card/70 backdrop-blur-xl border border-border/60 flex items-center justify-center shrink-0 group-active:translate-x-0.5 transition-transform">
-                    <ArrowRight className="w-4 h-4 text-primary" />
-                  </div>
+                  <ArrowRight className="w-5 h-5 text-primary shrink-0 group-active:translate-x-0.5 transition-transform" />
                 </div>
               </motion.button>
             </motion.div>
 
-            <motion.div variants={item} className="grid grid-cols-3 gap-2.5">
-              {[
-                { icon: ShieldCheck, label: "Pagamento protegido" },
-                { icon: Star, label: "Avaliadas" },
-                { icon: Clock3, label: "Rápido" },
-              ].map((benefit) => (
-                <div
-                  key={benefit.label}
-                  className="rounded-2xl border border-border/60 bg-card/62 backdrop-blur-xl px-2.5 py-3 text-center shadow-sm"
-                >
-                  <benefit.icon className="mx-auto mb-1.5 h-4 w-4 text-primary" strokeWidth={2} />
-                  <p className="text-[10.5px] font-medium leading-tight text-foreground">{benefit.label}</p>
-                </div>
-              ))}
-            </motion.div>
-
             {/* Services Grid - Glass cards */}
             <motion.div variants={item}>
-              <div className="flex items-center justify-between mb-2.5 px-1">
-                <h2 className="text-[13px] font-semibold text-foreground/90 tracking-tight">
-                  Serviços
-                </h2>
-                <span className="text-[11px] text-muted-foreground">
-                  {services?.length || 0} disponíveis
-                </span>
-              </div>
+              <h2 className="text-[13px] font-semibold text-foreground/90 tracking-tight mb-2.5 px-1">
+                Serviços
+              </h2>
               <div className="grid grid-cols-2 gap-2.5">
                 {(services || []).map((service) => {
                   const IconComp = iconMap[service.icon || "Home"] || Home;
@@ -207,11 +177,8 @@ export default function ClientHome() {
                   <CalendarClock className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold text-primary uppercase tracking-[0.1em]">
-                    Próximo agendamento
-                  </p>
-                  <p className="text-[13.5px] font-medium text-foreground mt-0.5 truncate tracking-tight">
-                    Nenhum agendamento
+                  <p className="text-[13.5px] font-medium text-foreground truncate tracking-tight">
+                    Meus agendamentos
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
