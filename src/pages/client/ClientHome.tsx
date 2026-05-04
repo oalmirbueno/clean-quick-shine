@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { NotificationsDropdown } from "@/components/ui/NotificationsDropdown";
 import { AppTutorial, useAppTutorial } from "@/components/ui/AppTutorial";
 import { motion, type Variants } from "framer-motion";
-import { Home, Sparkles, HardHat, Zap, ArrowRight, CalendarClock, ChevronRight } from "lucide-react";
+import { Home, Sparkles, HardHat, Zap, ArrowRight, CalendarClock, ChevronRight, ShieldCheck, Star, Clock3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,19 +52,25 @@ export default function ClientHome() {
       )}
 
       <div
-        className="h-full bg-background flex flex-col relative overflow-hidden"
-        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+        className="h-full flex flex-col relative overflow-hidden"
+        style={{
+          paddingTop: "max(env(safe-area-inset-top, 0px), 12px)",
+          background:
+            "linear-gradient(180deg, hsl(var(--accent) / 0.72) 0%, hsl(var(--background)) 42%, hsl(var(--background)) 100%)",
+        }}
       >
-        {/* Ambient gradient backdrop */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-0">
-          <div className="absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full bg-primary/25 blur-[120px]" />
-          <div className="absolute top-40 -right-24 w-[340px] h-[340px] rounded-full bg-primary/15 blur-[110px]" />
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[360px] h-[260px] rounded-full bg-primary/10 blur-[100px]" />
-        </div>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-56"
+          style={{
+            background:
+              "linear-gradient(135deg, hsl(var(--primary) / 0.18), hsl(var(--card) / 0.4) 48%, hsl(var(--secondary) / 0.46))",
+          }}
+        />
 
         {/* ── Header ── */}
         <header className="relative shrink-0 px-5 pt-3 pb-4 z-10">
-          <div className="flex items-center justify-between">
+          <div className="mx-auto flex w-full max-w-lg items-center justify-between">
             <div>
               <p className="text-[12px] text-muted-foreground tracking-tight">Bem-vindo de volta</p>
               <h1 className="text-[22px] font-semibold text-foreground leading-tight tracking-tight mt-0.5">
@@ -78,7 +84,7 @@ export default function ClientHome() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
-                className="w-9 h-9 rounded-full bg-primary/15 backdrop-blur-md border border-primary/20 flex items-center justify-center text-primary font-semibold text-sm"
+                className="w-9 h-9 rounded-2xl bg-card/70 backdrop-blur-xl border border-border/60 flex items-center justify-center text-primary font-semibold text-sm shadow-sm"
               >
                 {userName.charAt(0).toUpperCase()}
               </motion.div>
@@ -92,45 +98,62 @@ export default function ClientHome() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="px-5 pb-6 space-y-4"
+            className="mx-auto w-full max-w-lg px-5 pb-6 space-y-4"
           >
             {/* Hero Glass CTA */}
             <motion.div variants={item}>
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/client/service")}
-                className="relative w-full p-5 rounded-3xl overflow-hidden text-left group"
+                className="relative w-full p-5 rounded-2xl overflow-hidden text-left group border border-primary/20 backdrop-blur-2xl"
                 style={{
                   background:
-                    "linear-gradient(135deg, hsl(var(--primary) / 0.95), hsl(var(--primary) / 0.75))",
+                    "linear-gradient(135deg, hsl(var(--card) / 0.82), hsl(var(--primary) / 0.18))",
                   boxShadow:
-                    "0 20px 40px -20px hsl(var(--primary) / 0.55), inset 0 1px 0 hsl(0 0% 100% / 0.2)",
+                    "0 20px 45px -24px hsl(var(--primary) / 0.55), inset 0 1px 0 hsl(var(--primary-foreground) / 0.16)",
                 }}
               >
-                {/* Glass shine */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
-                <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/15 blur-2xl pointer-events-none" />
+                <div
+                  className="absolute inset-x-0 top-0 h-px pointer-events-none"
+                  style={{ background: "hsl(var(--primary-foreground) / 0.34)" }}
+                />
 
                 <div className="relative flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shrink-0">
-                    <CalendarClock className="w-6 h-6 text-white" strokeWidth={2} />
+                  <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground border border-primary/30 flex items-center justify-center shrink-0 shadow-sm">
+                    <CalendarClock className="w-6 h-6" strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] uppercase tracking-[0.12em] text-white/70 font-semibold">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-primary font-semibold">
                       Chamou, tá limpo
                     </p>
-                    <p className="font-semibold text-white text-[16px] leading-tight tracking-tight mt-1">
+                    <p className="font-semibold text-foreground text-[18px] leading-tight tracking-tight mt-1">
                       Agendar limpeza
                     </p>
-                    <p className="text-[12px] text-white/80 mt-0.5 leading-snug">
+                    <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
                       Profissionais verificadas em poucos toques
                     </p>
                   </div>
-                  <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shrink-0 group-active:translate-x-0.5 transition-transform">
-                    <ArrowRight className="w-4 h-4 text-white" />
+                  <div className="w-9 h-9 rounded-2xl bg-card/70 backdrop-blur-xl border border-border/60 flex items-center justify-center shrink-0 group-active:translate-x-0.5 transition-transform">
+                    <ArrowRight className="w-4 h-4 text-primary" />
                   </div>
                 </div>
               </motion.button>
+            </motion.div>
+
+            <motion.div variants={item} className="grid grid-cols-3 gap-2.5">
+              {[
+                { icon: ShieldCheck, label: "Pagamento protegido" },
+                { icon: Star, label: "Avaliadas" },
+                { icon: Clock3, label: "Rápido" },
+              ].map((benefit) => (
+                <div
+                  key={benefit.label}
+                  className="rounded-2xl border border-border/60 bg-card/62 backdrop-blur-xl px-2.5 py-3 text-center shadow-sm"
+                >
+                  <benefit.icon className="mx-auto mb-1.5 h-4 w-4 text-primary" strokeWidth={2} />
+                  <p className="text-[10.5px] font-medium leading-tight text-foreground">{benefit.label}</p>
+                </div>
+              ))}
             </motion.div>
 
             {/* Services Grid - Glass cards */}
@@ -151,13 +174,13 @@ export default function ClientHome() {
                       key={service.id}
                       whileTap={{ scale: 0.96 }}
                       onClick={() => navigate("/client/service")}
-                      className="relative flex items-center gap-3 p-3.5 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl hover:border-primary/40 hover:bg-card/80 transition-all text-left overflow-hidden"
+                      className="relative flex items-center gap-3 p-3.5 rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl hover:border-primary/40 hover:bg-card/90 transition-all text-left overflow-hidden"
                       style={{
                         boxShadow:
-                          "0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -16px hsl(var(--foreground) / 0.15)",
+                          "0 1px 0 hsl(var(--primary-foreground) / 0.08) inset, 0 10px 24px -18px hsl(var(--foreground) / 0.2)",
                       }}
                     >
-                      <div className="w-10 h-10 rounded-xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-2xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
                         <IconComp className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                       </div>
                       <span className="text-[12.5px] font-medium text-foreground leading-tight line-clamp-2 tracking-tight">
@@ -174,13 +197,13 @@ export default function ClientHome() {
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/client/orders")}
-                className="w-full p-4 rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl flex items-center gap-3 text-left hover:bg-card/80 transition-colors"
+                className="w-full p-4 rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl flex items-center gap-3 text-left hover:bg-card/90 transition-colors"
                 style={{
                   boxShadow:
-                    "0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 8px 24px -16px hsl(var(--foreground) / 0.15)",
+                    "0 1px 0 hsl(var(--primary-foreground) / 0.08) inset, 0 10px 24px -18px hsl(var(--foreground) / 0.2)",
                 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-primary/12 border border-primary/15 flex items-center justify-center shrink-0">
                   <CalendarClock className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
