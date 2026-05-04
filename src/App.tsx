@@ -66,6 +66,7 @@ import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import AdminPros from "./pages/admin/AdminPros";
 import AdminProDetail from "./pages/admin/AdminProDetail";
 import AdminClients from "./pages/admin/AdminClients";
+import AdminClientDetail from "./pages/admin/AdminClientDetail";
 import AdminCoupons from "./pages/admin/AdminCoupons";
 import AdminSupport from "./pages/admin/AdminSupport";
 import AdminSupportDetail from "./pages/admin/AdminSupportDetail";
