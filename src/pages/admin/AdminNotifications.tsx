@@ -286,8 +286,12 @@ export default function AdminNotifications() {
             {filtered.map((n) => (
               <div
                 key={n.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setDetailId(n.id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setDetailId(n.id); } }}
                 className={cn(
-                  "flex items-start gap-3 p-4 rounded-2xl border border-border/60 bg-card shadow-sm transition-colors",
+                  "flex items-start gap-3 p-4 rounded-2xl border border-border/60 bg-card shadow-sm transition-colors cursor-pointer hover:bg-muted/40 focus:outline-none focus:ring-2 focus:ring-primary/30",
                   !n.read && "border-primary/30 bg-primary/[0.02]",
                   selected.has(n.id) && "ring-2 ring-primary/30"
                 )}
@@ -295,6 +299,7 @@ export default function AdminNotifications() {
                 <input
                   type="checkbox"
                   checked={selected.has(n.id)}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={() => toggle(n.id)}
                   className="mt-1.5 w-4 h-4 accent-primary shrink-0"
                   aria-label="Selecionar notificação"
@@ -323,7 +328,7 @@ export default function AdminNotifications() {
                 </div>
                 {!n.read && (
                   <button
-                    onClick={() => markRead.mutate([n.id])}
+                    onClick={(e) => { e.stopPropagation(); markRead.mutate([n.id]); }}
                     disabled={markRead.isPending}
                     className="self-center text-[11px] font-medium px-2.5 py-1 rounded-full border border-border/60 hover:bg-muted transition-colors disabled:opacity-50 shrink-0"
                   >
