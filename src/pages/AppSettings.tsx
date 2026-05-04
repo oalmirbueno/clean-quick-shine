@@ -160,7 +160,7 @@ export default function AppSettings() {
         {/* Appearance */}
         <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Aparência</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm">
             <SettingItem
               icon={theme === "dark" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               label="Tema escuro"
@@ -173,7 +173,7 @@ export default function AppSettings() {
         {/* Notifications */}
         <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Notificações</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm">
             <SettingItem
               icon={notifications ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
               label="Notificações push"
@@ -186,7 +186,7 @@ export default function AppSettings() {
         {/* App & Data */}
         <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">App e Dados</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm divide-y divide-border">
             <SettingItem
               icon={<Database className="w-5 h-5" />}
               label="Dados em cache"
@@ -217,7 +217,7 @@ export default function AppSettings() {
         {/* Support */}
         <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Suporte</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm divide-y divide-border">
             <SettingItem
               icon={<HelpCircle className="w-5 h-5" />}
               label="Central de ajuda"
@@ -236,7 +236,7 @@ export default function AppSettings() {
         {/* Legal */}
         <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Legal</h3>
-          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+          <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm divide-y divide-border">
             <SettingItem
               icon={<FileText className="w-5 h-5" />}
               label="Termos de uso"
@@ -262,7 +262,7 @@ export default function AppSettings() {
         {user && (
           <motion.section variants={item}>
             <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Conta</h3>
-            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            <div className="bg-card rounded-2xl border border-border/60 overflow-hidden shadow-sm">
               <SettingItem
                 icon={<LogOut className="w-5 h-5" />}
                 label="Sair da conta"
