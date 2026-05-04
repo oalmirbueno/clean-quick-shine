@@ -31,7 +31,7 @@ export default function ProHome() {
   const queryClient = useQueryClient();
   const [showMap, setShowMap] = useState(false);
   const [processingOrderId, setProcessingOrderId] = useState<string | null>(null);
-  const { showTutorial, completeTutorial } = useAppTutorial("pro");
+  const { showTutorial, completeTutorial } = useAppTutorial("pro", user?.id);
 
   const { data: proData, isLoading: isLoadingPro } = useCurrentProData();
   const { data: availableOrders = [], isLoading: isLoadingOrders } = useAvailableOrdersForPro();
