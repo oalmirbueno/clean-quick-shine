@@ -318,11 +318,16 @@ export default function AdminNotifications() {
             <div className="flex items-center gap-2">
               {counts.pending > 0 && (
                 <button
-                  onClick={() => markRead.mutate(notifications.filter((n) => !n.read).map((n) => n.id))}
+                  onClick={async () => {
+                    const { data: pend, error } = await supabase
+                      .from("notifications").select("id").eq("read", false).limit(5000);
+                    if (error) { toast.error("Erro ao buscar pendentes"); return; }
+                    markRead.mutate((pend || []).map((p: any) => p.id));
+                  }}
                   disabled={markRead.isPending}
                   className="text-xs font-medium px-3 py-1.5 rounded-full border border-border/60 hover:bg-muted transition-colors disabled:opacity-50"
                 >
-                  Marcar todas como lidas
+                  Marcar todas como lidas ({counts.pending})
                 </button>
               )}
               <button
