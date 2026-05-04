@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction, type AuditAction } from "@/lib/auditLog";
+import { withdrawalTemplates } from "@/lib/adminNotificationTemplates";
 
 const statusActionMap: Record<string, { label: string; description: string; variant?: "primary" | "outline" }[]> = {
   pending: [
@@ -75,14 +76,12 @@ export default function AdminWithdrawalDetail() {
         metadata: { amount: withdrawal?.amount, user_id: withdrawal?.user_id, new_status: newStatus },
       });
       if (withdrawal?.user_id) {
-        const title = newStatus === "processing" ? "Saque em processamento" : newStatus === "completed" ? "Saque concluído ✅" : "Saque rejeitado";
-        const amount = withdrawal.amount ? `R$ ${Number(withdrawal.amount).toFixed(2).replace(".", ",")}` : "";
-        const message = newStatus === "processing"
-          ? `Seu saque de ${amount} está sendo processado.`
+        const tpl = newStatus === "processing"
+          ? withdrawalTemplates.approved(withdrawal.amount)
           : newStatus === "completed"
-            ? `Saque de ${amount} concluído.`
-            : `Saque de ${amount} rejeitado. Valor devolvido ao saldo.`;
-        const type = newStatus === "rejected" ? "warning" : "success";
+            ? withdrawalTemplates.completed(withdrawal.amount)
+            : withdrawalTemplates.rejected(withdrawal.amount);
+        const { title, message, type } = tpl;
         // In-app + push em paralelo, skipDbInsert evita duplicidade
         const inApp = supabase
           .from("notifications")
