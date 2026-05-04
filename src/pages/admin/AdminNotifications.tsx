@@ -411,6 +411,23 @@ export default function AdminNotifications() {
                 )}
               </div>
             ))}
+
+            {/* Sentinel + load more */}
+            <div ref={sentinelRef} />
+            {hasNextPage && (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="w-full py-3 rounded-2xl border border-border/60 bg-card text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+              >
+                {isFetchingNextPage ? "Carregando…" : "Carregar mais"}
+              </button>
+            )}
+            {!hasNextPage && notifications.length > 0 && (
+              <p className="text-center text-[11px] text-muted-foreground py-4">
+                Fim da lista · {notifications.length} carregadas
+              </p>
+            )}
           </div>
         )}
       </div>
