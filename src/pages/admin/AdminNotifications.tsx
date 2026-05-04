@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info, CheckCheck, User as UserIcon, Send, Hash, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -39,54 +39,112 @@ export default function AdminNotifications() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [detailId, setDetailId] = useState<string | null>(null);
 
-  const { data: notifications = [], isLoading } = useQuery<Notif[]>({
-    queryKey: ["admin_notifications"],
-    queryFn: async () => {
-      const { data, error } = await supabase
+  // Debounce da busca para reduzir requests
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const PAGE_SIZE = 50;
+
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["admin_notifications", { statusFilter, typeFilter, debouncedSearch }],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
+      const from = (pageParam as number) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      let q = supabase
         .from("notifications")
         .select("id, user_id, title, message, type, read, created_at, data")
         .order("created_at", { ascending: false })
-        .limit(500);
+        .range(from, to);
+      if (statusFilter === "pending") q = q.eq("read", false);
+      if (statusFilter === "sent") q = q.eq("read", true);
+      if (typeFilter !== "all") q = q.eq("type", typeFilter);
+      if (debouncedSearch) {
+        // Busca server-side em título/mensagem; nome do destinatário é filtrado em cliente abaixo.
+        const safe = debouncedSearch.replace(/[%,]/g, " ");
+        q = q.or(`title.ilike.%${safe}%,message.ilike.%${safe}%`);
+      }
+      const { data: rows, error } = await q;
       if (error) throw error;
-      const userIds = Array.from(new Set((data || []).map((n) => n.user_id)));
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, full_name")
-        .in("user_id", userIds);
-      const nameMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
-      return ((data || []) as any[]).map((n) => ({ ...n, recipientName: nameMap.get(n.user_id) || "Usuário" })) as Notif[];
+      const userIds = Array.from(new Set((rows || []).map((n: any) => n.user_id)));
+      let nameMap = new Map<string, string>();
+      if (userIds.length) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, full_name")
+          .in("user_id", userIds);
+        nameMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
+      }
+      const items: Notif[] = ((rows || []) as any[]).map((n) => ({
+        ...n,
+        recipientName: nameMap.get(n.user_id) || "Usuário",
+      }));
+      return { items, nextPage: items.length < PAGE_SIZE ? null : (pageParam as number) + 1 };
     },
+    getNextPageParam: (last) => last.nextPage,
     refetchInterval: 30_000,
   });
 
+  const notifications = useMemo<Notif[]>(
+    () => (data?.pages || []).flatMap((p) => p.items),
+    [data]
+  );
+
+  // Contagens globais (server-side, independentes da paginação/filtros)
+  const { data: globalCounts } = useQuery({
+    queryKey: ["admin_notifications_counts"],
+    queryFn: async () => {
+      const [all, pending] = await Promise.all([
+        supabase.from("notifications").select("id", { count: "exact", head: true }),
+        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("read", false),
+      ]);
+      const total = all.count ?? 0;
+      const pend = pending.count ?? 0;
+      return { all: total, pending: pend, sent: Math.max(0, total - pend) };
+    },
+    refetchInterval: 60_000,
+  });
+
+  // Tipos: lista distintos a partir das páginas já carregadas (ampliada conforme rola).
   const types = useMemo(() => {
     const set = new Set<string>();
     notifications.forEach((n) => n.type && set.add(n.type));
     return Array.from(set);
   }, [notifications]);
 
+  // Filtragem client-side só para refinar busca por nome do destinatário (server já filtrou o resto).
   const filtered = useMemo(() => {
-    return notifications.filter((n) => {
-      if (statusFilter === "pending" && n.read) return false;
-      if (statusFilter === "sent" && !n.read) return false;
-      if (typeFilter !== "all" && n.type !== typeFilter) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        if (
-          !n.title.toLowerCase().includes(q) &&
-          !n.message.toLowerCase().includes(q) &&
-          !(n.recipientName || "").toLowerCase().includes(q)
-        ) return false;
-      }
-      return true;
-    });
-  }, [notifications, statusFilter, typeFilter, search]);
+    if (!debouncedSearch) return notifications;
+    const q = debouncedSearch.toLowerCase();
+    return notifications.filter((n) =>
+      n.title.toLowerCase().includes(q) ||
+      n.message.toLowerCase().includes(q) ||
+      (n.recipientName || "").toLowerCase().includes(q)
+    );
+  }, [notifications, debouncedSearch]);
 
-  const counts = useMemo(() => ({
-    all: notifications.length,
-    pending: notifications.filter((n) => !n.read).length,
-    sent: notifications.filter((n) => n.read).length,
-  }), [notifications]);
+  const counts = useMemo(() => globalCounts || { all: 0, pending: 0, sent: 0 }, [globalCounts]);
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isFetchingNextPage) fetchNextPage();
+    }, { rootMargin: "200px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const markRead = useMutation({
     mutationFn: async (ids: string[]) => {
@@ -98,7 +156,6 @@ export default function AdminNotifications() {
         .update({ read: true })
         .in("id", targets.map((t) => t.id));
       if (error) throw error;
-      // Audit (não bloqueia em caso de falha)
       await Promise.allSettled(
         targets.map((t) =>
           logAdminAction({
@@ -114,14 +171,22 @@ export default function AdminNotifications() {
     },
     onMutate: async (ids) => {
       await qc.cancelQueries({ queryKey: ["admin_notifications"] });
-      const prev = qc.getQueryData<Notif[]>(["admin_notifications"]);
-      qc.setQueryData<Notif[]>(["admin_notifications"], (old = []) =>
-        old.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n))
-      );
+      const prev = qc.getQueriesData<any>({ queryKey: ["admin_notifications"] });
+      // Atualiza otimisticamente todas as páginas em cache
+      qc.setQueriesData<any>({ queryKey: ["admin_notifications"] }, (old: any) => {
+        if (!old?.pages) return old;
+        return {
+          ...old,
+          pages: old.pages.map((p: any) => ({
+            ...p,
+            items: p.items.map((n: Notif) => (ids.includes(n.id) ? { ...n, read: true } : n)),
+          })),
+        };
+      });
       return { prev };
     },
     onError: (e: any, _v, ctx: any) => {
-      if (ctx?.prev) qc.setQueryData(["admin_notifications"], ctx.prev);
+      if (ctx?.prev) ctx.prev.forEach(([key, val]: any) => qc.setQueryData(key, val));
       toast.error(e.message || "Erro ao marcar como lida");
     },
     onSuccess: (res) => {
@@ -130,7 +195,10 @@ export default function AdminNotifications() {
       else toast.success(c === 1 ? "Notificação marcada como lida" : `${c} notificações marcadas como lidas`);
       setSelected(new Set());
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["admin_notifications"] }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["admin_notifications"] });
+      qc.invalidateQueries({ queryKey: ["admin_notifications_counts"] });
+    },
   });
 
   const toggle = (id: string) => {
@@ -249,11 +317,16 @@ export default function AdminNotifications() {
             <div className="flex items-center gap-2">
               {counts.pending > 0 && (
                 <button
-                  onClick={() => markRead.mutate(notifications.filter((n) => !n.read).map((n) => n.id))}
+                  onClick={async () => {
+                    const { data: pend, error } = await supabase
+                      .from("notifications").select("id").eq("read", false).limit(5000);
+                    if (error) { toast.error("Erro ao buscar pendentes"); return; }
+                    markRead.mutate((pend || []).map((p: any) => p.id));
+                  }}
                   disabled={markRead.isPending}
                   className="text-xs font-medium px-3 py-1.5 rounded-full border border-border/60 hover:bg-muted transition-colors disabled:opacity-50"
                 >
-                  Marcar todas como lidas
+                  Marcar todas como lidas ({counts.pending})
                 </button>
               )}
               <button
@@ -337,6 +410,23 @@ export default function AdminNotifications() {
                 )}
               </div>
             ))}
+
+            {/* Sentinel + load more */}
+            <div ref={sentinelRef} />
+            {hasNextPage && (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="w-full py-3 rounded-2xl border border-border/60 bg-card text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+              >
+                {isFetchingNextPage ? "Carregando…" : "Carregar mais"}
+              </button>
+            )}
+            {!hasNextPage && notifications.length > 0 && (
+              <p className="text-center text-[11px] text-muted-foreground py-4">
+                Fim da lista · {notifications.length} carregadas
+              </p>
+            )}
           </div>
         )}
       </div>
