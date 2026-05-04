@@ -136,6 +136,22 @@ export default function AdminClients() {
               qc.setQueryData(["admin_client_detail", c.user_id], (old: any) =>
                 old ?? { profile: c, orders: [], blocked: !!c.blocked, totalSpent: Number(c.spent || 0) }
               );
+              // Prefetch full detail (orders + blocks) in background
+              qc.prefetchQuery({
+                queryKey: ["admin_client_detail", c.user_id],
+                queryFn: async () => {
+                  const [{ data: profile }, { data: orders }, { data: blocks }] = await Promise.all([
+                    supabase.from("profiles").select("*").eq("user_id", c.user_id).maybeSingle(),
+                    supabase.from("orders").select("*, services(name)").eq("client_id", c.user_id).order("created_at", { ascending: false }).limit(20),
+                    supabase.from("risk_actions").select("*").eq("user_id", c.user_id).eq("action", "block").eq("active", true),
+                  ]);
+                  const blocked = (blocks || []).length > 0;
+                  const totalSpent = (orders || [])
+                    .filter((o: any) => !["cancelled", "draft"].includes(o.status || ""))
+                    .reduce((s: number, o: any) => s + Number(o.total_price || 0), 0);
+                  return { profile, orders: orders || [], blocked, totalSpent };
+                },
+              });
               navigate(`/admin/clients/${c.user_id}`);
             }}
             emptyMessage="Nenhum cliente encontrado"
