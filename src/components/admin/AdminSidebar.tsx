@@ -21,6 +21,7 @@ import {
   ArrowDownToLine,
   Wrench,
   Bell,
+  Activity,
 } from "lucide-react";
 import { useState } from "react";
 
