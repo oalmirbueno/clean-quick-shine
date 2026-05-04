@@ -158,7 +158,7 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Appearance */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Aparência</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <SettingItem
@@ -171,7 +171,7 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Notifications */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Notificações</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <SettingItem
@@ -184,7 +184,7 @@ export default function AppSettings() {
         </motion.section>
 
         {/* App & Data */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">App e Dados</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
             <SettingItem
@@ -215,7 +215,7 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Support */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Suporte</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
             <SettingItem
@@ -234,7 +234,7 @@ export default function AppSettings() {
         </motion.section>
 
         {/* Legal */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
+        <motion.section variants={item}>
           <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Legal</h3>
           <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
             <SettingItem
@@ -260,7 +260,7 @@ export default function AppSettings() {
 
         {/* Account */}
         {user && (
-          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <motion.section variants={item}>
             <h3 className="text-sm font-medium text-muted-foreground mb-2 px-2">Conta</h3>
             <div className="bg-card rounded-2xl border border-border overflow-hidden">
               <SettingItem
@@ -275,7 +275,7 @@ export default function AppSettings() {
         )}
 
         {/* Footer */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="text-center pt-4">
+        <motion.div variants={item} className="text-center pt-4">
           <p className="text-xs text-muted-foreground">Já Limpo © 2025. Todos os direitos reservados.</p>
         </motion.div>
       </main>
