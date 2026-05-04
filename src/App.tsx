@@ -66,6 +66,7 @@ import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import AdminPros from "./pages/admin/AdminPros";
 import AdminProDetail from "./pages/admin/AdminProDetail";
 import AdminClients from "./pages/admin/AdminClients";
+import AdminClientDetail from "./pages/admin/AdminClientDetail";
 import AdminCoupons from "./pages/admin/AdminCoupons";
 import AdminSupport from "./pages/admin/AdminSupport";
 import AdminSupportDetail from "./pages/admin/AdminSupportDetail";
@@ -176,6 +177,7 @@ const App = () => {
                 <Route path="/admin/pros" element={<ProtectedRoute requiredRole="admin"><AdminPros /></ProtectedRoute>} />
                 <Route path="/admin/pros/:id" element={<ProtectedRoute requiredRole="admin"><AdminProDetail /></ProtectedRoute>} />
                 <Route path="/admin/clients" element={<ProtectedRoute requiredRole="admin"><AdminClients /></ProtectedRoute>} />
+                <Route path="/admin/clients/:id" element={<ProtectedRoute requiredRole="admin"><AdminClientDetail /></ProtectedRoute>} />
                 <Route path="/admin/coupons" element={<ProtectedRoute requiredRole="admin"><AdminCoupons /></ProtectedRoute>} />
                 <Route path="/admin/support" element={<ProtectedRoute requiredRole="admin"><AdminSupport /></ProtectedRoute>} />
                 <Route path="/admin/support/:id" element={<ProtectedRoute requiredRole="admin"><AdminSupportDetail /></ProtectedRoute>} />
