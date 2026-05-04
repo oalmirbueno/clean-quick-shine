@@ -14,13 +14,13 @@ const iconMap: Record<string, any> = {
   Home, Sparkles, HardHat, Zap,
 };
 
-const container = {
+const container: Variants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.07 } },
 };
-const item = {
+const item: Variants = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 220, damping: 24 } },
+  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 220, damping: 24 } },
 };
 
 export default function ClientHome() {
