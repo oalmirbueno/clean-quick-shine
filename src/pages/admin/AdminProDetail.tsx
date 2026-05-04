@@ -63,14 +63,30 @@ export default function AdminProDetail() {
     qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
   };
 
+  const optimisticPro = async (patch: Record<string, any>) => {
+    await qc.cancelQueries({ queryKey: ["admin_pro_detail", id] });
+    const prevDetail = qc.getQueryData<any>(["admin_pro_detail", id]);
+    const prevList = qc.getQueryData<any[]>(["admin_all_pros"]);
+    if (prevDetail) qc.setQueryData(["admin_pro_detail", id], { ...prevDetail, ...patch });
+    if (prevList) qc.setQueryData<any[]>(["admin_all_pros"], prevList.map((p) => (p.user_id === id ? { ...p, ...patch } : p)));
+    return { prevDetail, prevList };
+  };
+
+  const rollbackPro = (ctx: any) => {
+    if (ctx?.prevDetail) qc.setQueryData(["admin_pro_detail", id], ctx.prevDetail);
+    if (ctx?.prevList) qc.setQueryData(["admin_all_pros"], ctx.prevList);
+  };
+
   const approve = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("pro_profiles").update({ verified: true, status: "active" }).eq("user_id", id!);
       if (error) throw error;
       await notifyPro("Cadastro aprovado! 🎉", "Sua verificação foi concluída. Você já pode receber pedidos.", "success");
     },
-    onSuccess: () => { toast.success("Diarista aprovada"); invalidatePro(); },
-    onError: (e: any) => toast.error(e.message),
+    onMutate: () => optimisticPro({ verified: true, status: "active" }),
+    onSuccess: () => { toast.success("Diarista aprovada"); },
+    onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
+    onSettled: invalidatePro,
   });
 
   const reject = useMutation({
@@ -81,12 +97,13 @@ export default function AdminProDetail() {
       await supabase.from("pro_documents").update({ status: "rejected", rejection_reason: rejectReason.trim() }).eq("user_id", id!).eq("status", "pending");
       await notifyPro("Verificação reprovada", `Motivo: ${rejectReason.trim()}. Reenvie seus documentos para uma nova análise.`, "warning");
     },
+    onMutate: () => optimisticPro({ verified: false, status: "rejected", available_now: false }),
     onSuccess: () => {
       toast.warning("Diarista reprovada");
       setConfirm(null); setRejectReason("");
-      invalidatePro();
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
+    onSettled: invalidatePro,
   });
 
   const suspend = useMutation({
@@ -95,7 +112,10 @@ export default function AdminProDetail() {
       if (error) throw error;
       await notifyPro("Conta suspensa", "Sua conta foi suspensa pela equipe Já Limpo. Entre em contato com o suporte.", "warning");
     },
-    onSuccess: () => { toast.warning("Suspensa"); setConfirm(null); invalidatePro(); },
+    onMutate: () => optimisticPro({ status: "suspended", available_now: false }),
+    onSuccess: () => { toast.warning("Suspensa"); setConfirm(null); },
+    onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
+    onSettled: invalidatePro,
   });
 
   const reactivate = useMutation({
@@ -104,7 +124,10 @@ export default function AdminProDetail() {
       if (error) throw error;
       await notifyPro("Conta reativada", "Sua conta foi reativada. Bem-vinda de volta!", "success");
     },
-    onSuccess: () => { toast.success("Reativada"); setConfirm(null); invalidatePro(); },
+    onMutate: () => optimisticPro({ status: "active" }),
+    onSuccess: () => { toast.success("Reativada"); setConfirm(null); },
+    onError: (e: any, _v, ctx: any) => { rollbackPro(ctx); toast.error(e.message); },
+    onSettled: invalidatePro,
   });
 
   const sendNotify = useMutation({
