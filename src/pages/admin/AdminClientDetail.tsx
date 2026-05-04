@@ -35,26 +35,20 @@ export default function AdminClientDetail() {
   });
 
   const optimisticBlock = async (blocked: boolean) => {
-    await qc.cancelQueries({ queryKey: ["admin_client_detail", id] });
-    const prevDetail = qc.getQueryData<any>(["admin_client_detail", id]);
-    const prevList = qc.getQueryData<any[]>(["admin_all_clients_v2"]);
-    if (prevDetail) qc.setQueryData(["admin_client_detail", id], { ...prevDetail, blocked });
-    if (prevList) qc.setQueryData<any[]>(["admin_all_clients_v2"], prevList.map((c) => (c.user_id === id ? { ...c, blocked } : c)));
+    await qc.cancelQueries({ queryKey: adminKeys.clientDetail(id) });
+    const prevDetail = qc.getQueryData<any>(adminKeys.clientDetail(id));
+    const prevList = qc.getQueryData<any[]>(adminKeys.allClients());
+    if (prevDetail) qc.setQueryData(adminKeys.clientDetail(id), { ...prevDetail, blocked });
+    if (prevList) qc.setQueryData<any[]>(adminKeys.allClients(), prevList.map((c) => (c.user_id === id ? { ...c, blocked } : c)));
     return { prevDetail, prevList };
   };
 
   const rollback = (ctx: any) => {
-    if (ctx?.prevDetail) qc.setQueryData(["admin_client_detail", id], ctx.prevDetail);
-    if (ctx?.prevList) qc.setQueryData(["admin_all_clients_v2"], ctx.prevList);
+    if (ctx?.prevDetail) qc.setQueryData(adminKeys.clientDetail(id), ctx.prevDetail);
+    if (ctx?.prevList) qc.setQueryData(adminKeys.allClients(), ctx.prevList);
   };
 
-  const settledClient = () => {
-    qc.invalidateQueries({ queryKey: ["admin_client_detail", id] });
-    qc.invalidateQueries({ queryKey: ["admin_all_clients_v2"] });
-    qc.invalidateQueries({ queryKey: ["admin_risk_actions"] });
-    qc.invalidateQueries({ queryKey: ["admin_risk_flags"] });
-    qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
-  };
+  const settledClient = () => invalidateClient(id);
 
   const notifyClient = async (title: string, message: string, type: "info" | "success" | "warning" = "info") => {
     try {
