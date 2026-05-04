@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  ChevronLeft, 
+import {
   ChevronRight,
-  Settings,
   Bell,
   BellOff,
   Moon,
   Sun,
   Trash2,
-  Download,
   Smartphone,
   Globe,
-  Shield,
   HelpCircle,
   LogOut,
   Database,
@@ -27,6 +23,10 @@ import {
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { Logo } from "@/components/ui/Logo";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 interface SettingItemProps {
   icon: React.ReactNode;
