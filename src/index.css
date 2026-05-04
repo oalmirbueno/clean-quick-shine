@@ -66,7 +66,7 @@
     --shadow-button: 0 2px 4px 0 hsl(162 78% 45% / 0.2);
     --app-height: 100dvh;
     --bottom-nav-height: 56px;
-    --bottom-nav-safe-area: env(safe-area-inset-bottom, 0px);
+    --bottom-nav-safe-area: 0px;
   }
 
   .dark {
@@ -380,12 +380,17 @@ body {
   padding: 0;
   background-color: hsl(var(--background));
   overscroll-behavior-y: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
   height: 100dvh;
   height: var(--app-height);
   overflow: hidden;
 }
 
 #root {
+  position: fixed;
+  inset: 0;
   height: 100dvh;
   height: var(--app-height);
   width: 100%;
