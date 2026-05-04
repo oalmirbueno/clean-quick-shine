@@ -153,7 +153,7 @@ export default function AdminProDetail() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted shrink-0">
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -164,6 +164,86 @@ export default function AdminProDetail() {
             <StatusBadge status={pro.status || "pending"} />
           </div>
         </div>
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setNotifyOpen(true)}
+            className="h-10 px-3 rounded-xl border border-border/60 bg-card hover:bg-muted text-sm font-medium inline-flex items-center gap-1.5"
+          >
+            <MessageSquareWarning className="w-4 h-4" /> Notificar
+          </button>
+          {!pro.verified ? (
+            <>
+              <button
+                onClick={() => approve.mutate()}
+                disabled={approve.isPending}
+                className="h-10 px-3 rounded-xl bg-primary text-primary-foreground hover:opacity-90 text-sm font-medium inline-flex items-center gap-1.5 disabled:opacity-60"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Aprovar
+              </button>
+              <button
+                onClick={() => setConfirm("reject")}
+                className="h-10 px-3 rounded-xl bg-destructive text-destructive-foreground hover:opacity-90 text-sm font-medium inline-flex items-center gap-1.5"
+              >
+                <XCircle className="w-4 h-4" /> Reprovar
+              </button>
+            </>
+          ) : pro.status === "suspended" ? (
+            <button
+              onClick={() => setConfirm("reactivate")}
+              className="h-10 px-3 rounded-xl bg-success text-success-foreground hover:opacity-90 text-sm font-medium inline-flex items-center gap-1.5"
+            >
+              <ShieldCheck className="w-4 h-4" /> Reativar
+            </button>
+          ) : (
+            <button
+              onClick={() => setConfirm("suspend")}
+              className="h-10 px-3 rounded-xl bg-destructive text-destructive-foreground hover:opacity-90 text-sm font-medium inline-flex items-center gap-1.5"
+            >
+              <AlertTriangle className="w-4 h-4" /> Suspender
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile quick actions */}
+      <div className="sm:hidden grid grid-cols-2 gap-2">
+        <button
+          onClick={() => setNotifyOpen(true)}
+          className="h-10 rounded-xl border border-border/60 bg-card hover:bg-muted text-sm font-medium inline-flex items-center justify-center gap-1.5"
+        >
+          <MessageSquareWarning className="w-4 h-4" /> Notificar
+        </button>
+        {!pro.verified ? (
+          <button
+            onClick={() => approve.mutate()}
+            disabled={approve.isPending}
+            className="h-10 rounded-xl bg-primary text-primary-foreground hover:opacity-90 text-sm font-medium inline-flex items-center justify-center gap-1.5 disabled:opacity-60"
+          >
+            <CheckCircle2 className="w-4 h-4" /> Aprovar
+          </button>
+        ) : pro.status === "suspended" ? (
+          <button
+            onClick={() => setConfirm("reactivate")}
+            className="h-10 rounded-xl bg-success text-success-foreground hover:opacity-90 text-sm font-medium inline-flex items-center justify-center gap-1.5"
+          >
+            <ShieldCheck className="w-4 h-4" /> Reativar
+          </button>
+        ) : (
+          <button
+            onClick={() => setConfirm("suspend")}
+            className="h-10 rounded-xl bg-destructive text-destructive-foreground hover:opacity-90 text-sm font-medium inline-flex items-center justify-center gap-1.5"
+          >
+            <AlertTriangle className="w-4 h-4" /> Suspender
+          </button>
+        )}
+        {!pro.verified && (
+          <button
+            onClick={() => setConfirm("reject")}
+            className="col-span-2 h-10 rounded-xl bg-destructive text-destructive-foreground hover:opacity-90 text-sm font-medium inline-flex items-center justify-center gap-1.5"
+          >
+            <XCircle className="w-4 h-4" /> Reprovar com motivo
+          </button>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
