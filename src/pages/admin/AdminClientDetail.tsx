@@ -13,7 +13,7 @@ import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
 export default function AdminClientDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const qc = useQueryClient();
+  const { qc, client: invalidateClient } = useAdminInvalidate();
   const [confirm, setConfirm] = useState<null | "block" | "unblock">(null);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyTitle, setNotifyTitle] = useState("");
