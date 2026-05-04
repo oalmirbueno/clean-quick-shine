@@ -1531,6 +1531,25 @@ export type Database = {
       }
       decrypt_field: { Args: { encrypted_text: string }; Returns: string }
       encrypt_field: { Args: { plain_text: string }; Returns: string }
+      find_matching_pros: {
+        Args: {
+          p_exclude_client?: string
+          p_lat: number
+          p_limit?: number
+          p_lng: number
+          p_max_km?: number
+          p_zone_id: string
+        }
+        Returns: {
+          available_now: boolean
+          distance_km: number
+          jobs_done: number
+          rating: number
+          same_zone: boolean
+          user_id: string
+          verified: boolean
+        }[]
+      }
       find_nearest_zone: {
         Args: { p_lat: number; p_lng: number }
         Returns: string
@@ -1541,6 +1560,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      haversine_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
