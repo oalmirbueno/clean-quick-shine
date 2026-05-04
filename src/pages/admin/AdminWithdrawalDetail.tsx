@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
+import { logAdminAction, type AuditAction } from "@/lib/auditLog";
 
 const statusActionMap: Record<string, { label: string; description: string; variant?: "primary" | "outline" }[]> = {
   pending: [
