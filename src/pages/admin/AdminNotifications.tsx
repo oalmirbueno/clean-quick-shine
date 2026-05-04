@@ -2,12 +2,13 @@ import { useMemo, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info, CheckCheck } from "lucide-react";
+import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info, CheckCheck, User as UserIcon, Send, Hash, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { logAdminAction } from "@/lib/auditLog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 type Notif = {
   id: string;
@@ -17,6 +18,7 @@ type Notif = {
   type: string;
   read: boolean;
   created_at: string;
+  data?: Record<string, any> | null;
   recipientName?: string;
 };
 
@@ -35,13 +37,14 @@ export default function AdminNotifications() {
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "sent">("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const { data: notifications = [], isLoading } = useQuery<Notif[]>({
     queryKey: ["admin_notifications"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("notifications")
-        .select("id, user_id, title, message, type, read, created_at")
+        .select("id, user_id, title, message, type, read, created_at, data")
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
