@@ -52,7 +52,8 @@ export default function AdminWithdrawals() {
       if (error) throw error;
       const affected = withdrawals.filter((w: any) => selected.has(w.id));
       const auditAction: AuditAction = action === "approve" ? "withdrawal_approved" : action === "reject" ? "withdrawal_rejected" : "withdrawal_completed";
-      await Promise.all(
+      const newStatusForData = action === "approve" ? "processing" : action === "reject" ? "rejected" : "completed";
+      await Promise.allSettled(
         affected.flatMap((w: any) => {
           const title = action === "approve" ? "Saque em processamento" : action === "complete" ? "Saque concluído ✅" : "Saque rejeitado";
           const message = action === "approve"
@@ -61,10 +62,14 @@ export default function AdminWithdrawals() {
               ? `Saque de ${fmt(w.amount)} concluído.`
               : `Saque de ${fmt(w.amount)} rejeitado. Valor devolvido ao saldo.`;
           const type = action === "reject" ? "warning" : "success";
+          const data = { withdrawal_id: w.id, new_status: newStatusForData, bulk: true };
           return [
+            // In-app garantido
+            supabase.from("notifications").insert({ user_id: w.user_id, title, message, type, data }),
+            // Push em paralelo (sem duplicar in-app)
             supabase.functions
-              .invoke("send-push-notification", { body: { userId: w.user_id, title, message, type } })
-              .catch(() => supabase.from("notifications").insert({ user_id: w.user_id, title, message, type })),
+              .invoke("send-push-notification", { body: { userId: w.user_id, title, message, type, skipDbInsert: true, data } })
+              .catch((e) => console.warn("[bulk withdraw push]", e)),
             logAdminAction({
               action: auditAction,
               targetType: "withdrawal",

@@ -83,13 +83,17 @@ export default function AdminWithdrawalDetail() {
             ? `Saque de ${amount} concluído.`
             : `Saque de ${amount} rejeitado. Valor devolvido ao saldo.`;
         const type = newStatus === "rejected" ? "warning" : "success";
-        try {
-          await supabase.functions.invoke("send-push-notification", {
-            body: { userId: withdrawal.user_id, title, message, type },
-          });
-        } catch {
-          await supabase.from("notifications").insert({ user_id: withdrawal.user_id, title, message, type });
-        }
+        // In-app + push em paralelo, skipDbInsert evita duplicidade
+        const inApp = supabase
+          .from("notifications")
+          .insert({ user_id: withdrawal.user_id, title, message, type, data: { withdrawal_id: id, new_status: newStatus } })
+          .then(({ error }) => { if (error) console.error("[withdrawal notify] in-app failed", error); });
+        const push = supabase.functions
+          .invoke("send-push-notification", {
+            body: { userId: withdrawal.user_id, title, message, type, skipDbInsert: true, data: { withdrawal_id: id, new_status: newStatus } },
+          })
+          .catch((e) => console.warn("[withdrawal notify] push failed", e));
+        await Promise.allSettled([inApp, push]);
       }
     },
     onMutate: async (newStatus) => {
