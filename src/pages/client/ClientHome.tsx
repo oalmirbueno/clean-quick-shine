@@ -39,7 +39,8 @@ const item: Variants = {
 
 export default function ClientHome() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
+  const isAdmin = hasRole("admin");
   const { showTutorial, completeTutorial } = useAppTutorial("client", user?.id);
   const { data: services } = useServices();
 
