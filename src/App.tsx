@@ -82,6 +82,7 @@ import AdminDocuments from "./pages/admin/AdminDocuments";
 import AdminWithdrawals from "./pages/admin/AdminWithdrawals";
 import AdminWithdrawalDetail from "./pages/admin/AdminWithdrawalDetail";
 import AdminServices from "./pages/admin/AdminServices";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 
 // Company Pages
 import CompanyOnboarding from "./pages/company/CompanyOnboarding";
@@ -193,6 +194,7 @@ const App = () => {
                 <Route path="/admin/withdrawals" element={<ProtectedRoute requiredRole="admin"><AdminWithdrawals /></ProtectedRoute>} />
                 <Route path="/admin/withdrawals/:id" element={<ProtectedRoute requiredRole="admin"><AdminWithdrawalDetail /></ProtectedRoute>} />
                 <Route path="/admin/services" element={<ProtectedRoute requiredRole="admin"><AdminServices /></ProtectedRoute>} />
+                <Route path="/admin/notifications" element={<ProtectedRoute requiredRole="admin"><AdminNotifications /></ProtectedRoute>} />
 
                 {/* Company Routes */}
                 <Route path="/company/onboarding" element={<CompanyOnboarding />} />

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { useAuth } from "@/contexts/AuthContext";
-import { Eye, FileCheck, Tag, Wrench, Building2, HeadphonesIcon, BarChart3, Shield, Settings, LogOut, X } from "lucide-react";
+import { Eye, FileCheck, Tag, Wrench, Building2, HeadphonesIcon, BarChart3, Shield, Settings, LogOut, X, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const primary = [
@@ -21,6 +21,7 @@ const moreItems = [
   { icon: Wrench, label: "Serviços", path: "/admin/services" },
   { icon: Building2, label: "Orçamentos", path: "/admin/quotes" },
   { icon: HeadphonesIcon, label: "Suporte", path: "/admin/support" },
+  { icon: Bell, label: "Notificações", path: "/admin/notifications" },
   { icon: BarChart3, label: "Analytics", path: "/admin/analytics" },
   { icon: Shield, label: "Risco", path: "/admin/risk" },
   { icon: Settings, label: "Configurações", path: "/admin/settings" },
