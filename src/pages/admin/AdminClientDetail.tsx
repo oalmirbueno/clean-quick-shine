@@ -70,6 +70,13 @@ export default function AdminClientDetail() {
         active: true,
       });
       if (error) throw error;
+      await logAdminAction({
+        action: "client_blocked",
+        targetType: "client",
+        targetId: id!,
+        targetName: client?.profile?.full_name,
+        reason: "Bloqueado pelo administrador",
+      });
       await notifyClient(
         "Conta bloqueada",
         "Sua conta foi bloqueada pela equipe Já Limpo. Entre em contato com o suporte.",
