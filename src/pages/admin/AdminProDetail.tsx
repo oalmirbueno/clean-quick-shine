@@ -54,14 +54,16 @@ export default function AdminProDetail() {
   });
 
   const notifyPro = async (title: string, message: string, type: "info" | "success" | "warning" = "info") => {
-    try {
-      await supabase.functions.invoke("send-push-notification", {
-        body: { userId: id!, title, message, type },
-      });
-    } catch (e) {
-      // Fallback: ao menos grava in-app
-      await supabase.from("notifications").insert({ user_id: id!, title, message, type });
-    }
+    // Always persist in-app notification, and fire push in parallel.
+    // The push function also writes to the table, but we guarantee in-app delivery even if it fails.
+    const inApp = supabase
+      .from("notifications")
+      .insert({ user_id: id!, title, message, type })
+      .then(({ error }) => { if (error) console.error("[notifyPro] in-app insert failed", error); });
+    const push = supabase.functions
+      .invoke("send-push-notification", { body: { userId: id!, title, message, type, skipDbInsert: true } })
+      .catch((e) => console.warn("[notifyPro] push failed", e));
+    await Promise.allSettled([inApp, push]);
   };
 
   const invalidatePro = () => invalidateProGroup(id);
