@@ -42,6 +42,7 @@ import ClientCancel from "./pages/client/ClientCancel";
 import ClientLocation from "./pages/client/ClientLocation";
 import ClientSubscription from "./pages/client/ClientSubscription";
 import ClientReferral from "./pages/client/ClientReferral";
+import ClientDemo from "./pages/client/ClientDemo";
 
 // Pro Pages
 import ProHome from "./pages/pro/ProHome";
@@ -148,6 +149,7 @@ const App = () => {
                 <Route path="/client/location" element={<ProtectedRoute requiredRole="client"><ClientLocation /></ProtectedRoute>} />
                 <Route path="/client/subscription" element={<ProtectedRoute requiredRole="client"><ClientSubscription /></ProtectedRoute>} />
                 <Route path="/client/referral" element={<ProtectedRoute requiredRole="client"><ClientReferral /></ProtectedRoute>} />
+                <Route path="/client/demo" element={<ClientDemo />} />
 
                 {/* Pro Routes */}
                 <Route path="/pro/home" element={<ProtectedRoute requiredRole="pro"><ProHome /></ProtectedRoute>} />
