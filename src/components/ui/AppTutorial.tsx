@@ -101,8 +101,9 @@ export function AppTutorial({ variant, onComplete, userId }: AppTutorialProps) {
     localStorage.setItem(storageKey, "true");
     // Mantém a chave global também marcada para retro-compat de outras telas
     localStorage.setItem(baseKey, "true");
+    if (userId) void markTutorialCompletedRemote(variant, userId);
     setTimeout(() => onComplete(), 280);
-  }, [onComplete, storageKey, baseKey]);
+  }, [onComplete, storageKey, baseKey, userId, variant]);
 
 
   const handleNext = useCallback(() => {
