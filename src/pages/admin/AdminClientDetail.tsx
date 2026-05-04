@@ -54,6 +54,9 @@ export default function AdminClientDetail() {
       setConfirm(null);
       qc.invalidateQueries({ queryKey: ["admin_client_detail", id] });
       qc.invalidateQueries({ queryKey: ["admin_all_clients_v2"] });
+      qc.invalidateQueries({ queryKey: ["admin_risk_actions"] });
+      qc.invalidateQueries({ queryKey: ["admin_risk_flags"] });
+      qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
     },
     onError: (e: any) => toast.error(e.message || "Erro ao bloquear"),
   });
