@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { useAuth } from "@/contexts/AuthContext";
-import { Eye, FileCheck, Tag, Wrench, Building2, HeadphonesIcon, BarChart3, Shield, Settings, LogOut, X } from "lucide-react";
+import { Eye, FileCheck, Tag, Wrench, Building2, HeadphonesIcon, BarChart3, Shield, Settings, LogOut, X, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const primary = [
