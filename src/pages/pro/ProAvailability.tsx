@@ -1,15 +1,19 @@
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { MapMock } from "@/components/ui/MapMock";
-import { ChevronRight, Radio, MapPin, Clock, Zap } from "lucide-react";
+import { Radio, MapPin, Clock, Zap } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 export default function ProAvailability() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
