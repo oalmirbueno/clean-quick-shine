@@ -299,20 +299,20 @@ export default function ProProfile() {
           </div>
         </div>
 
-        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 animate-fade-in" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pb-6 space-y-4 animate-fade-in" style={{ WebkitOverflowScrolling: 'touch' }}>
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-card rounded-xl border border-border p-3 text-center">
-              <p className="text-xl font-bold text-foreground">{rating.toFixed(1)}</p>
-              <p className="text-xs text-muted-foreground">Nota</p>
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="bg-card rounded-2xl border border-border/60 p-3.5 text-center shadow-sm">
+              <p className="text-lg font-bold text-foreground leading-none">{rating.toFixed(1)}</p>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mt-1.5">Nota</p>
             </div>
-            <div className="bg-card rounded-xl border border-border p-3 text-center">
-              <p className="text-xl font-bold text-foreground">{jobsDone}</p>
-              <p className="text-xs text-muted-foreground">Serviços</p>
+            <div className="bg-card rounded-2xl border border-border/60 p-3.5 text-center shadow-sm">
+              <p className="text-lg font-bold text-foreground leading-none">{jobsDone}</p>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mt-1.5">Serviços</p>
             </div>
-            <div className="bg-card rounded-xl border border-border p-3 text-center">
-              <p className="text-xl font-bold text-foreground">{acceptanceRate}%</p>
-              <p className="text-xs text-muted-foreground">Aceitação</p>
+            <div className="bg-card rounded-2xl border border-border/60 p-3.5 text-center shadow-sm">
+              <p className="text-lg font-bold text-foreground leading-none">{acceptanceRate}%</p>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mt-1.5">Aceitação</p>
             </div>
           </div>
 
