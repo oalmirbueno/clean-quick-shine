@@ -45,7 +45,7 @@ const statusTargetMap: Record<string, string[]> = {
 export default function AdminWithdrawalDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const queryClient = useQueryClient();
+  const { qc: queryClient, withdrawals: invalidateWithdrawals } = useAdminInvalidate();
   const [confirmAction, setConfirmAction] = useState<{ status: string; label: string; description: string } | null>(null);
 
   const { data: withdrawal } = useQuery({
