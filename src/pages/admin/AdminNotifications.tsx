@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info, CheckCheck, User as UserIcon, Send, Hash, Calendar, Download, FileText, FileSpreadsheet } from "lucide-react";
+import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info, CheckCheck, User as UserIcon, Send, Hash, Calendar, FileText, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
