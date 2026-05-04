@@ -54,7 +54,6 @@ export default function AdminNotifications() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch,
   } = useInfiniteQuery({
     queryKey: ["admin_notifications", { statusFilter, typeFilter, debouncedSearch }],
     initialPageParam: 0,
