@@ -305,7 +305,7 @@ export default function AdminNotifications() {
       setExporting("csv");
       const items = await fetchAllForExport();
       if (items.length === 0) { toast.info("Nenhuma notificação para exportar"); return; }
-      const headers = ["ID", "Data/Hora", "Status", "Tipo", "Destinatário", "ID do usuário", "Título", "Mensagem", "Payload"];
+      const headers = ["ID", "Data/Hora", "Status", "Tipo", "Destinatário", "Email", "ID do usuário", "Pedido", "Título", "Mensagem", "Payload"];
       const escape = (v: any) => {
         const s = v == null ? "" : String(v);
         return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -316,7 +316,9 @@ export default function AdminNotifications() {
         n.read ? "Lida" : "Pendente",
         n.type,
         n.recipientName || "",
+        n.recipientEmail || "",
         n.user_id,
+        extractOrderId(n),
         n.title,
         n.message,
         n.data ? JSON.stringify(n.data) : "",
