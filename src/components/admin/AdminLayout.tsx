@@ -14,7 +14,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         className="lg:ml-64 flex-1 h-full min-h-0 overflow-y-auto overscroll-contain"
         style={{
           paddingTop: "env(safe-area-inset-top, 0px)",
-          paddingBottom: "calc(4rem + env(safe-area-inset-bottom, 0px))",
+          paddingBottom: "calc(4rem + var(--bottom-nav-safe-area, 0px))",
           WebkitOverflowScrolling: "touch",
         }}
       >
