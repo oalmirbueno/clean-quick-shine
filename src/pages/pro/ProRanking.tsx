@@ -18,11 +18,9 @@ const tips = [
 ];
 
 export default function ProRanking() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: rankingData, isLoading } = useProRanking();
 
-  // Fetch profile data
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -39,8 +37,12 @@ export default function ProRanking() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="h-full bg-background flex flex-col safe-top">
+        <ProPageHeader title="Meu ranking" />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-7 h-7 text-primary animate-spin" />
+        </div>
+        <BottomNav variant="pro" />
       </div>
     );
   }
