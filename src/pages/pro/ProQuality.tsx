@@ -1,8 +1,12 @@
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { QualityCard } from "@/components/ui/QualityBadge";
-import { ChevronRight, Clock, Target, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
+import { Clock, Target, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
 import { useProMetrics, useSlaRules } from "@/hooks/useProMetrics";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 export default function ProQuality() {
   const navigate = useNavigate();
