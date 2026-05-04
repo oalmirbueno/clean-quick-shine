@@ -35,7 +35,7 @@ export default function AdminProDetail() {
   });
 
   const { data: docs = [] } = useQuery({
-    queryKey: ["admin_pro_docs", id],
+    queryKey: adminKeys.proDocs(id),
     queryFn: async () => {
       const { data } = await supabase.from("pro_documents").select("*").eq("user_id", id!);
       return data || [];
