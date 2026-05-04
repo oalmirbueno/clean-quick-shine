@@ -51,7 +51,7 @@ export const BottomNav = forwardRef<HTMLDivElement, BottomNavProps>(
 
         <nav
           ref={ref}
-          className="fixed inset-x-0 bottom-0 z-50 border-t border-border/30 bg-card/95 backdrop-blur-lg"
+          className="fixed inset-x-0 bottom-0 z-50 border-t liquid-glass-bar"
           style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
           <div className="max-w-lg mx-auto flex" style={{ height: "56px" }}>
