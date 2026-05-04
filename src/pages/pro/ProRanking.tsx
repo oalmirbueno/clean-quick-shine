@@ -1,9 +1,14 @@
-import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Star, CheckCircle2, TrendingUp, Award, Loader2, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import { Star, CheckCircle2, TrendingUp, Award, Loader2, Users } from "lucide-react";
+import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { useProRanking } from "@/hooks/useProMetrics";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 const tips = [
   "Responda rapidamente aos pedidos para aumentar sua taxa de aceitação",
