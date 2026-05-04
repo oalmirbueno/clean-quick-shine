@@ -133,32 +133,15 @@ export default function AppSettings() {
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex-shrink-0 bg-background/95 backdrop-blur-md border-b border-border z-10"
-      >
-        <div className="flex items-center gap-4 p-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold">Configurações</h1>
-          </div>
-        </div>
-      </motion.header>
+      <ProPageHeader title="Configurações" subtitle="Personalize sua experiência" />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-6 pb-8 safe-bottom">
-        {/* App Info */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border"
-        >
+      <main className="flex-1 overflow-y-auto min-h-0 px-5 pb-8 safe-bottom">
+        <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
+          {/* App Info */}
+          <motion.section
+            variants={item}
+            className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/60 shadow-sm"
+          >
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Logo size="sm" iconOnly />
           </div>
