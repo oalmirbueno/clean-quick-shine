@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 
+type NavigatorWithStandalone = Navigator & { standalone?: boolean };
+
 export function useViewportHeight() {
   useEffect(() => {
     const setViewportHeight = () => {
       const isStandalone =
         window.matchMedia("(display-mode: standalone)").matches ||
-        (window.navigator as any).standalone === true;
+        (window.navigator as NavigatorWithStandalone).standalone === true;
 
       document.documentElement.classList.toggle("app-standalone", isStandalone);
 
