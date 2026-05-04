@@ -127,7 +127,13 @@ export default function AdminPros() {
             columns={columns}
             data={filteredPros}
             keyField="id"
-            onRowClick={(pro) => navigate(`/admin/pros/${pro.user_id}`)}
+            onRowClick={(pro) => {
+              // Seed the detail cache for instant render
+              qc.setQueryData(["admin_pro_detail", pro.user_id], (old: any) =>
+                old ?? { ...(pro.profiles || {}), ...pro, metrics: null }
+              );
+              navigate(`/admin/pros/${pro.user_id}`);
+            }}
           />
         </div>
       )}
