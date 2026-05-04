@@ -29,13 +29,14 @@ export function resetTutorialFor(variant: "client" | "pro", userId?: string | nu
 interface AppTutorialProps {
   variant: "client" | "pro";
   onComplete: () => void;
+  userId?: string | null;
 }
 
 // Animation tuning — short, snappy, GPU-friendly transforms only
 const SLIDE_TRANSITION = { duration: 0.22, ease: [0.32, 0.72, 0, 1] as const };
 const SWIPE_THRESHOLD = 60;
 
-export function AppTutorial({ variant, onComplete }: AppTutorialProps) {
+export function AppTutorial({ variant, onComplete, userId }: AppTutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isExiting, setIsExiting] = useState(false);
@@ -47,7 +48,8 @@ export function AppTutorial({ variant, onComplete }: AppTutorialProps) {
   const step = steps[currentStep];
   const isLastStep = currentStep === totalSteps - 1;
   const isFirstStep = currentStep === 0;
-  const storageKey = variant === "client" ? CLIENT_TUTORIAL_KEY : PRO_TUTORIAL_KEY;
+  const baseKey = variant === "client" ? CLIENT_TUTORIAL_KEY : PRO_TUTORIAL_KEY;
+  const storageKey = makeKey(baseKey, userId);
   const isPro = variant === "pro";
 
   // Lock body scroll while open
@@ -60,8 +62,11 @@ export function AppTutorial({ variant, onComplete }: AppTutorialProps) {
   const handleComplete = useCallback(() => {
     setIsExiting(true);
     localStorage.setItem(storageKey, "true");
+    // Mantém a chave global também marcada para retro-compat de outras telas
+    localStorage.setItem(baseKey, "true");
     setTimeout(() => onComplete(), 280);
-  }, [onComplete, storageKey]);
+  }, [onComplete, storageKey, baseKey]);
+
 
   const handleNext = useCallback(() => {
     setDirection(1);
