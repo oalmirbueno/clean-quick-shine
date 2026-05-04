@@ -37,7 +37,7 @@ export function AdminBottomNav() {
     <>
       {/* Bottom Nav (mobile only) */}
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border/60"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t liquid-glass-bar"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="grid grid-cols-6 h-16">
