@@ -92,6 +92,7 @@ import ProjectDocumentation from "./pages/dev/ProjectDocumentation";
 import Install from "./pages/Install";
 import AppSettings from "./pages/AppSettings";
 import Offline from "./pages/Offline";
+import HelpDocs from "./pages/HelpDocs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
