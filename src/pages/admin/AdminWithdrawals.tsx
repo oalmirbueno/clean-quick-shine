@@ -48,7 +48,6 @@ export default function AdminWithdrawals() {
       if (newStatus === "completed") updates.processed_at = new Date().toISOString();
       const { error } = await supabase.from("withdrawals").update(updates).in("id", ids);
       if (error) throw error;
-      // Notify pros
       const affected = withdrawals.filter((w: any) => selected.has(w.id));
       const notifs = affected.map((w: any) => ({
         user_id: w.user_id,
@@ -58,16 +57,31 @@ export default function AdminWithdrawals() {
       }));
       if (notifs.length) await supabase.from("notifications").insert(notifs);
     },
+    onMutate: async (action) => {
+      await qc.cancelQueries({ queryKey: ["admin_withdrawals_list"] });
+      const prev = qc.getQueryData<any[]>(["admin_withdrawals_list"]);
+      const newStatus = action === "approve" ? "processing" : action === "reject" ? "rejected" : "completed";
+      qc.setQueryData<any[]>(["admin_withdrawals_list"], (old = []) =>
+        old.map((w) => (selected.has(w.id) ? { ...w, status: newStatus, processed_at: newStatus === "completed" ? new Date().toISOString() : w.processed_at } : w))
+      );
+      return { prev };
+    },
+    onError: (e: any, _action, ctx: any) => {
+      if (ctx?.prev) qc.setQueryData(["admin_withdrawals_list"], ctx.prev);
+      toast.error(e.message);
+      setBulkConfirm(null);
+    },
     onSuccess: (_, action) => {
       const labels: any = { approve: "aprovados", reject: "rejeitados", complete: "concluídos" };
       toast.success(`${selected.size} saques ${labels[action]}`);
       setSelected(new Set());
       setBulkConfirm(null);
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["admin_withdrawals_list"] });
       qc.invalidateQueries({ queryKey: ["admin_withdrawals"] });
       qc.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
     },
-    onError: (e: any) => { toast.error(e.message); setBulkConfirm(null); },
   });
 
   return (
