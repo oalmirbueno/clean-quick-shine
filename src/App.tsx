@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { UpdatePrompt } from "@/components/ui/UpdatePrompt";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { InstallBanner } from "@/components/ui/InstallBanner";
+import { MobilePwaGate } from "@/components/MobilePwaGate";
 
 // Pages
 import Index from "./pages/Index";
