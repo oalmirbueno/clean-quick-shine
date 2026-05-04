@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info, CheckCheck, User as UserIcon, Send, Hash, Calendar } from "lucide-react";
+import { Search, Bell, CheckCircle2, Clock, AlertTriangle, Info, CheckCheck, User as UserIcon, Send, Hash, Calendar, FileText, FileSpreadsheet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -228,12 +228,224 @@ export default function AdminNotifications() {
     [notifications, selected]
   );
 
+  // ===================== EXPORT =====================
+  const [exporting, setExporting] = useState<null | "csv" | "pdf">(null);
+
+  const fetchAllForExport = async (): Promise<Notif[]> => {
+    const all: any[] = [];
+    const PAGE = 1000;
+    let from = 0;
+    // Itera em páginas de 1000 (limite default) até esgotar.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      let q = supabase
+        .from("notifications")
+        .select("id, user_id, title, message, type, read, created_at, data")
+        .order("created_at", { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (statusFilter === "pending") q = q.eq("read", false);
+      if (statusFilter === "sent") q = q.eq("read", true);
+      if (typeFilter !== "all") q = q.eq("type", typeFilter);
+      if (debouncedSearch) {
+        const safe = debouncedSearch.replace(/[%,]/g, " ");
+        q = q.or(`title.ilike.%${safe}%,message.ilike.%${safe}%`);
+      }
+      const { data: rows, error } = await q;
+      if (error) throw error;
+      const batch = rows || [];
+      all.push(...batch);
+      if (batch.length < PAGE) break;
+      from += PAGE;
+      if (all.length >= 20000) break; // hard safety cap
+    }
+    const userIds = Array.from(new Set(all.map((n) => n.user_id)));
+    let nameMap = new Map<string, string>();
+    if (userIds.length) {
+      const { data: profiles } = await supabase
+        .from("profiles").select("user_id, full_name").in("user_id", userIds);
+      nameMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
+    }
+    let items: Notif[] = all.map((n) => ({ ...n, recipientName: nameMap.get(n.user_id) || "Usuário" }));
+    // Refina busca com nome do destinatário (igual ao client-side da listagem)
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
+      items = items.filter((n) =>
+        n.title.toLowerCase().includes(q) ||
+        n.message.toLowerCase().includes(q) ||
+        (n.recipientName || "").toLowerCase().includes(q)
+      );
+    }
+    return items;
+  };
+
+  const filterSuffix = () => {
+    const parts = [statusFilter, typeFilter];
+    return parts.filter((p) => p && p !== "all").join("_") || "todas";
+  };
+
+  const exportCSV = async () => {
+    try {
+      setExporting("csv");
+      const items = await fetchAllForExport();
+      if (items.length === 0) { toast.info("Nenhuma notificação para exportar"); return; }
+      const headers = ["ID", "Data/Hora", "Status", "Tipo", "Destinatário", "ID do usuário", "Título", "Mensagem", "Payload"];
+      const escape = (v: any) => {
+        const s = v == null ? "" : String(v);
+        return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const rows = items.map((n) => [
+        n.id,
+        format(new Date(n.created_at), "yyyy-MM-dd HH:mm:ss"),
+        n.read ? "Lida" : "Pendente",
+        n.type,
+        n.recipientName || "",
+        n.user_id,
+        n.title,
+        n.message,
+        n.data ? JSON.stringify(n.data) : "",
+      ].map(escape).join(","));
+      const csv = "\uFEFF" + [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `jalimpo_notificacoes_${filterSuffix()}_${format(new Date(), "yyyyMMdd_HHmm")}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      await logAdminAction({
+        action: "notification_marked_read", // reutiliza canal de auditoria; metadata diferencia
+        targetType: "notification",
+        targetName: "Exportação CSV",
+        metadata: { export: "csv", count: items.length, filters: { status: statusFilter, type: typeFilter, search: debouncedSearch } },
+      }).catch(() => {});
+      toast.success(`${items.length} notificações exportadas (CSV)`);
+    } catch (e: any) {
+      toast.error(e.message || "Falha ao exportar CSV");
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const exportPDF = async () => {
+    try {
+      setExporting("pdf");
+      const items = await fetchAllForExport();
+      if (items.length === 0) { toast.info("Nenhuma notificação para exportar"); return; }
+      const { default: jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const margin = 32;
+      let y = margin;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text("Já Limpo — Auditoria de Notificações", margin, y);
+      y += 16;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100);
+      const filtersTxt = `Filtros: status=${statusFilter} · tipo=${typeFilter} · busca="${debouncedSearch || "—"}"  ·  Total: ${items.length}  ·  Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm")}`;
+      doc.text(filtersTxt, margin, y);
+      y += 14;
+      doc.setTextColor(0);
+
+      // Cabeçalho da tabela
+      const cols = [
+        { label: "Data/Hora", w: 100 },
+        { label: "Status", w: 55 },
+        { label: "Tipo", w: 70 },
+        { label: "Destinatário", w: 130 },
+        { label: "Título", w: 160 },
+        { label: "Mensagem", w: pageW - margin * 2 - 100 - 55 - 70 - 130 - 160 },
+      ];
+      const drawHeader = () => {
+        doc.setFillColor(240, 240, 240);
+        doc.rect(margin, y, pageW - margin * 2, 18, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        let x = margin + 4;
+        cols.forEach((c) => { doc.text(c.label, x, y + 12); x += c.w; });
+        y += 22;
+        doc.setFont("helvetica", "normal");
+      };
+      drawHeader();
+
+      doc.setFontSize(8);
+      items.forEach((n) => {
+        const cells = [
+          format(new Date(n.created_at), "dd/MM/yy HH:mm"),
+          n.read ? "Lida" : "Pendente",
+          n.type || "",
+          n.recipientName || "",
+          n.title || "",
+          n.message || "",
+        ];
+        const wrapped = cells.map((txt, i) => doc.splitTextToSize(String(txt), cols[i].w - 8));
+        const rowH = Math.max(...wrapped.map((w) => w.length)) * 10 + 6;
+        if (y + rowH > pageH - margin) {
+          doc.addPage();
+          y = margin;
+          drawHeader();
+        }
+        let x = margin + 4;
+        wrapped.forEach((lines, i) => { doc.text(lines, x, y + 10); x += cols[i].w; });
+        // separador
+        doc.setDrawColor(230);
+        doc.line(margin, y + rowH - 2, pageW - margin, y + rowH - 2);
+        y += rowH;
+      });
+
+      // Rodapé com paginação
+      const pages = doc.getNumberOfPages();
+      for (let i = 1; i <= pages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(120);
+        doc.text(`Página ${i}/${pages}`, pageW - margin, pageH - 12, { align: "right" });
+      }
+
+      doc.save(`jalimpo_notificacoes_${filterSuffix()}_${format(new Date(), "yyyyMMdd_HHmm")}.pdf`);
+      await logAdminAction({
+        action: "notification_marked_read",
+        targetType: "notification",
+        targetName: "Exportação PDF",
+        metadata: { export: "pdf", count: items.length, filters: { status: statusFilter, type: typeFilter, search: debouncedSearch } },
+      }).catch(() => {});
+      toast.success(`${items.length} notificações exportadas (PDF)`);
+    } catch (e: any) {
+      toast.error(e.message || "Falha ao exportar PDF");
+    } finally {
+      setExporting(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Notificações</h1>
-          <p className="text-sm text-muted-foreground">Mensagens enviadas a clientes e diaristas</p>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold">Notificações</h1>
+            <p className="text-sm text-muted-foreground">Mensagens enviadas a clientes e diaristas</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportCSV}
+              disabled={!!exporting}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-border/60 bg-card hover:bg-muted transition-colors disabled:opacity-50"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              {exporting === "csv" ? "Exportando…" : "Exportar CSV"}
+            </button>
+            <button
+              onClick={exportPDF}
+              disabled={!!exporting}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              {exporting === "pdf" ? "Gerando…" : "Exportar PDF"}
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
