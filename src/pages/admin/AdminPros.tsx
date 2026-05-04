@@ -128,11 +128,44 @@ export default function AdminPros() {
             data={filteredPros}
             keyField="id"
             onRowClick={(pro) => {
+              const uid = pro.user_id;
               // Seed the detail cache for instant render
-              qc.setQueryData(["admin_pro_detail", pro.user_id], (old: any) =>
+              qc.setQueryData(["admin_pro_detail", uid], (old: any) =>
                 old ?? { ...(pro.profiles || {}), ...pro, metrics: null }
               );
-              navigate(`/admin/pros/${pro.user_id}`);
+              // Prefetch full detail, docs, and recent orders in background
+              qc.prefetchQuery({
+                queryKey: ["admin_pro_detail", uid],
+                queryFn: async () => {
+                  const [{ data: profile }, { data: proProfile }, { data: metrics }] = await Promise.all([
+                    supabase.from("profiles").select("*").eq("user_id", uid).maybeSingle(),
+                    supabase.from("pro_profiles").select("*").eq("user_id", uid).maybeSingle(),
+                    supabase.from("pro_metrics").select("*").eq("user_id", uid).maybeSingle(),
+                  ]);
+                  if (!profile || !proProfile) return null;
+                  return { ...profile, ...proProfile, metrics };
+                },
+              });
+              qc.prefetchQuery({
+                queryKey: ["admin_pro_docs", uid],
+                queryFn: async () => {
+                  const { data } = await supabase.from("pro_documents").select("*").eq("user_id", uid);
+                  return data || [];
+                },
+              });
+              qc.prefetchQuery({
+                queryKey: ["admin_pro_orders", uid],
+                queryFn: async () => {
+                  const { data } = await supabase
+                    .from("orders")
+                    .select("*, services(name)")
+                    .eq("pro_id", uid)
+                    .order("created_at", { ascending: false })
+                    .limit(8);
+                  return data || [];
+                },
+              });
+              navigate(`/admin/pros/${uid}`);
             }}
           />
         </div>
