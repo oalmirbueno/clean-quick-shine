@@ -6,6 +6,7 @@ import { CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clientSteps, proSteps, type TutorialStep } from "./tutorial/steps";
 import { useViewportHeight } from "@/hooks/useViewportHeight";
+import { supabase } from "@/integrations/supabase/client";
 
 const CLIENT_TUTORIAL_KEY = "jalimpo_client_tutorial_completed";
 const PRO_TUTORIAL_KEY = "jalimpo_pro_tutorial_completed";
@@ -18,12 +19,48 @@ function makeKey(base: string, userId?: string | null) {
   return userId ? `${base}:${userId}` : base;
 }
 
+const profileColumn = (variant: "client" | "pro") =>
+  variant === "client" ? "tutorial_client_completed_at" : "tutorial_pro_completed_at";
+
+/** Marks tutorial as completed in the user profile (cross-device). */
+async function markTutorialCompletedRemote(
+  variant: "client" | "pro",
+  userId: string,
+) {
+  try {
+    await supabase
+      .from("profiles")
+      .update({ [profileColumn(variant)]: new Date().toISOString() } as any)
+      .eq("user_id", userId);
+  } catch (e) {
+    // Best-effort; local flag still keeps the user from seeing it again
+    console.warn("[tutorial] failed to sync completion to profile", e);
+  }
+}
+
+/** Clears tutorial completion remotely (used by "Refazer tutorial"). */
+async function clearTutorialCompletedRemote(
+  variant: "client" | "pro",
+  userId: string,
+) {
+  try {
+    await supabase
+      .from("profiles")
+      .update({ [profileColumn(variant)]: null } as any)
+      .eq("user_id", userId);
+  } catch (e) {
+    console.warn("[tutorial] failed to reset profile flag", e);
+  }
+}
+
 /** Public helpers so other screens can reset/check completion. */
 export function resetTutorialFor(variant: "client" | "pro", userId?: string | null) {
   const base = variant === "client" ? CLIENT_TUTORIAL_KEY : PRO_TUTORIAL_KEY;
   localStorage.removeItem(makeKey(base, userId));
   localStorage.removeItem(base); // legacy device-wide key
+  if (userId) void clearTutorialCompletedRemote(variant, userId);
 }
+
 
 
 interface AppTutorialProps {
@@ -64,8 +101,9 @@ export function AppTutorial({ variant, onComplete, userId }: AppTutorialProps) {
     localStorage.setItem(storageKey, "true");
     // Mantém a chave global também marcada para retro-compat de outras telas
     localStorage.setItem(baseKey, "true");
+    if (userId) void markTutorialCompletedRemote(variant, userId);
     setTimeout(() => onComplete(), 280);
-  }, [onComplete, storageKey, baseKey]);
+  }, [onComplete, storageKey, baseKey, userId, variant]);
 
 
   const handleNext = useCallback(() => {
@@ -336,34 +374,72 @@ function SlideContent({ step, direction, isPro, onSwipeNext, onSwipePrev }: Slid
 
 export function useAppTutorial(variant: "client" | "pro", userId?: string | null) {
   const [showTutorial, setShowTutorial] = useState(false);
+  const [checking, setChecking] = useState<boolean>(!!userId);
   const baseKey = variant === "client" ? CLIENT_TUTORIAL_KEY : PRO_TUTORIAL_KEY;
   const storageKey = makeKey(baseKey, userId);
+  const column = profileColumn(variant);
 
   useEffect(() => {
-    // Per-user OR legacy device-wide flag both count as completed.
-    const completed =
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const localCompleted =
       localStorage.getItem(storageKey) === "true" ||
       localStorage.getItem(baseKey) === "true";
-    if (completed) {
+
+    if (localCompleted) {
       setShowTutorial(false);
+      setChecking(false);
       return;
     }
-    const timer = setTimeout(() => setShowTutorial(true), 400);
-    return () => clearTimeout(timer);
-  }, [storageKey, baseKey]);
+
+    if (!userId) {
+      setChecking(false);
+      return;
+    }
+
+    setChecking(true);
+    (async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(column)
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (cancelled) return;
+      const remoteCompleted = !error && data && (data as any)[column] != null;
+      if (remoteCompleted) {
+        localStorage.setItem(storageKey, "true");
+        localStorage.setItem(baseKey, "true");
+        setShowTutorial(false);
+      } else {
+        timer = setTimeout(() => {
+          if (!cancelled) setShowTutorial(true);
+        }, 400);
+      }
+      setChecking(false);
+    })();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [storageKey, baseKey, userId, column]);
 
   const completeTutorial = useCallback(() => {
     localStorage.setItem(storageKey, "true");
     localStorage.setItem(baseKey, "true");
+    if (userId) void markTutorialCompletedRemote(variant, userId);
     setShowTutorial(false);
-  }, [storageKey, baseKey]);
+  }, [storageKey, baseKey, userId, variant]);
 
   const resetTutorial = useCallback(() => {
     localStorage.removeItem(storageKey);
     localStorage.removeItem(baseKey);
+    if (userId) void clearTutorialCompletedRemote(variant, userId);
     setShowTutorial(true);
-  }, [storageKey, baseKey]);
+  }, [storageKey, baseKey, userId, variant]);
 
-  return { showTutorial, completeTutorial, resetTutorial };
+  return { showTutorial, checking, completeTutorial, resetTutorial };
 }
+
 
