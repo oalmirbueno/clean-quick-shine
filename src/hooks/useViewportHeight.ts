@@ -1,8 +1,16 @@
 import { useEffect } from "react";
 
+type NavigatorWithStandalone = Navigator & { standalone?: boolean };
+
 export function useViewportHeight() {
   useEffect(() => {
     const setViewportHeight = () => {
+      const isStandalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as NavigatorWithStandalone).standalone === true;
+
+      document.documentElement.classList.toggle("app-standalone", isStandalone);
+
       const visualViewportHeight = window.visualViewport?.height;
       const windowHeight = window.innerHeight;
 
@@ -13,10 +21,12 @@ export function useViewportHeight() {
           activeEl.tagName === "TEXTAREA" ||
           activeEl.getAttribute("contenteditable") === "true");
 
-      // Keep a stable app height during browser chrome/UI movements.
-      // Only use visualViewport when keyboard/input is actually active.
+      // In installed PWA mode, behave like a native app: lock to the real
+      // viewport and ignore browser/safe-area chrome movement.
       const viewportHeight =
-        isInputFocused && visualViewportHeight
+        isStandalone
+          ? windowHeight
+          : isInputFocused && visualViewportHeight
           ? visualViewportHeight
           : windowHeight;
 
@@ -51,6 +61,8 @@ export function useViewportHeight() {
       if (window.visualViewport) {
         window.visualViewport.removeEventListener("resize", setViewportHeightDeferred);
       }
+
+      document.documentElement.classList.remove("app-standalone");
     };
   }, []);
 }
