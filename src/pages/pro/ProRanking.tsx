@@ -1,9 +1,14 @@
-import { useNavigate } from "react-router-dom";
-import { ChevronLeft, Star, CheckCircle2, TrendingUp, Award, Loader2, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import { Star, CheckCircle2, TrendingUp, Award, Loader2, Users } from "lucide-react";
+import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { useProRanking } from "@/hooks/useProMetrics";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 const tips = [
   "Responda rapidamente aos pedidos para aumentar sua taxa de aceitação",
@@ -13,11 +18,9 @@ const tips = [
 ];
 
 export default function ProRanking() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: rankingData, isLoading } = useProRanking();
 
-  // Fetch profile data
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
@@ -34,8 +37,12 @@ export default function ProRanking() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="h-full bg-background flex flex-col safe-top">
+        <ProPageHeader title="Meu ranking" />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-7 h-7 text-primary animate-spin" />
+        </div>
+        <BottomNav variant="pro" />
       </div>
     );
   }
@@ -71,106 +78,93 @@ export default function ProRanking() {
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      {/* Header */}
-      <header className="bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-foreground" />
-          </button>
-          <h1 className="text-lg font-semibold text-foreground">
-            Meu ranking
-          </h1>
-        </div>
-      </header>
+      <ProPageHeader title="Meu ranking" subtitle="Sua posição entre os profissionais" />
 
-      <main className="flex-1 overflow-y-auto p-4 pb-4 space-y-6 animate-fade-in">
-        {/* Profile Card */}
-        <div className="bg-card rounded-xl border border-border p-6 text-center card-shadow">
-          <div className="relative inline-block mb-4">
-            <img
-              src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name || "Pro"}`}
-              alt={profile?.full_name || "Profissional"}
-              className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
-            />
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <motion.div variants={container} initial="hidden" animate="show" className="px-5 pb-6 space-y-4">
+          {/* Profile Card */}
+          <motion.div variants={item} className="bg-card rounded-2xl border border-border/60 p-6 text-center shadow-sm">
+            <div className="relative inline-block mb-3">
+              <img
+                src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name || "Pro"}`}
+                alt={profile?.full_name || "Profissional"}
+                className="w-20 h-20 rounded-full object-cover border-4 border-primary/15"
+              />
+              {proProfile?.verified && (
+                <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-success rounded-full flex items-center justify-center border-2 border-background">
+                  <CheckCircle2 className="w-4 h-4 text-success-foreground" />
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-base font-bold text-foreground">{profile?.full_name || "Profissional"}</h2>
+
             {proProfile?.verified && (
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-success rounded-full flex items-center justify-center border-2 border-background">
-                <CheckCircle2 className="w-5 h-5 text-success-foreground" />
+              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-success/10 rounded-full mt-1.5">
+                <CheckCircle2 className="w-3 h-3 text-success" />
+                <span className="text-[10px] font-semibold text-success">Verificada</span>
               </div>
             )}
-          </div>
-          
-          <h2 className="text-xl font-bold text-foreground">{profile?.full_name || "Profissional"}</h2>
-          
-          {proProfile?.verified && (
-            <div className="inline-flex items-center gap-1 px-3 py-1 bg-success/10 rounded-full mt-2">
-              <CheckCircle2 className="w-4 h-4 text-success" />
-              <span className="text-sm font-medium text-success">Profissional verificada</span>
-            </div>
-          )}
 
-          {/* Ranking Position */}
-          <div className="mt-4 p-3 bg-accent rounded-lg">
-            <div className="flex items-center justify-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
-              <span className="text-sm text-muted-foreground">Você está no</span>
-              <span className="text-lg font-bold text-primary">top {rankingData?.percentile ?? 100}%</span>
+            <div className="mt-4 p-3 bg-accent rounded-xl">
+              <div className="flex items-center justify-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                <span className="text-xs text-muted-foreground">Você está no</span>
+                <span className="text-base font-bold text-primary">top {rankingData?.percentile ?? 100}%</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Posição #{rankingData?.rank ?? 1} de {rankingData?.totalPros ?? 1}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Posição #{rankingData?.rank ?? 1} de {rankingData?.totalPros ?? 1} profissionais
-            </p>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-3">
-          {stats.map((stat) => (
-            <div 
-              key={stat.label}
-              className="bg-card rounded-xl border border-border p-4 text-center card-shadow"
-            >
-              <stat.icon className={`w-6 h-6 ${stat.color} mx-auto mb-2`} />
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Ranking Info */}
-        <div className="bg-accent rounded-xl p-4 border border-primary/10">
-          <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            Como subir no ranking
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Profissionais com ranking alto recebem mais pedidos e aparecem primeiro para os clientes.
-          </p>
-          <ul className="space-y-2">
-            {tips.map((tip, index) => (
-              <li key={index} className="flex items-start gap-2 text-sm text-foreground">
-                <span className="text-primary font-medium">{index + 1}.</span>
-                {tip}
-              </li>
+          {/* Stats */}
+          <motion.div variants={item} className="grid grid-cols-3 gap-2.5">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="bg-card rounded-2xl border border-border/60 p-3.5 text-center shadow-sm"
+              >
+                <stat.icon className={`w-4 h-4 ${stat.color} mx-auto mb-1.5`} />
+                <p className="text-lg font-bold text-foreground leading-none">{stat.value}</p>
+                <p className="text-[10px] text-muted-foreground mt-1.5">{stat.label}</p>
+              </div>
             ))}
-          </ul>
-        </div>
+          </motion.div>
 
-        {/* Progress to Next Level */}
-        <div className="bg-card rounded-xl border border-border p-4 card-shadow">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-medium text-foreground">Próximo nível</span>
-            <span className="text-sm text-muted-foreground">{progress.toFixed(0)}%</span>
-          </div>
-          <div className="h-2 bg-secondary rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Complete mais {jobsRemaining} serviços para alcançar o próximo nível
-          </p>
-        </div>
+          {/* Ranking Info */}
+          <motion.div variants={item} className="bg-accent rounded-2xl p-4 border border-border/60">
+            <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              Como subir no ranking
+            </h3>
+            <ul className="space-y-1.5">
+              {tips.map((tip, index) => (
+                <li key={index} className="flex items-start gap-2 text-xs text-foreground">
+                  <span className="text-primary font-semibold">{index + 1}.</span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Progress */}
+          <motion.div variants={item} className="bg-card rounded-2xl border border-border/60 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-foreground">Próximo nível</span>
+              <span className="text-xs text-muted-foreground">{progress.toFixed(0)}%</span>
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-2">
+              Complete mais {jobsRemaining} serviços para alcançar o próximo nível
+            </p>
+          </motion.div>
+        </motion.div>
       </main>
+
+      <BottomNav variant="pro" />
     </div>
   );
 }
