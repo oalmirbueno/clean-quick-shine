@@ -97,7 +97,7 @@ export default function ClientHome() {
   return (
     <>
       {showTutorial && (
-        <AppTutorial variant="client" onComplete={completeTutorial} />
+        <AppTutorial variant="client" userId={user?.id} onComplete={completeTutorial} />
       )}
 
       <div
