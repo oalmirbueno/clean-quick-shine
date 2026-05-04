@@ -15,6 +15,7 @@ import {
   Tag,
   HelpCircle,
   ShieldCheck,
+  PlayCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
