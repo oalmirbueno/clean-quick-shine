@@ -84,6 +84,7 @@ import AdminWithdrawalDetail from "./pages/admin/AdminWithdrawalDetail";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminAuditLog from "./pages/admin/AdminAuditLog";
+import AdminNotificationLogs from "./pages/admin/AdminNotificationLogs";
 
 // Company Pages
 import CompanyOnboarding from "./pages/company/CompanyOnboarding";
