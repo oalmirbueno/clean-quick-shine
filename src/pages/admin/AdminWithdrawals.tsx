@@ -3,15 +3,16 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ArrowDownToLine, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { adminKeys, useAdminInvalidate } from "@/hooks/useAdminQueryKeys";
 
 export default function AdminWithdrawals() {
   const navigate = useNavigate();
-  const qc = useQueryClient();
+  const { qc, withdrawals: invalidateWithdrawals } = useAdminInvalidate();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkConfirm, setBulkConfirm] = useState<null | "approve" | "reject" | "complete">(null);
 
