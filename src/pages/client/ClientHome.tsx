@@ -117,16 +117,16 @@ export default function ClientHome() {
           </div>
         </header>
 
-        {/* Content - preenche toda a altura */}
+        {/* Content - flex column que preenche toda a altura disponível */}
         <main className="relative flex-1 overflow-y-auto min-h-0 z-10">
           <motion.div
             variants={container}
             initial="hidden"
             animate="show"
-            className="mx-auto w-full max-w-lg px-5 pb-6 flex flex-col gap-4"
+            className="mx-auto w-full max-w-lg px-5 pb-5 flex flex-col gap-3.5 min-h-full"
           >
-            {/* Hero CTA - grande, ocupa espaço */}
-            <motion.div variants={item}>
+            {/* Hero CTA */}
+            <motion.div variants={item} className="shrink-0">
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/client/service")}
@@ -136,7 +136,7 @@ export default function ClientHome() {
                     "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.85) 100%)",
                   boxShadow:
                     "0 24px 50px -22px hsl(var(--primary) / 0.55), inset 0 1px 0 hsl(0 0% 100% / 0.2)",
-                  minHeight: 168,
+                  minHeight: 160,
                 }}
               >
                 <div
@@ -186,9 +186,9 @@ export default function ClientHome() {
               </motion.button>
             </motion.div>
 
-            {/* Serviços - ocupando largura */}
-            <motion.div variants={item} className="flex-1">
-              <div className="flex items-center justify-between mb-2.5 px-1">
+            {/* Serviços - estica para preencher altura */}
+            <motion.div variants={item} className="flex-1 flex flex-col min-h-0">
+              <div className="flex items-center justify-between mb-2.5 px-1 shrink-0">
                 <h2 className="text-[15px] font-semibold text-foreground tracking-tight">
                   Serviços
                 </h2>
@@ -199,7 +199,7 @@ export default function ClientHome() {
                   Ver todos
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 flex-1 auto-rows-fr">
                 {(services || []).slice(0, 4).map((service) => {
                   const IconComp = iconMap[service.icon || "Home"] || Home;
                   return (
@@ -207,8 +207,7 @@ export default function ClientHome() {
                       key={service.id}
                       whileTap={{ scale: 0.96 }}
                       onClick={() => navigate("/client/service")}
-                      className="relative flex flex-col items-start gap-3 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 transition-all text-left shadow-sm"
-                      style={{ minHeight: 120 }}
+                      className="relative flex flex-col items-start justify-between gap-3 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 transition-all text-left shadow-sm h-full min-h-[110px]"
                     >
                       <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                         <IconComp
@@ -226,7 +225,7 @@ export default function ClientHome() {
             </motion.div>
 
             {/* Ações rápidas - 2 atalhos largos */}
-            <motion.div variants={item} className="grid grid-cols-2 gap-3">
+            <motion.div variants={item} className="grid grid-cols-2 gap-3 shrink-0">
               <button
                 onClick={() => navigate("/client/orders")}
                 className="flex items-center gap-3 p-4 rounded-2xl border border-border/60 bg-card text-left shadow-sm hover:border-primary/40 transition-colors"
@@ -272,7 +271,7 @@ export default function ClientHome() {
             <motion.button
               variants={item}
               onClick={() => navigate("/client/support")}
-              className="w-full p-3.5 rounded-2xl border border-border/60 bg-card flex items-center gap-3 text-left shadow-sm hover:border-primary/40 transition-colors"
+              className="w-full p-3.5 rounded-2xl border border-border/60 bg-card flex items-center gap-3 text-left shadow-sm hover:border-primary/40 transition-colors shrink-0"
             >
               <div className="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
                 <HelpCircle
