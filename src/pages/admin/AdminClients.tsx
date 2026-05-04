@@ -131,7 +131,13 @@ export default function AdminClients() {
             columns={columns}
             data={filtered}
             keyField="id"
-            onRowClick={(c) => navigate(`/admin/clients/${c.user_id}`)}
+            onRowClick={(c) => {
+              // Seed the detail cache for instant render
+              qc.setQueryData(["admin_client_detail", c.user_id], (old: any) =>
+                old ?? { profile: c, orders: [], blocked: !!c.blocked, totalSpent: Number(c.spent || 0) }
+              );
+              navigate(`/admin/clients/${c.user_id}`);
+            }}
             emptyMessage="Nenhum cliente encontrado"
           />
         </div>
