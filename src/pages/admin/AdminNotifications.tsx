@@ -18,7 +18,7 @@ type Notif = {
   type: string;
   read: boolean;
   created_at: string;
-  data?: Record<string, any> | null;
+  data?: any;
   recipientName?: string;
 };
 
@@ -54,7 +54,7 @@ export default function AdminNotifications() {
         .select("user_id, full_name")
         .in("user_id", userIds);
       const nameMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
-      return (data || []).map((n) => ({ ...n, recipientName: nameMap.get(n.user_id) || "Usuário" }));
+      return ((data || []) as any[]).map((n) => ({ ...n, recipientName: nameMap.get(n.user_id) || "Usuário" })) as Notif[];
     },
     refetchInterval: 30_000,
   });
