@@ -413,6 +413,51 @@ export type Database = {
           },
         ]
       }
+      notification_dispatch_logs: {
+        Row: {
+          caller_id: string | null
+          channel: string
+          created_at: string
+          endpoint: string | null
+          error: string | null
+          id: string
+          message: string | null
+          payload: Json | null
+          status: string
+          title: string | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          caller_id?: string | null
+          channel: string
+          created_at?: string
+          endpoint?: string | null
+          error?: string | null
+          id?: string
+          message?: string | null
+          payload?: Json | null
+          status: string
+          title?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          caller_id?: string | null
+          channel?: string
+          created_at?: string
+          endpoint?: string | null
+          error?: string | null
+          id?: string
+          message?: string | null
+          payload?: Json | null
+          status?: string
+          title?: string | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

@@ -97,9 +97,25 @@ serve(async (req) => {
       });
     }
 
+    const logDispatch = async (row: Record<string, unknown>) => {
+      try {
+        await supabaseAdmin.from("notification_dispatch_logs").insert({
+          user_id: userId,
+          title,
+          message,
+          type,
+          caller_id: callerId,
+          payload: data ?? {},
+          ...row,
+        });
+      } catch (e) {
+        console.error("dispatch log insert failed", e);
+      }
+    };
+
     // ---- 1. Save in-app notification ----
     if (!skipDbInsert) {
-      await supabaseAdmin.from("notifications").insert({
+      const { error: inAppErr } = await supabaseAdmin.from("notifications").insert({
         user_id: userId,
         title,
         message,
@@ -107,6 +123,13 @@ serve(async (req) => {
         read: false,
         data,
       });
+      await logDispatch({
+        channel: "in_app",
+        status: inAppErr ? "failed" : "success",
+        error: inAppErr ? inAppErr.message : null,
+      });
+    } else {
+      await logDispatch({ channel: "in_app", status: "skipped" });
     }
 
     // ---- 2. Get push subscriptions ----
@@ -116,14 +139,27 @@ serve(async (req) => {
       .eq("user_id", userId);
 
     const results: Array<{ endpoint: string; status: string }> = [];
-    if (subscriptions && subscriptions.length > 0) {
+    if (!subscriptions || subscriptions.length === 0) {
+      await logDispatch({ channel: "push", status: "skipped", error: "no_subscriptions" });
+    } else {
+      let okCount = 0;
+      let failCount = 0;
       for (const sub of subscriptions) {
         try {
           results.push({ endpoint: sub.endpoint, status: "queued" });
+          okCount++;
+          await logDispatch({ channel: "push", status: "success", endpoint: sub.endpoint });
         } catch (err) {
+          failCount++;
+          const msg = err instanceof Error ? err.message : String(err);
           console.error("Push error:", err);
           results.push({ endpoint: sub.endpoint, status: "failed" });
+          await logDispatch({ channel: "push", status: "failed", endpoint: sub.endpoint, error: msg });
         }
+      }
+      // aggregated row for quick filtering
+      if (failCount > 0 && okCount > 0) {
+        await logDispatch({ channel: "push", status: "partial", error: `${failCount}/${subscriptions.length} falharam` });
       }
     }
 
