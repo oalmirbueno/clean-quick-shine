@@ -269,19 +269,27 @@ export default function AdminNotifications() {
     }
     const userIds = Array.from(new Set(all.map((n) => n.user_id)));
     let nameMap = new Map<string, string>();
+    let emailMap = new Map<string, string>();
     if (userIds.length) {
-      const { data: profiles } = await supabase
-        .from("profiles").select("user_id, full_name").in("user_id", userIds);
+      const [{ data: profiles }, { data: emails }] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name").in("user_id", userIds),
+        supabase.rpc("get_users_emails", { _user_ids: userIds }),
+      ]);
       nameMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
+      emailMap = new Map((emails || []).map((e: any) => [e.user_id, e.email]));
     }
-    let items: Notif[] = all.map((n) => ({ ...n, recipientName: nameMap.get(n.user_id) || "Usuário" }));
-    // Refina busca com nome do destinatário (igual ao client-side da listagem)
+    let items: Notif[] = all.map((n) => ({
+      ...n,
+      recipientName: nameMap.get(n.user_id) || "Usuário",
+      recipientEmail: emailMap.get(n.user_id) || "",
+    }));
     if (debouncedSearch) {
       const q = debouncedSearch.toLowerCase();
       items = items.filter((n) =>
         n.title.toLowerCase().includes(q) ||
         n.message.toLowerCase().includes(q) ||
-        (n.recipientName || "").toLowerCase().includes(q)
+        (n.recipientName || "").toLowerCase().includes(q) ||
+        (n.recipientEmail || "").toLowerCase().includes(q)
       );
     }
     return items;
