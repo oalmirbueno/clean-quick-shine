@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { InputField } from "@/components/ui/InputField";
-import { ChevronLeft, Wallet, ArrowDownToLine, Clock, Loader2, CheckCircle2, XCircle, Smartphone, Mail, CreditCard, Key, ShieldAlert, HelpCircle } from "lucide-react";
+import { Wallet, ArrowDownToLine, Clock, Loader2, CheckCircle2, XCircle, Smartphone, Mail, CreditCard, Key, ShieldAlert, HelpCircle } from "lucide-react";
 import { useProBalance, useProWithdrawals } from "@/hooks/useWithdrawals";
 import { useWithdrawRequest } from "@/hooks/useWithdrawRequest";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 type PixKeyType = "cpf" | "email" | "phone" | "random";
 
