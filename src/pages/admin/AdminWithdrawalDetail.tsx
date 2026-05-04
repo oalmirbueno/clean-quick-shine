@@ -66,6 +66,14 @@ export default function AdminWithdrawalDetail() {
       if (newStatus === "completed") updates.processed_at = new Date().toISOString();
       const { error } = await supabase.from("withdrawals").update(updates).eq("id", id!);
       if (error) throw error;
+      const auditAction: AuditAction = newStatus === "processing" ? "withdrawal_approved" : newStatus === "completed" ? "withdrawal_completed" : "withdrawal_rejected";
+      await logAdminAction({
+        action: auditAction,
+        targetType: "withdrawal",
+        targetId: id!,
+        targetName: withdrawal?.proName,
+        metadata: { amount: withdrawal?.amount, user_id: withdrawal?.user_id, new_status: newStatus },
+      });
       if (withdrawal?.user_id) {
         const title = newStatus === "processing" ? "Saque em processamento" : newStatus === "completed" ? "Saque concluído ✅" : "Saque rejeitado";
         const amount = withdrawal.amount ? `R$ ${Number(withdrawal.amount).toFixed(2).replace(".", ",")}` : "";
