@@ -3,10 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+export type ChatRole = "client" | "pro";
+
 export interface OrderMessage {
   id: string;
   order_id: string;
   sender_id: string;
+  sender_role: ChatRole | null;
   content: string | null;
   attachment_url: string | null;
   attachment_type: string | null;
