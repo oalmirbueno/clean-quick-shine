@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, ClipboardList, User, Calendar, Wallet, LayoutDashboard, Users, Settings } from "lucide-react";
+import { Home, ClipboardList, User, Calendar, Wallet } from "lucide-react";
 import { forwardRef } from "react";
 
 interface NavItem {
