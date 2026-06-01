@@ -182,7 +182,7 @@ export default function ProOrderDetail() {
             </div>
             <button 
               className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
-              onClick={() => navigate(`/chat/order/${order.id}`)}
+              onClick={() => navigate(`/chat/order/${order.id}?as=pro`)}
               aria-label="Abrir chat"
             >
               <MessageCircle className="w-5 h-5 text-primary" />
@@ -256,7 +256,7 @@ export default function ProOrderDetail() {
         {/* Chat & Support */}
         <section className="p-4 space-y-3">
           <button
-            onClick={() => navigate(`/chat/order/${order.id}`)}
+            onClick={() => navigate(`/chat/order/${order.id}?as=pro`)}
             className="w-full p-4 rounded-xl border border-primary/30 bg-primary/5 flex items-center gap-3 hover:bg-primary/10 transition-colors"
           >
             <MessageCircle className="w-5 h-5 text-primary" />

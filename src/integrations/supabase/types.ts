@@ -501,6 +501,7 @@ export type Database = {
           order_id: string
           read_at: string | null
           sender_id: string
+          sender_role: string | null
         }
         Insert: {
           attachment_type?: string | null
@@ -511,6 +512,7 @@ export type Database = {
           order_id: string
           read_at?: string | null
           sender_id: string
+          sender_role?: string | null
         }
         Update: {
           attachment_type?: string | null
@@ -521,6 +523,7 @@ export type Database = {
           order_id?: string
           read_at?: string | null
           sender_id?: string
+          sender_role?: string | null
         }
         Relationships: []
       }

@@ -180,7 +180,7 @@ export default function ClientOrderDetail() {
                 </div>
               </div>
               <button
-                onClick={() => navigate(`/chat/order/${order.id}`)}
+                onClick={() => navigate(`/chat/order/${order.id}?as=client`)}
                 className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
                 aria-label="Abrir chat"
               >

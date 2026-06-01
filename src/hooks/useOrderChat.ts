@@ -3,10 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+export type ChatRole = "client" | "pro";
+
 export interface OrderMessage {
   id: string;
   order_id: string;
   sender_id: string;
+  sender_role: ChatRole | null;
   content: string | null;
   attachment_url: string | null;
   attachment_type: string | null;
@@ -66,7 +69,7 @@ export function useOrderChat(orderId: string | null) {
   }, [orderId]);
 
   const send = useCallback(
-    async (content: string, file?: File | null) => {
+    async (content: string, file?: File | null, role?: ChatRole) => {
       if (!orderId || !user?.id) return;
       const trimmed = content.trim();
       if (!trimmed && !file) return;
@@ -94,6 +97,7 @@ export function useOrderChat(orderId: string | null) {
       const { error } = await supabase.from("order_messages" as any).insert({
         order_id: orderId,
         sender_id: user.id,
+        sender_role: role ?? null,
         content: trimmed || null,
         attachment_url,
         attachment_type,
