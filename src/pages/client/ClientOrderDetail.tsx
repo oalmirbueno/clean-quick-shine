@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { BottomNav } from "@/components/ui/BottomNav";
 import { ChevronLeft, Calendar, Clock, MapPin, CreditCard, MessageCircle, HelpCircle, Loader2, Star, CheckCircle2, Download, RefreshCw } from "lucide-react";
 import { useOrder } from "@/hooks/useOrders";
 import { format } from "date-fns";
