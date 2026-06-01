@@ -12,6 +12,7 @@ import { UpdatePrompt } from "@/components/ui/UpdatePrompt";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { InstallBanner } from "@/components/ui/InstallBanner";
 import { MobilePwaGate } from "@/components/MobilePwaGate";
+import { PersistentBottomNav } from "@/components/ui/BottomNav";
 
 // Pages
 import Index from "./pages/Index";
