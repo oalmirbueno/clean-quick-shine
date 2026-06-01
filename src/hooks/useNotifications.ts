@@ -69,11 +69,13 @@ export function useNotifications() {
                 : undefined,
           });
         }
+      )
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, queryClient]);
+  }, [user?.id, queryClient, navigate, location.pathname]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
