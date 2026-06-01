@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { BottomNav } from "@/components/ui/BottomNav";
 import { ChevronLeft, Calendar, Clock, MapPin, CreditCard, MessageCircle, HelpCircle, Loader2, Star, CheckCircle2, Download, RefreshCw } from "lucide-react";
 import { useOrder } from "@/hooks/useOrders";
 import { format } from "date-fns";
@@ -324,7 +325,7 @@ export default function ClientOrderDetail() {
 
       {/* Bottom Action - Show for confirmed/en_route/in_progress */}
       {order.status && ["confirmed", "en_route", "in_progress"].includes(order.status) && (
-        <div className="p-4 bg-card border-t border-border">
+        <div className="p-4 bg-card border-t border-border safe-bottom">
           <PrimaryButton
             fullWidth
             onClick={() => navigate("/client/order-tracking", { state: { orderId: order.id } })}
@@ -336,7 +337,7 @@ export default function ClientOrderDetail() {
 
       {/* Rate button for completed orders without rating */}
       {order.status === "completed" && !order.client_rating && (
-        <div className="p-4 bg-card border-t border-border">
+        <div className="p-4 bg-card border-t border-border safe-bottom">
           <PrimaryButton
             fullWidth
             onClick={() => navigate("/client/rating", { state: { orderId: order.id } })}
@@ -345,6 +346,9 @@ export default function ClientOrderDetail() {
           </PrimaryButton>
         </div>
       )}
+
+      {/* Reserve space for the persistent bottom nav */}
+      <BottomNav variant="client" />
     </div>
   );
 }
