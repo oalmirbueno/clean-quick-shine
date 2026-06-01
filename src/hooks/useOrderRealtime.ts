@@ -37,12 +37,26 @@ export function useOrderRealtime(orderId: string | null) {
               cancelled: "❌ O pedido foi cancelado.",
             };
             
-            if (statusMessages[newOrder.status || ""]) {
-              toast.info(statusMessages[newOrder.status || ""], {
-                duration: 5000,
-              });
+            const msg = statusMessages[newOrder.status || ""];
+            if (msg) {
+              toast.info(msg, { duration: 5000 });
+              // OS-level notification (works when tab is in background)
+              if ("Notification" in window && Notification.permission === "granted" && "serviceWorker" in navigator) {
+                navigator.serviceWorker.ready
+                  .then((reg) =>
+                    reg.showNotification("Já Limpo", {
+                      body: msg,
+                      icon: "/pwa-192x192.png",
+                      badge: "/pwa-72x72.png",
+                      tag: `order-${newOrder.id}`,
+                      data: { url: `/client/order-tracking?orderId=${newOrder.id}` },
+                    } as NotificationOptions)
+                  )
+                  .catch(() => {});
+              }
             }
           }
+
           
           // Invalidate and refetch the order query
           queryClient.invalidateQueries({ queryKey: ["order", orderId] });

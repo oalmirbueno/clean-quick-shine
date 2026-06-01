@@ -295,6 +295,15 @@ export default function ClientOrderTracking() {
 
         {/* Actions */}
         <section className="p-4 mt-2 space-y-3">
+          {order.pro_id && (
+            <button
+              onClick={() => navigate(`/chat/order/${order.id}`)}
+              className="w-full p-4 rounded-xl border border-primary/30 bg-primary/5 flex items-center gap-3 hover:bg-primary/10 transition-colors"
+            >
+              <MessageCircle className="w-5 h-5 text-primary" />
+              <span className="font-medium text-foreground">Conversar com {order.pro_profile?.full_name?.split(" ")[0] || "profissional"}</span>
+            </button>
+          )}
           <button
             onClick={() => navigate("/client/support")}
             className="w-full p-4 rounded-xl border border-border bg-card flex items-center gap-3 hover:bg-secondary transition-colors"
@@ -302,6 +311,7 @@ export default function ClientOrderTracking() {
             <HelpCircle className="w-5 h-5 text-muted-foreground" />
             <span className="font-medium text-foreground">Suporte</span>
           </button>
+
 
           {order.status && ["confirmed", "en_route"].includes(order.status) && (
             <>
