@@ -3,16 +3,24 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import logoIcon from "@/assets/logo-icon.png";
 import { supabase } from "@/integrations/supabase/client";
+import { MobilePwaGate } from "@/components/MobilePwaGate";
+import Onboarding from "./Onboarding";
 
+/**
+ * Root route ("/"):
+ * - Resolves auth/role and either redirects authenticated users to their
+ *   home, or renders Onboarding inline for logged-out visitors.
+ * - Renders Onboarding directly (no client-side redirect to /onboarding)
+ *   to eliminate the LCP soft-redirect penalty.
+ */
 export default function Index() {
   const navigate = useNavigate();
-  const [show, setShow] = useState(true);
+  const [resolving, setResolving] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShow(false), 800);
+    let cancelled = false;
 
-    const navigateTimer = setTimeout(async () => {
-      // Mobile + não instalado + fora de iframe → forçar fluxo de instalação
+    (async () => {
       const ua = navigator.userAgent.toLowerCase();
       const isMobile = /iphone|ipad|ipod|android/.test(ua);
       const isStandalone =
@@ -21,8 +29,9 @@ export default function Index() {
       let inIframe = false;
       try { inIframe = window.self !== window.top; } catch { inIframe = true; }
 
-      // Check for active session
       const { data: { session } } = await supabase.auth.getSession();
+
+      if (cancelled) return;
 
       if (isMobile && !isStandalone && !inIframe && !session?.user) {
         navigate("/install", { replace: true });
@@ -30,58 +39,64 @@ export default function Index() {
       }
 
       if (session?.user) {
-        // Fetch roles to determine destination
         const { data: userRoles } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", session.user.id);
-        
+
+        if (cancelled) return;
+
         const roles = userRoles?.map(r => r.role) || [];
-        
+
         if (roles.includes("admin")) {
           navigate("/admin/dashboard", { replace: true });
-        } else if (roles.includes("pro")) {
-          navigate("/pro/home", { replace: true });
-        } else if (roles.includes("client")) {
-          navigate("/client/home", { replace: true });
-        } else {
-          navigate("/onboarding", { replace: true });
+          return;
         }
-      } else {
-        navigate("/onboarding", { replace: true });
+        if (roles.includes("pro")) {
+          navigate("/pro/home", { replace: true });
+          return;
+        }
+        if (roles.includes("client")) {
+          navigate("/client/home", { replace: true });
+          return;
+        }
       }
-    }, 1000);
 
+      // Logged-out (or no role): render Onboarding inline.
+      setResolving(false);
+    })();
 
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(navigateTimer);
-    };
+    return () => { cancelled = true; };
   }, [navigate]);
 
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div 
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          className="fixed inset-0 bg-background flex items-center justify-center"
-        >
-          <motion.img
-            src={logoIcon}
-            alt="Já Limpo"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.1, opacity: 0 }}
-            transition={{ 
-              duration: 0.4, 
-              ease: [0.4, 0, 0.2, 1]
-            }}
-            className="w-32 h-32"
-          />
-        </motion.div>
+    <>
+      <AnimatePresence>
+        {resolving && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed inset-0 z-50 bg-background flex items-center justify-center"
+          >
+            <motion.img
+              src={logoIcon}
+              alt="Já Limpo"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 1.1, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              className="w-32 h-32"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!resolving && (
+        <MobilePwaGate>
+          <Onboarding />
+        </MobilePwaGate>
       )}
-    </AnimatePresence>
+    </>
   );
 }
