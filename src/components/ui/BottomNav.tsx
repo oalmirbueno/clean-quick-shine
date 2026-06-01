@@ -27,11 +27,6 @@ const proItems: NavItem[] = [
   { icon: <User className="w-5 h-5" strokeWidth={1.6} />, activeIcon: <User className="w-5 h-5" strokeWidth={2.2} />, label: "Perfil", path: "/pro/profile" },
 ];
 
-const adminItems: NavItem[] = [
-  { icon: <LayoutDashboard className="w-5 h-5" strokeWidth={1.6} />, activeIcon: <LayoutDashboard className="w-5 h-5" strokeWidth={2.2} />, label: "Início", path: "/admin/dashboard" },
-  { icon: <Users className="w-5 h-5" strokeWidth={1.6} />, activeIcon: <Users className="w-5 h-5" strokeWidth={2.2} />, label: "Clientes", path: "/admin/clients" },
-  { icon: <Settings className="w-5 h-5" strokeWidth={1.6} />, activeIcon: <Settings className="w-5 h-5" strokeWidth={2.2} />, label: "Config", path: "/admin/settings" },
-];
 
 /**
  * BottomNav usado dentro das páginas — renderiza apenas o spacer
