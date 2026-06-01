@@ -19,6 +19,8 @@ export interface Notification {
 export function useNotifications() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["notifications", user?.id],
