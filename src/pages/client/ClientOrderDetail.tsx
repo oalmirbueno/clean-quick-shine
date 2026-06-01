@@ -348,7 +348,7 @@ export default function ClientOrderDetail() {
       )}
 
       {/* Reserve space for the persistent bottom nav */}
-      <BottomNav />
+      <BottomNav variant="client" />
     </div>
   );
 }
