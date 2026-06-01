@@ -90,8 +90,7 @@ export function PersistentBottomNav() {
   ];
   if (hideOnPrefixes.some((p) => path.startsWith(p))) return null;
 
-  const items =
-    variant === "client" ? clientItems : variant === "pro" ? proItems : adminItems;
+  const items = variant === "client" ? clientItems : proItems;
 
   return (
     <nav className="app-bottom-nav fixed inset-x-0 bottom-0 z-50 border-t liquid-glass-bar">
