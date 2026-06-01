@@ -61,10 +61,10 @@ export function PersistentBottomNav() {
   const location = useLocation();
   const path = location.pathname;
 
-  let variant: "client" | "pro" | "admin" | null = null;
+  let variant: "client" | "pro" | null = null;
   if (path.startsWith("/client/")) variant = "client";
   else if (path.startsWith("/pro/")) variant = "pro";
-  else if (path.startsWith("/admin/")) variant = "admin";
+  // Admin usa AdminBottomNav próprio via AdminLayout
 
   if (!variant) return null;
 
