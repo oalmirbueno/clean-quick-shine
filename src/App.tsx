@@ -48,6 +48,7 @@ import ClientDemo from "./pages/client/ClientDemo";
 // Pro Pages
 import ProHome from "./pages/pro/ProHome";
 import ProOrderDetail from "./pages/pro/ProOrderDetail";
+import OrderChatPage from "./pages/OrderChatPage";
 import ProAgenda from "./pages/pro/ProAgenda";
 import ProEarnings from "./pages/pro/ProEarnings";
 import ProRanking from "./pages/pro/ProRanking";
