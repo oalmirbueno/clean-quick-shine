@@ -225,6 +225,7 @@ const App = () => {
                 {/* Catch all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <PersistentBottomNav />
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
