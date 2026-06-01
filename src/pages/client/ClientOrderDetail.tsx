@@ -325,7 +325,7 @@ export default function ClientOrderDetail() {
 
       {/* Bottom Action - Show for confirmed/en_route/in_progress */}
       {order.status && ["confirmed", "en_route", "in_progress"].includes(order.status) && (
-        <div className="p-4 bg-card border-t border-border">
+        <div className="p-4 bg-card border-t border-border safe-bottom">
           <PrimaryButton
             fullWidth
             onClick={() => navigate("/client/order-tracking", { state: { orderId: order.id } })}
@@ -337,7 +337,7 @@ export default function ClientOrderDetail() {
 
       {/* Rate button for completed orders without rating */}
       {order.status === "completed" && !order.client_rating && (
-        <div className="p-4 bg-card border-t border-border">
+        <div className="p-4 bg-card border-t border-border safe-bottom">
           <PrimaryButton
             fullWidth
             onClick={() => navigate("/client/rating", { state: { orderId: order.id } })}
@@ -346,6 +346,9 @@ export default function ClientOrderDetail() {
           </PrimaryButton>
         </div>
       )}
+
+      {/* Reserve space for the persistent bottom nav */}
+      <BottomNav />
     </div>
   );
 }
