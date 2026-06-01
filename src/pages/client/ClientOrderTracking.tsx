@@ -296,7 +296,7 @@ export default function ClientOrderTracking() {
         {/* Actions */}
         <section className="p-4 mt-2 space-y-3">
           <button
-            onClick={() => navigate(`/chat/order/${order.id}`)}
+            onClick={() => navigate(`/chat/order/${order.id}?as=client`)}
             className="w-full p-4 rounded-xl border border-primary/30 bg-primary/5 flex items-center gap-3 hover:bg-primary/10 transition-colors"
           >
             <MessageCircle className="w-5 h-5 text-primary" />
