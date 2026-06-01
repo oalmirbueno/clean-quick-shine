@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
+import { toast } from "sonner";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export interface Notification {
   id: string;
@@ -17,6 +19,8 @@ export interface Notification {
 export function useNotifications() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["notifications", user?.id],
@@ -49,8 +53,21 @@ export function useNotifications() {
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
+        (payload) => {
           queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
+          const n = payload.new as Notification;
+          const orderId = (n.data as any)?.order_id as string | undefined;
+          const isChat = n.type === "chat";
+          const onThisChat =
+            isChat && orderId && location.pathname.startsWith(`/chat/order/${orderId}`);
+          if (onThisChat) return;
+          toast(n.title, {
+            description: n.message,
+            action:
+              isChat && orderId
+                ? { label: "Abrir", onClick: () => navigate(`/chat/order/${orderId}`) }
+                : undefined,
+          });
         }
       )
       .subscribe();
@@ -58,7 +75,7 @@ export function useNotifications() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, queryClient]);
+  }, [user?.id, queryClient, navigate, location.pathname]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
