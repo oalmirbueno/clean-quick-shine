@@ -6,12 +6,29 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, asaas-access-token",
 };
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let out = 0;
+  for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return out === 0;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Verify Asaas webhook token (set in Asaas dashboard + stored as ASAAS_WEBHOOK_TOKEN)
+    const expectedToken = Deno.env.get("ASAAS_WEBHOOK_TOKEN") ?? "";
+    const providedToken = req.headers.get("asaas-access-token") ?? "";
+    if (!expectedToken || !providedToken || !timingSafeEqual(providedToken, expectedToken)) {
+      console.warn("Asaas webhook rejected: invalid or missing token");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
