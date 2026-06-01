@@ -253,9 +253,16 @@ export default function ProOrderDetail() {
           </button>
         </section>
 
-        {/* Support */}
-        <section className="p-4">
-          <button 
+        {/* Chat & Support */}
+        <section className="p-4 space-y-3">
+          <button
+            onClick={() => navigate(`/chat/order/${order.id}`)}
+            className="w-full p-4 rounded-xl border border-primary/30 bg-primary/5 flex items-center gap-3 hover:bg-primary/10 transition-colors"
+          >
+            <MessageCircle className="w-5 h-5 text-primary" />
+            <span className="font-medium text-foreground">Conversar com o cliente</span>
+          </button>
+          <button
             onClick={() => navigate("/pro/support")}
             className="w-full p-4 rounded-xl border border-border bg-card flex items-center gap-3 hover:bg-secondary transition-colors"
           >
