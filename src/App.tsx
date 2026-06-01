@@ -172,6 +172,11 @@ const App = () => {
                 <Route path="/pro/quality" element={<ProtectedRoute requiredRole="pro"><ProQuality /></ProtectedRoute>} />
                 <Route path="/pro/availability" element={<ProtectedRoute requiredRole="pro"><ProAvailability /></ProtectedRoute>} />
 
+                {/* Shared: order chat (client & pro) */}
+                <Route path="/chat/order/:id" element={<ProtectedRoute><OrderChatPage /></ProtectedRoute>} />
+
+
+
                 {/* Admin Routes */}
                 <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/admin/login" element={<Navigate to="/login" replace />} />
