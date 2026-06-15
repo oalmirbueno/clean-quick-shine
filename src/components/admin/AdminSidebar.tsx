@@ -22,6 +22,7 @@ import {
   Wrench,
   Bell,
   Activity,
+  UserCog,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -31,6 +32,7 @@ const menuItems = [
   { icon: UserCheck, label: "Diaristas", path: "/admin/pros" },
   { icon: FileCheck, label: "Documentos", path: "/admin/documents" },
   { icon: Users, label: "Clientes", path: "/admin/clients" },
+  { icon: UserCog, label: "Usuários", path: "/admin/users" },
   { icon: Tag, label: "Cupons", path: "/admin/coupons" },
   { icon: ArrowDownToLine, label: "Saques", path: "/admin/withdrawals" },
   { icon: Wrench, label: "Serviços", path: "/admin/services" },
