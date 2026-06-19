@@ -21,22 +21,9 @@ export default function Index() {
     let cancelled = false;
 
     (async () => {
-      const ua = navigator.userAgent.toLowerCase();
-      const isMobile = /iphone|ipad|ipod|android/.test(ua);
-      const isStandalone =
-        window.matchMedia("(display-mode: standalone)").matches ||
-        (window.navigator as any).standalone === true;
-      let inIframe = false;
-      try { inIframe = window.self !== window.top; } catch { inIframe = true; }
-
       const { data: { session } } = await supabase.auth.getSession();
 
       if (cancelled) return;
-
-      if (isMobile && !isStandalone && !inIframe && !session?.user) {
-        navigate("/install", { replace: true });
-        return;
-      }
 
       if (session?.user) {
         const { data: userRoles } = await supabase
