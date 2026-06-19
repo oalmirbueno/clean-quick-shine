@@ -13,8 +13,21 @@ export function MobilePwaGate({ children }: { children: ReactNode }) {
   const inIframe = useIsInIframe();
   const location = useLocation();
 
+  const isAuthRoute = [
+    "/",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/onboarding",
+    "/confirm-email",
+  ].some((path) => location.pathname === path);
+
   // Já está no /install — nunca redireciona
   if (location.pathname.startsWith("/install")) return <>{children}</>;
+
+  // Login/cadastro/recuperação precisam permanecer acessíveis no navegador mobile.
+  if (isAuthRoute) return <>{children}</>;
 
   // Preview Lovable / iframe: nunca bloqueia
   if (inIframe) return <>{children}</>;
