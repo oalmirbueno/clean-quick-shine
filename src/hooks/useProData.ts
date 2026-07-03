@@ -187,37 +187,47 @@ export function useAvailableOrdersForPro() {
       
       const declinedIds = declinedOrders?.map(d => d.order_id) || [];
 
-      // Get orders in matching status (not yet assigned)
-      let query = supabase
-        .from("orders")
+      // Pedidos disponíveis via VIEW SEGURA: expõe só bairro/cidade/zona
+      // (sem rua/número/complemento/CEP/geo nem client_id/notes antes do
+      // aceite). A view já filtra pro_id nulo + scheduled/matching + diarista
+      // verificada; endereço completo só fica visível depois de aceitar.
+      // A view não está nos tipos gerados; descrevemos a linha localmente.
+      type AvailableOrderRow = {
+        id: string;
+        service_id: string;
+        scheduled_date: string;
+        scheduled_time: string;
+        duration_hours: number;
+        total_price: number;
+        status: string;
+        city: string | null;
+        neighborhood: string | null;
+        zone_id: string | null;
+      };
+
+      const { data: viewRows, error } = await supabase
+        .from("available_orders_safe" as never)
         .select("*")
-        .is("pro_id", null)
-        .in("status", ["scheduled", "matching"])
         .gte("scheduled_date", new Date().toISOString().split("T")[0])
         .order("scheduled_date", { ascending: true })
         .order("scheduled_time", { ascending: true })
         .limit(20);
 
-      const { data: orders, error } = await query;
-
-      if (error || !orders || orders.length === 0) return [];
+      const orders = (viewRows ?? []) as unknown as AvailableOrderRow[];
+      if (error || orders.length === 0) return [];
 
       // Filter out declined orders client-side
-      const filteredOrders = declinedIds.length > 0 
-        ? orders.filter(o => !declinedIds.includes(o.id))
+      const filteredOrders = declinedIds.length > 0
+        ? orders.filter((o) => !declinedIds.includes(o.id))
         : orders;
 
-      // Get service and address details
-      const serviceIds = [...new Set(filteredOrders.map(o => o.service_id))];
-      const addressIds = [...new Set(filteredOrders.map(o => o.address_id))];
+      // Serviços (nome). Endereço seguro já vem embutido na view.
+      const serviceIds = [...new Set(filteredOrders.map((o) => o.service_id))];
 
-      const [servicesResult, addressesResult] = await Promise.all([
-        supabase.from("services").select("id, name, requires_pro_plan").in("id", serviceIds),
-        supabase.from("addresses").select("id, city, neighborhood, zone_id").in("id", addressIds),
-      ]);
+      const servicesResult = await supabase
+        .from("services").select("id, name, requires_pro_plan").in("id", serviceIds);
 
       const services = servicesResult.data || [];
-      const addresses = addressesResult.data || [];
 
       // Get pro's current location for distance calculation (simplified)
       const { data: proProfile } = await supabase
@@ -241,10 +251,10 @@ export function useAvailableOrdersForPro() {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      return filteredOrders.map(order => {
+      return filteredOrders.map((order) => {
         const service = services.find(s => s.id === order.service_id);
-        const address = addresses.find(a => a.id === order.address_id);
-        
+        const address = { city: order.city ?? "", neighborhood: order.neighborhood ?? "" };
+
         const scheduledDate = new Date(order.scheduled_date);
         let dateLabel = scheduledDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
         
