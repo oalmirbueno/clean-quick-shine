@@ -103,14 +103,21 @@ serve(async (req) => {
 
     if (!isManual && payment?.asaas_payment_id && (payment.status === "paid" || payment.status === "confirmed" || payment.asaas_status === "RECEIVED" || payment.asaas_status === "CONFIRMED")) {
       const asaasApiKey = Deno.env.get("ASAAS_API_KEY");
-      const asaasEnv = Deno.env.get("ASAAS_ENVIRONMENT") || "production";
-      const asaasBaseUrl = asaasEnv === "production" ? "https://api.asaas.com/v3" : "https://sandbox.asaas.com/api/v3";
-
+      const asaasEnv = Deno.env.get("ASAAS_ENVIRONMENT");
       if (!asaasApiKey) {
         return new Response(JSON.stringify({ error: "ASAAS_API_KEY não configurada" }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      // Fail-fast: sem ambiente explícito não se toca em dinheiro (antes o
+      // default era "production", divergente das outras funções que assumiam
+      // "sandbox" — combinação perigosa).
+      if (!asaasEnv || !["sandbox", "production"].includes(asaasEnv)) {
+        return new Response(JSON.stringify({ error: "ASAAS_ENVIRONMENT não configurado (sandbox|production)" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const asaasBaseUrl = asaasEnv === "production" ? "https://api.asaas.com/v3" : "https://sandbox.asaas.com/api/v3";
 
       const refundResp = await fetch(`${asaasBaseUrl}/payments/${payment.asaas_payment_id}/refund`, {
         method: "POST",
