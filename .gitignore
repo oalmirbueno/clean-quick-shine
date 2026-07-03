@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Documentos internos de auditoria/planejamento (NÃO publicar em repo público)
+docs/auditoria-lancamento-*.md
+docs/plano-lovable-cloud-*.md
+docs/plano-consolidado-execucao-*.md
+docs/prompts-lovable-refinados-*.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

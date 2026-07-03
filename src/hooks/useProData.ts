@@ -314,18 +314,25 @@ export function useAcceptOrder() {
       if (!user?.id) throw new Error("Usuário não autenticado");
 
       // Update order: assign pro and change status to confirmed
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("orders")
-        .update({ 
-          pro_id: user.id, 
+        .update({
+          pro_id: user.id,
           status: "confirmed",
           updated_at: new Date().toISOString()
         })
         .eq("id", orderId)
         .is("pro_id", null) // Only if not yet assigned
-        .in("status", ["scheduled", "matching"]);
+        .in("status", ["scheduled", "matching"])
+        .select("id");
 
       if (error) throw error;
+      // RLS/concorrência: se nenhuma linha foi atualizada, o pedido já foi
+      // aceito por outra diarista ou o pro ainda não tem permissão para aceitar.
+      // Sem esta checagem o app mostrava "Pedido aceito com sucesso!" falsamente.
+      if (!data || data.length === 0) {
+        throw new Error("Este pedido não está mais disponível. Ele pode já ter sido aceito por outra profissional.");
+      }
 
       return orderId;
     },

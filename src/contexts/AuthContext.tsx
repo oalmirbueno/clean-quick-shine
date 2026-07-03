@@ -96,30 +96,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: window.location.origin,
         data: {
           full_name: fullName,
+          // Passado para o trigger handle_new_user garantir a role no servidor
+          // (blindagem para quando "Confirm email" for ativado e não houver
+          // sessão imediata para o INSERT client-side abaixo). Apenas client/pro.
+          signup_role: role === "pro" ? "pro" : "client",
         },
       },
     });
 
     if (error) return { error };
 
-    // Update profile with phone and add role
+    // A role é criada no servidor pelo trigger handle_new_user (lê signup_role
+    // do metadata). Aqui só completamos o telefone no profile e refletimos a
+    // role localmente para UX imediata.
     if (data.user) {
-      // Update profile
       await supabase
         .from("profiles")
         .update({ phone })
         .eq("user_id", data.user.id);
 
-      // Add user role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({ user_id: data.user.id, role });
-
-      if (roleError) {
-        console.error("Error inserting role:", roleError);
-      }
-
-      // Update local state immediately
       setRoles([role]);
       setRolesLoaded(true);
     }

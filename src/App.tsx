@@ -158,7 +158,9 @@ const App = () => {
                 <Route path="/client/location" element={<ProtectedRoute requiredRole="client"><ClientLocation /></ProtectedRoute>} />
                 <Route path="/client/subscription" element={<ProtectedRoute requiredRole="client"><ClientSubscription /></ProtectedRoute>} />
                 <Route path="/client/referral" element={<ProtectedRoute requiredRole="client"><ClientReferral /></ProtectedRoute>} />
-                <Route path="/client/demo" element={<ClientDemo />} />
+                {import.meta.env.DEV && (
+                  <Route path="/client/demo" element={<ClientDemo />} />
+                )}
 
                 {/* Pro Routes */}
                 <Route path="/pro/home" element={<ProtectedRoute requiredRole="pro"><ProHome /></ProtectedRoute>} />
@@ -213,9 +215,13 @@ const App = () => {
                 <Route path="/company/onboarding" element={<CompanyOnboarding />} />
                 <Route path="/company/request-quote" element={<CompanyRequestQuote />} />
 
-                {/* Dev Routes */}
-                <Route path="/dev/components" element={<ComponentShowcase />} />
-                <Route path="/dev/documentation" element={<ProjectDocumentation />} />
+                {/* Dev Routes — apenas em desenvolvimento (removidas do build de produção) */}
+                {import.meta.env.DEV && (
+                  <>
+                    <Route path="/dev/components" element={<ComponentShowcase />} />
+                    <Route path="/dev/documentation" element={<ProjectDocumentation />} />
+                  </>
+                )}
 
                 {/* Install & Settings Routes */}
                 <Route path="/install" element={<Install />} />
