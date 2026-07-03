@@ -304,6 +304,13 @@ export type Database = {
             foreignKeyName: "coupon_uses_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
+            referencedRelation: "available_orders_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_uses_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -404,6 +411,13 @@ export type Database = {
           reason?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "matching_logs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "available_orders_safe"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "matching_logs_order_id_fkey"
             columns: ["order_id"]
@@ -671,6 +685,13 @@ export type Database = {
             foreignKeyName: "payments_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
+            referencedRelation: "available_orders_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -696,6 +717,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pro_declined_orders_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "available_orders_safe"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pro_declined_orders_order_id_fkey"
             columns: ["order_id"]
@@ -1506,6 +1534,13 @@ export type Database = {
             foreignKeyName: "support_tickets_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
+            referencedRelation: "available_orders_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -1539,8 +1574,10 @@ export type Database = {
           created_at: string
           encrypted_bank_info: string | null
           encrypted_pix_key: string | null
+          encrypted_pix_key_backup: string | null
           id: string
           method: string
+          pix_key_type: string | null
           processed_at: string | null
           status: string | null
           user_id: string
@@ -1551,8 +1588,10 @@ export type Database = {
           created_at?: string
           encrypted_bank_info?: string | null
           encrypted_pix_key?: string | null
+          encrypted_pix_key_backup?: string | null
           id?: string
           method: string
+          pix_key_type?: string | null
           processed_at?: string | null
           status?: string | null
           user_id: string
@@ -1563,8 +1602,10 @@ export type Database = {
           created_at?: string
           encrypted_bank_info?: string | null
           encrypted_pix_key?: string | null
+          encrypted_pix_key_backup?: string | null
           id?: string
           method?: string
+          pix_key_type?: string | null
           processed_at?: string | null
           status?: string | null
           user_id?: string
@@ -1652,6 +1693,40 @@ export type Database = {
       }
     }
     Views: {
+      available_orders_safe: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          duration_hours: number | null
+          id: string | null
+          neighborhood: string | null
+          scheduled_date: string | null
+          scheduled_time: string | null
+          service_id: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["order_status"] | null
+          surge_multiplier: number | null
+          total_price: number | null
+          zone_fee: number | null
+          zone_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addresses_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "zones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       withdrawals_secure: {
         Row: {
           amount: number | null
@@ -1690,6 +1765,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_get_withdrawal_pix_key: {
+        Args: { p_withdrawal_id: string }
+        Returns: string
+      }
       calculate_pro_available_balance: {
         Args: { p_user_id: string }
         Returns: number
@@ -1738,6 +1817,15 @@ export type Database = {
         Returns: number
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      store_withdrawal_request: {
+        Args: {
+          p_amount: number
+          p_pix_key: string
+          p_pix_key_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "client" | "pro" | "company"
