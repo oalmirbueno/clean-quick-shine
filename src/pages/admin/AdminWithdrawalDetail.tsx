@@ -9,8 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
 import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
-import { logAdminAction, type AuditAction } from "@/lib/auditLog";
-import { withdrawalTemplates } from "@/lib/adminNotificationTemplates";
 
 const statusActionMap: Record<string, { label: string; description: string; variant?: "primary" | "outline" }[]> = {
   pending: [
@@ -63,37 +61,17 @@ export default function AdminWithdrawalDetail() {
 
   const updateStatus = useMutation({
     mutationFn: async (newStatus: string) => {
-      const updates: any = { status: newStatus };
-      if (newStatus === "completed") updates.processed_at = new Date().toISOString();
-      const { error } = await supabase.from("withdrawals").update(updates).eq("id", id!);
-      if (error) throw error;
-      const auditAction: AuditAction = newStatus === "processing" ? "withdrawal_approved" : newStatus === "completed" ? "withdrawal_completed" : "withdrawal_rejected";
-      await logAdminAction({
-        action: auditAction,
-        targetType: "withdrawal",
-        targetId: id!,
-        targetName: withdrawal?.proName,
-        metadata: { amount: withdrawal?.amount, user_id: withdrawal?.user_id, new_status: newStatus },
+      // A transferência PIX real e as notificações à diarista são feitas pela
+      // edge function approve-withdrawal (service role). A tela não move mais
+      // dinheiro nem status diretamente na tabela.
+      const action = newStatus === "processing" ? "approve"
+        : newStatus === "completed" ? "complete"
+        : "reject";
+      const { data, error } = await supabase.functions.invoke("approve-withdrawal", {
+        body: { withdrawalId: id, action },
       });
-      if (withdrawal?.user_id) {
-        const tpl = newStatus === "processing"
-          ? withdrawalTemplates.approved(withdrawal.amount)
-          : newStatus === "completed"
-            ? withdrawalTemplates.completed(withdrawal.amount)
-            : withdrawalTemplates.rejected(withdrawal.amount);
-        const { title, message, type } = tpl;
-        // In-app + push em paralelo, skipDbInsert evita duplicidade
-        const inApp = supabase
-          .from("notifications")
-          .insert({ user_id: withdrawal.user_id, title, message, type, data: { withdrawal_id: id, new_status: newStatus } })
-          .then(({ error }) => { if (error) console.error("[withdrawal notify] in-app failed", error); });
-        const push = supabase.functions
-          .invoke("send-push-notification", {
-            body: { userId: withdrawal.user_id, title, message, type, skipDbInsert: true, data: { withdrawal_id: id, new_status: newStatus } },
-          })
-          .catch((e) => console.warn("[withdrawal notify] push failed", e));
-        await Promise.allSettled([inApp, push]);
-      }
+      if (error) throw new Error(error.message || "Erro ao processar saque");
+      if (data?.error) throw new Error(data.error);
     },
     onMutate: async (newStatus) => {
       const scope = mutationScopes.withdrawal(id);

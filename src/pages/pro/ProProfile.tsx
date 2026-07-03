@@ -33,6 +33,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAddresses, useCreateAddress, useUpdateAddress, useDeleteAddress } from "@/hooks/useAddresses";
+import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { toast } from "sonner";
 
 type EditSection = null | "personal" | "bio" | "address-new" | string; // string = address id
@@ -574,6 +575,8 @@ export default function ProProfile() {
             </div>
             <span className="font-medium text-destructive">Sair da conta</span>
           </button>
+
+          <DeleteAccountButton />
 
           <p className="text-center text-sm text-muted-foreground mt-4 pb-4">Já Limpo v1.0.0</p>
         </main>

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ChevronRight, MapPin, CreditCard, Settings, LogOut, HelpCircle } from "lucide-react";
+import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,6 +107,9 @@ export default function ClientProfile() {
           </div>
           <span className="font-medium text-destructive">Sair da conta</span>
         </button>
+
+        {/* Excluir conta (LGPD) */}
+        <DeleteAccountButton />
 
         {/* App Version */}
         <p className="text-center text-sm text-muted-foreground mt-8">
