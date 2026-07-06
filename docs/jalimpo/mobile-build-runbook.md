@@ -16,17 +16,31 @@ enxergar a versão nova. O que muda só em `android/` ou `ios/` (manifest, plist
 
 ## Android — build local
 
-Pré-requisitos (não presentes na máquina atual):
-1. JDK 21 (Temurin) — `winget install EclipseAdoptium.Temurin.21.JDK`
-2. Android Studio (instala SDK/platform-tools) — ou SDK command-line tools
-3. Variável `ANDROID_HOME` apontando para o SDK (`%LOCALAPPDATA%\Android\Sdk`)
+Ambiente instalado na máquina principal em 2026-07-06:
+- **JDK 21 (Temurin)**: `C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot`
+  (instalado via `winget install EclipseAdoptium.Temurin.21.JDK`)
+- **Android SDK**: `E:\Android\Sdk` (command-line tools oficiais do Google;
+  platform-tools + platforms;android-36 + build-tools 35/36; licenças aceitas
+  via `sdkmanager --licenses`)
+- **Gradle caches**: `E:\Android\gradle` (via `GRADLE_USER_HOME`, para não encher o C:)
+- `android/local.properties` (gitignored): `sdk.dir=E:/Android/Sdk` — usar
+  **barras normais**; backslash simples quebra o parse de .properties.
 
 Build debug (APK para testar em aparelho):
 ```powershell
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot"
+$env:GRADLE_USER_HOME = "E:\Android\gradle"
 cd android
 .\gradlew assembleDebug
 # saída: android\app\build\outputs\apk\debug\app-debug.apk
 ```
+
+Instalar no aparelho (depurar via USB com "Depuração USB" ativa):
+```powershell
+E:\Android\Sdk\platform-tools\adb.exe install -r android\app\build\outputs\apk\debug\app-debug.apk
+```
+Sem cabo: copiar o APK para o aparelho (WhatsApp/Drive/USB) e abrir — Android
+pede permissão para "instalar apps de fontes desconhecidas" (normal em debug).
 
 Build release (AAB para a Play Store — exige keystore):
 ```powershell
@@ -49,12 +63,17 @@ Mac/CI consegue gerar o archive.
 
 ## Ícones e splash
 
-Quando houver a logo final em 1024×1024:
+Gerados em 2026-07-06 com `@capacitor/assets` a partir de `assets/logo.png`
+(marca da gota, canvas 1024×1024 montado por upscale do `src/assets/logo-icon.png`
+384px — qualidade OK para beta; **arte final nativa em 1024×1024 continua
+pendente** para o release de loja):
 ```powershell
-npm install -D @capacitor/assets
-npx capacitor-assets generate --iconBackgroundColor "#ffffff"
+npx capacitor-assets generate --iconBackgroundColor "#FFFFFF" --iconBackgroundColorDark "#111B2E" --splashBackgroundColor "#FFFFFF" --splashBackgroundColorDark "#111B2E"
 ```
-(hoje as cascas usam o ícone padrão do Capacitor — pendência antes do release)
+Atenção: a ferramenta também sobrescreve `public/manifest.json` e gera ícones de
+PWA fora de `public/` — depois de rodar, conferir que os ícones estão em
+`public/icons/` e que o manifest aponta para `/icons/icon-*.png`. De brinde ela
+corrigiu os ícones do PWA, que eram todos 1920×1280 mislabeled.
 
 ## Regras de segurança do processo
 

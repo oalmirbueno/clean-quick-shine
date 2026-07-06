@@ -30,7 +30,8 @@ processo (rollback vivo). Publicação é aditiva.
 
 - [ ] Conta Google Play Console no **CNPJ da Já Limpo** (taxa única US$ 25)
 - [ ] Keystore de release gerado e guardado em cofre (perder = nunca mais atualizar o app) — recomendado: Play App Signing
-- [ ] Build AAB de release (`cd android && gradlew bundleRelease`) — requer JDK 21 + Android SDK
+- [x] Ambiente de build Android montado (JDK 21 + SDK em E:\Android) — APK debug gerado em 2026-07-06
+- [ ] Build AAB de release (`cd android && gradlew bundleRelease`) — falta apenas o keystore
 - [ ] Data safety preenchido: coleta nome/e-mail/telefone/endereço/localização/fotos de documentos; pagamento via Asaas; exclusão self-service
 - [ ] Declaração de permissões: localização (mapa/atendimento), câmera (verificação de documentos)
 - [ ] Screenshots (mín. 2, tel. 16:9 ou 9:16), ícone 512×512, feature graphic 1024×500
@@ -50,7 +51,8 @@ processo (rollback vivo). Publicação é aditiva.
 
 ## Pendências de produto antes do release
 
-- [ ] Ícone/splash nativos finais (gerar com `npx @capacitor/assets generate` a partir de logo 1024×1024)
+- [x] Ícone/splash nativos gerados (beta, upscale da marca 384px) — **pendente: arte final 1024×1024 nativa** e regerar
+- [ ] Teste do APK debug em aparelho Android real (APK pronto em `E:\Android\ja-limpo-debug.apk`)
 - [ ] Deploy do frontend com as rotas `/support` e `/account-deletion` no ar
 - [ ] Push nativo (FCM/APNs) — fase futura; beta usa notificação in-app/e-mail
 - [ ] Teste em aparelho Android real (login com usuário existente, pedido, mapa, upload de documento)

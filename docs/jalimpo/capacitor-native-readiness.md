@@ -50,10 +50,18 @@ URLs finais (após deploy): `https://jalimpo.com/terms`, `/privacy`, `/support`,
 
 ## Pendências conhecidas
 
-- Ícone/splash nativos gerados a partir de `public/pwa-512x512.png` (usar
-  `@capacitor/assets` quando houver arte final em alta resolução).
+- Arte final do ícone em 1024×1024 (hoje: upscale da marca 384px, ok para beta;
+  regerar com `npx capacitor-assets generate` quando houver a arte).
 - Deep links / App Links (`assetlinks.json` + `apple-app-site-association` em
-  jalimpo.com) — necessários para abrir links de e-mail direto no app; sem eles o
-  link abre no navegador (funciona, só não é o ideal).
-- Build Android requer JDK 21 + Android Studio/SDK (não presentes nesta máquina).
+  jalimpo.com) — precisam do SHA-256 do certificado de release (Android) e do
+  Team ID Apple (iOS), que ainda não existem; sem eles o link abre no navegador
+  (funciona, só não é o ideal). Não inventar valores.
 - Build iOS requer Mac/Xcode ou serviço de build em nuvem (Codemagic/Appflow).
+
+## Ambiente Android (2026-07-06)
+
+JDK 21 + Android SDK instalados na máquina principal (detalhes e comandos no
+`mobile-build-runbook.md`). **APK debug gerado com sucesso**:
+`android/app/build/outputs/apk/debug/app-debug.apk` (cópia em
+`E:\Android\ja-limpo-debug.apk`). Teste em aparelho real pendente (nenhum
+dispositivo adb conectado no momento do build).
