@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => ({
         "favicon.ico",
         "robots.txt",
         "pwa-*.png",
+        "icons/*.png",
         "apple-splash-*.png",
       ],
       manifest: false,

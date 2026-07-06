@@ -6,105 +6,51 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#FFFFFF",
   "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/pwa-72x72.png",
+      "src": "/icons/icon-48.png",
+      "type": "image/png",
+      "sizes": "48x48",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-72.png",
+      "type": "image/png",
       "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/pwa-96x96.png",
+      "src": "/icons/icon-96.png",
+      "type": "image/png",
       "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/pwa-128x128.png",
+      "src": "/icons/icon-128.png",
+      "type": "image/png",
       "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/pwa-144x144.png",
-      "sizes": "144x144",
+      "src": "/icons/icon-192.png",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/pwa-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/pwa-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/pwa-384x384.png",
-      "sizes": "384x384",
+      "src": "/icons/icon-256.png",
       "type": "image/png",
-      "purpose": "any"
+      "sizes": "256x256",
+      "purpose": "any maskable"
     },
     {
-      "src": "/pwa-512x512.png",
+      "src": "/icons/icon-512.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/pwa-maskable-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-maskable-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-maskable-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-maskable-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-maskable-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-maskable-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-maskable-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-maskable-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -112,19 +58,34 @@
       "name": "Início",
       "short_name": "Início",
       "url": "/client/home",
-      "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/pwa-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Meus Pedidos",
       "short_name": "Pedidos",
       "url": "/client/orders",
-      "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/pwa-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Suporte",
       "short_name": "Suporte",
       "url": "/client/support",
-      "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/pwa-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
   "screenshots": [
@@ -135,7 +96,10 @@
       "form_factor": "narrow"
     }
   ],
-  "categories": ["lifestyle", "utilities"],
+  "categories": [
+    "lifestyle",
+    "utilities"
+  ],
   "lang": "pt-BR",
   "dir": "ltr"
 }
