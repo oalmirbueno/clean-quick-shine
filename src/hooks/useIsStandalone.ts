@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { isNativeApp } from "@/lib/platform";
 
 /**
  * Detecta se o app está rodando como PWA instalado (standalone).
- * Inclui detecção iOS (navigator.standalone) e modo display-mode.
+ * Inclui detecção iOS (navigator.standalone), modo display-mode e a casca
+ * nativa Capacitor (que conta como "instalado" por definição).
  */
 export function useIsStandalone() {
   const [isStandalone, setIsStandalone] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
+    if (isNativeApp()) return true;
     try {
       if (window.matchMedia("(display-mode: standalone)").matches) return true;
       if ((window.navigator as any).standalone === true) return true;
@@ -17,6 +20,7 @@ export function useIsStandalone() {
   });
 
   useEffect(() => {
+    if (isNativeApp()) return;
     const mq = window.matchMedia("(display-mode: standalone)");
     const handler = (e: MediaQueryListEvent) => setIsStandalone(e.matches);
     mq.addEventListener?.("change", handler);

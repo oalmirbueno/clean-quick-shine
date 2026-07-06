@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Download, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { isNativeApp } from "@/lib/platform";
 
 const DISMISS_KEY = "jalimpo_install_banner_dismissed";
 const COOLDOWN_DAYS = 7;
@@ -12,6 +13,9 @@ export function InstallBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    // No app nativo não existe "instalar o PWA"
+    if (isNativeApp()) return;
+
     // Never show on the install page itself or auth pages where it'd overlap
     if (location.pathname.startsWith("/install")) return;
 

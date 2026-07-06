@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { getPublicOrigin } from "@/lib/platform";
 import { Gift, Copy, Share2, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -32,7 +33,7 @@ export function ReferralCard({
       navigator.share({
         title: "LimpaJá - Indicação",
         text: `Use meu código ${referralCode} e ganhe R$ ${rewardValue} de desconto na primeira limpeza!`,
-        url: window.location.origin,
+        url: getPublicOrigin(),
       });
     } else {
       handleCopy();

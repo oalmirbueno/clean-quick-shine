@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { validatePassword } from "@/lib/passwordValidation";
+import { getPublicOrigin } from "@/lib/platform";
 
 type AppRole = "admin" | "pro" | "client";
 
@@ -127,7 +128,7 @@ export default function AdminUsers() {
       await call("send_reset_email", {
         targetUserId: u.id,
         email: u.email,
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${getPublicOrigin()}/reset-password`,
       });
       toast.success("Email de recuperação enviado");
     } catch (e) {

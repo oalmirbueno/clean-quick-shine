@@ -26,6 +26,8 @@ import AccessDenied from "./pages/AccessDenied";
 import ConfirmEmail from "./pages/ConfirmEmail";
 import TermsOfUse from "./pages/TermsOfUse";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Support from "./pages/Support";
+import AccountDeletion from "./pages/AccountDeletion";
 
 // Client Pages
 import ClientHome from "./pages/client/ClientHome";
@@ -140,6 +142,8 @@ const App = () => {
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
                 <Route path="/terms" element={<TermsOfUse />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/account-deletion" element={<AccountDeletion />} />
 
                 {/* Client Routes */}
                 <Route path="/client/home" element={<ProtectedRoute requiredRole="client"><ClientHome /></ProtectedRoute>} />

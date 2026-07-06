@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { isNativeApp } from "@/lib/platform";
 
 interface UseRegisterSWReturn {
   needRefresh: boolean;
@@ -29,6 +30,9 @@ export function useRegisterSW(): UseRegisterSWReturn {
   const [swVersion, setSwVersion] = useState("");
 
   useEffect(() => {
+    // Na casca nativa os assets são servidos localmente pelo Capacitor;
+    // service worker só atrapalharia (cache duplo, prompt de update falso).
+    if (isNativeApp()) return;
     if (!("serviceWorker" in navigator)) return;
     if (isPreviewOrIframe()) {
       navigator.serviceWorker.getRegistrations().then((regs) => {

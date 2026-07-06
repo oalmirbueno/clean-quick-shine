@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { isNativeApp } from "@/lib/platform";
 
 export function usePushNotifications() {
   const { user } = useAuth();
@@ -9,6 +10,12 @@ export function usePushNotifications() {
   const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
+    // Web Push depende de service worker — não existe na casca nativa.
+    // Push nativo (FCM/APNs) entra depois via @capacitor/push-notifications.
+    if (isNativeApp()) {
+      setIsSupported(false);
+      return;
+    }
     const supported =
       "Notification" in window &&
       "serviceWorker" in navigator &&

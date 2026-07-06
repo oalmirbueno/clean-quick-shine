@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback 
 import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { getPublicOrigin } from "@/lib/platform";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -93,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: getPublicOrigin(),
         data: {
           full_name: fullName,
           // Passado para o trigger handle_new_user garantir a role no servidor

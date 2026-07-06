@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { isNativeApp } from "@/lib/platform";
 
 const PREVIEW_CACHE_RESET_KEY = "jalimpo_preview_cache_reset_simple_home_v4";
 const PWA_CACHE_RESET_KEY = "jalimpo_pwa_cache_reset_bottom_nav_v2";
@@ -61,7 +62,11 @@ async function resetInstalledPwaCacheOnce() {
   window.location.reload();
 }
 
-void resetPreviewCacheOnce();
-void resetInstalledPwaCacheOnce();
+// Rotinas de limpeza de cache são exclusivas do PWA/preview web;
+// na casca nativa não há service worker e o reload viraria loop.
+if (!isNativeApp()) {
+  void resetPreviewCacheOnce();
+  void resetInstalledPwaCacheOnce();
+}
 
 createRoot(document.getElementById("root")!).render(<App />);
