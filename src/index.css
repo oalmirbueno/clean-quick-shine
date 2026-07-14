@@ -6,96 +6,101 @@
 
 @layer base {
   :root {
-    /* Primary - Verde menta fresco (transmite limpeza) */
-    --primary: 162 78% 45%;
+    /* === Identidade V3 jálimpo ===
+       Verde principal #19CC97 · Azul profundo #102A43
+       Mint #DDF8EE · Branco frio #F6F9FA · Cinza texto #667085 */
+
+    /* Primary — verde jálimpo #19CC97 */
+    --primary: 158 78% 45%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Azul profundo (transmite confiança) */
-    --secondary: 220 60% 95%;
-    --secondary-foreground: 220 60% 20%;
+    /* Secondary — azul profundo #102A43 (usado em superfícies escuras/CTAs de contraste) */
+    --secondary: 213 62% 16%;
+    --secondary-foreground: 0 0% 100%;
 
-    /* Accent - Verde claro suave */
-    --accent: 162 40% 95%;
-    --accent-foreground: 162 78% 25%;
+    /* Accent — mint claro #DDF8EE */
+    --accent: 154 71% 92%;
+    --accent-foreground: 213 62% 16%;
 
-    /* Background */
-    --background: 210 20% 98%;
-    --foreground: 220 25% 12%;
+    /* Background — branco frio #F6F9FA */
+    --background: 200 20% 97%;
+    --foreground: 213 62% 16%;
 
     /* Card */
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 12%;
+    --card-foreground: 213 62% 16%;
 
     /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 12%;
+    --popover-foreground: 213 62% 16%;
 
-    /* Muted */
-    --muted: 210 15% 94%;
-    --muted-foreground: 220 10% 46%;
+    /* Muted — cinza texto #667085 */
+    --muted: 210 20% 96%;
+    --muted-foreground: 220 13% 46%;
 
-    /* Border */
-    --border: 210 15% 90%;
-    --input: 210 15% 90%;
+    /* Border / Input */
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Success */
-    --success: 152 69% 40%;
+    /* Success (alinhado ao verde primário) */
+    --success: 158 78% 40%;
     --success-foreground: 0 0% 100%;
 
     /* Warning */
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Ring/Focus */
-    --ring: 162 78% 45%;
+    /* Ring/Focus — verde jálimpo */
+    --ring: 158 78% 45%;
 
     /* Radius */
     --radius: 1rem;
 
-    /* Modern shadows */
-    --shadow-xs: 0 1px 2px 0 hsl(220 25% 12% / 0.05);
-    --shadow-sm: 0 1px 3px 0 hsl(220 25% 12% / 0.08), 0 1px 2px -1px hsl(220 25% 12% / 0.08);
-    --shadow-md: 0 4px 6px -1px hsl(220 25% 12% / 0.08), 0 2px 4px -2px hsl(220 25% 12% / 0.08);
-    --shadow-lg: 0 10px 15px -3px hsl(220 25% 12% / 0.08), 0 4px 6px -4px hsl(220 25% 12% / 0.08);
+    /* Modern shadows (tom azul profundo) */
+    --shadow-xs: 0 1px 2px 0 hsl(213 62% 16% / 0.05);
+    --shadow-sm: 0 1px 3px 0 hsl(213 62% 16% / 0.08), 0 1px 2px -1px hsl(213 62% 16% / 0.08);
+    --shadow-md: 0 4px 6px -1px hsl(213 62% 16% / 0.08), 0 2px 4px -2px hsl(213 62% 16% / 0.08);
+    --shadow-lg: 0 10px 15px -3px hsl(213 62% 16% / 0.08), 0 4px 6px -4px hsl(213 62% 16% / 0.08);
     --shadow-card: var(--shadow-sm);
     --shadow-card-hover: var(--shadow-md);
-    --shadow-button: 0 2px 4px 0 hsl(162 78% 45% / 0.2);
+    --shadow-button: 0 2px 4px 0 hsl(158 78% 45% / 0.22);
     --app-height: 100dvh;
     --bottom-nav-height: 56px;
     --bottom-nav-safe-area: 0px;
   }
 
   .dark {
-    --primary: 162 70% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 30% 15%;
-    --secondary-foreground: 220 20% 90%;
-    --accent: 162 30% 15%;
-    --accent-foreground: 162 70% 80%;
-    --background: 220 20% 7%;
-    --foreground: 210 15% 93%;
-    --card: 220 20% 10%;
-    --card-foreground: 210 15% 93%;
-    --popover: 220 20% 10%;
-    --popover-foreground: 210 15% 93%;
-    --muted: 220 15% 15%;
-    --muted-foreground: 210 10% 55%;
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
+    /* Dark — superfície #102A43 como base, verde jálimpo mantido */
+    --primary: 158 72% 50%;
+    --primary-foreground: 213 62% 12%;
+    --secondary: 213 45% 22%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 213 45% 20%;
+    --accent-foreground: 158 72% 70%;
+    --background: 213 62% 10%;
+    --foreground: 200 20% 95%;
+    --card: 213 55% 14%;
+    --card-foreground: 200 20% 95%;
+    --popover: 213 55% 14%;
+    --popover-foreground: 200 20% 95%;
+    --muted: 213 40% 18%;
+    --muted-foreground: 210 15% 65%;
+    --border: 213 40% 22%;
+    --input: 213 40% 22%;
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
-    --success: 152 60% 45%;
+    --success: 158 65% 50%;
     --success-foreground: 0 0% 100%;
     --warning: 38 80% 55%;
     --warning-foreground: 0 0% 100%;
-    --ring: 162 70% 50%;
+    --ring: 158 72% 50%;
 
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.3);
-    --shadow-card-hover: 0 4px 6px -1px hsl(0 0% 0% / 0.3);
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.35);
+    --shadow-card-hover: 0 4px 6px -1px hsl(0 0% 0% / 0.35);
   }
 }
 
