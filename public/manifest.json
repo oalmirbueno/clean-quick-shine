@@ -1,105 +1,32 @@
 {
   "id": "ja-limpo-app",
-  "name": "Já Limpo - Limpeza Profissional",
-  "short_name": "Já Limpo",
-  "description": "Precisa de Limpeza? Baixa o Já Limpo",
+  "name": "jálimpo — Limpeza Profissional",
+  "short_name": "jálimpo",
+  "description": "Precisa de limpeza? Baixa o jálimpo.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#3b82f6",
+  "background_color": "#F6F9FA",
+  "theme_color": "#102A43",
   "orientation": "portrait-primary",
   "icons": [
-    {
-      "src": "/icons/icon-48.png",
-      "type": "image/png",
-      "sizes": "48x48",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-72.png",
-      "type": "image/png",
-      "sizes": "72x72",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-96.png",
-      "type": "image/png",
-      "sizes": "96x96",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-128.png",
-      "type": "image/png",
-      "sizes": "128x128",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-256.png",
-      "type": "image/png",
-      "sizes": "256x256",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
+    { "src": "/icons/icon-48.png",  "type": "image/png", "sizes": "48x48",   "purpose": "any maskable" },
+    { "src": "/icons/icon-72.png",  "type": "image/png", "sizes": "72x72",   "purpose": "any maskable" },
+    { "src": "/icons/icon-96.png",  "type": "image/png", "sizes": "96x96",   "purpose": "any maskable" },
+    { "src": "/icons/icon-128.png", "type": "image/png", "sizes": "128x128", "purpose": "any maskable" },
+    { "src": "/icons/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+    { "src": "/icons/icon-256.png", "type": "image/png", "sizes": "256x256", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
   ],
   "shortcuts": [
-    {
-      "name": "Início",
-      "short_name": "Início",
-      "url": "/client/home",
-      "icons": [
-        {
-          "src": "/pwa-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Meus Pedidos",
-      "short_name": "Pedidos",
-      "url": "/client/orders",
-      "icons": [
-        {
-          "src": "/pwa-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Suporte",
-      "short_name": "Suporte",
-      "url": "/client/support",
-      "icons": [
-        {
-          "src": "/pwa-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
+    { "name": "Início",       "short_name": "Início",  "url": "/client/home",    "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }] },
+    { "name": "Meus Pedidos", "short_name": "Pedidos", "url": "/client/orders",  "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }] },
+    { "name": "Suporte",      "short_name": "Suporte", "url": "/client/support", "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }] }
   ],
   "screenshots": [
-    {
-      "src": "/screenshots/home.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
+    { "src": "/screenshots/home.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow" }
   ],
-  "categories": [
-    "lifestyle",
-    "utilities"
-  ],
+  "categories": ["lifestyle", "utilities"],
   "lang": "pt-BR",
   "dir": "ltr"
 }
