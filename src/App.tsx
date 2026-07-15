@@ -83,6 +83,7 @@ import AdminCohorts from "./pages/admin/AdminCohorts";
 import AdminMatchingDebug from "./pages/admin/AdminMatchingDebug";
 import AdminQuotes from "./pages/admin/AdminQuotes";
 import AdminDocuments from "./pages/admin/AdminDocuments";
+import AdminVerifications from "./pages/admin/AdminVerifications";
 import AdminWithdrawals from "./pages/admin/AdminWithdrawals";
 import AdminWithdrawalDetail from "./pages/admin/AdminWithdrawalDetail";
 import AdminServices from "./pages/admin/AdminServices";
@@ -207,6 +208,7 @@ const App = () => {
                 <Route path="/admin/matching-debug" element={<ProtectedRoute requiredRole="admin"><AdminMatchingDebug /></ProtectedRoute>} />
                 <Route path="/admin/quotes" element={<ProtectedRoute requiredRole="admin"><AdminQuotes /></ProtectedRoute>} />
                 <Route path="/admin/documents" element={<ProtectedRoute requiredRole="admin"><AdminDocuments /></ProtectedRoute>} />
+                <Route path="/admin/verifications" element={<ProtectedRoute requiredRole="admin"><AdminVerifications /></ProtectedRoute>} />
                 <Route path="/admin/withdrawals" element={<ProtectedRoute requiredRole="admin"><AdminWithdrawals /></ProtectedRoute>} />
                 <Route path="/admin/withdrawals/:id" element={<ProtectedRoute requiredRole="admin"><AdminWithdrawalDetail /></ProtectedRoute>} />
                 <Route path="/admin/services" element={<ProtectedRoute requiredRole="admin"><AdminServices /></ProtectedRoute>} />

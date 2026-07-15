@@ -30,6 +30,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
   { icon: ClipboardList, label: "Pedidos", path: "/admin/orders" },
   { icon: UserCheck, label: "Diaristas", path: "/admin/pros" },
+  { icon: ShieldCheck, label: "Verificações", path: "/admin/verifications" },
   { icon: FileCheck, label: "Documentos", path: "/admin/documents" },
   { icon: Users, label: "Clientes", path: "/admin/clients" },
   { icon: UserCog, label: "Usuários", path: "/admin/users" },
