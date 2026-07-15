@@ -1,11 +1,16 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { BottomNav } from "@/components/ui/BottomNav";
+import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { ChevronLeft, Upload, CheckCircle2, Loader2, AlertCircle, CreditCard, Camera, Shield, Clock, XCircle, ImageIcon, FileText, Check } from "lucide-react";
+import { Upload, CheckCircle2, Loader2, AlertCircle, CreditCard, Camera, Shield, Clock, XCircle, ImageIcon, FileText, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProDocuments } from "@/hooks/useProDocuments";
 import { toast } from "sonner";
+
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 interface DocConfig {
   id: string;
