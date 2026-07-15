@@ -21,6 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useServices } from "@/hooks/useServices";
+import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, any> = { Home, Sparkles, HardHat, Zap };
 
