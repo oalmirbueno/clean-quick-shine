@@ -1,58 +1,74 @@
-# Bloco D — Redesenho Dashboard Pro (Diarista)
+# Painel de Verificações de Diaristas
 
-Aplicar a **mesma linguagem visual V3** já entregue no fluxo do cliente (Blocos A–C) às 12 telas do diarista, sem tocar em lógica de negócio, RLS, edge functions ou hooks.
+## 1. Banco de dados (nova migração)
 
-## Princípios visuais (idênticos ao cliente)
+**Tabela `verification_threads`** — uma thread por diarista (1:1 com `pro_profiles.user_id`).
+- `user_id` (FK auth.users, único), `status` (`open` | `resolved`), `last_message_at`, `unread_admin`, `unread_pro`.
 
-- Verde primário `#19CC97`, azul profundo `#102A43`
-- `rounded-2xl` / `rounded-3xl`, `border-border/60`, `shadow-sm`
-- Header unificado: `bg-background/80 backdrop-blur-md`, botão back `size-10 rounded-full`, título + subtítulo
-- Cards com ícones em `size-9/10 rounded-full` sobre `bg-primary/10` ou `bg-secondary`
-- Bottom CTA `bg-card/95 backdrop-blur-md`, safe-bottom
-- Motion: `framer-motion` com stagger sutil (delay 0.04–0.06) em listas
-- Empty states humanos com ícone Lucide + copy curta
-- Dark mode: só onde já existe (respeitando tokens)
+**Tabela `verification_messages`** — mensagens da thread.
+- `thread_id`, `sender_id`, `sender_role` (`admin` | `pro`), `body` (text), `attachment_url` (nullable), created_at.
 
-## Escopo — 12 telas em 4 passes
+**RLS**
+- Pro: SELECT/INSERT apenas na própria thread (`user_id = auth.uid()`).
+- Admin: SELECT/INSERT/UPDATE em todas (via `is_admin(auth.uid())`).
+- Grants para `authenticated` e `service_role`.
 
-### Passe 1 — Núcleo diário (3 telas)
-- **ProHome** — hero de status (online/offline), stats do dia (ganhos, jobs, rating), lista de novos pedidos com stagger, CTA para agenda
-- **ProAgenda** — segmented control (Hoje / Semana / Concluídos), timeline com marcadores, cards de job com hora + endereço
-- **ProOrderDetail** — hero cliente/serviço, cards de rota, endereço, pagamento, botões de ação principal (aceitar/iniciar/finalizar)
+**Trigger**: ao inserir mensagem, atualiza `last_message_at` e incrementa o contador de não-lidas do lado oposto; ao ler, o lado zera seu contador via RPC.
 
-### Passe 2 — Ganhos e crescimento (3 telas)
-- **ProEarnings** — hero card com saldo grande, breakdown de comissão, gráfico/lista de últimos serviços, CTA sacar
-- **ProWithdraw** — form limpo com valor destacado, dados bancários em card, resumo antes de confirmar
-- **ProRanking** — pódio visual, posição do pro, lista de tops, badge de nível
+**Notificação**: trigger `AFTER INSERT` cria linha em `notifications` para o destinatário (título "Nova mensagem sobre sua verificação").
 
-### Passe 3 — Perfil e qualidade (3 telas)
-- **ProProfile** — hero avatar + rating + jobs done, seções agrupadas (dados, docs, banking, preferências), menu list refinado
-- **ProAvailability** — grade de dias/horários com toggles suaves, chips de zona
-- **ProQuality** — score cards, checklist de boas práticas, badges conquistados
+## 2. Nova rota `/admin/verifications`
 
-### Passe 4 — Suporte e onboarding (3 telas)
-- **ProPlan** — hero do plano atual (Free/Pro/Elite), cards de upgrade com destaque no recomendado
-- **ProSupport** — mesmo padrão do cliente (grid quick actions + lista + sheet novo ticket)
-- **ProVerification** — stepper vertical de docs, cards de upload com status (pendente/aprovado/reprovado), copy explicativa por passo
+Fila focada em "diaristas aguardando decisão". Card por diarista com:
+- Nome, telefone, avatar do primeiro documento (miniatura).
+- Progresso `X/3` obrigatórios (id_front, id_back, selfie).
+- Chips: `pendente` · `parcialmente aprovado` · `rejeitado` · `verificado`.
+- Contador de mensagens não lidas na thread.
+- Ações rápidas: **Aprovar verificação** (aprova todos os obrigatórios pendentes em lote) · **Rejeitar** (abre modal com motivo, marca todos os pendentes como rejeitados e envia mensagem na thread).
+- Botão **Abrir conversa** → drawer lateral com a thread (composer, anexos opcionais, histórico, marca como lido ao abrir).
 
-## Fora de escopo
-- Hooks de dados, mutations, RPCs, edge functions
-- Fluxo B2B, admin, auth
-- Componentes compartilhados (`OrderCard`, `PlanCard`, `SubscriptionCard`) — mantidos como estão; se precisarem de variant, versionamos sem quebrar cliente
-- Dark mode novo (aplicar só onde já existe)
+Filtros no topo: `Aguardando` (default) · `Em conversa` · `Aprovadas` · `Rejeitadas` · `Todas`. Busca por nome/telefone.
 
-## Riscos e mitigação
-- **ProProfile (588 linhas)** e **ProHome (476 linhas)**: telas densas — antes de editar, ler as áreas com hooks pesados; JSX de renderização é o único alvo
-- **ProVerification (441 linhas)**: fluxo de upload frágil — preservar estados, refs de input, callbacks; só refinar wrapper visual
-- **ProAgenda / ProWithdraw**: 345 linhas cada — cuidar da lógica de filtro e cálculo, editar só JSX
+Item de menu novo no `AdminSidebar` e `AdminBottomNav`: **Verificações** (ícone `ShieldCheck`) com badge de count pendente.
 
-## Entregáveis por passe
-1. Files changed (lista completa)
-2. Screenshot mobile (390×844) via Playwright autenticado
-3. Checklist visual: header ✓ · cards `rounded-2xl` ✓ · motion stagger ✓ · empty state ✓ · CTA fixo ✓
-4. Confirmação de que hooks/tipos passam sem erro
+## 3. Polish em `/admin/documents`
+
+- Novo card no topo do grupo do diarista com botão **Abrir conversa** (reaproveita o drawer da thread).
+- Botão **Aprovar todos obrigatórios** no header do grupo quando houver ≥1 pendente entre os 3 obrigatórios.
+- Histórico compacto de decisões (quem aprovou/rejeitou e quando) usando `reviewed_by` + `reviewed_at`, resolvendo nome via `get_users_emails` ou `profiles`.
+- Empty state e estados de loading padronizados com o resto do V3.
+
+## 4. Componentes novos
+
+- `src/components/admin/VerificationThreadDrawer.tsx` — sheet lateral com header do diarista, lista de mensagens (bubbles admin/pro), composer com textarea e upload opcional para `chat-attachments`, auto-mark-as-read on open.
+- `src/hooks/useVerificationThread.ts` — carrega thread + mensagens, envia mensagem, marca como lido, subscribe realtime em `verification_messages`.
+- `src/hooks/useAdminVerifications.ts` — agrega `pro_documents` + `verification_threads` para a fila. Ações batelot approve/reject.
+- `src/pages/admin/AdminVerifications.tsx` — página nova.
+
+## 5. Lado do diarista
+
+- Bloco novo em `ProVerification.tsx`: card **Conversa com o suporte de verificação** — mostra últimas mensagens e composer. Reaproveita `useVerificationThread` (mesmo hook, sem role admin).
+
+## Detalhes técnicos
+
+**Aprovar em lote** — RPC nova `admin_approve_verification(p_user_id uuid)` (SECURITY DEFINER, `is_admin` check): atualiza todos os `pro_documents` obrigatórios pendentes desse user para `approved`, o trigger `check_pro_verification` já promove `pro_profiles.verified = true`. Insere mensagem na thread ("Verificação aprovada ✅").
+
+**Rejeitar em lote** — RPC `admin_reject_verification(p_user_id uuid, p_reason text)`: marca todos obrigatórios pendentes como `rejected` com `rejection_reason`, insere mensagem na thread com o motivo.
+
+**Anexos**: bucket `chat-attachments` já existe; signed URLs (1h) para exibição.
+
+**Realtime**: canal por `thread_id` para o drawer aberto; invalidação de queries no `postgres_changes`.
+
+**Query keys** (novos em `useAdminQueryKeys`):
+- `adminVerifications: () => ["admin_verifications"]`
+- `verificationThread: (id?) => ["verification_thread", id]`
+- `verificationMessages: (id?) => ["verification_messages", id]`
 
 ## Ordem de execução
-Passes sequenciais, um por turno. Após cada passe, aguardo confirmação para seguir.
 
-**Próximo passo**: se aprovar, começo pelo **Passe 1 — ProHome, ProAgenda, ProOrderDetail**.
+1. Migração (tabelas + RLS + grants + triggers + RPCs).
+2. Hooks + drawer + página `/admin/verifications` + rota + item de menu.
+3. Polish em `/admin/documents` (aprovar todos + botão conversa + histórico).
+4. Card de conversa em `ProVerification.tsx`.
+
+Responder **ok** para eu começar pela migração.
