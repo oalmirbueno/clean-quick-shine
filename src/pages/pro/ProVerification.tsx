@@ -261,183 +261,157 @@ export default function ProVerification() {
     );
   };
 
+  const bannerTone = allRequiredApproved
+    ? { wrap: "bg-success/10 border-success/25", Icon: CheckCircle2, iconTone: "text-success" }
+    : rejectedCount > 0
+    ? { wrap: "bg-destructive/10 border-destructive/25", Icon: AlertCircle, iconTone: "text-destructive" }
+    : pendingCount > 0
+    ? { wrap: "bg-warning/10 border-warning/25", Icon: Clock, iconTone: "text-warning" }
+    : { wrap: "bg-primary/5 border-primary/20", Icon: CreditCard, iconTone: "text-primary" };
+
   return (
     <div className="h-full bg-background flex flex-col safe-top">
-      <header className="flex-shrink-0 bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-foreground" />
-          </button>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">Verificação de documentos</h1>
-            <p className="text-sm text-muted-foreground">Envie seus documentos para começar</p>
-          </div>
-        </div>
-      </header>
+      <ProPageHeader title="Verificação" subtitle="Envie seus documentos para começar" />
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4 animate-fade-in">
-        {/* Status Banner */}
-        <div className={cn(
-          "p-4 rounded-xl border",
-          allRequiredApproved
-            ? "bg-success/10 border-success/20"
-            : rejectedCount > 0
-            ? "bg-destructive/10 border-destructive/20"
-            : pendingCount > 0
-            ? "bg-warning/10 border-warning/20"
-            : "bg-accent border-primary/10"
-        )}>
-          <div className="flex items-center gap-3">
-            {allRequiredApproved ? (
-              <CheckCircle2 className="w-6 h-6 text-success" />
-            ) : rejectedCount > 0 ? (
-              <AlertCircle className="w-6 h-6 text-destructive" />
-            ) : (
-              <CreditCard className="w-6 h-6 text-primary" />
-            )}
-            <div>
-              <p className="font-medium text-foreground">
-                {allRequiredApproved
-                  ? "Verificação completa!"
-                  : rejectedCount > 0
-                  ? "Documento(s) rejeitado(s)"
-                  : pendingCount > 0
-                  ? "Documentos em análise"
-                  : "Envie seus documentos"
-                }
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {allRequiredApproved
-                  ? "Todos os documentos obrigatórios foram aprovados"
-                  : rejectedCount > 0
-                  ? "Reenvie os documentos rejeitados"
-                  : pendingCount > 0
-                  ? "Retornaremos em até 48 horas"
-                  : notSentRequired > 0
-                  ? `Faltam ${notSentRequired} documento${notSentRequired > 1 ? "s" : ""} obrigatório${notSentRequired > 1 ? "s" : ""}`
-                  : "Para receber pedidos, complete sua verificação"
-                }
-              </p>
+      <main className="flex-1 overflow-y-auto min-h-0">
+        <motion.div variants={container} initial="hidden" animate="show" className="px-5 pb-6 space-y-4">
+          {/* Status Banner */}
+          <motion.div variants={item} className={cn("p-4 rounded-2xl border shadow-sm", bannerTone.wrap)}>
+            <div className="flex items-center gap-3">
+              <div className={cn("w-11 h-11 rounded-xl bg-background/60 flex items-center justify-center shrink-0")}>
+                <bannerTone.Icon className={cn("w-5 h-5", bannerTone.iconTone)} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground text-sm">
+                  {allRequiredApproved
+                    ? "Verificação completa!"
+                    : rejectedCount > 0
+                    ? "Documento(s) rejeitado(s)"
+                    : pendingCount > 0
+                    ? "Documentos em análise"
+                    : "Envie seus documentos"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {allRequiredApproved
+                    ? "Todos os obrigatórios aprovados"
+                    : rejectedCount > 0
+                    ? "Reenvie os rejeitados"
+                    : pendingCount > 0
+                    ? "Retornaremos em até 48h"
+                    : notSentRequired > 0
+                    ? `Faltam ${notSentRequired} obrigatório${notSentRequired > 1 ? "s" : ""}`
+                    : "Complete sua verificação"}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-lg font-bold text-foreground leading-none">{approvedCount}/{requiredDocs.length}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mt-1">Aprovados</p>
+              </div>
             </div>
-          </div>
 
-          {/* Progress bar */}
-          <div className="mt-3 flex items-center gap-2">
-            <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all"
-                style={{ width: `${(approvedCount / requiredDocs.length) * 100}%` }}
+            <div className="mt-3 h-2 bg-background/60 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-primary rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${(approvedCount / requiredDocs.length) * 100}%` }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
               />
             </div>
-            <span className="text-xs text-muted-foreground font-medium">
-              {approvedCount}/{requiredDocs.length}
-            </span>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* Terms acceptance — required before uploading */}
-        {!allRequiredApproved && (
-          <div className={cn(
-            "p-4 rounded-xl border transition-colors",
-            acceptedTerms
-              ? "bg-success/5 border-success/20"
-              : "bg-card border-border"
-          )}>
+          {/* Terms acceptance */}
+          {!allRequiredApproved && (
+            <motion.div variants={item} className={cn(
+              "p-4 rounded-2xl border shadow-sm transition-colors",
+              acceptedTerms ? "bg-success/5 border-success/25" : "bg-card border-border/60"
+            )}>
+              <div className="flex items-start gap-3">
+                <div className={cn(
+                  "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
+                  acceptedTerms ? "bg-success/15" : "bg-primary/10"
+                )}>
+                  <FileText className={cn("w-5 h-5", acceptedTerms ? "text-success" : "text-primary")} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground text-sm">Termos do profissional</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Leia e aceite antes de enviar seus documentos.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/terms?tab=pro")}
+                    className="text-xs text-primary font-medium hover:underline mt-1.5"
+                  >
+                    Ler termos completos →
+                  </button>
+                </div>
+              </div>
+
+              <label className="flex items-start gap-3 mt-3 pt-3 border-t border-border/60 cursor-pointer select-none">
+                <button
+                  type="button"
+                  onClick={() => handleAcceptTerms(!acceptedTerms)}
+                  aria-pressed={acceptedTerms}
+                  className={cn(
+                    "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 transition-all",
+                    acceptedTerms ? "bg-primary border-primary" : "border-input hover:border-primary/50"
+                  )}
+                >
+                  {acceptedTerms && <Check className="w-3 h-3 text-primary-foreground" />}
+                </button>
+                <span className="text-xs text-foreground leading-relaxed">
+                  Li e aceito os <strong>Termos do Profissional</strong>, a{" "}
+                  <button type="button" onClick={(e) => { e.preventDefault(); navigate("/privacy"); }} className="text-primary hover:underline">
+                    Política de Privacidade
+                  </button>{" "}
+                  e a{" "}
+                  <button type="button" onClick={(e) => { e.preventDefault(); navigate("/terms?tab=cancellation"); }} className="text-primary hover:underline">
+                    Política de Cancelamento
+                  </button>.
+                </span>
+              </label>
+            </motion.div>
+          )}
+
+          {/* Required docs */}
+          <motion.section variants={item} className="space-y-2.5">
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Documentos obrigatórios ({requiredDocs.length})</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Envie fotos nítidas e legíveis para ativar seu perfil.</p>
+            </div>
+            {requiredDocs.map(renderDocCard)}
+          </motion.section>
+
+          {/* Optional docs */}
+          {optionalDocs.length > 0 && (
+            <motion.section variants={item} className="space-y-2.5">
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Documentos opcionais</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Aumentam sua credibilidade e prioridade no matching.</p>
+              </div>
+              {optionalDocs.map(renderDocCard)}
+            </motion.section>
+          )}
+
+          {/* Tips */}
+          <motion.div variants={item} className="p-4 bg-accent rounded-2xl border border-border/60">
             <div className="flex items-start gap-3">
-              <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
-                acceptedTerms ? "bg-success/10" : "bg-primary/10"
-              )}>
-                <FileText className={cn("w-5 h-5", acceptedTerms ? "text-success" : "text-primary")} />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-foreground text-sm">
-                  Termos do profissional diarista
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Leia e aceite os termos antes de enviar seus documentos.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => navigate("/terms?tab=pro")}
-                  className="text-xs text-primary font-medium hover:underline mt-1.5"
-                >
-                  Ler termos completos →
-                </button>
+                <h4 className="text-sm font-semibold text-foreground mb-1.5">Requisitos para aprovação</h4>
+                <ul className="space-y-1 text-xs text-muted-foreground">
+                  <li>• Fotos <strong className="text-foreground">nítidas, sem reflexos e sem cortes</strong></li>
+                  <li>• Documento inteiro e <strong className="text-foreground">todos os dados legíveis</strong></li>
+                  <li>• Documento válido e <strong className="text-foreground">não vencido</strong></li>
+                  <li>• Selfie com <strong className="text-foreground">rosto e documento visíveis</strong></li>
+                  <li>• Resolução mínima <strong className="text-foreground">800px</strong> · <strong className="text-foreground">100KB+</strong> por arquivo</li>
+                </ul>
               </div>
             </div>
-
-            <label className="flex items-start gap-3 mt-3 pt-3 border-t border-border/60 cursor-pointer select-none">
-              <button
-                type="button"
-                onClick={() => handleAcceptTerms(!acceptedTerms)}
-                aria-pressed={acceptedTerms}
-                className={cn(
-                  "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 transition-all",
-                  acceptedTerms
-                    ? "bg-primary border-primary"
-                    : "border-input hover:border-primary/50"
-                )}
-              >
-                {acceptedTerms && <Check className="w-3 h-3 text-primary-foreground" />}
-              </button>
-              <span className="text-xs text-foreground leading-relaxed">
-                Li e aceito os <strong>Termos do Profissional</strong>, a{" "}
-                <button
-                  type="button"
-                  onClick={(e) => { e.preventDefault(); navigate("/privacy"); }}
-                  className="text-primary hover:underline"
-                >
-                  Política de Privacidade
-                </button>{" "}
-                e a{" "}
-                <button
-                  type="button"
-                  onClick={(e) => { e.preventDefault(); navigate("/terms?tab=cancellation"); }}
-                  className="text-primary hover:underline"
-                >
-                  Política de Cancelamento
-                </button>.
-              </span>
-            </label>
-          </div>
-        )}
-
-        {/* Required docs */}
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
-            Documentos obrigatórios ({requiredDocs.length})
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            Todos os documentos abaixo são obrigatórios para ativar seu perfil. Envie fotos nítidas e legíveis.
-          </p>
-          {requiredDocs.map(renderDocCard)}
-        </div>
-
-        {/* Optional docs */}
-        {optionalDocs.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">Documentos opcionais</h2>
-            <p className="text-xs text-muted-foreground">Aumentam sua credibilidade e prioridade no matching</p>
-            {optionalDocs.map(renderDocCard)}
-          </div>
-        )}
-
-        {/* Tips */}
-        <div className="p-4 bg-muted/50 rounded-xl">
-          <h4 className="font-medium text-foreground mb-2">⚠️ Requisitos para aprovação</h4>
-          <ul className="space-y-1.5 text-sm text-muted-foreground">
-            <li>• Fotos <strong className="text-foreground">nítidas, sem reflexos e sem cortes</strong></li>
-            <li>• Documento inteiro visível e <strong className="text-foreground">todos os dados legíveis</strong></li>
-            <li>• Documento válido e <strong className="text-foreground">não vencido</strong></li>
-            <li>• Selfie com <strong className="text-foreground">rosto e documento claramente visíveis</strong></li>
-            <li>• Resolução mínima: <strong className="text-foreground">800px</strong> no maior lado</li>
-            <li>• Tamanho mínimo: <strong className="text-foreground">100KB</strong> por arquivo</li>
-          </ul>
-        </div>
+          </motion.div>
+        </motion.div>
       </main>
 
       <BottomNav variant="pro" />
