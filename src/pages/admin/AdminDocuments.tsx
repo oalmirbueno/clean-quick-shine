@@ -523,6 +523,14 @@ export default function AdminDocuments() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <VerificationThreadDrawer
+        open={!!chatUser}
+        onOpenChange={(o) => !o && setChatUser(null)}
+        proUserId={chatUser?.id}
+        proName={chatUser?.name}
+        role="admin"
+      />
     </AdminLayout>
   );
 }
