@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { Star, Check, Loader2, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrder } from "@/hooks/useOrders";
 import { useSubmitRating } from "@/hooks/useSubmitRating";
+
+const ratingLabels: Record<number, { title: string; sub: string }> = {
+  1: { title: "Muito ruim", sub: "Sentimos muito pela experiência." },
+  2: { title: "Ruim", sub: "Vamos trabalhar para melhorar." },
+  3: { title: "Regular", sub: "Podemos fazer melhor da próxima vez." },
+  4: { title: "Muito bom", sub: "Que bom que gostou!" },
+  5: { title: "Excelente!", sub: "Isso faz toda a diferença." },
+};
+
 
 const ratingTags = [
   { id: "punctuality", label: "Pontualidade" },
