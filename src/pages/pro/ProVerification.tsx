@@ -4,9 +4,12 @@ import { motion } from "framer-motion";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Upload, CheckCircle2, Loader2, AlertCircle, CreditCard, Camera, Shield, Clock, XCircle, ImageIcon, FileText, Check } from "lucide-react";
+import { Upload, CheckCircle2, Loader2, AlertCircle, CreditCard, Camera, Shield, Clock, XCircle, ImageIcon, FileText, Check, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProDocuments } from "@/hooks/useProDocuments";
+import { useAuth } from "@/contexts/AuthContext";
+import { useVerificationThread } from "@/hooks/useVerificationThread";
+import { VerificationThreadDrawer } from "@/components/admin/VerificationThreadDrawer";
 import { toast } from "sonner";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
