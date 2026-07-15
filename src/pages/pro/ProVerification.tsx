@@ -183,7 +183,7 @@ export default function ProVerification() {
     }[status];
 
     return (
-      <div key={doc.id} className="p-4 bg-card rounded-xl border border-border card-shadow">
+      <motion.div variants={item} key={doc.id} className="p-4 bg-card rounded-2xl border border-border/60 shadow-sm">
         <input
           type="file"
           ref={(el) => (fileInputRefs.current[doc.id] = el)}
