@@ -132,95 +132,96 @@ export default function ClientCancel() {
   return (
     <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <header className="bg-background/80 backdrop-blur-md border-b border-border/50 px-4 py-3 z-10">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="size-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
           >
-            <ChevronLeft className="w-6 h-6 text-foreground" />
+            <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
-          <h1 className="text-lg font-semibold text-foreground">Cancelar pedido</h1>
+          <h1 className="text-base font-semibold text-foreground">Cancelar pedido</h1>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 animate-fade-in">
-        {/* Warning */}
-        <div className={`p-4 rounded-xl border mb-6 ${
-          isFreeCancel 
-            ? "bg-success/10 border-success/20" 
-            : "bg-warning/10 border-warning/20"
-        }`}>
+      <main className="flex-1 overflow-y-auto p-4 space-y-3 animate-fade-in">
+        {/* Warning hero */}
+        <div className={cn(
+          "p-5 rounded-2xl border",
+          isFreeCancel
+            ? "bg-primary/5 border-primary/20"
+            : "bg-warning/5 border-warning/25"
+        )}>
           <div className="flex items-start gap-3">
-            {isFreeCancel ? (
-              <Clock className="w-6 h-6 text-success flex-shrink-0" />
-            ) : (
-              <AlertTriangle className="w-6 h-6 text-warning flex-shrink-0" />
-            )}
-            <div>
-              <p className="font-medium text-foreground">
-                {isFreeCancel 
-                  ? "Cancelamento gratuito" 
-                  : "Cancelamento com multa"
-                }
+            <div className={cn(
+              "size-11 rounded-full flex items-center justify-center shrink-0",
+              isFreeCancel ? "bg-primary/15" : "bg-warning/15"
+            )}>
+              {isFreeCancel ? (
+                <Clock className="w-5 h-5 text-primary" />
+              ) : (
+                <AlertTriangle className="w-5 h-5 text-warning" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-foreground">
+                {isFreeCancel ? "Cancelamento gratuito" : "Cancelamento com multa"}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {isFreeCancel 
-                  ? `Você ainda está dentro da janela de ${CANCEL_SETTINGS.cancelFreeHours} horas para cancelamento gratuito.`
-                  : `Como faltam menos de ${CANCEL_SETTINGS.cancelFreeHours} horas para o serviço, será cobrada uma multa de ${CANCEL_SETTINGS.cancelPenaltyPercent}%.`
-                }
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                {isFreeCancel
+                  ? `Você está dentro da janela de ${CANCEL_SETTINGS.cancelFreeHours}h para cancelar sem custos.`
+                  : `Faltam menos de ${CANCEL_SETTINGS.cancelFreeHours}h para o serviço. Será cobrada uma multa de ${CANCEL_SETTINGS.cancelPenaltyPercent}%.`}
               </p>
               {hoursUntilOrder > 0 && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Faltam {Math.floor(hoursUntilOrder)} horas para o serviço
-                </p>
+                <div className="inline-flex items-center gap-1.5 mt-2.5 px-2.5 py-1 rounded-full bg-background/60 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  Faltam {Math.floor(hoursUntilOrder)}h para o serviço
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Order Summary */}
-        <div className="bg-card rounded-xl border border-border p-4 card-shadow mb-6">
-          <h3 className="font-semibold text-foreground mb-3">Resumo do pedido</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
+        <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-4">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Resumo do pedido</h3>
+          <div className="space-y-2.5 text-sm">
+            <div className="flex justify-between gap-3">
               <span className="text-muted-foreground">Serviço</span>
-              <span className="text-foreground">{serviceName}</span>
+              <span className="text-foreground font-medium text-right">{serviceName}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3">
               <span className="text-muted-foreground">Data</span>
-              <span className="text-foreground">
-                {formatDate(order.scheduled_date)} às {order.scheduled_time.slice(0, 5)}
+              <span className="text-foreground text-right">
+                {formatDate(order.scheduled_date)} · {order.scheduled_time.slice(0, 5)}
               </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-3 pt-2.5 border-t border-border/50">
               <span className="text-muted-foreground">Valor pago</span>
-              <span className="text-foreground">
+              <span className="text-foreground font-semibold">
                 R$ {totalPrice.toFixed(2).replace(".", ",")}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Penalty Info */}
+        {/* Penalty breakdown */}
         {!isFreeCancel && (
-          <div className="bg-card rounded-xl border border-border p-4 card-shadow mb-6">
-            <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-warning" />
-              Valor da multa
-            </h3>
-            <div className="space-y-2 text-sm">
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="w-4 h-4 text-warning" />
+              <h3 className="text-sm font-semibold text-foreground">Detalhamento do reembolso</h3>
+            </div>
+            <div className="space-y-2.5 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">
-                  Multa ({CANCEL_SETTINGS.cancelPenaltyPercent}%)
-                </span>
+                <span className="text-muted-foreground">Multa ({CANCEL_SETTINGS.cancelPenaltyPercent}%)</span>
                 <span className="text-destructive font-medium">
-                  R$ {penaltyAmount.toFixed(2).replace(".", ",")}
+                  −R$ {penaltyAmount.toFixed(2).replace(".", ",")}
                 </span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-border">
-                <span className="text-muted-foreground">Reembolso</span>
-                <span className="text-success font-medium">
+              <div className="flex justify-between pt-2.5 border-t border-border/50">
+                <span className="text-foreground font-medium">Você recebe de volta</span>
+                <span className="text-primary font-bold text-base">
                   R$ {refundAmount.toFixed(2).replace(".", ",")}
                 </span>
               </div>
@@ -229,23 +230,29 @@ export default function ClientCancel() {
         )}
 
         {/* Policy */}
-        <div className="bg-secondary/50 rounded-xl p-4 mb-6">
-          <h4 className="text-sm font-medium text-foreground mb-2">Política de cancelamento</h4>
-          <p className="text-xs text-muted-foreground">
+        <div className="bg-secondary/60 rounded-2xl p-4">
+          <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide mb-1.5">Política de cancelamento</h4>
+          <p className="text-xs text-muted-foreground leading-relaxed">
             {CANCEL_SETTINGS.refundPolicyText}
           </p>
         </div>
       </main>
 
       {/* Bottom Action */}
-      <div className="p-4 bg-card border-t border-border">
-        <PrimaryButton 
-          fullWidth 
+      <div className="p-4 bg-card/95 backdrop-blur-md border-t border-border/60 safe-bottom space-y-2">
+        <PrimaryButton
+          fullWidth
           onClick={() => setShowConfirm(true)}
           className="bg-destructive hover:bg-destructive/90"
         >
           Confirmar cancelamento
         </PrimaryButton>
+        <button
+          onClick={() => navigate(-1)}
+          className="w-full py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Voltar sem cancelar
+        </button>
       </div>
 
       <ConfirmModal
