@@ -242,22 +242,55 @@ export default function ClientHome() {
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2.5 flex-1 auto-rows-fr">
-                {(services || []).slice(0, 4).map((service) => {
+                {(services || []).slice(0, 4).map((service, idx) => {
                   const IconComp = iconMap[service.icon || "Home"] || Home;
+                  const featured = idx === 0;
                   return (
                     <motion.button
                       key={service.id}
                       whileTap={{ scale: 0.97 }}
                       whileHover={{ y: -2 }}
                       onClick={() => navigate("/client/service")}
-                      className="relative flex flex-col items-start justify-between gap-3 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 transition-colors text-left shadow-sm h-full min-h-[104px]"
+                      className={cn(
+                        "relative flex flex-col items-start justify-between gap-3 p-4 rounded-2xl border transition-colors text-left shadow-sm h-full min-h-[104px] overflow-hidden",
+                        featured
+                          ? "col-span-2 border-primary/30 bg-primary/5 hover:border-primary/50 min-h-[124px]"
+                          : "border-border/60 bg-card hover:border-primary/40",
+                      )}
                     >
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      {featured && (
+                        <div
+                          aria-hidden
+                          className="absolute -right-6 -bottom-6 w-28 h-28 rounded-full"
+                          style={{
+                            background:
+                              "radial-gradient(circle, hsl(var(--primary) / 0.15), transparent 70%)",
+                          }}
+                        />
+                      )}
+                      <div
+                        className={cn(
+                          "relative w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                          featured ? "bg-primary/15" : "bg-primary/10",
+                        )}
+                      >
                         <IconComp className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
                       </div>
-                      <span className="text-[13.5px] font-semibold text-foreground leading-tight tracking-tight line-clamp-2">
-                        {service.name}
-                      </span>
+                      <div className="relative">
+                        <span
+                          className={cn(
+                            "block font-semibold text-foreground leading-tight tracking-tight line-clamp-2",
+                            featured ? "text-[15px]" : "text-[13.5px]",
+                          )}
+                        >
+                          {service.name}
+                        </span>
+                        {featured && (
+                          <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-medium text-primary">
+                            Mais pedido <ArrowRight className="w-3 h-3" strokeWidth={2.5} />
+                          </span>
+                        )}
+                      </div>
                     </motion.button>
                   );
                 })}
