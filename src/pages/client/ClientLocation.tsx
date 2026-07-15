@@ -157,17 +157,25 @@ export default function ClientLocation() {
   return (
     <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="flex-shrink-0 bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3">
+      <header
+        className="shrink-0 px-5 pt-3 pb-4"
+        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+      >
+        <div className="mx-auto max-w-lg flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
+            aria-label="Voltar"
           >
-            <ChevronLeft className="w-6 h-6 text-foreground" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">Endereço do serviço</h1>
-            <p className="text-sm text-muted-foreground">Selecione ou adicione um endereço</p>
+          <div className="min-w-0">
+            <p className="text-[12px] text-muted-foreground leading-none mb-1">
+              Localização
+            </p>
+            <h1 className="text-[20px] font-semibold text-foreground leading-tight tracking-tight">
+              Endereço do serviço
+            </h1>
           </div>
         </div>
       </header>
