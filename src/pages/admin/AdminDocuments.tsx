@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdminDocuments, AdminDocument } from "@/hooks/useAdminDocuments";
+import { useAdminVerifications } from "@/hooks/useAdminVerifications";
+import { VerificationThreadDrawer } from "@/components/admin/VerificationThreadDrawer";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CheckCircle, XCircle, Eye, FileText, User, Clock, Filter, ChevronDown, ChevronRight, Phone, ShieldCheck, ShieldAlert } from "lucide-react";
+import { CheckCircle, XCircle, Eye, FileText, User, Clock, Filter, ChevronDown, ChevronRight, Phone, ShieldCheck, ShieldAlert, MessageSquare, CheckCheck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +57,8 @@ export default function AdminDocuments() {
     getSignedUrl,
   } = useAdminDocuments();
 
+  const { approve: approveAll, isApproving: isApprovingAll } = useAdminVerifications();
+
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const [selectedDoc, setSelectedDoc] = useState<AdminDocument | null>(null);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -64,6 +68,7 @@ export default function AdminDocuments() {
     () => "all"
   );
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+  const [chatUser, setChatUser] = useState<{ id: string; name: string } | null>(null);
 
   // Group documents by user
   const userGroups: UserGroup[] = useMemo(() => {
@@ -286,6 +291,30 @@ export default function AdminDocuments() {
                   </div>
                 </button>
 
+                {/* Quick actions row */}
+                <div className="flex items-center gap-2 px-4 pb-3 -mt-1 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-lg"
+                    onClick={() => setChatUser({ id: group.userId, name: group.name })}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+                    Conversa
+                  </Button>
+                  {group.hasPending && (
+                    <Button
+                      size="sm"
+                      className="h-8 rounded-lg bg-success hover:bg-success/90 text-success-foreground"
+                      onClick={() => approveAll(group.userId)}
+                      disabled={isApprovingAll}
+                    >
+                      <CheckCheck className="w-3.5 h-3.5 mr-1.5" />
+                      Aprovar todos obrigatórios
+                    </Button>
+                  )}
+                </div>
+
                 {/* Documents list */}
                 {isExpanded && (
                   <div className="border-t border-border divide-y divide-border">
@@ -494,6 +523,14 @@ export default function AdminDocuments() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <VerificationThreadDrawer
+        open={!!chatUser}
+        onOpenChange={(o) => !o && setChatUser(null)}
+        proUserId={chatUser?.id}
+        proName={chatUser?.name}
+        role="admin"
+      />
     </AdminLayout>
   );
 }

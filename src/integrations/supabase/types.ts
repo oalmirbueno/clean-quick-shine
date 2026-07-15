@@ -1567,6 +1567,77 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_messages: {
+        Row: {
+          attachment_url: string | null
+          body: string
+          created_at: string
+          id: string
+          sender_id: string
+          sender_role: string
+          thread_id: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          sender_role: string
+          thread_id: string
+        }
+        Update: {
+          attachment_url?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          sender_role?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "verification_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verification_threads: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string | null
+          status: string
+          unread_admin: number
+          unread_pro: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          status?: string
+          unread_admin?: number
+          unread_pro?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          status?: string
+          unread_admin?: number
+          unread_pro?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       withdrawals: {
         Row: {
           amount: number
@@ -1765,9 +1836,17 @@ export type Database = {
       }
     }
     Functions: {
+      admin_approve_verification: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       admin_get_withdrawal_pix_key: {
         Args: { p_withdrawal_id: string }
         Returns: string
+      }
+      admin_reject_verification: {
+        Args: { p_reason: string; p_user_id: string }
+        Returns: undefined
       }
       calculate_pro_available_balance: {
         Args: { p_user_id: string }
@@ -1798,6 +1877,10 @@ export type Database = {
         Args: { p_lat: number; p_lng: number }
         Returns: string
       }
+      get_or_create_verification_thread: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
       get_users_emails: {
         Args: { _user_ids: string[] }
         Returns: {
@@ -1817,6 +1900,10 @@ export type Database = {
         Returns: number
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      mark_verification_thread_read: {
+        Args: { p_thread_id: string }
+        Returns: undefined
+      }
       store_withdrawal_request: {
         Args: {
           p_amount: number
