@@ -96,8 +96,8 @@ export default function ProSupport() {
       {showNewTicket && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setShowNewTicket(false)} />
-          <div className="relative bg-card rounded-t-xl sm:rounded-xl border border-border p-6 w-full max-w-md card-shadow animate-slide-up">
-            <button onClick={() => setShowNewTicket(false)} className="absolute top-4 right-4 p-1 rounded-lg hover:bg-secondary transition-colors"><X className="w-5 h-5 text-muted-foreground" /></button>
+          <div className="relative bg-card rounded-t-3xl sm:rounded-2xl border border-border/60 p-6 w-full max-w-md shadow-lg animate-slide-up">
+            <button onClick={() => setShowNewTicket(false)} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-secondary transition-colors"><X className="w-5 h-5 text-muted-foreground" /></button>
             <h2 className="text-xl font-bold text-foreground mb-6">Novo ticket</h2>
             <div className="space-y-4">
               <InputField label="Assunto" placeholder="Descreva brevemente seu problema" value={subject} onChange={(e) => setSubject(e.target.value)} />
