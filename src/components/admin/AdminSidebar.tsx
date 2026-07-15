@@ -23,6 +23,7 @@ import {
   Bell,
   Activity,
   UserCog,
+  ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 
