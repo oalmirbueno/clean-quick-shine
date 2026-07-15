@@ -198,7 +198,7 @@ export default function ProVerification() {
         />
 
         <div className="flex items-start gap-3">
-          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0", statusConfig.bg)}>
+          <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0", statusConfig.bg)}>
             <doc.icon className={cn("w-5 h-5", statusConfig.text)} />
           </div>
 
@@ -239,7 +239,7 @@ export default function ProVerification() {
             disabled={isUploading || isCurrentlyUploading || !acceptedTerms}
             title={!acceptedTerms ? "Aceite os termos para enviar documentos" : undefined}
             className={cn(
-              "mt-3 w-full py-2.5 rounded-lg border border-dashed",
+              "mt-3 w-full py-2.5 rounded-xl border border-dashed",
               "flex items-center justify-center gap-2 font-medium text-sm",
               "transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
               status === "rejected"
@@ -257,7 +257,7 @@ export default function ProVerification() {
               : status === "rejected" ? "Reenviar documento" : "Enviar documento"}
           </button>
         )}
-      </div>
+      </motion.div>
     );
   };
 
