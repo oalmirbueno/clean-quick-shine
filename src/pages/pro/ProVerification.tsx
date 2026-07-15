@@ -113,6 +113,9 @@ export default function ProVerification() {
   const navigate = useNavigate();
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const { documents, isLoading, uploadDocument, isUploading, getDocumentStatus } = useProDocuments();
+  const { user } = useAuth();
+  const { thread, messages } = useVerificationThread(user?.id);
+  const [chatOpen, setChatOpen] = useState(false);
   const [uploadingType, setUploadingType] = useState<string | null>(null);
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(() => {
     return localStorage.getItem("pro_terms_accepted") === "true";
