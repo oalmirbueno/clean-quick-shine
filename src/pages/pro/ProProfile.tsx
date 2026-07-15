@@ -268,33 +268,39 @@ export default function ProProfile() {
       <div className="h-full min-h-0 bg-background flex flex-col safe-top">
         <ProPageHeader title="Perfil" subtitle={user?.email || undefined} showBack={false} />
 
-        {/* Hero header */}
+        {/* Hero header — gradient primary */}
         <div className="shrink-0 px-5 pb-4">
-          <div className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/60 shadow-sm">
-            <div className="relative shrink-0">
-              <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-              {isVerified && (
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success rounded-full flex items-center justify-center border-2 border-background">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-success-foreground" />
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-primary/80 p-5 shadow-sm">
+            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary-foreground/10 blur-2xl" aria-hidden />
+            <div className="relative flex items-center gap-4">
+              <div className="relative shrink-0">
+                <div className="w-20 h-20 rounded-3xl bg-primary-foreground/15 backdrop-blur-sm ring-4 ring-primary-foreground/20 flex items-center justify-center text-primary-foreground text-3xl font-bold">
+                  {userName.charAt(0).toUpperCase()}
                 </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-base font-semibold text-foreground truncate">{userName}</h2>
-              <div className="flex items-center gap-2 mt-1.5">
-                <StatusBadge status={isVerified ? "approved" : "pending"} />
-                <button
-                  onClick={() => toggleAvailability.mutate()}
-                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold transition-colors ${
-                    proProfile?.available_now
-                      ? "bg-success/10 text-success"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {proProfile?.available_now ? "● Online" : "○ Offline"}
-                </button>
+                {isVerified && (
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-background rounded-full flex items-center justify-center shadow-md">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] uppercase tracking-wide text-primary-foreground/70 font-semibold">Perfil profissional</p>
+                <h2 className="text-lg font-bold text-primary-foreground truncate mt-0.5">{userName}</h2>
+                <div className="flex items-center gap-1.5 mt-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-foreground/15 text-primary-foreground">
+                    {isVerified ? "Verificado" : "Em análise"}
+                  </span>
+                  <button
+                    onClick={() => toggleAvailability.mutate()}
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold transition-all ${
+                      proProfile?.available_now
+                        ? "bg-success text-success-foreground shadow-sm"
+                        : "bg-primary-foreground/15 text-primary-foreground"
+                    }`}
+                  >
+                    {proProfile?.available_now ? "● Online" : "○ Offline"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -318,7 +324,7 @@ export default function ProProfile() {
           </div>
 
           {/* === DADOS PESSOAIS === */}
-          <section className="bg-card rounded-xl border border-border overflow-hidden">
+          <section className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             <button
               onClick={() => setEditSection(editSection === "personal" ? null : "personal")}
               className="w-full p-4 flex items-center gap-3 hover:bg-secondary/50 transition-colors"
@@ -372,7 +378,7 @@ export default function ProProfile() {
           </section>
 
           {/* === BIO / PERFIL PRO === */}
-          <section className="bg-card rounded-xl border border-border overflow-hidden">
+          <section className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             <button
               onClick={() => setEditSection(editSection === "bio" ? null : "bio")}
               className="w-full p-4 flex items-center gap-3 hover:bg-secondary/50 transition-colors"
@@ -430,7 +436,7 @@ export default function ProProfile() {
           </section>
 
           {/* === ENDEREÇOS === */}
-          <section className="bg-card rounded-xl border border-border overflow-hidden">
+          <section className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             <div className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <MapPin className="w-5 h-5 text-primary" />
@@ -548,16 +554,16 @@ export default function ProProfile() {
           </section>
 
           {/* === NAVIGATION MENU === */}
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             {navItems.map((item, index) => (
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
                 className={`w-full p-4 flex items-center gap-4 hover:bg-secondary/50 transition-colors
-                  ${index !== navItems.length - 1 ? "border-b border-border" : ""}`}
+                  ${index !== navItems.length - 1 ? "border-b border-border/60" : ""}`}
               >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                  <item.icon className="w-5 h-5 text-muted-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <item.icon className="w-5 h-5 text-primary" />
                 </div>
                 <span className="flex-1 text-left font-medium text-foreground">{item.label}</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -568,9 +574,9 @@ export default function ProProfile() {
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="w-full p-4 bg-card rounded-xl border border-border flex items-center gap-4 hover:bg-destructive/5 hover:border-destructive/20 transition-colors"
+            className="w-full p-4 bg-card rounded-2xl border border-border/60 shadow-sm flex items-center gap-4 hover:bg-destructive/5 hover:border-destructive/30 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
               <LogOut className="w-5 h-5 text-destructive" />
             </div>
             <span className="font-medium text-destructive">Sair da conta</span>
