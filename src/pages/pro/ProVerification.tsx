@@ -450,6 +450,14 @@ export default function ProVerification() {
       </main>
 
       <BottomNav variant="pro" />
+
+      <VerificationThreadDrawer
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        proUserId={user?.id}
+        proName="Suporte de verificação"
+        role="pro"
+      />
     </div>
   );
 }
