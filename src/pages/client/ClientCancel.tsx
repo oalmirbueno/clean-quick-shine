@@ -5,6 +5,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { ChevronLeft, AlertTriangle, Clock, DollarSign, Loader2 } from "lucide-react";
 import { useOrder } from "@/hooks/useOrders";
 import { useCancelOrder, CANCEL_SETTINGS } from "@/hooks/useCancelOrder";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
