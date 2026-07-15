@@ -178,14 +178,17 @@ export default function ClientOrderTracking() {
   return (
     <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4">
+      <header className="bg-background/80 backdrop-blur-md border-b border-border/50 px-4 py-3 z-10">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/client/orders")} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors">
-            <ChevronLeft className="w-6 h-6 text-foreground" />
+          <button
+            onClick={() => navigate("/client/orders")}
+            className="size-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-semibold text-foreground">Acompanhar pedido</h1>
-            {statusLabel && <p className="text-sm text-muted-foreground">{statusLabel}</p>}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base font-semibold text-foreground leading-tight">Acompanhar pedido</h1>
+            <p className="text-xs text-muted-foreground truncate">#{order.id.slice(0, 8)}</p>
           </div>
         </div>
       </header>
@@ -198,145 +201,176 @@ export default function ClientOrderTracking() {
               center={mapCenter}
               zoom={14}
               markers={mapMarkers}
-              height="300px"
+              height="320px"
               showUserLocation
               className="rounded-none"
             />
-            {/* Status overlay */}
-            <div className="absolute bottom-3 left-3 right-3">
-              <div className="bg-card/90 backdrop-blur-sm rounded-xl px-4 py-2.5 border border-border flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
-                <span className="text-sm font-medium text-foreground">{statusLabel}</span>
+            {/* Status pill */}
+            <div className="absolute top-3 left-3 right-3 flex justify-center pointer-events-none">
+              <div className="bg-card/95 backdrop-blur-md rounded-full px-4 py-2 border border-border/60 shadow-sm flex items-center gap-2">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+                  <span className="relative inline-flex rounded-full size-2 bg-primary" />
+                </span>
+                <span className="text-xs font-semibold text-foreground">{statusLabel}</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Completed map state */}
+        {/* Completed hero */}
         {hasMapCoords && (order.status === "completed" || order.status === "rated" || order.status === "paid_out") && (
-          <div className="mx-4 mt-4 p-6 bg-success/5 rounded-2xl border border-success/20 flex flex-col items-center gap-2">
-            <div className="w-14 h-14 rounded-full bg-success/10 flex items-center justify-center">
-              <Check className="w-7 h-7 text-success" />
+          <div className="mx-4 mt-4 p-8 bg-gradient-to-b from-primary/10 to-primary/[0.03] rounded-3xl border border-primary/15 flex flex-col items-center gap-3">
+            <div className="size-16 rounded-full bg-primary/15 flex items-center justify-center">
+              <Check className="w-8 h-8 text-primary" strokeWidth={2.5} />
             </div>
-            <p className="font-semibold text-foreground">Serviço concluído!</p>
-            <p className="text-sm text-muted-foreground text-center">O serviço foi finalizado com sucesso.</p>
+            <div className="text-center space-y-1">
+              <p className="text-lg font-semibold text-foreground">Serviço concluído</p>
+              <p className="text-sm text-muted-foreground">Tudo certo por aqui. Obrigado por usar o Já Limpo.</p>
+            </div>
           </div>
         )}
 
-        {/* Pro Info */}
-        {order.pro_id && (
-          <section className="p-4 border-b border-border">
-            <div className="flex items-center gap-3">
-              <img src={proAvatar} alt={proName} className="w-14 h-14 rounded-full object-cover border-2 border-primary/20" />
-              <div className="flex-1">
-                <p className="font-semibold text-foreground">{proName}</p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{serviceName}</span>
-                  {order.pro_profile?.rating && (
-                    <>
-                      <span>•</span>
-                      <span>⭐ {Number(order.pro_profile.rating).toFixed(1)}</span>
-                    </>
-                  )}
+        <div className="p-4 space-y-4">
+          {/* Pro Card */}
+          {order.pro_id && (
+            <section className="p-4 bg-card rounded-2xl border border-border/60 shadow-sm">
+              <div className="flex items-center gap-3">
+                <img
+                  src={proAvatar}
+                  alt={proName}
+                  className="size-14 rounded-full object-cover ring-2 ring-primary/20"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground truncate">{proName}</p>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                    <span className="truncate">{serviceName}</span>
+                    {order.pro_profile?.rating && (
+                      <>
+                        <span>•</span>
+                        <span className="flex items-center gap-0.5 shrink-0">
+                          <span className="text-warning">★</span>
+                          {Number(order.pro_profile.rating).toFixed(1)}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
+                {order.pro_profile?.phone && (
+                  <a
+                    href={`https://wa.me/55${order.pro_profile.phone.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="size-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+                    aria-label="Conversar no WhatsApp"
+                  >
+                    <MessageCircle className="w-5 h-5 text-primary" />
+                  </a>
+                )}
               </div>
-              {order.pro_profile?.phone && (
-                <a
-                  href={`https://wa.me/55${order.pro_profile.phone.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center hover:bg-success/20 transition-colors"
-                >
-                  <MessageCircle className="w-5 h-5 text-success" />
-                </a>
+
+              {/* Realtime chip */}
+              {["confirmed", "en_route", "in_progress"].includes(order.status || "") && (
+                <div className="mt-3 pt-3 border-t border-border/50 flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="relative flex size-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+                    <span className="relative inline-flex rounded-full size-2 bg-primary" />
+                  </span>
+                  <span>Atualizações em tempo real</span>
+                </div>
               )}
+            </section>
+          )}
+
+          {/* Timeline */}
+          <section className="p-5 bg-card rounded-2xl border border-border/60 shadow-sm">
+            <h2 className="text-sm font-semibold text-foreground mb-5">Status do pedido</h2>
+            <TimelineStepper steps={timelineSteps} currentStep={currentStep} />
+          </section>
+
+          {/* Service Details */}
+          <section className="p-4 bg-card rounded-2xl border border-border/60 shadow-sm space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">Detalhes do serviço</h3>
+            <div className="flex items-center gap-3 text-sm">
+              <div className="size-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <span className="text-muted-foreground">Duração <span className="text-foreground font-medium">{order.duration_hours}h</span></span>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <div className="size-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <span className="text-foreground">
+                {new Date(order.scheduled_date + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })} · {order.scheduled_time?.slice(0, 5)}
+              </span>
+            </div>
+            {formatAddress() && (
+              <div className="flex items-start gap-3 text-sm">
+                <div className="size-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <span className="text-foreground leading-relaxed">{formatAddress()}</span>
+              </div>
+            )}
+            <div className="pt-3 border-t border-border/50 flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Total</span>
+              <span className="text-lg font-bold text-foreground">R$ {Number(order.total_price).toFixed(2).replace(".", ",")}</span>
             </div>
           </section>
-        )}
 
-        {/* Realtime indicator */}
-        <div className="px-4 pt-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <span>Atualizações em tempo real</span>
-          </div>
+          {/* Actions */}
+          <section className="space-y-2">
+            <button
+              onClick={() => navigate(`/chat/order/${order.id}?as=client`)}
+              className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-secondary/60 transition-colors active:scale-[0.99]"
+            >
+              <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center">
+                <MessageCircle className="w-4.5 h-4.5 text-primary" />
+              </div>
+              <span className="font-medium text-foreground text-sm flex-1 text-left">
+                {order.pro_id
+                  ? `Conversar com ${order.pro_profile?.full_name?.split(" ")[0] || "profissional"}`
+                  : "Abrir chat do pedido"}
+              </span>
+              <ChevronLeft className="w-4 h-4 text-muted-foreground rotate-180" />
+            </button>
+            <button
+              onClick={() => navigate("/client/support")}
+              className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-secondary/60 transition-colors active:scale-[0.99]"
+            >
+              <div className="size-9 rounded-full bg-secondary flex items-center justify-center">
+                <HelpCircle className="w-4.5 h-4.5 text-muted-foreground" />
+              </div>
+              <span className="font-medium text-foreground text-sm flex-1 text-left">Suporte</span>
+              <ChevronLeft className="w-4 h-4 text-muted-foreground rotate-180" />
+            </button>
+
+            {order.status && ["confirmed", "en_route"].includes(order.status) && (
+              <>
+                <button
+                  onClick={() => navigate(`/client/cancel/${order.id}`)}
+                  className="w-full p-4 rounded-2xl border border-destructive/20 bg-destructive/5 flex items-center gap-3 hover:bg-destructive/10 transition-colors active:scale-[0.99]"
+                >
+                  <div className="size-9 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <X className="w-4.5 h-4.5 text-destructive" />
+                  </div>
+                  <span className="font-medium text-destructive text-sm flex-1 text-left">Cancelar pedido</span>
+                </button>
+                <p className="text-xs text-center text-muted-foreground pt-1">
+                  Cancelamentos podem ter taxa dependendo do horário.
+                </p>
+              </>
+            )}
+          </section>
         </div>
 
-        {/* Timeline */}
-        <section className="p-4">
-          <h2 className="font-medium text-foreground mb-6">Status do pedido</h2>
-          <TimelineStepper steps={timelineSteps} currentStep={currentStep} />
-        </section>
-
-        {/* Service Details */}
-        <section className="mx-4 p-4 bg-card rounded-xl border border-border space-y-3">
-          <h3 className="font-medium text-foreground text-sm">Detalhes do serviço</h3>
-          <div className="flex items-center gap-3 text-sm">
-            <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            <span className="text-muted-foreground">Duração estimada: <span className="text-foreground font-medium">{order.duration_hours}h</span></span>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            <span className="text-muted-foreground">
-              {new Date(order.scheduled_date + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })} às {order.scheduled_time?.slice(0, 5)}
-            </span>
-          </div>
-          {formatAddress() && (
-            <div className="flex items-start gap-3 text-sm">
-              <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <span className="text-muted-foreground">{formatAddress()}</span>
-            </div>
-          )}
-          <div className="pt-2 border-t border-border flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Total</span>
-            <span className="font-semibold text-foreground">R$ {Number(order.total_price).toFixed(2).replace(".", ",")}</span>
-          </div>
-        </section>
-
-        {/* Actions */}
-        <section className="p-4 mt-2 space-y-3">
-          <button
-            onClick={() => navigate(`/chat/order/${order.id}?as=client`)}
-            className="w-full p-4 rounded-xl border border-primary/30 bg-primary/5 flex items-center gap-3 hover:bg-primary/10 transition-colors"
-          >
-            <MessageCircle className="w-5 h-5 text-primary" />
-            <span className="font-medium text-foreground">
-              {order.pro_id
-                ? `Conversar com ${order.pro_profile?.full_name?.split(" ")[0] || "profissional"}`
-                : "Abrir chat do pedido"}
-            </span>
-          </button>
-          <button
-            onClick={() => navigate("/client/support")}
-            className="w-full p-4 rounded-xl border border-border bg-card flex items-center gap-3 hover:bg-secondary transition-colors"
-          >
-            <HelpCircle className="w-5 h-5 text-muted-foreground" />
-            <span className="font-medium text-foreground">Suporte</span>
-          </button>
-
-
-          {order.status && ["confirmed", "en_route"].includes(order.status) && (
-            <>
-              <button
-                onClick={() => navigate(`/client/cancel/${order.id}`)}
-                className="w-full p-4 rounded-xl border border-destructive/20 bg-destructive/5 flex items-center gap-3 hover:bg-destructive/10 transition-colors"
-              >
-                <X className="w-5 h-5 text-destructive" />
-                <span className="font-medium text-destructive">Cancelar pedido</span>
-              </button>
-              <p className="text-xs text-center text-muted-foreground">
-                Cancelamentos podem ter taxa dependendo do horário.
-              </p>
-            </>
-          )}
-        </section>
-
-        <div className="h-4" />
+        <div className="h-6" />
       </main>
 
       {/* Bottom Action */}
       {order.status === "completed" && !order.client_rating && (
-        <div className="flex-shrink-0 p-4 bg-card border-t border-border safe-bottom">
+        <div className="flex-shrink-0 p-4 bg-card/95 backdrop-blur-md border-t border-border/60 safe-bottom">
           <PrimaryButton fullWidth onClick={handleComplete}>
             Avaliar serviço
           </PrimaryButton>
