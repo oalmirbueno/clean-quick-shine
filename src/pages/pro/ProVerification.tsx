@@ -325,6 +325,35 @@ export default function ProVerification() {
             </div>
           </motion.div>
 
+          {/* Conversa com o suporte de verificação */}
+          <motion.div variants={item}>
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="w-full p-4 bg-card rounded-2xl border border-border/60 shadow-sm hover:border-primary/40 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 relative">
+                  <MessageSquare className="w-5 h-5 text-primary" />
+                  {thread && thread.unread_pro > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                      {thread.unread_pro}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground text-sm">Conversa com o suporte</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                    {messages.length > 0
+                      ? messages[messages.length - 1].body
+                      : "Tire dúvidas sobre sua verificação."}
+                  </p>
+                </div>
+                <span className="text-xs text-primary font-medium shrink-0">Abrir →</span>
+              </div>
+            </button>
+          </motion.div>
+
           {/* Terms acceptance */}
           {!allRequiredApproved && (
             <motion.div variants={item} className={cn(
