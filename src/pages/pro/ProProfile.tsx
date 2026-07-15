@@ -324,7 +324,7 @@ export default function ProProfile() {
           </div>
 
           {/* === DADOS PESSOAIS === */}
-          <section className="bg-card rounded-xl border border-border overflow-hidden">
+          <section className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             <button
               onClick={() => setEditSection(editSection === "personal" ? null : "personal")}
               className="w-full p-4 flex items-center gap-3 hover:bg-secondary/50 transition-colors"
@@ -378,7 +378,7 @@ export default function ProProfile() {
           </section>
 
           {/* === BIO / PERFIL PRO === */}
-          <section className="bg-card rounded-xl border border-border overflow-hidden">
+          <section className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             <button
               onClick={() => setEditSection(editSection === "bio" ? null : "bio")}
               className="w-full p-4 flex items-center gap-3 hover:bg-secondary/50 transition-colors"
@@ -436,7 +436,7 @@ export default function ProProfile() {
           </section>
 
           {/* === ENDEREÇOS === */}
-          <section className="bg-card rounded-xl border border-border overflow-hidden">
+          <section className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             <div className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <MapPin className="w-5 h-5 text-primary" />
@@ -554,16 +554,16 @@ export default function ProProfile() {
           </section>
 
           {/* === NAVIGATION MENU === */}
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             {navItems.map((item, index) => (
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
                 className={`w-full p-4 flex items-center gap-4 hover:bg-secondary/50 transition-colors
-                  ${index !== navItems.length - 1 ? "border-b border-border" : ""}`}
+                  ${index !== navItems.length - 1 ? "border-b border-border/60" : ""}`}
               >
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                  <item.icon className="w-5 h-5 text-muted-foreground" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <item.icon className="w-5 h-5 text-primary" />
                 </div>
                 <span className="flex-1 text-left font-medium text-foreground">{item.label}</span>
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -574,9 +574,9 @@ export default function ProProfile() {
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="w-full p-4 bg-card rounded-xl border border-border flex items-center gap-4 hover:bg-destructive/5 hover:border-destructive/20 transition-colors"
+            className="w-full p-4 bg-card rounded-2xl border border-border/60 shadow-sm flex items-center gap-4 hover:bg-destructive/5 hover:border-destructive/30 transition-colors"
           >
-            <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
               <LogOut className="w-5 h-5 text-destructive" />
             </div>
             <span className="font-medium text-destructive">Sair da conta</span>
