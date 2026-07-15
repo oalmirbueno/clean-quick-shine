@@ -291,6 +291,30 @@ export default function AdminDocuments() {
                   </div>
                 </button>
 
+                {/* Quick actions row */}
+                <div className="flex items-center gap-2 px-4 pb-3 -mt-1 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 rounded-lg"
+                    onClick={() => setChatUser({ id: group.userId, name: group.name })}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+                    Conversa
+                  </Button>
+                  {group.hasPending && (
+                    <Button
+                      size="sm"
+                      className="h-8 rounded-lg bg-success hover:bg-success/90 text-success-foreground"
+                      onClick={() => approveAll(group.userId)}
+                      disabled={isApprovingAll}
+                    >
+                      <CheckCheck className="w-3.5 h-3.5 mr-1.5" />
+                      Aprovar todos obrigatórios
+                    </Button>
+                  )}
+                </div>
+
                 {/* Documents list */}
                 {isExpanded && (
                   <div className="border-t border-border divide-y divide-border">
