@@ -1,71 +1,58 @@
-# Bloco C — Redesenho moderno do fluxo do cliente
+# Bloco D — Redesenho Dashboard Pro (Diarista)
 
-Escopo confirmado: **14 telas do cliente**, redesenho moderno (padrão Uber/Rappi/Rappi-like), aplicando a identidade V3 já instalada. Somente **UI/presentation** — hooks, mutations, RLS, rotas e edge functions permanecem intocados.
+Aplicar a **mesma linguagem visual V3** já entregue no fluxo do cliente (Blocos A–C) às 12 telas do diarista, sem tocar em lógica de negócio, RLS, edge functions ou hooks.
 
-## Princípios visuais (locked pela V3)
+## Princípios visuais (idênticos ao cliente)
 
-- **Paleta**: Verde `#19CC97` (primary CTA), Azul profundo `#102A43` (superfícies dark, headers), branco puro, cinzas neutros. Sem gradientes agressivos, sem cor extra.
-- **Tipografia**: hierarquia atual (Inter/system) com pesos SemiBold em títulos, tracking justo em números financeiros. Wordmark "jálimpo" sempre em minúsculas.
-- **Forma**: `rounded-2xl` padrão, `rounded-3xl` em superfícies elevadas (hero, sheets), `border-border/60`, `shadow-sm`. Sem card duplo, sem sombra pesada.
-- **Espaçamento**: respiro amplo (`p-5`/`p-6` mínimo em sheets), listas com `gap-3`, seções separadas por `space-y-6`.
-- **Motion**: framer-motion sutil (`layout`, `whileTap 0.98`, entrada `fade + slide 8px`, 200–300ms). Sem parallax, sem confetti.
-- **Dark mode**: só nas telas que já suportam hoje; não vou forçar dark novo.
+- Verde primário `#19CC97`, azul profundo `#102A43`
+- `rounded-2xl` / `rounded-3xl`, `border-border/60`, `shadow-sm`
+- Header unificado: `bg-background/80 backdrop-blur-md`, botão back `size-10 rounded-full`, título + subtítulo
+- Cards com ícones em `size-9/10 rounded-full` sobre `bg-primary/10` ou `bg-secondary`
+- Bottom CTA `bg-card/95 backdrop-blur-md`, safe-bottom
+- Motion: `framer-motion` com stagger sutil (delay 0.04–0.06) em listas
+- Empty states humanos com ícone Lucide + copy curta
+- Dark mode: só onde já existe (respeitando tokens)
 
-## Padrões de redesenho aplicados a todas as telas
+## Escopo — 12 telas em 4 passes
 
-1. **Header consistente**: barra fina com back button `size-10 rounded-full`, título centralizado ou à esquerda, ação à direita. Sem card dentro do header.
-2. **Hero contextual**: no topo, um bloco com o dado mais importante da tela (saldo, próximo pedido, status do serviço), em superfície `bg-secondary/40` com respiro.
-3. **CTAs primários fixos**: sticky bottom com sombra sutil, `PrimaryButton` full-width, verde V3.
-4. **Cards resumidos, não empilhados**: um card = uma decisão. Metadados em linha única com ícone Lucide 16px.
-5. **Estados vazios humanos**: ilustração via ícone Lucide grande + copy curta + CTA único.
-6. **Skeletons**: já existem — reutilizar e adicionar onde faltar.
+### Passe 1 — Núcleo diário (3 telas)
+- **ProHome** — hero de status (online/offline), stats do dia (ganhos, jobs, rating), lista de novos pedidos com stagger, CTA para agenda
+- **ProAgenda** — segmented control (Hoje / Semana / Concluídos), timeline com marcadores, cards de job com hora + endereço
+- **ProOrderDetail** — hero cliente/serviço, cards de rota, endereço, pagamento, botões de ação principal (aceitar/iniciar/finalizar)
 
-## Telas e mudanças específicas
+### Passe 2 — Ganhos e crescimento (3 telas)
+- **ProEarnings** — hero card com saldo grande, breakdown de comissão, gráfico/lista de últimos serviços, CTA sacar
+- **ProWithdraw** — form limpo com valor destacado, dados bancários em card, resumo antes de confirmar
+- **ProRanking** — pódio visual, posição do pro, lista de tops, badge de nível
 
-### Grupo 1 — Núcleo diário (3)
-- **ClientHome**: hero "Olá, {nome}" com próximo agendamento em destaque; grid 2×2 de serviços vira **bento assimétrico** (Residencial ocupa 2 colunas, demais 1); chips de sugestão em scroll horizontal com fade nas bordas.
-- **ClientOrders**: tabs viram segmented control pill; cards com timeline mini (dot + linha) indicando etapa; empty state redesenhado.
-- **ClientProfile**: header com avatar grande e nome; menu agrupado em seções ("Conta", "Preferências", "Ajuda"); logout no rodapé, versão discreta.
+### Passe 3 — Perfil e qualidade (3 telas)
+- **ProProfile** — hero avatar + rating + jobs done, seções agrupadas (dados, docs, banking, preferências), menu list refinado
+- **ProAvailability** — grade de dias/horários com toggles suaves, chips de zona
+- **ProQuality** — score cards, checklist de boas práticas, badges conquistados
 
-### Grupo 2 — Booking (6)
-- **ClientService**: seleção como cards grandes com ícone + descrição curta + faixa de preço.
-- **ClientSchedule**: date picker inline (não modal) + grid de horários com estados (disponível/ocupado); resumo sticky no rodapé.
-- **ClientLocation**: mapa Leaflet ocupa 60% da tela, sheet inferior com endereço editável e CTA.
-- **ClientMatching**: full-screen com animação de busca (pulse concêntrico verde), copy dinâmica, botão "cancelar busca" discreto.
-- **ClientOffer**: card único centralizado com avatar da pro, rating, preço destacado, CTAs "aceitar" (verde) e "próxima" (ghost).
-- **ClientCheckout**: resumo em cima, MoneyBreakdown claro, seleção de pagamento em radio cards, CTA sticky com valor.
+### Passe 4 — Suporte e onboarding (3 telas)
+- **ProPlan** — hero do plano atual (Free/Pro/Elite), cards de upgrade com destaque no recomendado
+- **ProSupport** — mesmo padrão do cliente (grid quick actions + lista + sheet novo ticket)
+- **ProVerification** — stepper vertical de docs, cards de upload com status (pendente/aprovado/reprovado), copy explicativa por passo
 
-### Grupo 3 — Pós-pedido (4)
-- **ClientOrderTracking**: mapa em cima, sheet inferior arrastável com status atual, ETA, dados da pro, botões chat/ligar.
-- **ClientOrderDetail**: timeline vertical + MoneyBreakdown + ações contextuais por status.
-- **ClientRating**: 5 estrelas grandes tap target 48px + chips de feedback ("pontual", "atenciosa"...) + textarea opcional.
-- **ClientCancel**: já está bem; refino de warning card (verde/âmbar) + policy em accordion.
+## Fora de escopo
+- Hooks de dados, mutations, RPCs, edge functions
+- Fluxo B2B, admin, auth
+- Componentes compartilhados (`OrderCard`, `PlanCard`, `SubscriptionCard`) — mantidos como estão; se precisarem de variant, versionamos sem quebrar cliente
+- Dark mode novo (aplicar só onde já existe)
 
-### Grupo 4 — Auxiliares (3)
-- **ClientSupport**: lista de tickets em cards com badge de status; FAB para novo ticket; modal de criação simplificado.
-- **ClientSubscription**: PlanCards lado a lado com destaque no plano atual; tabela de benefícios enxuta.
-- **ClientReferral**: hero com código grande copiável + share; contador de convites; regras em accordion.
+## Riscos e mitigação
+- **ProProfile (588 linhas)** e **ProHome (476 linhas)**: telas densas — antes de editar, ler as áreas com hooks pesados; JSX de renderização é o único alvo
+- **ProVerification (441 linhas)**: fluxo de upload frágil — preservar estados, refs de input, callbacks; só refinar wrapper visual
+- **ProAgenda / ProWithdraw**: 345 linhas cada — cuidar da lógica de filtro e cálculo, editar só JSX
 
-## Fora do escopo (não vou tocar)
+## Entregáveis por passe
+1. Files changed (lista completa)
+2. Screenshot mobile (390×844) via Playwright autenticado
+3. Checklist visual: header ✓ · cards `rounded-2xl` ✓ · motion stagger ✓ · empty state ✓ · CTA fixo ✓
+4. Confirmação de que hooks/tipos passam sem erro
 
-- Hooks, mutations, tipos, RLS, edge functions, roteamento, autenticação.
-- Fluxo Pro, Admin, B2B.
-- Regras de negócio (preços, cancelamento, matching, splits).
+## Ordem de execução
+Passes sequenciais, um por turno. Após cada passe, aguardo confirmação para seguir.
 
-## Entrega em passes
-
-Para não fazer um turno gigante e frágil, vou dividir em **4 passes** (um por grupo), cada um em um turno:
-1. Passe 1 — Grupo 1 (Home/Orders/Profile)
-2. Passe 2 — Grupo 2 (Booking)
-3. Passe 3 — Grupo 3 (Pós-pedido)
-4. Passe 4 — Grupo 4 (Auxiliares)
-
-Cada passe termina com: arquivos alterados, screenshots (Playwright) das telas redesenhadas em light+dark quando aplicável, e checklist do que ficou.
-
-## Riscos
-
-- Muitos hooks retornam shapes específicos — vou ler o hook antes de mexer no JSX de cada tela para não quebrar tipagem.
-- Leaflet + sheet arrastável no Tracking exige cuidado com z-index e safe areas.
-- Alguns componentes (`OrderCard`, `ServiceCard`, `PlanCard`) são compartilhados — vou versionar via variant, não substituir, para não afetar Pro/Admin.
-
-Aprovando este plano, começo pelo **Passe 1 — Grupo 1** no próximo turno.
+**Próximo passo**: se aprovar, começo pelo **Passe 1 — ProHome, ProAgenda, ProOrderDetail**.
