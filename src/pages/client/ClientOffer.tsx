@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { BottomNav } from "@/components/ui/BottomNav";
 import { useService } from "@/hooks/useServices";
 import { useCreateOrder } from "@/hooks/useCreateOrder";
-import { ArrowLeft, Star, UserCheck, Clock, Calendar, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Star,
+  ShieldCheck,
+  Clock,
+  Calendar,
+  Loader2,
+  MapPin,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface OfferState {
@@ -17,6 +25,7 @@ interface OfferState {
   proName: string;
   proRating: number;
   proJobsDone?: number;
+  distanceKm?: number;
 }
 
 export default function ClientOffer() {
@@ -31,10 +40,14 @@ export default function ClientOffer() {
   if (!state?.serviceId || !state?.proId) {
     return (
       <PageTransition>
-        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="h-full bg-background flex items-center justify-center p-6">
           <div className="text-center">
-            <p className="text-muted-foreground mb-4">Dados da oferta não encontrados</p>
-            <PrimaryButton onClick={() => navigate("/client/home")}>Voltar ao início</PrimaryButton>
+            <p className="text-muted-foreground mb-4">
+              Dados da oferta não encontrados
+            </p>
+            <PrimaryButton onClick={() => navigate("/client/home")}>
+              Voltar ao início
+            </PrimaryButton>
           </div>
         </div>
       </PageTransition>
@@ -61,7 +74,6 @@ export default function ClientOffer() {
         setIsCreating(false);
       }
     } catch (error: any) {
-      console.error("Erro ao criar pedido:", error);
       toast.error(error?.message || "Erro ao criar pedido");
       setIsCreating(false);
     }
@@ -69,9 +81,10 @@ export default function ClientOffer() {
 
   const formatDate = (dateInput: string | Date) => {
     try {
-      const dateStr = dateInput instanceof Date 
-        ? dateInput.toISOString().split("T")[0] 
-        : String(dateInput);
+      const dateStr =
+        dateInput instanceof Date
+          ? dateInput.toISOString().split("T")[0]
+          : String(dateInput);
       const [year, month, day] = dateStr.split("-");
       return `${day}/${month}/${year}`;
     } catch {
@@ -79,126 +92,184 @@ export default function ClientOffer() {
     }
   };
 
+  const totalPrice = Number(service?.base_price) || 0;
+
   return (
     <PageTransition>
-      <div className="h-full bg-background flex flex-col safe-top">
+      <div className="h-full bg-background flex flex-col relative safe-top">
+        {/* Glow */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-[40%]"
+          style={{
+            background:
+              "radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.14) 0%, transparent 70%)",
+          }}
+        />
+
         {/* Header */}
-        <header className="bg-card border-b border-border p-4">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-muted transition-colors">
-              <ArrowLeft className="w-5 h-5 text-foreground" />
+        <header
+          className="relative shrink-0 px-5 pt-3 pb-2 z-10"
+          style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+        >
+          <div className="mx-auto max-w-lg flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
+              aria-label="Voltar"
+            >
+              <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-semibold text-foreground">Oferta de serviço</h1>
+            <h1 className="text-[15px] font-semibold text-foreground">
+              Sua oferta
+            </h1>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 space-y-4">
-          {/* Card da Profissional */}
-          <div className="bg-card rounded-2xl border border-border p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
-                {state.proName?.charAt(0)?.toUpperCase() || "P"}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-foreground text-lg">{state.proName}</p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                    {state.proRating?.toFixed(1) || "5.0"}
-                  </span>
-                  {state.proJobsDone !== undefined && (
-                    <>
-                      <span>•</span>
-                      <span>{state.proJobsDone} serviços</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-xs text-primary">
-              <UserCheck className="w-3.5 h-3.5" />
-              Profissional verificada
-            </div>
-          </div>
-
-          {/* Detalhes do Serviço */}
-          <div className="bg-card rounded-2xl border border-border p-5">
-            <h2 className="text-sm font-medium text-muted-foreground mb-3">Detalhes do serviço</h2>
-
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground text-sm">{service?.name || "Serviço"}</p>
-                  <p className="text-xs text-muted-foreground">{service?.description || ""}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Calendar className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground text-sm">{formatDate(state.date)}</p>
-                  <p className="text-xs text-muted-foreground">às {state.time}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground text-sm">Duração estimada</p>
-                  <p className="text-xs text-muted-foreground">{service?.duration_hours || 0} horas</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Preço */}
-          <div className="bg-card rounded-2xl border border-border p-5">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Valor total</span>
-              <span className="text-2xl font-bold text-foreground">
-                R$ {(Number(service?.base_price) || 0).toFixed(2).replace(".", ",")}
-              </span>
-            </div>
-          </div>
-
-          {/* Botões */}
-          <div className="space-y-3 pt-2">
-            <PrimaryButton
-              className="w-full"
-              onClick={handleAccept}
-              disabled={isCreating}
+        <main className="relative z-10 flex-1 overflow-y-auto px-5 pb-32">
+          <div className="mx-auto max-w-lg space-y-4">
+            {/* Hero Pro card */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm text-center"
             >
+              <div className="relative w-24 h-24 mx-auto mb-4">
+                <div className="w-24 h-24 rounded-full bg-primary/10 border-2 border-primary/25 flex items-center justify-center text-primary font-bold text-4xl">
+                  {state.proName?.charAt(0)?.toUpperCase() || "P"}
+                </div>
+                <span className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center border-4 border-card">
+                  <ShieldCheck className="w-4 h-4" strokeWidth={2.5} />
+                </span>
+              </div>
+
+              <h2 className="text-[20px] font-semibold text-foreground leading-tight tracking-tight">
+                {state.proName}
+              </h2>
+
+              <div className="flex items-center justify-center gap-2 mt-2 text-[13px] text-muted-foreground">
+                <span className="inline-flex items-center gap-0.5 text-amber-500 font-semibold">
+                  <Star className="w-4 h-4 fill-amber-500" />
+                  {state.proRating?.toFixed(1) || "5.0"}
+                </span>
+                {state.proJobsDone !== undefined && (
+                  <>
+                    <span>·</span>
+                    <span>{state.proJobsDone} serviços</span>
+                  </>
+                )}
+              </div>
+
+              <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11.5px] font-semibold">
+                <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2.5} />
+                Profissional verificada
+              </div>
+            </motion.div>
+
+            {/* Details */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 }}
+              className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm space-y-4"
+            >
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                Detalhes do serviço
+              </p>
+
+              <DetailRow
+                icon={Calendar}
+                label="Data e hora"
+                value={`${formatDate(state.date)} às ${state.time}`}
+              />
+              <DetailRow
+                icon={Clock}
+                label="Duração estimada"
+                value={`${service?.duration_hours || 0} horas`}
+              />
+              {state.distanceKm !== undefined && state.distanceKm !== null && (
+                <DetailRow
+                  icon={MapPin}
+                  label="Distância"
+                  value={`${state.distanceKm.toFixed(1)} km`}
+                />
+              )}
+            </motion.div>
+
+            {/* Price */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.16 }}
+              className="rounded-2xl border border-primary/25 bg-primary/5 p-5 flex items-center justify-between"
+            >
+              <div>
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">
+                  Valor total
+                </p>
+                <p className="text-[13px] text-muted-foreground">
+                  {service?.name || "Serviço"}
+                </p>
+              </div>
+              <p className="text-[26px] font-bold text-foreground tracking-tight">
+                R$ {totalPrice.toFixed(2).replace(".", ",")}
+              </p>
+            </motion.div>
+          </div>
+        </main>
+
+        {/* Sticky bottom CTA */}
+        <div
+          className="shrink-0 px-5 pt-3 pb-5 bg-card/95 backdrop-blur border-t border-border/60"
+          style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 20px)" }}
+        >
+          <div className="mx-auto max-w-lg space-y-2.5">
+            <PrimaryButton fullWidth onClick={handleAccept} disabled={isCreating}>
               {isCreating ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Criando pedido...
                 </span>
               ) : (
-                "Aceitar e pagar"
+                <>Aceitar e pagar · R$ {totalPrice.toFixed(2).replace(".", ",")}</>
               )}
             </PrimaryButton>
-
-            <PrimaryButton
-              variant="outline"
-              className="w-full"
+            <button
               onClick={() => navigate("/client/home")}
               disabled={isCreating}
+              className="w-full h-11 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
             >
-              Recusar
-            </PrimaryButton>
+              Recusar oferta
+            </button>
           </div>
-        </main>
-
-        <BottomNav variant="client" />
+        </div>
       </div>
     </PageTransition>
+  );
+}
+
+function DetailRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-xl bg-secondary/70 flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-foreground/70" strokeWidth={2} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11.5px] text-muted-foreground leading-none mb-1">
+          {label}
+        </p>
+        <p className="text-[14px] font-medium text-foreground leading-tight truncate">
+          {value}
+        </p>
+      </div>
+    </div>
   );
 }

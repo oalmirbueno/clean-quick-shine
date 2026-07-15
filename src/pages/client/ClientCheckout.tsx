@@ -545,36 +545,49 @@ export default function ClientCheckout() {
     <PageTransition>
       <div className="h-full bg-background flex flex-col safe-top">
         {/* Header */}
-        <header className="flex-shrink-0 bg-card border-b border-border px-4 py-3">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                if (step === "payment") setStep("cpf");
-                else navigate(-1);
-              }}
-              className="p-2 rounded-xl hover:bg-muted transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-foreground" />
-            </button>
-            <h1 className="text-lg font-semibold text-foreground">
-              {step === "cpf" && "Dados para pagamento"}
-              {step === "payment" && "Pagamento"}
-              {step === "confirmation" && "Confirmação"}
-            </h1>
-          </div>
+        <header
+          className="shrink-0 px-5 pt-3 pb-4"
+          style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+        >
+          <div className="mx-auto max-w-lg">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (step === "payment") setStep("cpf");
+                  else navigate(-1);
+                }}
+                className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
+                aria-label="Voltar"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="min-w-0">
+                <p className="text-[12px] text-muted-foreground leading-none mb-1">
+                  Passo {["cpf", "payment", "confirmation"].indexOf(step) + 1} de 3
+                </p>
+                <h1 className="text-[18px] font-semibold text-foreground leading-tight tracking-tight">
+                  {step === "cpf" && "Dados para pagamento"}
+                  {step === "payment" && "Forma de pagamento"}
+                  {step === "confirmation" && "Confirmação"}
+                </h1>
+              </div>
+            </div>
 
-          {/* Progress */}
-          <div className="flex gap-2 mt-3">
-            {["cpf", "payment", "confirmation"].map((s, i) => (
-              <div
-                key={s}
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  ["cpf", "payment", "confirmation"].indexOf(step) >= i
-                    ? "bg-primary"
-                    : "bg-border"
-                }`}
-              />
-            ))}
+            {/* Progress */}
+            <div className="flex gap-1.5 mt-4">
+              {["cpf", "payment", "confirmation"].map((s, i) => {
+                const currentIdx = ["cpf", "payment", "confirmation"].indexOf(step);
+                const active = currentIdx >= i;
+                return (
+                  <div
+                    key={s}
+                    className={`h-1 flex-1 rounded-full transition-colors ${
+                      active ? "bg-primary" : "bg-border/60"
+                    }`}
+                  />
+                );
+              })}
+            </div>
           </div>
         </header>
 
