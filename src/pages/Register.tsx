@@ -32,6 +32,8 @@ const periods = [
 ];
 
 export default function Register() {
+  useForceInstallGate();
+
   const navigate = useNavigate();
   const { signUp } = useAuth();
   const [userType, setUserType] = useState<UserType>("client");
