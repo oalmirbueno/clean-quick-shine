@@ -341,9 +341,14 @@ function ChoiceCard({
   );
 }
 
+type OsKey = "ios" | "android";
+type BrowserKey = "safari" | "chrome" | "samsung";
+
 function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
   const [copied, setCopied] = useState(false);
-  const [os, setOs] = useState<"ios" | "android">("ios");
+  const [os, setOs] = useState<OsKey>("ios");
+  const [iosBrowser, setIosBrowser] = useState<"safari" | "chrome">("safari");
+  const [androidBrowser, setAndroidBrowser] = useState<"chrome" | "samsung">("chrome");
   const url = typeof window !== "undefined" ? window.location.origin + "/" : "";
 
   const copyLink = async () => {
@@ -357,33 +362,23 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
     }
   };
 
-  const steps =
-    os === "ios"
-      ? [
-          { title: "Abra o link no iPhone", body: "Aponte a câmera para o QR ou cole o link no Safari." },
-          { title: "Toque em Compartilhar", body: "Ícone de quadrado com seta na barra inferior do Safari." },
-          { title: "Adicionar à Tela de Início", body: "Role o menu e confirme em Adicionar no canto superior." },
-          { title: "Abra pelo ícone Já Limpo", body: "Faça login ou crie sua conta em segundos." },
-        ]
-      : [
-          { title: "Abra o link no Android", body: "Aponte a câmera para o QR ou cole o link no Chrome." },
-          { title: "Toque no menu do Chrome", body: "Três pontinhos no canto superior direito." },
-          { title: "Instalar aplicativo", body: "Escolha Instalar app ou Adicionar à tela inicial." },
-          { title: "Abra pelo ícone Já Limpo", body: "Faça login ou crie sua conta em segundos." },
-        ];
+  const browser: BrowserKey = os === "ios" ? iosBrowser : androidBrowser;
+
+  const steps = getSteps(os, browser);
 
   return (
     <AuthLayout
-      eyebrow={
-        <>
-          <Sparkles className="w-3 h-3" /> Já Limpo é feito para celular
-        </>
-      }
-      title="Abra no seu celular"
-      subtitle="Escaneie o QR ou copie o link. Depois siga o passo a passo do seu sistema."
+      title="Já Limpo fica perfeito no seu celular"
+      subtitle="Aponte a câmera no QR ou copie o link. Em poucos segundos o app fica na sua tela inicial."
       showTrust
     >
       <div className="space-y-5">
+        <div className="grid grid-cols-3 gap-2">
+          <FeatureChip icon={Zap} label="Mais rápido" />
+          <FeatureChip icon={BellRing} label="Notificações" />
+          <FeatureChip icon={Wifi} label="Sempre pronto" />
+        </div>
+
         <div className="rounded-3xl border border-border/60 bg-card p-6 flex flex-col items-center gap-4">
           <div className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-border/40">
             <QRCodeSVG
@@ -422,23 +417,55 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
           </button>
         </div>
 
-        <div className="rounded-2xl bg-muted/40 border border-border/60 p-1 grid grid-cols-2 gap-1">
-          <OsTab
-            active={os === "ios"}
-            onClick={() => setOs("ios")}
-            icon={AppleIcon}
-            label="iPhone"
-          />
-          <OsTab
-            active={os === "android"}
-            onClick={() => setOs("android")}
-            icon={AndroidIcon}
-            label="Android"
-          />
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+            Escolha seu sistema
+          </div>
+          <div className="rounded-2xl bg-muted/40 border border-border/60 p-1 grid grid-cols-2 gap-1">
+            <OsTab active={os === "ios"} onClick={() => setOs("ios")} icon={AppleIcon} label="iPhone" />
+            <OsTab active={os === "android"} onClick={() => setOs("android")} icon={AndroidIcon} label="Android" />
+          </div>
+        </div>
+
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+            Qual navegador você usa?
+          </div>
+          {os === "ios" ? (
+            <div className="grid grid-cols-2 gap-2">
+              <BrowserPill
+                active={iosBrowser === "safari"}
+                onClick={() => setIosBrowser("safari")}
+                icon={SafariIcon}
+                label="Safari"
+              />
+              <BrowserPill
+                active={iosBrowser === "chrome"}
+                onClick={() => setIosBrowser("chrome")}
+                icon={ChromeIcon}
+                label="Chrome"
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <BrowserPill
+                active={androidBrowser === "chrome"}
+                onClick={() => setAndroidBrowser("chrome")}
+                icon={ChromeIcon}
+                label="Chrome"
+              />
+              <BrowserPill
+                active={androidBrowser === "samsung"}
+                onClick={() => setAndroidBrowser("samsung")}
+                icon={SamsungIcon}
+                label="Samsung Internet"
+              />
+            </div>
+          )}
         </div>
 
         <motion.ol
-          key={os}
+          key={`${os}-${browser}`}
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
@@ -470,6 +497,48 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
   );
 }
 
+function getSteps(os: OsKey, browser: BrowserKey): { title: string; body: string }[] {
+  if (os === "ios" && browser === "safari") {
+    return [
+      { title: "Abra o link no Safari", body: "Aponte a câmera para o QR ou cole o link." },
+      { title: "Toque em Compartilhar", body: "Ícone de quadrado com seta na barra inferior." },
+      { title: "Adicionar à Tela de Início", body: "Role o menu e confirme em Adicionar." },
+      { title: "Abra pelo ícone Já Limpo", body: "Faça login ou crie sua conta em segundos." },
+    ];
+  }
+  if (os === "ios" && browser === "chrome") {
+    return [
+      { title: "Abra o link no Chrome", body: "Cole o endereço ou toque no link enviado." },
+      { title: "Toque em Compartilhar", body: "Ícone de compartilhar na barra do Chrome." },
+      { title: "Adicionar à Tela de Início", body: "Role as opções e escolha Adicionar à Tela de Início." },
+      { title: "Abra pelo ícone Já Limpo", body: "Faça login ou crie sua conta em segundos." },
+    ];
+  }
+  if (os === "android" && browser === "chrome") {
+    return [
+      { title: "Abra o link no Chrome", body: "Aponte a câmera para o QR ou cole o link." },
+      { title: "Toque no menu do Chrome", body: "Três pontinhos no canto superior direito." },
+      { title: "Instalar aplicativo", body: "Escolha Instalar app ou Adicionar à tela inicial." },
+      { title: "Abra pelo ícone Já Limpo", body: "Faça login ou crie sua conta em segundos." },
+    ];
+  }
+  return [
+    { title: "Abra o link no Samsung Internet", body: "Aponte a câmera para o QR ou cole o link." },
+    { title: "Toque no menu", body: "Três linhas no canto inferior direito." },
+    { title: "Adicionar página a", body: "Escolha Tela inicial para instalar como app." },
+    { title: "Abra pelo ícone Já Limpo", body: "Faça login ou crie sua conta em segundos." },
+  ];
+}
+
+function FeatureChip({ icon: Icon, label }: { icon: typeof Zap; label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-1 rounded-2xl border border-border/60 bg-card/60 py-2.5">
+      <Icon className="w-4 h-4 text-primary" />
+      <span className="text-[11px] font-medium text-foreground/80">{label}</span>
+    </div>
+  );
+}
+
 function OsTab({
   active,
   onClick,
@@ -493,6 +562,33 @@ function OsTab({
     >
       <Icon className={active ? "w-4 h-4 text-primary" : "w-4 h-4"} />
       {label}
+    </button>
+  );
+}
+
+function BrowserPill({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: (props: { className?: string }) => JSX.Element;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        active
+          ? "flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/30 text-foreground text-sm font-semibold transition-all"
+          : "flex items-center gap-2 px-3 py-2.5 rounded-xl bg-card border border-border/60 text-muted-foreground hover:text-foreground hover:border-border text-sm font-medium transition-colors"
+      }
+    >
+      <Icon className="w-5 h-5 shrink-0" />
+      <span className="truncate">{label}</span>
     </button>
   );
 }
@@ -526,4 +622,40 @@ function AndroidIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+function SafariIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <circle cx="12" cy="12" r="10" fill="#1f8ef1" />
+      <circle cx="12" cy="12" r="8.2" fill="#f6f7f9" />
+      <path d="M12 5v2M12 17v2M5 12h2M17 12h2" stroke="#c9cdd3" strokeWidth="1" strokeLinecap="round" />
+      <path d="M12 12l4.6-6.6-6.6 4.6L7.4 18.6l6.6-4.6z" fill="#e74c3c" />
+      <circle cx="12" cy="12" r="1.1" fill="#fff" />
+    </svg>
+  );
+}
+
+function ChromeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <circle cx="12" cy="12" r="10" fill="#fff" />
+      <path d="M12 2a10 10 0 018.66 5H12a5 5 0 00-4.33 2.5L4.34 3.78A9.97 9.97 0 0112 2z" fill="#ea4335" />
+      <path d="M2 12a10 10 0 013.34-7.47l3.33 5.77A5 5 0 008.5 15L4.6 20.16A9.98 9.98 0 012 12z" fill="#fbbc05" />
+      <path d="M12 22a10 10 0 01-7.4-3.84l3.9-5.16A5 5 0 0012 17c.55 0 1.08-.09 1.58-.25L10.9 21.9c.36.06.73.1 1.1.1z" fill="#34a853" />
+      <path d="M20.66 7A10 10 0 0122 12c0 5.52-4.48 10-10 10l3.6-6.34A5 5 0 0017 12a5 5 0 00-.67-2.5l4.33-2.5z" fill="#4285f4" />
+      <circle cx="12" cy="12" r="4" fill="#fff" />
+      <circle cx="12" cy="12" r="3" fill="#4285f4" />
+    </svg>
+  );
+}
+
+function SamsungIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <circle cx="12" cy="12" r="10" fill="#1428a0" />
+      <path d="M7 10.5c0-1 .8-1.8 2.5-1.8s2.5.8 2.5 1.9c0 .7-.4 1.2-1.2 1.5l-2 .8c-1.6.6-2.3 1.5-2.3 2.9v.6H14v-1.5H8.5v-.1c.1-.4.4-.7 1.1-1l1.9-.7c1.5-.6 2-1.4 2-2.6C13.5 8.8 12 8 9.5 8 7.1 8 5.5 9 5.5 10.9v.4H7v-.8zM16 8.5v7h1.5v-3l1.5 3h1.7l-1.7-3.2c1-.3 1.5-1 1.5-2 0-1.3-1-2-2.7-2H16zm1.5 1.3h.7c.9 0 1.3.3 1.3 1s-.4 1-1.3 1h-.7v-2z" fill="#fff" />
+    </svg>
+  );
+}
+
 
