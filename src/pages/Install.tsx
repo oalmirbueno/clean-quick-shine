@@ -302,8 +302,8 @@ export default function Install() {
           {/* Animated pointing hint */}
           <AnimatedInstallHint os={os} browser={browser} />
 
-          {/* Primary actions: native install if available, else share link */}
-          {deferredPrompt ? (
+          {/* Native install button (Android Chrome / Desktop Chromium) */}
+          {deferredPrompt && (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -314,75 +314,9 @@ export default function Install() {
               <Download className="w-4 h-4" />
               Instalar agora
             </motion.button>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={shareUrl}
-                className="py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
-              >
-                <Share className="w-4 h-4" />
-                Compartilhar
-              </button>
-              <button
-                onClick={copyUrl}
-                className="py-3 rounded-2xl bg-card border border-border/60 text-foreground font-semibold text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
-              >
-                <Copy className="w-4 h-4" />
-                Copiar link
-              </button>
-            </div>
           )}
 
-
-
-          {/* OS tabs */}
-          <section>
-            <div className="grid grid-cols-4 gap-1.5 p-1 bg-muted/40 rounded-2xl">
-              {osTabs.map((tab) => {
-                const active = os === tab.value;
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => {
-                      setOs(tab.value);
-                      setBrowser(defaultBrowserFor(tab.value));
-                    }}
-                    className={`relative flex items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-semibold transition-colors ${
-                      active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Browser chips */}
-          <section>
-            <div className="flex flex-wrap gap-2">
-              {browserOptionsFor(os).map((b) => {
-                const active = browser === b.value;
-                return (
-                  <button
-                    key={b.value}
-                    onClick={() => setBrowser(b.value)}
-                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors border ${
-                      active
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card text-muted-foreground border-border/60 hover:bg-muted"
-                    }`}
-                  >
-                    {b.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Warning: wrong browser / unsupported */}
+          {/* Warning: unsupported browser */}
           {guide.warning && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
@@ -390,18 +324,10 @@ export default function Install() {
               className="rounded-2xl bg-warning/10 border border-warning/30 p-3.5 flex items-start gap-3"
             >
               <AlertCircle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
-              <div className="flex-1 space-y-2">
-                <p className="text-xs text-foreground leading-relaxed">{guide.warning}</p>
-                <button
-                  onClick={copyUrl}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-card border border-border/60 text-[11px] font-semibold text-foreground hover:bg-muted transition-colors"
-                >
-                  <Copy className="w-3 h-3" />
-                  Copiar link do app
-                </button>
-              </div>
+              <p className="text-xs text-foreground leading-relaxed">{guide.warning}</p>
             </motion.div>
           )}
+
 
           {/* Interactive tutorial */}
           <section className="space-y-3">
