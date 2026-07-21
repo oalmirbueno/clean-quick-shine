@@ -7,11 +7,12 @@
     <meta name="description" content="Precisa de limpeza? Baixa o jálimpo.">
     <meta name="author" content="jálimpo" />
 
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#102A43" />
+    <!-- PWA Meta Tags — theme-color por esquema (evita status bar preta no modo claro) -->
+    <meta name="theme-color" content="#F6F9FA" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#102A43" media="(prefers-color-scheme: dark)" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="jálimpo" />
 
     <!-- PWA Manifest -->
