@@ -705,6 +705,40 @@ function labelFor(b: Browser): string {
   return map[b];
 }
 
+function osShortLabel(os: OS): string {
+  const map: Record<OS, string> = {
+    ios: "iOS",
+    ipados: "iPadOS",
+    android: "Android",
+    windows: "Windows",
+    macos: "macOS",
+    linux: "Linux",
+    other: "Web",
+  };
+  return map[os];
+}
+
+function BrowserGlyph({ browser }: { browser: Browser }) {
+  // Small colored dot per browser for the badge; keeps bundle light without extra SVGs.
+  const color: Record<Browser, string> = {
+    safari: "#0FB5EE",
+    chrome: "#F4B400",
+    edge: "#0078D4",
+    firefox: "#FF7139",
+    samsung: "#1428A0",
+    opera: "#FF1B2D",
+    brave: "#FB542B",
+    other: "hsl(var(--muted-foreground))",
+  };
+  return (
+    <span
+      aria-hidden
+      className="inline-block w-1.5 h-1.5 rounded-full"
+      style={{ background: color[browser] }}
+    />
+  );
+}
+
 // ============================================================
 // Animated pointing hint
 // ============================================================
