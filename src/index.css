@@ -248,40 +248,40 @@
 }
 
 @layer utilities {
-  /* Safe area utilities for notched devices */
+  /* Safe area utilities — clamped para evitar gaps enormes no iOS/Android */
   .safe-top {
-    padding-top: max(env(safe-area-inset-top, 0px), 12px);
+    padding-top: max(env(safe-area-inset-top, 0px), 16px);
   }
-  
+
   .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: min(env(safe-area-inset-bottom, 0px), 12px);
   }
 
   .app-standalone .safe-bottom {
     padding-bottom: 0;
   }
-  
+
   .safe-left {
     padding-left: max(0.5rem, env(safe-area-inset-left));
   }
-  
+
   .safe-right {
     padding-right: max(0.5rem, env(safe-area-inset-right));
   }
-  
+
   .safe-x {
     padding-left: max(0.5rem, env(safe-area-inset-left));
     padding-right: max(0.5rem, env(safe-area-inset-right));
   }
-  
+
   .safe-y {
-    padding-top: max(env(safe-area-inset-top), 20px);
-    padding-bottom: max(env(safe-area-inset-bottom), 10px);
+    padding-top: max(env(safe-area-inset-top), 16px);
+    padding-bottom: min(env(safe-area-inset-bottom, 0px), 12px);
   }
-  
+
   .safe-all {
-    padding-top: max(env(safe-area-inset-top, 0px), 12px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-top: max(env(safe-area-inset-top, 0px), 16px);
+    padding-bottom: min(env(safe-area-inset-bottom, 0px), 12px);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
@@ -421,7 +421,7 @@ body {
 }
 
 html.app-standalone {
-  --bottom-nav-safe-area: env(safe-area-inset-bottom, 0px);
+  --bottom-nav-safe-area: min(env(safe-area-inset-bottom, 0px), 16px);
 }
 
 html.app-standalone,
@@ -432,20 +432,20 @@ html.app-standalone #root {
   max-height: var(--app-height);
 }
 
-/* Bottom nav respeita a home-indicator do iOS / gesture bar do Android */
+/* Bottom nav rente ao fundo; respeita home-indicator mas clampa a 16px */
 .app-bottom-nav {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: min(env(safe-area-inset-bottom, 0px), 16px);
 }
 
 html.app-standalone .app-bottom-nav {
   bottom: 0 !important;
   margin-bottom: 0 !important;
-  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  padding-bottom: min(env(safe-area-inset-bottom, 0px), 16px) !important;
   transform: translate3d(0, 0, 0);
 }
 
 .bottom-nav-spacer {
-  height: calc(var(--bottom-nav-height, 56px) + env(safe-area-inset-bottom, 0px)) !important;
+  height: calc(var(--bottom-nav-height, 56px) + min(env(safe-area-inset-bottom, 0px), 16px)) !important;
 }
 
 html.app-standalone .app-scroll-container,
