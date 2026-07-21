@@ -23,7 +23,7 @@ import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
 import { useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { toast } from "sonner";
 
-type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
+
 
 /**
  * Welcome / entry wizard.
@@ -51,18 +51,13 @@ export default function Onboarding() {
   // Desktop/tablet (não mobile e não standalone): tela dedicada de "abra no celular".
   const showDesktopHandoff = !isMobile && !isStandalone;
 
-  const [step, setStep] = useState<Step>("welcome");
-
   const goLogin = () => navigate("/login");
   const goRegister = () => navigate("/register");
-  const goInstall = () => navigate("/install");
 
   // Se o app já está rodando standalone, abre direto o fluxo de login.
   useEffect(() => {
     if (isStandalone) navigate("/login", { replace: true });
   }, [isStandalone, navigate]);
-
-  const backTarget = step === "welcome" ? undefined : () => setStep("welcome");
 
   if (showDesktopHandoff) {
     return <DesktopHandoff onProWeb={goLogin} />;
@@ -71,153 +66,49 @@ export default function Onboarding() {
 
   return (
     <AuthLayout
-      onBack={backTarget}
       eyebrow={
         <>
           <Sparkles className="w-3 h-3" /> Bem-vindo ao Já Limpo
         </>
       }
-      title={
-        step === "welcome"
-          ? "Você já tem cadastro?"
-          : step === "hasAccountYes"
-            ? "Já instalou o app?"
-            : "Vamos começar do jeito certo"
-      }
-      subtitle={
-        step === "welcome"
-          ? "Em poucos toques você agenda sua limpeza."
-          : step === "hasAccountYes"
-            ? "Assim você abre o Já Limpo sempre que precisar."
-            : forceInstall
-              ? "Instale o app antes de criar sua conta."
-              : "Crie sua conta grátis em segundos."
-      }
-      showTrust={step === "welcome"}
+      title="Você já tem cadastro?"
+      subtitle="Em poucos toques você agenda sua limpeza."
+      showTrust
     >
-      <AnimatePresence mode="wait">
-        {step === "welcome" && (
-          <motion.div
-            key="welcome"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            {forceInstall && pwaInstalled && (
-              <InstalledStatusCard onOpen={goLogin} />
-            )}
 
-            <ChoiceCard
-              icon={LogIn}
-              title="Sim, já tenho conta"
-              description={
-                forceInstall
-                  ? pwaInstalled
-                    ? "Abrir o app instalado"
-                    : "Abrir ou instalar o app"
-                  : "Entrar agora"
-              }
-              onClick={() => {
-                if (forceInstall && !pwaInstalled) setStep("hasAccountYes");
-                else goLogin();
-              }}
-            />
-            <ChoiceCard
-              icon={UserPlus}
-              title="Não, é minha primeira vez"
-              description={
-                forceInstall
-                  ? pwaInstalled
-                    ? "Abrir o app e criar conta"
-                    : "Instalar o app e criar conta"
-                  : "Criar conta grátis"
-              }
-              onClick={() => {
-                if (forceInstall && !pwaInstalled) setStep("hasAccountNo");
-                else goRegister();
-              }}
-              primary
-            />
-
-            {forceInstall && !pwaInstalled && (
-              <InfoNote>
-                O Já Limpo funciona melhor como aplicativo instalado, mais
-                rápido, com notificações e sempre atualizado.
-              </InfoNote>
-            )}
-          </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="space-y-3"
+      >
+        {forceInstall && pwaInstalled && (
+          <InstalledStatusCard onOpen={goLogin} />
         )}
 
+        <ChoiceCard
+          icon={LogIn}
+          title="Sim, já tenho conta"
+          description={pwaInstalled ? "Abrir o app instalado" : "Entrar agora"}
+          onClick={goLogin}
+        />
+        <ChoiceCard
+          icon={UserPlus}
+          title="Não, é minha primeira vez"
+          description={pwaInstalled ? "Abrir o app e criar conta" : "Criar conta grátis"}
+          onClick={goRegister}
+          primary
+        />
 
-        {step === "hasAccountYes" && (
-          <motion.div
-            key="hasAccountYes"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            <ChoiceCard
-              icon={CheckCircle2}
-              title="Sim, já instalei"
-              description="Abrir o app e entrar"
-              onClick={goLogin}
-              primary
-            />
-            <ChoiceCard
-              icon={Download}
-              title="Ainda não instalei"
-              description="Ver como instalar em segundos"
-              onClick={goInstall}
-            />
-
-            <InfoNote>
-              Depois de instalar, abra o Já Limpo pelo ícone na tela inicial.
-              As atualizações são automáticas ao reabrir o app.
-            </InfoNote>
-          </motion.div>
+        {forceInstall && !pwaInstalled && (
+          <InfoNote>
+            Depois de entrar, mostramos como deixar o Já Limpo na sua tela
+            inicial em poucos toques.
+          </InfoNote>
         )}
+      </motion.div>
 
-        {step === "hasAccountNo" && (
-          <motion.div
-            key="hasAccountNo"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            <ChoiceCard
-              icon={Download}
-              title="Instalar o app agora"
-              description="Rápido, sem loja. Depois criamos sua conta."
-              onClick={goInstall}
-              primary
-            />
 
-            <InfoNote>
-              Instalar deixa o app na tela inicial, com acesso mais rápido e
-              atualizações automáticas.
-            </InfoNote>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {forceInstall && step === "welcome" && (
-        <div className="mt-5 text-center">
-          <button
-            type="button"
-            onClick={goLogin}
-            className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
-          >
-            Sou diarista, continuar pelo navegador
-
-          </button>
-        </div>
-      )}
 
       <p className="mt-6 text-[11px] text-center text-muted-foreground leading-relaxed">
         Ao continuar você aceita nossos{" "}
