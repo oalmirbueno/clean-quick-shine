@@ -51,18 +51,13 @@ export default function Onboarding() {
   // Desktop/tablet (não mobile e não standalone): tela dedicada de "abra no celular".
   const showDesktopHandoff = !isMobile && !isStandalone;
 
-  const [step, setStep] = useState<Step>("welcome");
-
   const goLogin = () => navigate("/login");
   const goRegister = () => navigate("/register");
-  const goInstall = () => navigate("/install");
 
   // Se o app já está rodando standalone, abre direto o fluxo de login.
   useEffect(() => {
     if (isStandalone) navigate("/login", { replace: true });
   }, [isStandalone, navigate]);
-
-  const backTarget = step === "welcome" ? undefined : () => setStep("welcome");
 
   if (showDesktopHandoff) {
     return <DesktopHandoff onProWeb={goLogin} />;
@@ -71,30 +66,16 @@ export default function Onboarding() {
 
   return (
     <AuthLayout
-      onBack={backTarget}
       eyebrow={
         <>
           <Sparkles className="w-3 h-3" /> Bem-vindo ao Já Limpo
         </>
       }
-      title={
-        step === "welcome"
-          ? "Você já tem cadastro?"
-          : step === "hasAccountYes"
-            ? "Já instalou o app?"
-            : "Vamos começar do jeito certo"
-      }
-      subtitle={
-        step === "welcome"
-          ? "Em poucos toques você agenda sua limpeza."
-          : step === "hasAccountYes"
-            ? "Assim você abre o Já Limpo sempre que precisar."
-            : forceInstall
-              ? "Instale o app antes de criar sua conta."
-              : "Crie sua conta grátis em segundos."
-      }
-      showTrust={step === "welcome"}
+      title="Você já tem cadastro?"
+      subtitle="Em poucos toques você agenda sua limpeza."
+      showTrust
     >
+
       <AnimatePresence mode="wait">
         {step === "welcome" && (
           <motion.div
