@@ -635,7 +635,7 @@ function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
 
         {/* App screenshot */}
         <img
-          src="/src/assets/screenshots/client-home.png"
+          src={appPreview}
           alt="Prévia do app Já Limpo"
           className="absolute inset-x-0 top-8 bottom-8 w-full h-[calc(100%-4rem)] object-cover object-top"
           loading="lazy"
