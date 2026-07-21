@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,21 +18,26 @@ type Step = "welcome" | "installed";
 
 /**
  * Welcome/entry screen.
- * - Mobile browser (not installed): shows a tiny wizard —
- *     "Já tem cadastro?" → Sim/Não
- *     If Sim → "Já instalou o app?" → Sim (Entrar) / Não (Instalar)
- *     If Não → vai direto para /install (instala, depois cria conta no app).
- * - Standalone (PWA já instalado) ou desktop: mostra CTAs diretos.
+ * - PWA já instalado (standalone) → redireciona direto para /login.
+ * - Navegador mobile (não instalado) → wizard de 2 passos.
+ * - Desktop → CTAs diretos (criar conta / entrar).
  */
 export default function Onboarding() {
   const navigate = useNavigate();
   const isStandalone = useIsStandalone();
   const isMobile = useIsMobileDevice();
 
-  // Se já está no app instalado (PWA) ou desktop, pula o wizard.
+  // PWA aberto standalone → o usuário já instalou, então vai direto para o login.
+  useEffect(() => {
+    if (isStandalone) navigate("/login", { replace: true });
+  }, [isStandalone, navigate]);
+
+  // Wizard "cadastrado? / instalado?" só faz sentido em navegador mobile.
   const showWizard = useMemo(() => isMobile && !isStandalone, [isMobile, isStandalone]);
 
   const [step, setStep] = useState<Step>("welcome");
+
+
 
   if (!showWizard) {
     return (
