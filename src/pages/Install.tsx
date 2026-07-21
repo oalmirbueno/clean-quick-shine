@@ -130,7 +130,15 @@ export default function Install() {
   useEffect(() => {
     const onResize = () => setViewportIsWide(window.innerWidth >= 1024);
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const onMql = () => setViewportIsWide(mql.matches);
+    mql.addEventListener?.("change", onMql);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+      mql.removeEventListener?.("change", onMql);
+    };
   }, []);
   const viewportMode = viewportIsWide ? "desktop" : "mobile";
   const storageKey = `jl_install_tutorial:${viewportMode}:${os}:${browser}:${tutorialSteps.length}`;
