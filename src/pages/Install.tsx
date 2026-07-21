@@ -222,6 +222,23 @@ export default function Install() {
   const installedReady = isStandaloneMode || isInstalled || installedPwa || manuallyInstalled;
   const canOpenAuthHere = isStandaloneMode || !isMobileViewport;
 
+  // Sempre que qualquer sinal indicar instalação, persiste local + remoto
+  // para que futuras visitas pelo Safari/Chrome do MESMO device já pulem
+  // o tutorial e caiam direto na tela "Já instalado".
+  useEffect(() => {
+    if (!installedReady) return;
+    try {
+      localStorage.setItem("jl_pwa_installed", "1");
+    } catch {
+      /* noop */
+    }
+    setManuallyInstalled(true);
+    void import("@/lib/pwaDeviceTrack").then((m) =>
+      m.markDeviceInstalled({ source: "install-page", ua: navigator.userAgent }),
+    );
+  }, [installedReady]);
+
+
   useEffect(() => {
     if (!installedReady) return;
     if (tutorialSteps.length === 0) return;
