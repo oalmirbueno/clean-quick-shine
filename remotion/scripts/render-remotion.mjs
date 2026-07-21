@@ -17,8 +17,7 @@ const browser = await openBrowser("chrome", {
 });
 
 const targets = [
-  { id: "ios", out: "/mnt/documents/instalar-ja-limpo-iphone.mp4" },
-  { id: "android", out: "/mnt/documents/instalar-ja-limpo-android.mp4" },
+  { id: "ios-chrome", out: "/mnt/documents/instalar-ja-limpo-iphone-chrome.mp4" },
 ];
 
 for (const t of targets) {
