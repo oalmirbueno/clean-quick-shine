@@ -3,6 +3,26 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Home, ClipboardList, User, Calendar, Wallet } from "lucide-react";
 import { forwardRef } from "react";
 
+const HIDE_ON_PREFIXES = [
+  "/client/checkout",
+  "/client/matching",
+  "/client/offer",
+  "/client/rating",
+  "/client/order-tracking",
+  "/client/schedule",
+  "/client/service",
+  "/client/cancel",
+  "/chat/order",
+  "/pro/order",
+  "/pro/withdraw",
+  "/pro/verification",
+  "/pro/plan",
+  "/pro/support",
+  "/pro/quality",
+  "/pro/availability",
+  "/pro/ranking",
+];
+
 interface NavItem {
   icon: React.ReactNode;
   activeIcon: React.ReactNode;
@@ -36,6 +56,8 @@ const proItems: NavItem[] = [
  */
 export const BottomNav = forwardRef<HTMLDivElement, BottomNavProps>(
   function BottomNav(_props, _ref) {
+    const location = useLocation();
+    if (HIDE_ON_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
     return (
       <div
         className="bottom-nav-spacer shrink-0 w-full"
@@ -62,28 +84,7 @@ export function PersistentBottomNav() {
   // Admin usa AdminBottomNav próprio via AdminLayout
 
   if (!variant) return null;
-
-  // Rotas de fluxos onde a barra inferior atrapalha (checkout, matching, etc.)
-  const hideOnPrefixes = [
-    "/client/checkout",
-    "/client/matching",
-    "/client/offer",
-    "/client/rating",
-    "/client/order-tracking",
-    "/client/schedule",
-    "/client/service",
-    "/client/cancel",
-    "/chat/order",
-    "/pro/order",
-    "/pro/withdraw",
-    "/pro/verification",
-    "/pro/plan",
-    "/pro/support",
-    "/pro/quality",
-    "/pro/availability",
-    "/pro/ranking",
-  ];
-  if (hideOnPrefixes.some((p) => path.startsWith(p))) return null;
+  if (HIDE_ON_PREFIXES.some((p) => path.startsWith(p))) return null;
 
   const items = variant === "client" ? clientItems : proItems;
 
