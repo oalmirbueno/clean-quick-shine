@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
@@ -13,9 +13,11 @@ import {
   Copy,
   Check,
   QrCode,
+  Rocket,
 } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
+import { useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { toast } from "sonner";
 
 type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
@@ -25,14 +27,17 @@ type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
  *
  * Prioridade: SEMPRE empurrar o usuário para o app (PWA).
  *  - Desktop/Tablet-browser: mostra QR + link para abrir no celular.
- *    Link discreto para diaristas seguirem no navegador (fallback).
- *  - Mobile-browser (não standalone): força fluxo de instalação antes de login/cadastro.
- *  - Já dentro do PWA: vai direto para login/cadastro.
+ *  - Mobile-browser (não standalone):
+ *      • Se o PWA já está instalado neste device, exibe status "App instalado"
+ *        com CTA para abrir pelo ícone.
+ *      • Caso contrário, força fluxo de instalação antes de login/cadastro.
+ *  - Já dentro do PWA: pula direto para /login.
  */
 export default function Onboarding() {
   const navigate = useNavigate();
   const isStandalone = useIsStandalone();
   const isMobile = useIsMobileDevice();
+  const pwaInstalled = useInstalledPwa();
 
   // Em navegador mobile, sempre força passar pelo app.
   const forceInstall = useMemo(
@@ -49,11 +54,17 @@ export default function Onboarding() {
   const goRegister = () => navigate("/register");
   const goInstall = () => navigate("/install");
 
+  // Se o app já está rodando standalone, abre direto o fluxo de login.
+  useEffect(() => {
+    if (isStandalone) navigate("/login", { replace: true });
+  }, [isStandalone, navigate]);
+
   const backTarget = step === "welcome" ? undefined : () => setStep("welcome");
 
   if (showDesktopHandoff) {
     return <DesktopHandoff onProWeb={goLogin} />;
   }
+
 
   return (
     <AuthLayout
@@ -91,27 +102,43 @@ export default function Onboarding() {
             transition={{ duration: 0.2 }}
             className="space-y-3"
           >
+            {forceInstall && pwaInstalled && (
+              <InstalledStatusCard onOpen={goLogin} />
+            )}
+
             <ChoiceCard
               icon={LogIn}
               title="Sim, já tenho conta"
-              description={forceInstall ? "Abrir ou instalar o app" : "Entrar agora"}
+              description={
+                forceInstall
+                  ? pwaInstalled
+                    ? "Abrir o app instalado"
+                    : "Abrir ou instalar o app"
+                  : "Entrar agora"
+              }
               onClick={() => {
-                if (forceInstall) setStep("hasAccountYes");
+                if (forceInstall && !pwaInstalled) setStep("hasAccountYes");
                 else goLogin();
               }}
             />
             <ChoiceCard
               icon={UserPlus}
               title="Não, é minha primeira vez"
-              description={forceInstall ? "Instalar o app e criar conta" : "Criar conta grátis"}
+              description={
+                forceInstall
+                  ? pwaInstalled
+                    ? "Abrir o app e criar conta"
+                    : "Instalar o app e criar conta"
+                  : "Criar conta grátis"
+              }
               onClick={() => {
-                if (forceInstall) setStep("hasAccountNo");
+                if (forceInstall && !pwaInstalled) setStep("hasAccountNo");
                 else goRegister();
               }}
               primary
             />
 
-            {forceInstall && (
+            {forceInstall && !pwaInstalled && (
               <InfoNote>
                 O Já Limpo funciona melhor como aplicativo instalado, mais
                 rápido, com notificações e sempre atualizado.
@@ -119,6 +146,7 @@ export default function Onboarding() {
             )}
           </motion.div>
         )}
+
 
         {step === "hasAccountYes" && (
           <motion.div
@@ -198,7 +226,44 @@ export default function Onboarding() {
   );
 }
 
+function InstalledStatusCard({ onOpen }: { onOpen: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="rounded-2xl border border-primary/25 bg-primary/5 p-4 flex items-start gap-3"
+    >
+      <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+        <CheckCircle2 className="w-5 h-5" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-semibold text-foreground">
+            App instalado neste celular
+          </div>
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary/15 text-primary">
+            Pronto
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+          Abra o Já Limpo pelo ícone na sua tela inicial para a melhor
+          experiência.
+        </p>
+        <button
+          type="button"
+          onClick={onOpen}
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+        >
+          <Rocket className="w-3.5 h-3.5" /> Continuar mesmo assim
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 function InfoNote({ children }: { children: React.ReactNode }) {
+
   return (
     <div className="mt-4 rounded-2xl bg-muted/40 border border-border/60 p-3.5 flex items-start gap-3">
       <Smartphone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
