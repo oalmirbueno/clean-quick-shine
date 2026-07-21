@@ -8,12 +8,8 @@ import {
   Plus,
   MoreVertical,
   Check,
-  ChevronRight,
-  Sparkles,
-  Zap,
-  WifiOff,
-  Bell,
   ChevronLeft,
+  Sparkles,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/ui/Logo";
@@ -23,34 +19,19 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-type DeviceType = "ios" | "android" | "desktop" | "auto";
-
-const deviceTabs = [
-  { id: "auto" as DeviceType, label: "Detectar", icon: Sparkles },
-  { id: "ios" as DeviceType, label: "iPhone", icon: Smartphone },
-  { id: "android" as DeviceType, label: "Android", icon: Smartphone },
-  { id: "desktop" as DeviceType, label: "Desktop", icon: Monitor },
-];
-
-const benefits = [
-  { icon: Zap, title: "Acesso rápido", description: "Direto da tela inicial" },
-  { icon: WifiOff, title: "Funciona offline", description: "Sem precisar de internet" },
-  { icon: Bell, title: "Notificações", description: "Alertas em tempo real" },
-];
+type DeviceType = "ios" | "android" | "desktop";
 
 export default function Install() {
   const navigate = useNavigate();
-  const [selectedDevice, setSelectedDevice] = useState<DeviceType>("auto");
-  const [detectedDevice, setDetectedDevice] = useState<DeviceType>("desktop");
+  const [device, setDevice] = useState<DeviceType>("desktop");
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    if (/iphone|ipad|ipod/.test(userAgent)) setDetectedDevice("ios");
-    else if (/android/.test(userAgent)) setDetectedDevice("android");
-    else setDetectedDevice("desktop");
+    const ua = navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(ua)) setDevice("ios");
+    else if (/android/.test(ua)) setDevice("android");
+    else setDevice("desktop");
 
     if (window.matchMedia("(display-mode: standalone)").matches) {
       setIsInstalled(true);
@@ -64,8 +45,6 @@ export default function Install() {
     return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
   }, []);
 
-  const activeDevice = selectedDevice === "auto" ? detectedDevice : selectedDevice;
-
   const handleInstall = async () => {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
@@ -74,42 +53,52 @@ export default function Install() {
     setDeferredPrompt(null);
   };
 
-  const iosSteps = [
-    { icon: Share, title: "Toque em Compartilhar", description: "Use o ícone de compartilhar do Safari." },
-    { icon: Plus, title: "Adicionar à Tela de Início", description: "Role e selecione a opção." },
-    { icon: Check, title: "Confirme", description: "Toque em 'Adicionar' no canto superior." },
-  ];
-  const androidSteps = [
-    { icon: MoreVertical, title: "Menu do navegador", description: "Toque nos três pontos no topo." },
-    { icon: Download, title: "Instalar aplicativo", description: "Selecione 'Instalar app' ou 'Adicionar à tela'." },
-    { icon: Check, title: "Confirme", description: "Toque em 'Instalar'." },
-  ];
-  const desktopSteps = [
-    { icon: Download, title: "Ícone de instalação", description: "Clique no ícone na barra de endereços." },
-    { icon: Check, title: "Confirme", description: "Clique em 'Instalar' na janela." },
-  ];
+  const stepsByDevice: Record<DeviceType, { icon: typeof Share; text: string }[]> = {
+    ios: [
+      { icon: Share, text: "Toque no botão Compartilhar do Safari" },
+      { icon: Plus, text: "Escolha \"Adicionar à Tela de Início\"" },
+      { icon: Check, text: "Confirme em \"Adicionar\"" },
+    ],
+    android: [
+      { icon: MoreVertical, text: "Abra o menu do navegador (⋮)" },
+      { icon: Download, text: "Toque em \"Instalar app\"" },
+      { icon: Check, text: "Confirme em \"Instalar\"" },
+    ],
+    desktop: [
+      { icon: Download, text: "Clique no ícone de instalar na barra de endereço" },
+      { icon: Check, text: "Confirme em \"Instalar\"" },
+    ],
+  };
 
-  const steps =
-    activeDevice === "ios" ? iosSteps : activeDevice === "android" ? androidSteps : desktopSteps;
+  const deviceMeta: Record<DeviceType, { label: string; icon: typeof Smartphone }> = {
+    ios: { label: "iPhone", icon: Smartphone },
+    android: { label: "Android", icon: Smartphone },
+    desktop: { label: "Desktop", icon: Monitor },
+  };
+
+  const steps = stepsByDevice[device];
+  const DeviceIcon = deviceMeta[device].icon;
 
   if (isInstalled) {
     return (
       <div className="h-full bg-background flex flex-col items-center justify-center px-6 safe-top safe-bottom">
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", damping: 15 }}
-          className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-5"
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", damping: 16 }}
+          className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-6"
         >
-          <Check className="w-10 h-10 text-primary" />
+          <Check className="w-10 h-10 text-primary" strokeWidth={2.2} />
         </motion.div>
-        <h1 className="text-2xl font-bold text-foreground mb-2 text-center">App instalado</h1>
-        <p className="text-muted-foreground text-center mb-7 text-sm">
-          O Já Limpo está pronto na sua tela inicial. Abra pelo ícone do app para fazer login.
+        <h1 className="text-2xl font-semibold text-foreground mb-2 text-center tracking-tight">
+          Tudo pronto
+        </h1>
+        <p className="text-muted-foreground text-center mb-8 text-sm max-w-xs leading-relaxed">
+          Abra o Já Limpo pelo ícone na sua tela inicial para continuar.
         </p>
         <button
           onClick={() => navigate("/onboarding")}
-          className="px-7 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm"
+          className="px-8 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-95 transition-transform"
         >
           Continuar
         </button>
@@ -117,91 +106,74 @@ export default function Install() {
     );
   }
 
-  const StepIcon = steps[currentStep].icon;
-
   return (
     <div className="h-full bg-background flex flex-col safe-top">
       {/* Header */}
-      <header className="shrink-0 px-5 pt-3 pb-3 flex items-center justify-between">
+      <header className="shrink-0 px-5 pt-3 pb-2 flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center"
+          className="w-10 h-10 rounded-2xl bg-card border border-border/60 flex items-center justify-center active:scale-95 transition-transform"
           aria-label="Voltar"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
         <Logo size="sm" />
         <div className="w-10 h-10" />
       </header>
 
       <main className="flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-md mx-auto px-5 pb-6 space-y-5">
+        <div className="max-w-md mx-auto px-5 pb-8 space-y-6">
           {/* Hero */}
-          <section className="text-center space-y-2 pt-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-              <Download className="w-3.5 h-3.5" />
-              Instale o app
+          <motion.section
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="text-center pt-4 space-y-3"
+          >
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold tracking-wide uppercase">
+              <Sparkles className="w-3 h-3" />
+              Instale em segundos
             </div>
-            <h1 className="text-2xl font-bold text-foreground leading-tight">
-              Baixe o Já Limpo
+            <h1 className="text-[26px] font-semibold text-foreground leading-tight tracking-tight">
+              Já Limpo na sua<br />tela inicial
             </h1>
-            <p className="text-sm text-muted-foreground leading-snug">
-              Para usar o app é preciso instalar primeiro. Depois faça login pelo ícone na tela inicial.
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
+              Rápido, direto e sempre à mão. Sem baixar da loja.
             </p>
-          </section>
+          </motion.section>
 
-          {/* Quick install */}
+          {/* Quick install (Android/Chrome) */}
           {deferredPrompt && (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={handleInstall}
-              className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm
-                flex items-center justify-center gap-2 shadow-sm shadow-primary/20"
+              className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm
+                flex items-center justify-center gap-2 shadow-sm shadow-primary/25 active:scale-[0.98] transition-transform"
             >
               <Download className="w-4 h-4" />
               Instalar agora
             </motion.button>
           )}
 
-          {/* Benefits */}
-          <section className="grid grid-cols-3 gap-2">
-            {benefits.map((b) => (
-              <div
-                key={b.title}
-                className="text-center p-3 rounded-2xl bg-card border border-border/60 shadow-sm"
-              >
-                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                  <b.icon className="w-4 h-4 text-primary" />
-                </div>
-                <p className="font-semibold text-[11px] leading-tight">{b.title}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-                  {b.description}
-                </p>
-              </div>
-            ))}
-          </section>
-
-          {/* Device tabs */}
-          <section className="space-y-3">
-            <div className="flex gap-2 overflow-x-auto -mx-1 px-1 pb-1 scrollbar-none">
-              {deviceTabs.map((tab) => {
-                const active = selectedDevice === tab.id;
+          {/* Device switch */}
+          <section>
+            <div className="grid grid-cols-3 gap-2 p-1 bg-muted/40 rounded-2xl">
+              {(Object.keys(deviceMeta) as DeviceType[]).map((d) => {
+                const active = device === d;
+                const Icon = deviceMeta[d].icon;
                 return (
                   <button
-                    key={tab.id}
-                    onClick={() => {
-                      setSelectedDevice(tab.id);
-                      setCurrentStep(0);
-                    }}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                    key={d}
+                    onClick={() => setDevice(d)}
+                    className={`relative flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
                       active
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted/60 text-muted-foreground"
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground"
                     }`}
                   >
-                    <tab.icon className="w-3.5 h-3.5" />
-                    {tab.label}
+                    <Icon className="w-3.5 h-3.5" />
+                    {deviceMeta[d].label}
                   </button>
                 );
               })}
@@ -210,73 +182,45 @@ export default function Install() {
 
           {/* Steps */}
           <section className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Passo a passo</h2>
-              <span className="text-xs text-muted-foreground">
-                {currentStep + 1}/{steps.length}
-              </span>
-            </div>
-
-            <div className="flex gap-1.5">
-              {steps.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentStep(i)}
-                  className={`flex-1 h-1 rounded-full transition-colors ${
-                    i <= currentStep ? "bg-primary" : "bg-muted"
-                  }`}
-                />
-              ))}
+            <div className="flex items-center gap-2 px-1">
+              <DeviceIcon className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">
+                Como instalar no {deviceMeta[device].label}
+              </h2>
             </div>
 
             <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-                transition={{ duration: 0.18 }}
-                className="bg-card rounded-2xl border border-border/60 shadow-sm p-4"
+              <motion.ol
+                key={device}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-2"
               >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <StepIcon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold leading-tight">
-                      {steps[currentStep].title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1 leading-snug">
-                      {steps[currentStep].description}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+                {steps.map((step, i) => {
+                  const StepIcon = step.icon;
+                  return (
+                    <li
+                      key={i}
+                      className="flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border/60 shadow-sm"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-primary font-semibold text-sm">
+                        {i + 1}
+                      </div>
+                      <StepIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <p className="text-sm text-foreground leading-snug flex-1">
+                        {step.text}
+                      </p>
+                    </li>
+                  );
+                })}
+              </motion.ol>
             </AnimatePresence>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-                disabled={currentStep === 0}
-                className="flex-1 py-2.5 rounded-xl border border-border/60 text-muted-foreground text-xs font-medium
-                  disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Anterior
-              </button>
-              <button
-                onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
-                disabled={currentStep === steps.length - 1}
-                className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold
-                  disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
-              >
-                Próximo
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
           </section>
 
-          <p className="text-center text-xs text-muted-foreground pt-2 pb-[env(safe-area-inset-bottom,0px)]">
-            Já instalou? Abra pelo ícone do app na tela inicial.
+          <p className="text-center text-xs text-muted-foreground pt-1 pb-[env(safe-area-inset-bottom,0px)]">
+            Já instalou? Abra pelo ícone na tela inicial.
           </p>
         </div>
       </main>
