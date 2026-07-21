@@ -26,3 +26,7 @@ verify_jwt = false
 [functions.delete-account]
 verify_jwt = false
 
+[functions.pwa-device-track]
+verify_jwt = false
+
+

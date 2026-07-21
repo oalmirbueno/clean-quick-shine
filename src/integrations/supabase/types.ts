@@ -1076,6 +1076,30 @@ export type Database = {
         }
         Relationships: []
       }
+      pwa_devices: {
+        Row: {
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          meta: Json
+        }
+        Insert: {
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          meta?: Json
+        }
+        Update: {
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          meta?: Json
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           approved_at: string | null
