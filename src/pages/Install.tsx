@@ -83,15 +83,24 @@ export default function Install() {
     const mq = window.matchMedia("(display-mode: standalone)");
     const handleDisplayChange = () => setIsInstalled(detectStandalone());
 
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") handleDisplayChange();
+    };
+
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
     window.addEventListener("appinstalled", handleInstalled);
     mq.addEventListener?.("change", handleDisplayChange);
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleDisplayChange);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
       window.removeEventListener("appinstalled", handleInstalled);
       mq.removeEventListener?.("change", handleDisplayChange);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleDisplayChange);
     };
+
   }, []);
 
   const handleInstall = async () => {
@@ -208,6 +217,25 @@ export default function Install() {
   const showQr = isDesktopOs && viewportIsWide;
   const installedReady = isStandaloneMode || isInstalled || installedPwa;
   const canOpenAuthHere = isStandaloneMode || !isMobileViewport;
+
+  // Auto-mark tutorial as fully completed when we detect the app is installed
+  // (user returned to /install after "Adicionar à Tela de Início" / appinstalled).
+  useEffect(() => {
+    if (!installedReady) return;
+    if (tutorialSteps.length === 0) return;
+    const allDone = tutorialSteps.map(() => true);
+    setCompleted(allDone);
+    setActiveStep(tutorialSteps.length - 1);
+    try {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({ completed: allDone, activeStep: tutorialSteps.length - 1 }),
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [installedReady, storageKey, tutorialSteps.length]);
+
 
   const markStepDone = () => {
     setCompleted((prev) => {
