@@ -37,7 +37,8 @@ export function useInstalledPwa(): boolean {
       getInstalledRelatedApps?: () => Promise<Array<{ platform: string; url?: string; id?: string }>>;
     };
 
-    if (typeof nav.getInstalledRelatedApps === "function") {
+    const check = () => {
+      if (typeof nav.getInstalledRelatedApps !== "function") return;
       nav
         .getInstalledRelatedApps()
         .then((apps) => {
@@ -50,17 +51,26 @@ export function useInstalledPwa(): boolean {
         .catch(() => {
           /* ignore */
         });
-    }
+    };
 
+    check();
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") check();
+    };
     const onInstalled = () => {
       markPwaInstalled();
       setInstalled(true);
     };
     window.addEventListener("appinstalled", onInstalled);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", check);
 
     return () => {
       cancelled = true;
       window.removeEventListener("appinstalled", onInstalled);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", check);
     };
   }, []);
 
