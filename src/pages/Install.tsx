@@ -122,6 +122,36 @@ export default function Install() {
 
 
   const guide = useMemo(() => buildGuide(os, browser), [os, browser]);
+  const tutorialSteps = useMemo(() => guide.steps.slice(0, 3), [guide]);
+  const [activeStep, setActiveStep] = useState(0);
+  const [completed, setCompleted] = useState<boolean[]>(() => tutorialSteps.map(() => false));
+
+  useEffect(() => {
+    setActiveStep(0);
+    setCompleted(tutorialSteps.map(() => false));
+  }, [os, browser, tutorialSteps]);
+
+  const isDesktopOs = os === "windows" || os === "macos" || os === "linux";
+
+  const markStepDone = () => {
+    setCompleted((prev) => {
+      const next = [...prev];
+      next[activeStep] = true;
+      return next;
+    });
+    if (activeStep < tutorialSteps.length - 1) {
+      setActiveStep(activeStep + 1);
+    }
+  };
+
+  const resetTutorial = () => {
+    setActiveStep(0);
+    setCompleted(tutorialSteps.map(() => false));
+  };
+
+  const progress = Math.round(
+    (completed.filter(Boolean).length / Math.max(tutorialSteps.length, 1)) * 100,
+  );
 
   // ====== Installed screen ======
   if (isInstalled) {
