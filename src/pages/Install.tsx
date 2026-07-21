@@ -209,6 +209,25 @@ export default function Install() {
   const installedReady = isStandaloneMode || isInstalled || installedPwa;
   const canOpenAuthHere = isStandaloneMode || !isMobileViewport;
 
+  // Auto-mark tutorial as fully completed when we detect the app is installed
+  // (user returned to /install after "Adicionar à Tela de Início" / appinstalled).
+  useEffect(() => {
+    if (!installedReady) return;
+    if (tutorialSteps.length === 0) return;
+    const allDone = tutorialSteps.map(() => true);
+    setCompleted(allDone);
+    setActiveStep(tutorialSteps.length - 1);
+    try {
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({ completed: allDone, activeStep: tutorialSteps.length - 1 }),
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [installedReady, storageKey, tutorialSteps.length]);
+
+
   const markStepDone = () => {
     setCompleted((prev) => {
       const next = [...prev];
