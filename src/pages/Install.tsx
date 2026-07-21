@@ -532,51 +532,6 @@ interface Guide {
   warning?: string;
 }
 
-function osTabOptions(p: PlatformInfo | null) {
-  const list: { value: OS; label: string; icon: typeof Smartphone }[] = [
-    { value: "ios", label: "iPhone", icon: Smartphone },
-    { value: "android", label: "Android", icon: Smartphone },
-    { value: "ipados", label: "iPad", icon: Tablet },
-    { value: p?.os === "macos" ? "macos" : "windows", label: p?.os === "macos" ? "Mac" : "Desktop", icon: Monitor },
-  ];
-  return list;
-}
-
-function defaultBrowserFor(os: OS): Browser {
-  if (os === "ios" || os === "ipados" || os === "macos") return "safari";
-  if (os === "android") return "chrome";
-  return "chrome";
-}
-
-function browserOptionsFor(os: OS): { value: Browser; label: string }[] {
-  if (os === "ios" || os === "ipados") {
-    return [
-      { value: "safari", label: "Safari" },
-      { value: "chrome", label: "Chrome" },
-      { value: "firefox", label: "Firefox" },
-      { value: "edge", label: "Edge" },
-    ];
-  }
-  if (os === "android") {
-    return [
-      { value: "chrome", label: "Chrome" },
-      { value: "samsung", label: "Samsung" },
-      { value: "edge", label: "Edge" },
-      { value: "firefox", label: "Firefox" },
-      { value: "opera", label: "Opera" },
-    ];
-  }
-  // Desktop (windows/macos/linux)
-  const list: { value: Browser; label: string }[] = [
-    { value: "chrome", label: "Chrome" },
-    { value: "edge", label: "Edge" },
-    { value: "brave", label: "Brave" },
-    { value: "opera", label: "Opera" },
-    { value: "firefox", label: "Firefox" },
-  ];
-  if (os === "macos") list.unshift({ value: "safari", label: "Safari" });
-  return list;
-}
 
 function buildGuide(os: OS, browser: Browser): Guide {
   const iosFamily = os === "ios" || os === "ipados";
