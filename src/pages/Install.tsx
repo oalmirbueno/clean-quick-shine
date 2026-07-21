@@ -604,7 +604,7 @@ function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.4 }}
-      className="relative w-full aspect-[16/11] rounded-3xl overflow-hidden flex items-center justify-center border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]"
+      className="relative w-full aspect-[16/11] rounded-3xl overflow-hidden flex items-center justify-center border border-primary/15 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]"
       style={{
         background:
           "linear-gradient(135deg, rgba(16,42,67,0.95) 0%, rgba(11,30,48,0.95) 100%)",
@@ -612,66 +612,72 @@ function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
       }}
     >
       {/* Mint glow */}
-      <div className="absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_50%_115%,rgba(25,204,151,0.45),transparent_60%)]" />
+      <div className="absolute inset-0 opacity-80 bg-[radial-gradient(circle_at_50%_115%,rgba(25,204,151,0.5),transparent_60%)]" />
       <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_20%_-10%,rgba(255,255,255,0.08),transparent_55%)]" />
-      {/* Highlight edge */}
       <div className="pointer-events-none absolute inset-0 rounded-3xl [background:linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0)_45%)]" />
 
       {/* Phone frame */}
       <div
-        className="relative w-[152px] h-[224px] rounded-[30px] overflow-hidden shadow-2xl"
+        className="relative w-[150px] h-[230px] rounded-[32px] overflow-hidden"
         style={{
-          background:
-            "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 100%)",
-          border: "1px solid rgba(255,255,255,0.22)",
+          background: "#0B1E30",
+          border: "1px solid rgba(25,204,151,0.35)",
           boxShadow:
-            "0 10px 40px -8px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.18)",
+            "0 12px 40px -8px rgba(0,0,0,0.6), 0 0 0 3px rgba(11,30,48,0.9), inset 0 1px 0 rgba(255,255,255,0.14)",
         }}
       >
         {/* Notch */}
-        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-2.5 rounded-full bg-white/15 border border-white/10 z-20" />
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-14 h-3 rounded-full bg-black/70 border border-white/5 z-30" />
 
-        {/* Top browser bar (glass) */}
-        <div className="absolute inset-x-0 top-0 h-8 z-10 flex items-center gap-1 px-2 pt-3.5 border-b border-white/10 backdrop-blur-md bg-white/5">
-          <div className="flex-1 h-2 rounded-sm bg-white/15" />
-          {!pointerBottom && (
-            <motion.div
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 1.6, repeat: Infinity }}
-              className="w-3.5 h-3.5 rounded bg-primary/30 border border-primary/70 flex items-center justify-center"
-            >
-              {os === "android" ? (
-                <MoreVertical className="w-2 h-2 text-primary" />
-              ) : (
-                <Download className="w-2 h-2 text-primary" />
-              )}
-            </motion.div>
+        {/* Screen */}
+        <div className="absolute inset-[6px] rounded-[26px] overflow-hidden bg-white flex flex-col">
+          {/* Top browser bar */}
+          <div className="relative shrink-0 h-6 flex items-center gap-1 px-2 border-b border-primary/25 bg-[#F2FBF7]">
+            <div className="w-1 h-1 rounded-full bg-primary/40" />
+            <div className="w-1 h-1 rounded-full bg-primary/25" />
+            <div className="w-1 h-1 rounded-full bg-primary/25" />
+            <div className="flex-1 mx-1 h-2 rounded-sm bg-primary/10" />
+            {!pointerBottom && (
+              <motion.div
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+                className="w-4 h-4 rounded bg-primary/20 border border-primary/70 flex items-center justify-center"
+              >
+                {os === "android" ? (
+                  <MoreVertical className="w-2.5 h-2.5 text-primary" />
+                ) : (
+                  <Download className="w-2.5 h-2.5 text-primary" />
+                )}
+              </motion.div>
+            )}
+          </div>
+
+          {/* Real app screenshot — contained, no overlap */}
+          <div className="flex-1 min-h-0 bg-white flex items-start justify-center overflow-hidden">
+            <img
+              src={appPreview}
+              alt="Prévia real do app Já Limpo"
+              className="w-full h-full object-cover object-top"
+              loading="lazy"
+            />
+          </div>
+
+          {/* iOS bottom bar with pointer */}
+          {pointerBottom && (
+            <div className="relative shrink-0 h-7 flex items-center justify-around px-2 border-t border-primary/25 bg-[#F2FBF7]">
+              <div className="w-2 h-2 rounded bg-primary/25" />
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+                className="w-4 h-4 rounded bg-primary/20 border border-primary/70 flex items-center justify-center"
+              >
+                <Share className="w-2.5 h-2.5 text-primary" />
+              </motion.div>
+              <div className="w-2 h-2 rounded bg-primary/25" />
+              <div className="w-2 h-2 rounded bg-primary/25" />
+            </div>
           )}
         </div>
-
-        {/* Real app screenshot */}
-        <img
-          src={appPreview}
-          alt="Prévia real do app Já Limpo"
-          className="absolute inset-x-0 top-8 bottom-8 w-full h-[calc(100%-4rem)] object-cover object-top"
-          loading="lazy"
-        />
-
-        {/* iOS bottom bar with pointer */}
-        {pointerBottom && (
-          <div className="absolute inset-x-0 bottom-0 h-8 z-10 flex items-center justify-around px-2 border-t border-white/10 backdrop-blur-md bg-white/5">
-            <div className="w-2.5 h-2.5 rounded bg-white/15" />
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.6, repeat: Infinity }}
-              className="w-4 h-4 rounded bg-primary/30 border border-primary/70 flex items-center justify-center"
-            >
-              <Share className="w-2.5 h-2.5 text-primary" />
-            </motion.div>
-            <div className="w-2.5 h-2.5 rounded bg-white/15" />
-            <div className="w-2.5 h-2.5 rounded bg-white/15" />
-          </div>
-        )}
       </div>
     </motion.div>
   );
