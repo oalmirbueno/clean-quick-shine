@@ -165,6 +165,18 @@ export default function Install() {
 
   const isDesktopOs = os === "windows" || os === "macos" || os === "linux";
 
+  // Also react to viewport width so the preview device switcher (mobile/tablet)
+  // hides the QR immediately even when UA still reports desktop.
+  const [viewportIsWide, setViewportIsWide] = useState<boolean>(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : true,
+  );
+  useEffect(() => {
+    const onResize = () => setViewportIsWide(window.innerWidth >= 1024);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const showQr = isDesktopOs && viewportIsWide;
+
   const markStepDone = () => {
     setCompleted((prev) => {
       const next = [...prev];
@@ -511,7 +523,7 @@ export default function Install() {
           </section>
 
           {/* QR code: desktop only */}
-          {isDesktopOs && (
+          {showQr && (
             <section className="rounded-2xl bg-card border border-border/60 p-4 flex items-center gap-4">
               <div className="p-2 rounded-xl bg-white">
                 <QRCodeSVG value={window.location.origin} size={88} level="M" />
