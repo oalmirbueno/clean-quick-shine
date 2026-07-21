@@ -16,9 +16,13 @@ const browser = await openBrowser("chrome", {
   chromeMode: "chrome-for-testing",
 });
 
+const only = process.env.ONLY;
+
 const targets = [
   { id: "ios-safari", out: "/mnt/documents/instalar-ja-limpo-iphone-safari.mp4" },
-];
+  { id: "ios-chrome", out: "/mnt/documents/instalar-ja-limpo-iphone-chrome.mp4" },
+  { id: "android-chrome", out: "/mnt/documents/instalar-ja-limpo-android-chrome.mp4" },
+].filter((t) => !only || t.id === only);
 
 for (const t of targets) {
   console.log(`Rendering ${t.id}...`);
