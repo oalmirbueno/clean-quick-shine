@@ -26,6 +26,7 @@ import { Logo } from "@/components/ui/Logo";
 import {
   detectPlatform,
   detectStandalone,
+  getResponsiveViewportWidth,
   type Browser,
   type OS,
   type PlatformInfo,
@@ -125,19 +126,26 @@ export default function Install() {
   const tutorialSteps = useMemo(() => guide.steps.slice(0, 3), [guide]);
   // Track viewport mode so tutorial progress is stored separately for desktop vs mobile/tablet.
   const [viewportIsWide, setViewportIsWide] = useState<boolean>(() =>
-    typeof window !== "undefined" ? window.innerWidth >= 1024 : true,
+    typeof window !== "undefined" ? getResponsiveViewportWidth() >= 1024 : true,
   );
   useEffect(() => {
-    const onResize = () => setViewportIsWide(window.innerWidth >= 1024);
+    const onResize = () => setViewportIsWide(getResponsiveViewportWidth() >= 1024);
+    onResize();
     window.addEventListener("resize", onResize);
     window.addEventListener("orientationchange", onResize);
+    window.visualViewport?.addEventListener("resize", onResize);
     const mql = window.matchMedia("(min-width: 1024px)");
     const onMql = () => setViewportIsWide(mql.matches);
     mql.addEventListener?.("change", onMql);
+    const root = document.getElementById("root");
+    const observer = root && "ResizeObserver" in window ? new ResizeObserver(onResize) : null;
+    if (root && observer) observer.observe(root);
     return () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", onResize);
+      window.visualViewport?.removeEventListener("resize", onResize);
       mql.removeEventListener?.("change", onMql);
+      observer?.disconnect();
     };
   }, []);
   const viewportMode = viewportIsWide ? "desktop" : "mobile";
