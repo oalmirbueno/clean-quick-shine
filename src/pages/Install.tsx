@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Smartphone,
   Monitor,
-  Tablet,
   Download,
   Share,
   Plus,
@@ -19,10 +18,12 @@ import {
   RotateCcw,
   QrCode,
 } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Logo";
+import { useIsMobileDevice } from "@/hooks/useIsStandalone";
 import {
   detectPlatform,
   detectStandalone,
@@ -31,6 +32,7 @@ import {
   type OS,
   type PlatformInfo,
 } from "@/lib/platformDetect";
+
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -257,7 +259,7 @@ export default function Install() {
   }
 
 
-  const osTabs = osTabOptions(platform);
+  const isMobileViewport = useIsMobileDevice();
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
@@ -300,8 +302,8 @@ export default function Install() {
           {/* Animated pointing hint */}
           <AnimatedInstallHint os={os} browser={browser} />
 
-          {/* Primary actions: native install if available, else share link */}
-          {deferredPrompt ? (
+          {/* Native install button (Android Chrome / Desktop Chromium) */}
+          {deferredPrompt && (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -312,75 +314,9 @@ export default function Install() {
               <Download className="w-4 h-4" />
               Instalar agora
             </motion.button>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={shareUrl}
-                className="py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
-              >
-                <Share className="w-4 h-4" />
-                Compartilhar
-              </button>
-              <button
-                onClick={copyUrl}
-                className="py-3 rounded-2xl bg-card border border-border/60 text-foreground font-semibold text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
-              >
-                <Copy className="w-4 h-4" />
-                Copiar link
-              </button>
-            </div>
           )}
 
-
-
-          {/* OS tabs */}
-          <section>
-            <div className="grid grid-cols-4 gap-1.5 p-1 bg-muted/40 rounded-2xl">
-              {osTabs.map((tab) => {
-                const active = os === tab.value;
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => {
-                      setOs(tab.value);
-                      setBrowser(defaultBrowserFor(tab.value));
-                    }}
-                    className={`relative flex items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-semibold transition-colors ${
-                      active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Browser chips */}
-          <section>
-            <div className="flex flex-wrap gap-2">
-              {browserOptionsFor(os).map((b) => {
-                const active = browser === b.value;
-                return (
-                  <button
-                    key={b.value}
-                    onClick={() => setBrowser(b.value)}
-                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-colors border ${
-                      active
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card text-muted-foreground border-border/60 hover:bg-muted"
-                    }`}
-                  >
-                    {b.label}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Warning: wrong browser / unsupported */}
+          {/* Warning: unsupported browser */}
           {guide.warning && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
@@ -388,18 +324,10 @@ export default function Install() {
               className="rounded-2xl bg-warning/10 border border-warning/30 p-3.5 flex items-start gap-3"
             >
               <AlertCircle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
-              <div className="flex-1 space-y-2">
-                <p className="text-xs text-foreground leading-relaxed">{guide.warning}</p>
-                <button
-                  onClick={copyUrl}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-card border border-border/60 text-[11px] font-semibold text-foreground hover:bg-muted transition-colors"
-                >
-                  <Copy className="w-3 h-3" />
-                  Copiar link do app
-                </button>
-              </div>
+              <p className="text-xs text-foreground leading-relaxed">{guide.warning}</p>
             </motion.div>
           )}
+
 
           {/* Interactive tutorial */}
           <section className="space-y-3">
@@ -561,17 +489,31 @@ export default function Install() {
 
 
 
-          <div className="flex flex-col gap-2 pt-1">
+          {/* Share with a friend (subtle, footer) */}
+          <div className="pt-2">
             <button
-              onClick={() => navigate("/login?web=1")}
-              className="w-full py-2 text-[12px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+              onClick={shareUrl}
+              className="w-full py-3 rounded-2xl bg-card border border-border/60 text-foreground text-sm font-medium hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
             >
-              Sou diarista, continuar pelo navegador
+              <Share className="w-4 h-4" />
+              Compartilhar com um amigo
             </button>
+          </div>
+
+          <div className="flex flex-col gap-2 pt-1">
+            {!isMobileViewport && (
+              <button
+                onClick={() => navigate("/login?web=1")}
+                className="w-full py-2 text-[12px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+              >
+                Sou diarista, continuar pelo navegador
+              </button>
+            )}
             <p className="text-center text-[11px] text-muted-foreground pb-[env(safe-area-inset-bottom,0px)]">
               Atualizações são automáticas ao abrir o app.
             </p>
           </div>
+
 
         </div>
       </main>
@@ -590,51 +532,6 @@ interface Guide {
   warning?: string;
 }
 
-function osTabOptions(p: PlatformInfo | null) {
-  const list: { value: OS; label: string; icon: typeof Smartphone }[] = [
-    { value: "ios", label: "iPhone", icon: Smartphone },
-    { value: "android", label: "Android", icon: Smartphone },
-    { value: "ipados", label: "iPad", icon: Tablet },
-    { value: p?.os === "macos" ? "macos" : "windows", label: p?.os === "macos" ? "Mac" : "Desktop", icon: Monitor },
-  ];
-  return list;
-}
-
-function defaultBrowserFor(os: OS): Browser {
-  if (os === "ios" || os === "ipados" || os === "macos") return "safari";
-  if (os === "android") return "chrome";
-  return "chrome";
-}
-
-function browserOptionsFor(os: OS): { value: Browser; label: string }[] {
-  if (os === "ios" || os === "ipados") {
-    return [
-      { value: "safari", label: "Safari" },
-      { value: "chrome", label: "Chrome" },
-      { value: "firefox", label: "Firefox" },
-      { value: "edge", label: "Edge" },
-    ];
-  }
-  if (os === "android") {
-    return [
-      { value: "chrome", label: "Chrome" },
-      { value: "samsung", label: "Samsung" },
-      { value: "edge", label: "Edge" },
-      { value: "firefox", label: "Firefox" },
-      { value: "opera", label: "Opera" },
-    ];
-  }
-  // Desktop (windows/macos/linux)
-  const list: { value: Browser; label: string }[] = [
-    { value: "chrome", label: "Chrome" },
-    { value: "edge", label: "Edge" },
-    { value: "brave", label: "Brave" },
-    { value: "opera", label: "Opera" },
-    { value: "firefox", label: "Firefox" },
-  ];
-  if (os === "macos") list.unshift({ value: "safari", label: "Safari" });
-  return list;
-}
 
 function buildGuide(os: OS, browser: Browser): Guide {
   const iosFamily = os === "ios" || os === "ipados";
@@ -821,81 +718,152 @@ function BrowserGlyph({ browser }: { browser: Browser }) {
 function AnimatedInstallHint({ os, browser }: { os: OS; browser: Browser }) {
   const iosFamily = os === "ios" || os === "ipados";
   const isSafariIOS = iosFamily && browser === "safari";
-  const isBottomBar = isSafariIOS; // Safari iOS: share is bottom
-  // Chrome iOS: share is bottom-right too. Android: menu top-right. Desktop: install icon top-right (address bar).
   const chromeIOS = iosFamily && (browser === "chrome" || browser === "edge" || browser === "firefox");
   const bottom = isSafariIOS || chromeIOS;
 
-  const label = isSafariIOS
+  const label = isSafariIOS || chromeIOS
     ? "Toque em Compartilhar"
-    : chromeIOS
-      ? "Toque em Compartilhar"
-      : os === "android"
-        ? "Abra o menu do navegador"
-        : "Clique em Instalar na barra de endereço";
+    : os === "android"
+      ? "Abra o menu do navegador"
+      : "Clique em Instalar na barra de endereço";
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="rounded-3xl bg-gradient-to-b from-primary/5 to-transparent border border-border/60 p-4"
+      className="rounded-3xl bg-gradient-to-b from-primary/8 via-primary/[0.03] to-transparent border border-border/60 p-5"
     >
-      <div className="relative mx-auto w-[220px] h-[300px] rounded-[32px] bg-card border border-border shadow-sm overflow-hidden">
-        {/* Phone notch */}
-        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-foreground/80 rounded-b-2xl z-10" />
-        {/* Browser chrome */}
-        <div className="absolute inset-x-0 top-0 h-9 bg-muted/60 border-b border-border/40 flex items-center gap-1.5 px-3 pt-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
-          <div className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
-          <div className="flex-1 h-3.5 rounded-md bg-background/70 mx-1" />
-          {!bottom && (
-            <div className="relative">
-              <div className="w-4 h-4 rounded bg-primary/20 flex items-center justify-center">
-                {os === "android" ? (
-                  <MoreVertical className="w-3 h-3 text-primary" />
-                ) : (
-                  <Download className="w-3 h-3 text-primary" />
-                )}
-              </div>
-              <PingArrow direction="up" />
-            </div>
-          )}
-        </div>
-        {/* Page content stub */}
-        <div className="absolute inset-x-3 top-12 space-y-1.5">
-          <div className="h-2 rounded bg-muted/70 w-3/4" />
-          <div className="h-2 rounded bg-muted/50 w-1/2" />
-          <div className="mt-3 h-16 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Logo size="sm" />
-          </div>
-          <div className="h-2 rounded bg-muted/50 w-2/3" />
-          <div className="h-2 rounded bg-muted/40 w-1/2" />
-        </div>
-        {/* Bottom bar (iOS) */}
-        {bottom && (
-          <div className="absolute inset-x-0 bottom-0 h-10 bg-muted/60 border-t border-border/40 flex items-center justify-around px-4">
-            <div className="w-4 h-4 rounded bg-foreground/20" />
-            <div className="relative">
-              <div className="w-4 h-4 rounded bg-primary/20 flex items-center justify-center">
-                <Share className="w-3 h-3 text-primary" />
-              </div>
-              <PingArrow direction="down" />
-            </div>
-            <div className="w-4 h-4 rounded bg-foreground/20" />
-            <div className="w-4 h-4 rounded bg-foreground/20" />
-          </div>
-        )}
+      <div className="flex items-center justify-center gap-4">
+        {/* Phone 1: browser with pointer */}
+        <PhoneBrowser os={os} browser={browser} bottom={bottom} />
+
+        {/* Flow arrow */}
+        <motion.div
+          animate={{ x: [0, 4, 0], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          className="text-primary shrink-0"
+          aria-hidden
+        >
+          <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+        </motion.div>
+
+        {/* Phone 2: home screen with Já Limpo icon */}
+        <PhoneHomeScreen />
       </div>
-      <p className="text-center text-xs font-semibold text-foreground mt-3">
+      <p className="text-center text-xs font-semibold text-foreground mt-4">
         {label}
       </p>
       <p className="text-center text-[11px] text-muted-foreground mt-0.5">
-        Siga os passos abaixo para adicionar à tela inicial.
+        E o Já Limpo aparece na sua tela inicial.
       </p>
     </motion.div>
   );
 }
+
+function PhoneBrowser({
+  os,
+  browser,
+  bottom,
+}: {
+  os: OS;
+  browser: Browser;
+  bottom: boolean;
+}) {
+  return (
+    <div className="relative w-[104px] h-[172px] rounded-[22px] bg-card border border-border shadow-sm overflow-hidden shrink-0">
+      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-9 h-2 bg-foreground/70 rounded-b-lg z-10" />
+      {/* Top browser bar */}
+      <div className="absolute inset-x-0 top-0 h-6 bg-muted/60 border-b border-border/40 flex items-center gap-1 px-1.5 pt-1.5">
+        <div className="flex-1 h-2 rounded-sm bg-background/70" />
+        {!bottom && (
+          <div className="relative">
+            <div className="w-3 h-3 rounded bg-primary/25 flex items-center justify-center">
+              {os === "android" ? (
+                <MoreVertical className="w-2 h-2 text-primary" />
+              ) : (
+                <Download className="w-2 h-2 text-primary" />
+              )}
+            </div>
+            <PingArrow direction="up" />
+          </div>
+        )}
+      </div>
+      {/* Page content */}
+      <div className="absolute inset-x-2 top-8 space-y-1">
+        <div className="h-1.5 rounded bg-muted/70 w-3/4" />
+        <div className="h-1.5 rounded bg-muted/50 w-1/2" />
+        <div className="mt-1.5 h-9 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+          <Logo size="sm" />
+        </div>
+        <div className="h-1.5 rounded bg-muted/50 w-2/3" />
+      </div>
+      {/* iOS bottom bar */}
+      {bottom && (
+        <div className="absolute inset-x-0 bottom-0 h-7 bg-muted/60 border-t border-border/40 flex items-center justify-around px-2">
+          <div className="w-2.5 h-2.5 rounded bg-foreground/20" />
+          <div className="relative">
+            <div className="w-3 h-3 rounded bg-primary/25 flex items-center justify-center">
+              <Share className="w-2 h-2 text-primary" />
+            </div>
+            <PingArrow direction="down" />
+          </div>
+          <div className="w-2.5 h-2.5 rounded bg-foreground/20" />
+          <div className="w-2.5 h-2.5 rounded bg-foreground/20" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PhoneHomeScreen() {
+  return (
+    <div className="relative w-[104px] h-[172px] rounded-[22px] bg-gradient-to-b from-slate-900 to-slate-800 border border-border shadow-sm overflow-hidden shrink-0">
+      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-9 h-2 bg-black/80 rounded-b-lg z-10" />
+      {/* Status bar */}
+      <div className="absolute inset-x-0 top-0 h-5 flex items-center justify-between px-2">
+        <span className="text-[7px] font-semibold text-white/80">9:41</span>
+        <div className="flex gap-0.5">
+          <div className="w-1 h-1 rounded-full bg-white/70" />
+          <div className="w-1 h-1 rounded-full bg-white/70" />
+        </div>
+      </div>
+      {/* Grid of app icons */}
+      <div className="absolute inset-x-2.5 top-7 grid grid-cols-3 gap-1.5">
+        <div className="aspect-square rounded-md bg-white/10" />
+        <div className="aspect-square rounded-md bg-white/10" />
+        <div className="aspect-square rounded-md bg-white/10" />
+        <div className="aspect-square rounded-md bg-white/10" />
+        {/* Já Limpo icon: highlighted */}
+        <motion.div
+          animate={{ scale: [0.85, 1.08, 1], opacity: [0, 1, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 0.4, ease: "easeOut" }}
+          className="relative aspect-square rounded-md bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/40"
+        >
+          <span className="text-[10px] font-bold text-primary-foreground">J</span>
+          <motion.span
+            className="absolute inset-0 rounded-md ring-2 ring-primary/50"
+            animate={{ opacity: [0, 0.8, 0], scale: [1, 1.35, 1.5] }}
+            transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 0.4 }}
+            aria-hidden
+          />
+        </motion.div>
+        <div className="aspect-square rounded-md bg-white/10" />
+      </div>
+      {/* Já Limpo label */}
+      <p className="absolute inset-x-0 bottom-8 text-center text-[7px] font-semibold text-white/90">
+        Já Limpo
+      </p>
+      {/* Dock */}
+      <div className="absolute inset-x-2 bottom-1.5 h-6 rounded-lg bg-white/10 backdrop-blur flex items-center justify-around px-1">
+        <div className="w-3 h-3 rounded bg-white/30" />
+        <div className="w-3 h-3 rounded bg-white/30" />
+        <div className="w-3 h-3 rounded bg-white/30" />
+      </div>
+    </div>
+  );
+}
+
 
 function PingArrow({ direction }: { direction: "up" | "down" }) {
   const isUp = direction === "up";
