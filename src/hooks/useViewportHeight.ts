@@ -11,7 +11,6 @@ export function useViewportHeight() {
 
       document.documentElement.classList.toggle("app-standalone", isStandalone);
 
-      const visualViewportHeight = window.visualViewport?.height;
       const windowHeight = window.innerHeight;
 
       const activeEl = document.activeElement;
@@ -21,7 +20,8 @@ export function useViewportHeight() {
           activeEl.tagName === "TEXTAREA" ||
           activeEl.getAttribute("contenteditable") === "true");
 
-      const viewportHeight = visualViewportHeight && (isStandalone || isInputFocused)
+      const visualViewportHeight = window.visualViewport?.height;
+      const viewportHeight = visualViewportHeight && isInputFocused
         ? visualViewportHeight
         : windowHeight;
 
