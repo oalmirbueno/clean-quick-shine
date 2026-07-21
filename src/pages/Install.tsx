@@ -72,11 +72,6 @@ export default function Install() {
     }
   });
 
-  const confirmInstalled = () => {
-    markPwaInstalled();
-    setManuallyInstalled(true);
-    setIsInstalled(true);
-  };
 
   useEffect(() => {
     const p = detectPlatform();
