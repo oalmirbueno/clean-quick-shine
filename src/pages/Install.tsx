@@ -318,9 +318,26 @@ export default function Install() {
                 <Smartphone className="w-5 h-5 text-primary mx-auto mb-2" />
                 <p className="text-sm font-semibold">Abra pelo ícone do app</p>
                 <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                  No navegador o acesso fica protegido. Use o ícone do Já Limpo na tela inicial.
+                  Feche esta aba e toque no ícone do Já Limpo na sua tela inicial.
                 </p>
               </div>
+            )}
+
+            {!isStandaloneMode && (
+              <button
+                onClick={() => {
+                  setManuallyInstalled(false);
+                  setIsInstalled(false);
+                  try {
+                    localStorage.removeItem("jl_pwa_installed");
+                  } catch {
+                    /* noop */
+                  }
+                }}
+                className="mb-4 text-[11px] text-neutral-500 hover:text-neutral-300 underline underline-offset-2"
+              >
+                Ainda não instalei, voltar ao tutorial
+              </button>
             )}
 
             <section className="w-full rounded-3xl bg-neutral-900/50 border border-neutral-800 p-5 space-y-3">
