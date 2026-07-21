@@ -421,7 +421,7 @@ body {
 }
 
 html.app-standalone {
-  --bottom-nav-safe-area: env(safe-area-inset-bottom, 0px);
+  --bottom-nav-safe-area: min(env(safe-area-inset-bottom, 0px), 16px);
 }
 
 html.app-standalone,
@@ -432,20 +432,20 @@ html.app-standalone #root {
   max-height: var(--app-height);
 }
 
-/* Bottom nav respeita a home-indicator do iOS / gesture bar do Android */
+/* Bottom nav rente ao fundo; respeita home-indicator mas clampa a 16px */
 .app-bottom-nav {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: min(env(safe-area-inset-bottom, 0px), 16px);
 }
 
 html.app-standalone .app-bottom-nav {
   bottom: 0 !important;
   margin-bottom: 0 !important;
-  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  padding-bottom: min(env(safe-area-inset-bottom, 0px), 16px) !important;
   transform: translate3d(0, 0, 0);
 }
 
 .bottom-nav-spacer {
-  height: calc(var(--bottom-nav-height, 56px) + env(safe-area-inset-bottom, 0px)) !important;
+  height: calc(var(--bottom-nav-height, 56px) + min(env(safe-area-inset-bottom, 0px), 16px)) !important;
 }
 
 html.app-standalone .app-scroll-container,
