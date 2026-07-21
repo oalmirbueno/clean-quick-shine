@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { QRCodeSVG } from "qrcode.react";
 import {
   Sparkles,
   ArrowRight,
@@ -9,9 +10,13 @@ import {
   LogIn,
   UserPlus,
   CheckCircle2,
+  Copy,
+  Check,
+  QrCode,
 } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
+import { toast } from "sonner";
 
 type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
 
@@ -19,9 +24,10 @@ type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
  * Welcome / entry wizard.
  *
  * Prioridade: SEMPRE empurrar o usuário para o app (PWA).
+ *  - Desktop/Tablet-browser: mostra QR + link para abrir no celular.
+ *    Link discreto para diaristas seguirem no navegador (fallback).
  *  - Mobile-browser (não standalone): força fluxo de instalação antes de login/cadastro.
- *    Link discreto no rodapé para diaristas continuarem no navegador (fallback).
- *  - Desktop ou já dentro do PWA: vai direto para login/cadastro.
+ *  - Já dentro do PWA: vai direto para login/cadastro.
  */
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -34,6 +40,9 @@ export default function Onboarding() {
     [isMobile, isStandalone],
   );
 
+  // Desktop/tablet (não mobile e não standalone): tela dedicada de "abra no celular".
+  const showDesktopHandoff = !isMobile && !isStandalone;
+
   const [step, setStep] = useState<Step>("welcome");
 
   const goLogin = () => navigate("/login");
@@ -41,6 +50,10 @@ export default function Onboarding() {
   const goInstall = () => navigate("/install");
 
   const backTarget = step === "welcome" ? undefined : () => setStep("welcome");
+
+  if (showDesktopHandoff) {
+    return <DesktopHandoff onProWeb={goLogin} />;
+  }
 
   return (
     <AuthLayout
