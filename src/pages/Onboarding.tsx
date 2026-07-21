@@ -226,7 +226,44 @@ export default function Onboarding() {
   );
 }
 
+function InstalledStatusCard({ onOpen }: { onOpen: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="rounded-2xl border border-primary/25 bg-primary/5 p-4 flex items-start gap-3"
+    >
+      <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+        <CheckCircle2 className="w-5 h-5" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-semibold text-foreground">
+            App instalado neste celular
+          </div>
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary/15 text-primary">
+            Pronto
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+          Abra o Já Limpo pelo ícone na sua tela inicial para a melhor
+          experiência.
+        </p>
+        <button
+          type="button"
+          onClick={onOpen}
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+        >
+          <Rocket className="w-3.5 h-3.5" /> Continuar mesmo assim
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 function InfoNote({ children }: { children: React.ReactNode }) {
+
   return (
     <div className="mt-4 rounded-2xl bg-muted/40 border border-border/60 p-3.5 flex items-start gap-3">
       <Smartphone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
