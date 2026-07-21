@@ -83,15 +83,24 @@ export default function Install() {
     const mq = window.matchMedia("(display-mode: standalone)");
     const handleDisplayChange = () => setIsInstalled(detectStandalone());
 
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") handleDisplayChange();
+    };
+
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
     window.addEventListener("appinstalled", handleInstalled);
     mq.addEventListener?.("change", handleDisplayChange);
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleDisplayChange);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
       window.removeEventListener("appinstalled", handleInstalled);
       mq.removeEventListener?.("change", handleDisplayChange);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleDisplayChange);
     };
+
   }, []);
 
   const handleInstall = async () => {
