@@ -64,6 +64,19 @@ export default function Install() {
   const [browser, setBrowser] = useState<Browser>("other");
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [manuallyInstalled, setManuallyInstalled] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("jl_pwa_installed") === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  const confirmInstalled = () => {
+    markPwaInstalled();
+    setManuallyInstalled(true);
+    setIsInstalled(true);
+  };
 
   useEffect(() => {
     const p = detectPlatform();
