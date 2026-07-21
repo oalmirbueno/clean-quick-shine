@@ -117,18 +117,29 @@ export default function Install() {
           Tudo pronto
         </h1>
         <p className="text-muted-foreground text-center mb-8 text-sm max-w-xs leading-relaxed">
-          Abra o Já Limpo pelo ícone na sua tela inicial e faça login para começar.
+          Abra o Já Limpo pelo ícone na tela inicial. Se é seu primeiro acesso,
+          crie sua conta em segundos.
         </p>
-        <button
-          onClick={() => navigate("/login")}
-          className="px-8 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-95 transition-transform inline-flex items-center gap-2"
-        >
-          <LogIn className="w-4 h-4" />
-          Entrar
-        </button>
+        <div className="w-full max-w-xs space-y-2">
+          <button
+            onClick={() => navigate("/register")}
+            className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-95 transition-transform inline-flex items-center justify-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            Criar conta grátis
+          </button>
+          <button
+            onClick={() => navigate("/login")}
+            className="w-full py-3 rounded-2xl bg-card border border-border/60 text-foreground font-medium text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
+          >
+            <LogIn className="w-4 h-4" />
+            Já tenho conta · Entrar
+          </button>
+        </div>
       </div>
     );
   }
+
 
   const osTabs = osTabOptions(platform);
 
