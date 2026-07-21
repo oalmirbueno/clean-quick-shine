@@ -248,40 +248,40 @@
 }
 
 @layer utilities {
-  /* Safe area utilities for notched devices */
+  /* Safe area utilities — clamped para evitar gaps enormes no iOS/Android */
   .safe-top {
-    padding-top: max(env(safe-area-inset-top, 0px), 12px);
+    padding-top: max(env(safe-area-inset-top, 0px), 16px);
   }
-  
+
   .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: min(env(safe-area-inset-bottom, 0px), 12px);
   }
 
   .app-standalone .safe-bottom {
     padding-bottom: 0;
   }
-  
+
   .safe-left {
     padding-left: max(0.5rem, env(safe-area-inset-left));
   }
-  
+
   .safe-right {
     padding-right: max(0.5rem, env(safe-area-inset-right));
   }
-  
+
   .safe-x {
     padding-left: max(0.5rem, env(safe-area-inset-left));
     padding-right: max(0.5rem, env(safe-area-inset-right));
   }
-  
+
   .safe-y {
-    padding-top: max(env(safe-area-inset-top), 20px);
-    padding-bottom: max(env(safe-area-inset-bottom), 10px);
+    padding-top: max(env(safe-area-inset-top), 16px);
+    padding-bottom: min(env(safe-area-inset-bottom, 0px), 12px);
   }
-  
+
   .safe-all {
-    padding-top: max(env(safe-area-inset-top, 0px), 12px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-top: max(env(safe-area-inset-top, 0px), 16px);
+    padding-bottom: min(env(safe-area-inset-bottom, 0px), 12px);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
