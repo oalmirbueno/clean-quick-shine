@@ -4,7 +4,7 @@ import "./index.css";
 import { isNativeApp } from "@/lib/platform";
 
 const PREVIEW_CACHE_RESET_KEY = "jalimpo_preview_cache_reset_v3_identity_v5";
-const PWA_CACHE_RESET_KEY = "jalimpo_pwa_cache_reset_v3_ios_align_v1";
+const PWA_CACHE_RESET_KEY = "jalimpo_pwa_cache_reset_v3_auto_update_v1";
 
 function isLovablePreview() {
   try {
