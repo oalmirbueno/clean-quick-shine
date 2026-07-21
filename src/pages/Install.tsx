@@ -254,7 +254,7 @@ export default function Install() {
 
   // Shared dark shell — this page is always dark regardless of user theme.
   const Shell = ({ children }: { children: React.ReactNode }) => (
-    <div className="dark h-full bg-[#050505] text-white flex flex-col safe-top overflow-hidden">
+    <div className="dark h-full bg-[#0B1E30] text-white flex flex-col safe-top overflow-hidden">
       {children}
     </div>
   );
