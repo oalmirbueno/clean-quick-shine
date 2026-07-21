@@ -60,12 +60,13 @@ export default function Onboarding() {
     if (isStandalone) navigate("/login", { replace: true });
   }, [isStandalone, navigate]);
 
-  // Navegador mobile sem PWA instalado: força o /install (com tutorial animado).
+  // Navegador mobile/tablet sempre passa pelo /install.
+  // Se já instalou, o /install mostra a tela de app instalado + compartilhamento.
   useEffect(() => {
-    if (forceInstall && !pwaInstalled) {
+    if (forceInstall) {
       navigate("/install", { replace: true });
     }
-  }, [forceInstall, pwaInstalled, navigate]);
+  }, [forceInstall, navigate]);
 
   if (showDesktopHandoff) {
     return <DesktopHandoff onProWeb={goLogin} />;

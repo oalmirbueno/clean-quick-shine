@@ -17,13 +17,15 @@ import {
   ChevronRight,
   RotateCcw,
   QrCode,
+  MessageCircle,
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Logo";
-import { useIsMobileDevice } from "@/hooks/useIsStandalone";
+import { useInstalledPwa } from "@/hooks/useInstalledPwa";
+import { useIsMobileDevice, useIsStandalone } from "@/hooks/useIsStandalone";
 import {
   detectPlatform,
   detectStandalone,
@@ -52,6 +54,9 @@ interface Step {
  */
 export default function Install() {
   const navigate = useNavigate();
+  const isMobileViewport = useIsMobileDevice();
+  const isStandaloneMode = useIsStandalone();
+  const installedPwa = useInstalledPwa();
 
   const [platform, setPlatform] = useState<PlatformInfo | null>(null);
   const [os, setOs] = useState<OS>("other");
@@ -108,11 +113,12 @@ export default function Install() {
 
   const shareUrl = async () => {
     const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+    const shareText = "Conhece alguém que precisa de praticidade na limpeza? Compartilhe o Já Limpo.";
     if (nav.share) {
       try {
         await nav.share({
           title: "Já Limpo",
-          text: "Instale o app Já Limpo",
+          text: shareText,
           url: window.location.origin,
         });
         return;
@@ -121,6 +127,13 @@ export default function Install() {
       }
     }
     copyUrl();
+  };
+
+  const shareWhatsApp = () => {
+    const text = encodeURIComponent(
+      `Conhece alguém que pode aproveitar o Já Limpo? Acesse e instale o app: ${window.location.origin}`,
+    );
+    window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
   };
 
 
@@ -193,6 +206,8 @@ export default function Install() {
 
   const isDesktopOs = os === "windows" || os === "macos" || os === "linux";
   const showQr = isDesktopOs && viewportIsWide;
+  const installedReady = isStandaloneMode || isInstalled || installedPwa;
+  const canOpenAuthHere = isStandaloneMode || !isMobileViewport;
 
   const markStepDone = () => {
     setCompleted((prev) => {
@@ -220,46 +235,93 @@ export default function Install() {
   );
 
   // ====== Installed screen ======
-  if (isInstalled) {
+  if (installedReady) {
     return (
-      <div className="h-full bg-background flex flex-col items-center justify-center px-6 safe-top safe-bottom">
-        <motion.div
-          initial={{ scale: 0.6, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", damping: 16 }}
-          className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-6"
-        >
-          <Check className="w-10 h-10 text-primary" strokeWidth={2.2} />
-        </motion.div>
-        <h1 className="text-2xl font-semibold text-foreground mb-2 text-center tracking-tight">
-          Tudo pronto
-        </h1>
-        <p className="text-muted-foreground text-center mb-8 text-sm max-w-xs leading-relaxed">
-          Abra o Já Limpo pelo ícone na tela inicial. Se é seu primeiro acesso,
-          crie sua conta em segundos.
-        </p>
-        <div className="w-full max-w-xs space-y-2">
-          <button
-            onClick={() => navigate("/register")}
-            className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-95 transition-transform inline-flex items-center justify-center gap-2"
+      <div className="h-full bg-background flex flex-col safe-top safe-bottom overflow-y-auto">
+        <div className="w-full max-w-md mx-auto px-6 py-8 flex flex-col items-center justify-center min-h-full">
+          <motion.div
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", damping: 16 }}
+            className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-6"
           >
-            <Sparkles className="w-4 h-4" />
-            Criar conta grátis
-          </button>
-          <button
-            onClick={() => navigate("/login")}
-            className="w-full py-3 rounded-2xl bg-card border border-border/60 text-foreground font-medium text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
-          >
-            <LogIn className="w-4 h-4" />
-            Já tenho conta · Entrar
-          </button>
+            <Check className="w-10 h-10 text-primary" strokeWidth={2.2} />
+          </motion.div>
+          <h1 className="text-2xl font-semibold text-foreground mb-2 text-center tracking-tight">
+            App instalado
+          </h1>
+          <p className="text-muted-foreground text-center mb-6 text-sm max-w-xs leading-relaxed">
+            Abra o Já Limpo pelo ícone na tela inicial. Depois, compartilhe com quem também pode aproveitar essa novidade.
+          </p>
+
+          {canOpenAuthHere ? (
+            <div className="w-full max-w-xs space-y-2 mb-5">
+              <button
+                onClick={() => navigate("/register")}
+                className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-95 transition-transform inline-flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                Criar conta grátis
+              </button>
+              <button
+                onClick={() => navigate("/login")}
+                className="w-full py-3 rounded-2xl bg-card border border-border/60 text-foreground font-medium text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-4 h-4" />
+                Já tenho conta
+              </button>
+            </div>
+          ) : (
+            <div className="w-full max-w-xs mb-5 rounded-2xl bg-primary/5 border border-primary/20 p-4 text-center">
+              <Smartphone className="w-5 h-5 text-primary mx-auto mb-2" />
+              <p className="text-sm font-semibold text-foreground">Abra pelo ícone do app</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                No navegador mobile o acesso fica protegido. Use o ícone do Já Limpo na tela inicial.
+              </p>
+            </div>
+          )}
+
+          <section className="w-full rounded-3xl bg-card border border-border/60 p-4 space-y-3">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide mb-2">
+                <Share className="w-3 h-3" />
+                Compartilhe
+              </div>
+              <h2 className="text-base font-semibold text-foreground">Compartilhe para mais pessoas</h2>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                Conhece alguém que procura diarista ou quer trabalhar com limpeza? Envie o Já Limpo.
+              </p>
+            </div>
+
+            {showQr && (
+              <div className="flex items-center justify-center py-2">
+                <div className="p-3 rounded-2xl bg-white border border-border/40">
+                  <QRCodeSVG value={window.location.origin} size={112} level="M" />
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                onClick={shareWhatsApp}
+                className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm active:scale-95 transition-transform inline-flex items-center justify-center gap-2"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Compartilhar no WhatsApp
+              </button>
+              <button
+                onClick={shareUrl}
+                className="w-full py-3 rounded-2xl bg-background border border-border/60 text-foreground font-medium text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
+              >
+                <Share className="w-4 h-4" />
+                Compartilhar link
+              </button>
+            </div>
+          </section>
         </div>
       </div>
     );
   }
-
-
-  const isMobileViewport = useIsMobileDevice();
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">

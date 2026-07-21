@@ -3,9 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
 
 /**
- * Em navegador mobile (não standalone), força ir para /install.
- * Permite bypass com `?web=1` na URL (para diaristas que optam por navegador)
- * ou se a chave `jl_allow_mobile_web` estiver salva em localStorage.
+ * Em navegador mobile/tablet (não standalone), força ir para /install.
+ * Acesso web direto em login/cadastro só fica disponível em desktop.
  */
 export function useForceInstallGate() {
   const navigate = useNavigate();
@@ -15,14 +14,10 @@ export function useForceInstallGate() {
 
   useEffect(() => {
     if (isStandalone || !isMobile) return;
-    const params = new URLSearchParams(location.search);
-    if (params.get("web") === "1") {
-      try { localStorage.setItem("jl_allow_mobile_web", "1"); } catch {}
-      return;
-    }
     try {
-      if (localStorage.getItem("jl_allow_mobile_web") === "1") return;
+      localStorage.removeItem("jl_allow_mobile_web");
+      sessionStorage.setItem("jl_force_install_from", `${location.pathname}${location.search}`);
     } catch {}
     navigate("/install", { replace: true });
-  }, [isStandalone, isMobile, location.search, navigate]);
+  }, [isStandalone, isMobile, location.pathname, location.search, navigate]);
 }
