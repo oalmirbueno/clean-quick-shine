@@ -31,23 +31,33 @@ export function useIsStandalone() {
 }
 
 /**
- * Retorna true se for um device mobile (iOS/Android) por user-agent.
+ * Retorna true se for um device mobile OU tablet (iOS/iPadOS/Android).
+ * Detecta iPad moderno mesmo quando o UA reporta Macintosh (iPadOS >= 13).
  * Desktop continua tendo acesso normal pelo navegador.
  */
 export function useIsMobileDevice() {
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
+  const detect = () => {
     if (typeof window === "undefined") return false;
     const ua = window.navigator.userAgent.toLowerCase();
-    return /iphone|ipad|ipod|android/.test(ua);
-  });
+    if (/iphone|ipad|ipod|android/.test(ua)) return true;
+    // iPadOS 13+ reporta como "Macintosh". Detecta via maxTouchPoints.
+    const nav = window.navigator as Navigator & { maxTouchPoints?: number };
+    if (/macintosh/.test(ua) && (nav.maxTouchPoints ?? 0) > 1) return true;
+    // Tablets Android/Windows com touch primário e viewport pequeno-médio.
+    const isCoarse = window.matchMedia?.("(pointer: coarse)").matches;
+    if (isCoarse && window.innerWidth <= 1180) return true;
+    return false;
+  };
+
+  const [isMobile, setIsMobile] = useState<boolean>(detect);
 
   useEffect(() => {
-    const ua = window.navigator.userAgent.toLowerCase();
-    setIsMobile(/iphone|ipad|ipod|android/.test(ua));
+    setIsMobile(detect());
   }, []);
 
   return isMobile;
 }
+
 
 /**
  * True quando o app está rodando dentro de um iframe (preview Lovable).
