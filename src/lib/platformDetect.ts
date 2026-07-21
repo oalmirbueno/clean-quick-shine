@@ -31,6 +31,32 @@ export interface PlatformInfo {
   browserLabel: string;
 }
 
+export function getResponsiveViewportWidth(): number {
+  if (typeof window === "undefined") return 1024;
+
+  const candidates: number[] = [];
+  const push = (value?: number | null) => {
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+      candidates.push(value);
+    }
+  };
+
+  push(window.innerWidth);
+  push(window.visualViewport?.width);
+  push(document.documentElement?.clientWidth);
+  push(document.body?.clientWidth);
+  push(document.getElementById("root")?.getBoundingClientRect().width);
+
+  try {
+    const frame = window.frameElement as HTMLElement | null;
+    push(frame?.getBoundingClientRect().width);
+  } catch {
+    /* cross-origin preview frame */
+  }
+
+  return candidates.length ? Math.min(...candidates) : window.innerWidth;
+}
+
 export function detectPlatform(): PlatformInfo {
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
   const uaLower = ua.toLowerCase();
