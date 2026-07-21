@@ -5,7 +5,6 @@ import {
   Sparkles,
   ArrowRight,
   Smartphone,
-  Globe,
   Download,
   LogIn,
   UserPlus,
@@ -14,115 +13,62 @@ import {
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
 
-type Step = "channel" | "welcome" | "hasAccountYes" | "hasAccountNo";
-type Channel = "app" | "web";
+type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
 
 /**
  * Welcome / entry wizard.
  *
- * Fluxo inteligente:
- *  1. Mobile-browser (não standalone): pergunta "App ou Web?"
- *      - App → força instalação antes de login/cadastro
- *      - Web → segue direto para login/cadastro pelo navegador
- *  2. Desktop ou já dentro do PWA: pula direto para "Já tem cadastro?"
+ * Prioridade: SEMPRE empurrar o usuário para o app (PWA).
+ *  - Mobile-browser (não standalone): força fluxo de instalação antes de login/cadastro.
+ *    Link discreto no rodapé para diaristas continuarem no navegador (fallback).
+ *  - Desktop ou já dentro do PWA: vai direto para login/cadastro.
  */
 export default function Onboarding() {
   const navigate = useNavigate();
   const isStandalone = useIsStandalone();
   const isMobile = useIsMobileDevice();
 
-  // Precisa da escolha app/web? Só em mobile-browser.
-  const needsChannel = useMemo(
+  // Em navegador mobile, sempre força passar pelo app.
+  const forceInstall = useMemo(
     () => isMobile && !isStandalone,
     [isMobile, isStandalone],
   );
 
-  const [step, setStep] = useState<Step>(needsChannel ? "channel" : "welcome");
-  const [channel, setChannel] = useState<Channel>(
-    needsChannel ? "app" : "web",
-  );
-
-  // Só força instalar quando o usuário escolheu explicitamente o app
-  // e ainda está no navegador mobile.
-  const forceInstall = channel === "app" && needsChannel;
+  const [step, setStep] = useState<Step>("welcome");
 
   const goLogin = () => navigate("/login");
   const goRegister = () => navigate("/register");
   const goInstall = () => navigate("/install");
 
-  const pickChannel = (c: Channel) => {
-    setChannel(c);
-    setStep("welcome");
-  };
-
-  const backTarget = () => {
-    if (step === "channel") return undefined;
-    if (step === "welcome") return needsChannel ? () => setStep("channel") : undefined;
-    return () => setStep("welcome");
-  };
+  const backTarget = step === "welcome" ? undefined : () => setStep("welcome");
 
   return (
     <AuthLayout
-      onBack={backTarget()}
+      onBack={backTarget}
       eyebrow={
         <>
           <Sparkles className="w-3 h-3" /> Bem-vindo ao Já Limpo
         </>
       }
       title={
-        step === "channel"
-          ? "Como você quer usar?"
-          : step === "welcome"
-            ? "Você já tem cadastro?"
-            : step === "hasAccountYes"
-              ? "Já instalou o app?"
-              : "Vamos começar do jeito certo"
+        step === "welcome"
+          ? "Você já tem cadastro?"
+          : step === "hasAccountYes"
+            ? "Já instalou o app?"
+            : "Vamos começar do jeito certo"
       }
       subtitle={
-        step === "channel"
-          ? "Escolha o app instalado ou continue pelo navegador."
-          : step === "welcome"
-            ? "Em poucos toques você agenda sua limpeza."
-            : step === "hasAccountYes"
-              ? "Assim você abre o Já Limpo sempre que precisar."
-              : forceInstall
-                ? "Instale o app antes de criar sua conta."
-                : "Crie sua conta grátis em segundos."
+        step === "welcome"
+          ? "Em poucos toques você agenda sua limpeza."
+          : step === "hasAccountYes"
+            ? "Assim você abre o Já Limpo sempre que precisar."
+            : forceInstall
+              ? "Instale o app antes de criar sua conta."
+              : "Crie sua conta grátis em segundos."
       }
-      showTrust={step === "channel" || step === "welcome"}
+      showTrust={step === "welcome"}
     >
       <AnimatePresence mode="wait">
-        {step === "channel" && (
-          <motion.div
-            key="channel"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            <ChoiceCard
-              icon={Smartphone}
-              title="Usar o aplicativo"
-              description="Mais rápido, com atalho na tela inicial"
-              onClick={() => pickChannel("app")}
-              primary
-              badge="Recomendado"
-            />
-            <ChoiceCard
-              icon={Globe}
-              title="Continuar no navegador"
-              description="Usar direto sem instalar"
-              onClick={() => pickChannel("web")}
-            />
-
-            <InfoNote>
-              Detectamos que você está no navegador do celular. O app instalado
-              abre mais rápido e recebe atualizações automáticas.
-            </InfoNote>
-          </motion.div>
-        )}
-
         {step === "welcome" && (
           <motion.div
             key="welcome"
@@ -151,6 +97,13 @@ export default function Onboarding() {
               }}
               primary
             />
+
+            {forceInstall && (
+              <InfoNote>
+                O Já Limpo funciona melhor como aplicativo instalado — mais
+                rápido, com notificações e sempre atualizado.
+              </InfoNote>
+            )}
           </motion.div>
         )}
 
@@ -200,20 +153,26 @@ export default function Onboarding() {
               onClick={goInstall}
               primary
             />
-            <ChoiceCard
-              icon={UserPlus}
-              title="Prefiro criar conta pelo navegador"
-              description="Você pode instalar depois"
-              onClick={goRegister}
-            />
 
             <InfoNote>
-              Instalar antes deixa o app na tela inicial, mais rápido e com
+              Instalar deixa o app na tela inicial, com acesso mais rápido e
               atualizações automáticas.
             </InfoNote>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {forceInstall && step === "welcome" && (
+        <div className="mt-5 text-center">
+          <button
+            type="button"
+            onClick={goLogin}
+            className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+          >
+            Sou diarista — continuar pelo navegador
+          </button>
+        </div>
+      )}
 
       <p className="mt-6 text-[11px] text-center text-muted-foreground leading-relaxed">
         Ao continuar você aceita nossos{" "}
