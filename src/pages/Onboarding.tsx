@@ -5,6 +5,7 @@ import {
   Sparkles,
   ArrowRight,
   Smartphone,
+  Globe,
   Download,
   LogIn,
   UserPlus,
@@ -13,59 +14,115 @@ import {
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
 
-type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
+type Step = "channel" | "welcome" | "hasAccountYes" | "hasAccountNo";
+type Channel = "app" | "web";
 
 /**
  * Welcome / entry wizard.
  *
- * Dinâmica única (funciona em qualquer viewport, adaptando o texto):
- *  1. "Você já tem cadastro?"
- *      → Sim: pergunta se já instalou o app (só faz sentido em mobile-browser).
- *              - Instalado ou desktop/PWA → /login
- *              - Não instalado (mobile-browser) → /install
- *      → Não: em mobile-browser manda instalar antes; em desktop/PWA vai direto para /register.
+ * Fluxo inteligente:
+ *  1. Mobile-browser (não standalone): pergunta "App ou Web?"
+ *      - App → força instalação antes de login/cadastro
+ *      - Web → segue direto para login/cadastro pelo navegador
+ *  2. Desktop ou já dentro do PWA: pula direto para "Já tem cadastro?"
  */
 export default function Onboarding() {
   const navigate = useNavigate();
   const isStandalone = useIsStandalone();
   const isMobile = useIsMobileDevice();
 
-  // Precisa instalar antes? Só se estiver no navegador mobile e ainda não for standalone.
-  const needsInstall = useMemo(() => isMobile && !isStandalone, [isMobile, isStandalone]);
+  // Precisa da escolha app/web? Só em mobile-browser.
+  const needsChannel = useMemo(
+    () => isMobile && !isStandalone,
+    [isMobile, isStandalone],
+  );
 
-  const [step, setStep] = useState<Step>("welcome");
+  const [step, setStep] = useState<Step>(needsChannel ? "channel" : "welcome");
+  const [channel, setChannel] = useState<Channel>(
+    needsChannel ? "app" : "web",
+  );
+
+  // Só força instalar quando o usuário escolheu explicitamente o app
+  // e ainda está no navegador mobile.
+  const forceInstall = channel === "app" && needsChannel;
 
   const goLogin = () => navigate("/login");
   const goRegister = () => navigate("/register");
   const goInstall = () => navigate("/install");
 
+  const pickChannel = (c: Channel) => {
+    setChannel(c);
+    setStep("welcome");
+  };
+
+  const backTarget = () => {
+    if (step === "channel") return undefined;
+    if (step === "welcome") return needsChannel ? () => setStep("channel") : undefined;
+    return () => setStep("welcome");
+  };
+
   return (
     <AuthLayout
-      onBack={step === "welcome" ? undefined : () => setStep("welcome")}
+      onBack={backTarget()}
       eyebrow={
         <>
           <Sparkles className="w-3 h-3" /> Bem-vindo ao Já Limpo
         </>
       }
       title={
-        step === "welcome"
-          ? "Você já tem cadastro?"
-          : step === "hasAccountYes"
-            ? "Já instalou o app?"
-            : "Vamos começar do jeito certo"
+        step === "channel"
+          ? "Como você quer usar?"
+          : step === "welcome"
+            ? "Você já tem cadastro?"
+            : step === "hasAccountYes"
+              ? "Já instalou o app?"
+              : "Vamos começar do jeito certo"
       }
       subtitle={
-        step === "welcome"
-          ? "Em poucos toques você agenda sua limpeza."
-          : step === "hasAccountYes"
-            ? "Assim você abre o Já Limpo sempre que precisar."
-            : needsInstall
-              ? "Instale o app antes de criar sua conta."
-              : "Crie sua conta grátis em segundos."
+        step === "channel"
+          ? "Escolha o app instalado ou continue pelo navegador."
+          : step === "welcome"
+            ? "Em poucos toques você agenda sua limpeza."
+            : step === "hasAccountYes"
+              ? "Assim você abre o Já Limpo sempre que precisar."
+              : forceInstall
+                ? "Instale o app antes de criar sua conta."
+                : "Crie sua conta grátis em segundos."
       }
-      showTrust={step === "welcome"}
+      showTrust={step === "channel" || step === "welcome"}
     >
       <AnimatePresence mode="wait">
+        {step === "channel" && (
+          <motion.div
+            key="channel"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-3"
+          >
+            <ChoiceCard
+              icon={Smartphone}
+              title="Usar o aplicativo"
+              description="Mais rápido, com atalho na tela inicial"
+              onClick={() => pickChannel("app")}
+              primary
+              badge="Recomendado"
+            />
+            <ChoiceCard
+              icon={Globe}
+              title="Continuar no navegador"
+              description="Usar direto sem instalar"
+              onClick={() => pickChannel("web")}
+            />
+
+            <InfoNote>
+              Detectamos que você está no navegador do celular. O app instalado
+              abre mais rápido e recebe atualizações automáticas.
+            </InfoNote>
+          </motion.div>
+        )}
+
         {step === "welcome" && (
           <motion.div
             key="welcome"
@@ -78,18 +135,18 @@ export default function Onboarding() {
             <ChoiceCard
               icon={LogIn}
               title="Sim, já tenho conta"
-              description={needsInstall ? "Abrir ou instalar o app" : "Entrar agora"}
+              description={forceInstall ? "Abrir ou instalar o app" : "Entrar agora"}
               onClick={() => {
-                if (needsInstall) setStep("hasAccountYes");
+                if (forceInstall) setStep("hasAccountYes");
                 else goLogin();
               }}
             />
             <ChoiceCard
               icon={UserPlus}
               title="Não, é minha primeira vez"
-              description={needsInstall ? "Instalar o app e criar conta" : "Criar conta grátis"}
+              description={forceInstall ? "Instalar o app e criar conta" : "Criar conta grátis"}
               onClick={() => {
-                if (needsInstall) setStep("hasAccountNo");
+                if (forceInstall) setStep("hasAccountNo");
                 else goRegister();
               }}
               primary
@@ -183,12 +240,14 @@ function ChoiceCard({
   description,
   onClick,
   primary,
+  badge,
 }: {
   icon: typeof LogIn;
   title: string;
   description: string;
   onClick: () => void;
   primary?: boolean;
+  badge?: string;
 }) {
   return (
     <motion.button
@@ -210,8 +269,21 @@ function ChoiceCard({
         <Icon className="w-5 h-5" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className={primary ? "text-sm font-semibold" : "text-sm font-semibold text-foreground"}>
-          {title}
+        <div className="flex items-center gap-2">
+          <div className={primary ? "text-sm font-semibold" : "text-sm font-semibold text-foreground"}>
+            {title}
+          </div>
+          {badge && (
+            <span
+              className={
+                primary
+                  ? "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary-foreground/20"
+                  : "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-primary/10 text-primary"
+              }
+            >
+              {badge}
+            </span>
+          )}
         </div>
         <div
           className={
