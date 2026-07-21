@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Smartphone,
   Monitor,
-  Tablet,
   Download,
   Share,
   Plus,
@@ -19,6 +18,7 @@ import {
   RotateCcw,
   QrCode,
 } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
