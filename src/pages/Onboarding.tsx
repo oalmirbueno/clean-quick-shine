@@ -23,7 +23,7 @@ import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
 import { useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { toast } from "sonner";
 
-type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
+
 
 /**
  * Welcome / entry wizard.
