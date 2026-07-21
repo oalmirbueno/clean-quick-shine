@@ -123,13 +123,45 @@ export default function Install() {
 
   const guide = useMemo(() => buildGuide(os, browser), [os, browser]);
   const tutorialSteps = useMemo(() => guide.steps.slice(0, 3), [guide]);
+  const storageKey = `jl_install_tutorial:${os}:${browser}:${tutorialSteps.length}`;
+
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<boolean[]>(() => tutorialSteps.map(() => false));
 
+  // Hydrate from localStorage when os/browser (and thus storageKey) change.
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { completed?: boolean[]; activeStep?: number };
+        if (Array.isArray(parsed.completed) && parsed.completed.length === tutorialSteps.length) {
+          setCompleted(parsed.completed);
+          const firstOpen = parsed.completed.findIndex((v) => !v);
+          setActiveStep(
+            typeof parsed.activeStep === "number"
+              ? Math.min(Math.max(parsed.activeStep, 0), tutorialSteps.length - 1)
+              : firstOpen === -1
+                ? tutorialSteps.length - 1
+                : firstOpen,
+          );
+          return;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
     setActiveStep(0);
     setCompleted(tutorialSteps.map(() => false));
-  }, [os, browser, tutorialSteps]);
+  }, [storageKey, tutorialSteps.length]);
+
+  // Persist on change.
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ completed, activeStep }));
+    } catch {
+      /* ignore */
+    }
+  }, [storageKey, completed, activeStep]);
 
   const isDesktopOs = os === "windows" || os === "macos" || os === "linux";
 
@@ -147,6 +179,11 @@ export default function Install() {
   const resetTutorial = () => {
     setActiveStep(0);
     setCompleted(tutorialSteps.map(() => false));
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      /* ignore */
+    }
   };
 
   const progress = Math.round(
