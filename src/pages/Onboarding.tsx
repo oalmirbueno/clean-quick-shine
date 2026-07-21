@@ -102,27 +102,43 @@ export default function Onboarding() {
             transition={{ duration: 0.2 }}
             className="space-y-3"
           >
+            {forceInstall && pwaInstalled && (
+              <InstalledStatusCard onOpen={goLogin} />
+            )}
+
             <ChoiceCard
               icon={LogIn}
               title="Sim, já tenho conta"
-              description={forceInstall ? "Abrir ou instalar o app" : "Entrar agora"}
+              description={
+                forceInstall
+                  ? pwaInstalled
+                    ? "Abrir o app instalado"
+                    : "Abrir ou instalar o app"
+                  : "Entrar agora"
+              }
               onClick={() => {
-                if (forceInstall) setStep("hasAccountYes");
+                if (forceInstall && !pwaInstalled) setStep("hasAccountYes");
                 else goLogin();
               }}
             />
             <ChoiceCard
               icon={UserPlus}
               title="Não, é minha primeira vez"
-              description={forceInstall ? "Instalar o app e criar conta" : "Criar conta grátis"}
+              description={
+                forceInstall
+                  ? pwaInstalled
+                    ? "Abrir o app e criar conta"
+                    : "Instalar o app e criar conta"
+                  : "Criar conta grátis"
+              }
               onClick={() => {
-                if (forceInstall) setStep("hasAccountNo");
+                if (forceInstall && !pwaInstalled) setStep("hasAccountNo");
                 else goRegister();
               }}
               primary
             />
 
-            {forceInstall && (
+            {forceInstall && !pwaInstalled && (
               <InfoNote>
                 O Já Limpo funciona melhor como aplicativo instalado, mais
                 rápido, com notificações e sempre atualizado.
@@ -130,6 +146,7 @@ export default function Onboarding() {
             )}
           </motion.div>
         )}
+
 
         {step === "hasAccountYes" && (
           <motion.div
