@@ -70,19 +70,28 @@ if (!isNativeApp()) {
   void resetPreviewCacheOnce();
   void resetInstalledPwaCacheOnce();
 
-  // Marca localmente que este device já rodou o app instalado (standalone),
-  // para que o navegador mobile ofereça "abrir o app" em vez de "instalar".
+  // Marca localmente + remotamente que este device já rodou o app instalado
+  // (standalone). O registro remoto (fingerprint) permite que o navegador
+  // do mesmo dispositivo detecte a instalação depois — inclusive no iOS
+  // Safari, onde não existe API para isso.
   try {
     const runningStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    if (runningStandalone) localStorage.setItem("jl_pwa_installed", "1");
-    window.addEventListener("appinstalled", () =>
-      localStorage.setItem("jl_pwa_installed", "1"),
-    );
+    if (runningStandalone) {
+      localStorage.setItem("jl_pwa_installed", "1");
+      void import("./lib/pwaDeviceTrack").then((m) =>
+        m.markDeviceInstalled({ ua: navigator.userAgent }),
+      );
+    }
+    window.addEventListener("appinstalled", () => {
+      localStorage.setItem("jl_pwa_installed", "1");
+      void import("./lib/pwaDeviceTrack").then((m) => m.markDeviceInstalled());
+    });
   } catch {
     /* noop */
   }
+
 }
 
 
