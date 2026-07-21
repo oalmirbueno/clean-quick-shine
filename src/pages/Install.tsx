@@ -354,7 +354,7 @@ export default function Install() {
       <header className="shrink-0 px-5 pt-3 pb-2 flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-white hover:bg-neutral-800/70 active:scale-95 transition"
+          className="w-10 h-10 rounded-full bg-primary/12 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 active:scale-95 transition"
           aria-label="Voltar"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -482,13 +482,13 @@ export default function Install() {
                             isDone
                               ? "bg-primary text-primary-foreground border-primary"
                               : isActive
-                                ? "bg-primary/10 text-primary border-primary/60"
-                                : "bg-neutral-900 text-neutral-400 border-neutral-800"
+                                ? "bg-primary/15 text-primary border-primary/60"
+                                : "bg-primary/8 text-primary/80 border-primary/25"
                           }`}
                         >
                           {isDone ? <Check className="w-4 h-4" strokeWidth={2.6} /> : num}
                         </motion.div>
-                        {!isLast && <div className="w-px flex-1 bg-neutral-800 my-1 min-h-6" />}
+                        {!isLast && <div className="w-px flex-1 bg-primary/25 my-1 min-h-6" />}
                       </div>
 
                       {/* Body */}
@@ -565,7 +565,7 @@ export default function Install() {
           {/* Share footer */}
           <button
             onClick={shareUrl}
-            className="w-full py-3 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-neutral-200 text-sm font-medium hover:bg-neutral-900 transition-colors inline-flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-2xl bg-primary/12 border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/20 transition-colors inline-flex items-center justify-center gap-2"
           >
             <Share className="w-4 h-4" />
             Compartilhar com um amigo
