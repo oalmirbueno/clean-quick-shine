@@ -202,8 +202,8 @@ export default function Install() {
           {/* Animated pointing hint */}
           <AnimatedInstallHint os={os} browser={browser} />
 
-          {/* Quick install (Chromium: Android & Desktop) */}
-          {deferredPrompt && (
+          {/* Primary actions: native install if available, else share link */}
+          {deferredPrompt ? (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -214,7 +214,25 @@ export default function Install() {
               <Download className="w-4 h-4" />
               Instalar agora
             </motion.button>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={shareUrl}
+                className="py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
+              >
+                <Share className="w-4 h-4" />
+                Compartilhar
+              </button>
+              <button
+                onClick={copyUrl}
+                className="py-3 rounded-2xl bg-card border border-border/60 text-foreground font-semibold text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
+              >
+                <Copy className="w-4 h-4" />
+                Copiar link
+              </button>
+            </div>
           )}
+
 
 
           {/* OS tabs */}
