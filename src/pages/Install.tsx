@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Logo";
+import { useIsMobileDevice } from "@/hooks/useIsStandalone";
 import {
   detectPlatform,
   detectStandalone,
@@ -31,6 +32,7 @@ import {
   type OS,
   type PlatformInfo,
 } from "@/lib/platformDetect";
+
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
