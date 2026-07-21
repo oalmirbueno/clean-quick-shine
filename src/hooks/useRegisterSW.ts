@@ -132,10 +132,31 @@ export function useRegisterSW(): UseRegisterSWReturn {
       removeUpdateListeners = cleanup;
     });
 
-    const handleControllerChange = () => {
+    let pendingReload = false;
+    const reloadNow = () => {
       if (hasReloadedForUpdate) return;
       hasReloadedForUpdate = true;
       window.location.reload();
+    };
+    const reloadWhenIdle = () => {
+      // Se a aba estiver oculta, recarrega direto (usuário não vê corte).
+      // Caso esteja em foco, adia para o próximo blur/hide para não interromper
+      // um formulário/checkout em andamento — reabrir o app sempre traz a nova versão.
+      if (document.visibilityState === "hidden") {
+        reloadNow();
+        return;
+      }
+      if (pendingReload) return;
+      pendingReload = true;
+      const onHide = () => {
+        if (document.visibilityState === "hidden") reloadNow();
+      };
+      document.addEventListener("visibilitychange", onHide, { once: true });
+      window.addEventListener("pagehide", reloadNow, { once: true });
+    };
+
+    const handleControllerChange = () => {
+      reloadWhenIdle();
     };
 
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
