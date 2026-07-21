@@ -21,6 +21,7 @@ import {
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
 import { useInstalledPwa } from "@/hooks/useInstalledPwa";
+import { getResponsiveViewportWidth } from "@/lib/platformDetect";
 import { toast } from "sonner";
 
 
@@ -240,7 +241,27 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
   const [os, setOs] = useState<OsKey>("ios");
   const [iosBrowser, setIosBrowser] = useState<"safari" | "chrome">("safari");
   const [androidBrowser, setAndroidBrowser] = useState<"chrome" | "samsung">("chrome");
+  const [showQr, setShowQr] = useState(() =>
+    typeof window !== "undefined" ? getResponsiveViewportWidth() >= 1024 : true,
+  );
   const url = typeof window !== "undefined" ? window.location.origin + "/" : "";
+
+  useEffect(() => {
+    const update = () => setShowQr(getResponsiveViewportWidth() >= 1024);
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    window.visualViewport?.addEventListener("resize", update);
+    const root = document.getElementById("root");
+    const observer = root && "ResizeObserver" in window ? new ResizeObserver(update) : null;
+    if (root && observer) observer.observe(root);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+      window.visualViewport?.removeEventListener("resize", update);
+      observer?.disconnect();
+    };
+  }, []);
 
   const copyLink = async () => {
     try {
@@ -270,22 +291,24 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
           <FeatureChip icon={Wifi} label="Sempre pronto" />
         </div>
 
-        <div className="rounded-3xl border border-border/60 bg-card p-6 flex flex-col items-center gap-4">
-          <div className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-border/40">
-            <QRCodeSVG
-              value={url}
-              size={176}
-              level="M"
-              bgColor="#ffffff"
-              fgColor="#0b1c2c"
-              includeMargin={false}
-            />
+        {showQr && (
+          <div className="rounded-3xl border border-border/60 bg-card p-6 flex flex-col items-center gap-4">
+            <div className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-border/40">
+              <QRCodeSVG
+                value={url}
+                size={176}
+                level="M"
+                bgColor="#ffffff"
+                fgColor="#0b1c2c"
+                includeMargin={false}
+              />
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <QrCode className="w-3.5 h-3.5 text-primary" />
+              Aponte a câmera do iPhone ou Android
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <QrCode className="w-3.5 h-3.5 text-primary" />
-            Aponte a câmera do iPhone ou Android
-          </div>
-        </div>
+        )}
 
         <div className="rounded-2xl border border-border/60 bg-muted/30 p-3 flex items-center gap-2">
           <div className="flex-1 min-w-0 text-xs font-mono truncate text-foreground/80">
