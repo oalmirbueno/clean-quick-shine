@@ -337,11 +337,35 @@ export default function Install() {
             </motion.div>
           )}
 
-          {/* Steps */}
+          {/* Interactive tutorial */}
           <section className="space-y-3">
+            {/* Header with browser/OS badge */}
+            <div className="flex items-center justify-between gap-2 px-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <guide.headerIcon className="w-4 h-4 text-primary shrink-0" />
+                <h2 className="text-sm font-semibold text-foreground truncate">
+                  {guide.title}
+                </h2>
+              </div>
+              <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide">
+                <BrowserGlyph browser={browser} />
+                {labelFor(browser)} · {osShortLabel(os)}
+              </span>
+            </div>
+
+            {/* Progress bar */}
             <div className="flex items-center gap-2 px-1">
-              <guide.headerIcon className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">{guide.title}</h2>
+              <div className="flex-1 h-1.5 rounded-full bg-muted/60 overflow-hidden">
+                <motion.div
+                  className="h-full bg-primary"
+                  initial={false}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ type: "spring", damping: 20 }}
+                />
+              </div>
+              <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
+                {completed.filter(Boolean).length}/{tutorialSteps.length}
+              </span>
             </div>
 
             <AnimatePresence mode="wait">
@@ -353,24 +377,112 @@ export default function Install() {
                 transition={{ duration: 0.2 }}
                 className="space-y-2"
               >
-                {guide.steps.map((step, i) => {
+                {tutorialSteps.map((step, i) => {
                   const StepIconEl = step.icon;
+                  const isDone = completed[i];
+                  const isActive = i === activeStep && !isDone;
                   return (
-                    <li
+                    <motion.li
                       key={i}
-                      className="flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border/60 shadow-sm"
+                      layout
+                      animate={{
+                        scale: isActive ? 1 : 0.99,
+                        opacity: isDone ? 0.7 : 1,
+                      }}
+                      className={`relative flex items-center gap-3 p-3.5 rounded-2xl border shadow-sm transition-colors ${
+                        isActive
+                          ? "bg-primary/5 border-primary/40"
+                          : isDone
+                            ? "bg-card border-border/60"
+                            : "bg-card border-border/60"
+                      }`}
                     >
-                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-primary font-semibold text-sm">
-                        {i + 1}
+                      {isActive && (
+                        <motion.span
+                          className="absolute inset-0 rounded-2xl ring-2 ring-primary/40 pointer-events-none"
+                          animate={{ opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 1.6, repeat: Infinity }}
+                        />
+                      )}
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-semibold text-sm ${
+                          isDone
+                            ? "bg-primary text-primary-foreground"
+                            : isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-primary/10 text-primary"
+                        }`}
+                      >
+                        {isDone ? <Check className="w-4 h-4" strokeWidth={2.5} /> : i + 1}
                       </div>
-                      <StepIconEl className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <p className="text-sm text-foreground leading-snug flex-1">{step.text}</p>
-                    </li>
+                      <StepIconEl
+                        className={`w-4 h-4 shrink-0 ${
+                          isActive ? "text-primary" : "text-muted-foreground"
+                        }`}
+                      />
+                      <p
+                        className={`text-sm leading-snug flex-1 ${
+                          isDone ? "text-muted-foreground line-through" : "text-foreground"
+                        }`}
+                      >
+                        {step.text}
+                      </p>
+                    </motion.li>
                   );
                 })}
               </motion.ol>
             </AnimatePresence>
+
+            {/* Tutorial controls */}
+            <div className="flex items-center gap-2">
+              {completed.every(Boolean) ? (
+                <>
+                  <div className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-primary/10 text-primary text-sm font-semibold">
+                    <Check className="w-4 h-4" strokeWidth={2.5} />
+                    Tutorial concluído
+                  </div>
+                  <button
+                    onClick={resetTutorial}
+                    className="p-3 rounded-2xl bg-card border border-border/60 text-foreground hover:bg-muted transition-colors"
+                    aria-label="Recomeçar tutorial"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={markStepDone}
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold shadow-sm shadow-primary/20 active:scale-[0.98] transition-transform"
+                >
+                  {activeStep === tutorialSteps.length - 1 ? "Concluir" : "Fiz esse passo"}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </section>
+
+          {/* QR code: desktop only */}
+          {isDesktopOs && (
+            <section className="rounded-2xl bg-card border border-border/60 p-4 flex items-center gap-4">
+              <div className="p-2 rounded-xl bg-white">
+                <QRCodeSVG value={window.location.origin} size={88} level="M" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide mb-1.5">
+                  <QrCode className="w-3 h-3" />
+                  Para celular
+                </div>
+                <p className="text-sm font-semibold text-foreground leading-snug">
+                  Aponte a câmera do celular
+                </p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
+                  Abra o Já Limpo no seu iPhone ou Android para instalar em segundos.
+                </p>
+              </div>
+            </section>
+          )}
+          </section>
+
 
           <div className="flex flex-col gap-2 pt-1">
             <button
