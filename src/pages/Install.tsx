@@ -259,7 +259,7 @@ export default function Install() {
   }
 
 
-  const osTabs = osTabOptions(platform);
+  const isMobileViewport = useIsMobileDevice();
 
   return (
     <div className="h-full bg-background flex flex-col safe-top">
