@@ -69,6 +69,21 @@ async function resetInstalledPwaCacheOnce() {
 if (!isNativeApp()) {
   void resetPreviewCacheOnce();
   void resetInstalledPwaCacheOnce();
+
+  // Marca localmente que este device já rodou o app instalado (standalone),
+  // para que o navegador mobile ofereça "abrir o app" em vez de "instalar".
+  try {
+    const runningStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (runningStandalone) localStorage.setItem("jl_pwa_installed", "1");
+    window.addEventListener("appinstalled", () =>
+      localStorage.setItem("jl_pwa_installed", "1"),
+    );
+  } catch {
+    /* noop */
+  }
 }
+
 
 createRoot(document.getElementById("root")!).render(<App />);

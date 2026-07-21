@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
@@ -13,9 +13,11 @@ import {
   Copy,
   Check,
   QrCode,
+  Rocket,
 } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
+import { useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { toast } from "sonner";
 
 type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
@@ -25,14 +27,17 @@ type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
  *
  * Prioridade: SEMPRE empurrar o usuário para o app (PWA).
  *  - Desktop/Tablet-browser: mostra QR + link para abrir no celular.
- *    Link discreto para diaristas seguirem no navegador (fallback).
- *  - Mobile-browser (não standalone): força fluxo de instalação antes de login/cadastro.
- *  - Já dentro do PWA: vai direto para login/cadastro.
+ *  - Mobile-browser (não standalone):
+ *      • Se o PWA já está instalado neste device, exibe status "App instalado"
+ *        com CTA para abrir pelo ícone.
+ *      • Caso contrário, força fluxo de instalação antes de login/cadastro.
+ *  - Já dentro do PWA: pula direto para /login.
  */
 export default function Onboarding() {
   const navigate = useNavigate();
   const isStandalone = useIsStandalone();
   const isMobile = useIsMobileDevice();
+  const pwaInstalled = useInstalledPwa();
 
   // Em navegador mobile, sempre força passar pelo app.
   const forceInstall = useMemo(
@@ -49,11 +54,17 @@ export default function Onboarding() {
   const goRegister = () => navigate("/register");
   const goInstall = () => navigate("/install");
 
+  // Se o app já está rodando standalone, abre direto o fluxo de login.
+  useEffect(() => {
+    if (isStandalone) navigate("/login", { replace: true });
+  }, [isStandalone, navigate]);
+
   const backTarget = step === "welcome" ? undefined : () => setStep("welcome");
 
   if (showDesktopHandoff) {
     return <DesktopHandoff onProWeb={goLogin} />;
   }
+
 
   return (
     <AuthLayout
