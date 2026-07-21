@@ -159,7 +159,7 @@ export default function Install() {
       </header>
 
       <main className="flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-md mx-auto px-5 pb-8 space-y-6">
+        <div className="max-w-md mx-auto px-5 pb-8 space-y-5">
           {/* Hero */}
           <motion.section
             initial={{ opacity: 0, y: 8 }}
@@ -172,14 +172,17 @@ export default function Install() {
               Instale em segundos
             </div>
             <h1 className="text-[26px] font-semibold text-foreground leading-tight tracking-tight">
-              Já Limpo na sua<br />tela inicial
+              Deixe o Já Limpo<br />na sua tela inicial
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
               {platform
-                ? `Detectamos ${platform.label} · ${platform.browserLabel}. Ajuste se preferir.`
-                : "Rápido, direto e sempre à mão. Sem baixar da loja."}
+                ? `Detectamos ${platform.label} · ${platform.browserLabel}.`
+                : "Rápido, direto e sempre à mão."}
             </p>
           </motion.section>
+
+          {/* Animated pointing hint */}
+          <AnimatedInstallHint os={os} browser={browser} />
 
           {/* Quick install (Chromium: Android & Desktop) */}
           {deferredPrompt && (
@@ -194,6 +197,7 @@ export default function Install() {
               Instalar agora
             </motion.button>
           )}
+
 
           {/* OS tabs */}
           <section>
