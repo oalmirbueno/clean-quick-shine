@@ -26,7 +26,7 @@ import { Logo } from "@/components/ui/Logo";
 import appPreview from "@/assets/screenshots/app-preview.png";
 import appPreviewNext from "@/assets/screenshots/app-preview-next.png";
 
-import { useInstalledPwa } from "@/hooks/useInstalledPwa";
+import { markPwaInstalled, useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { useIsMobileDevice, useIsStandalone } from "@/hooks/useIsStandalone";
 import {
   detectPlatform,
@@ -64,6 +64,19 @@ export default function Install() {
   const [browser, setBrowser] = useState<Browser>("other");
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [manuallyInstalled, setManuallyInstalled] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("jl_pwa_installed") === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  const confirmInstalled = () => {
+    markPwaInstalled();
+    setManuallyInstalled(true);
+    setIsInstalled(true);
+  };
 
   useEffect(() => {
     const p = detectPlatform();
@@ -211,7 +224,7 @@ export default function Install() {
 
   const isDesktopOs = os === "windows" || os === "macos" || os === "linux";
   const showQr = isDesktopOs && viewportIsWide;
-  const installedReady = isStandaloneMode || isInstalled || installedPwa;
+  const installedReady = isStandaloneMode || isInstalled || installedPwa || manuallyInstalled;
   const canOpenAuthHere = isStandaloneMode || !isMobileViewport;
 
   useEffect(() => {
@@ -305,9 +318,26 @@ export default function Install() {
                 <Smartphone className="w-5 h-5 text-primary mx-auto mb-2" />
                 <p className="text-sm font-semibold">Abra pelo ícone do app</p>
                 <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                  No navegador o acesso fica protegido. Use o ícone do Já Limpo na tela inicial.
+                  Feche esta aba e toque no ícone do Já Limpo na sua tela inicial.
                 </p>
               </div>
+            )}
+
+            {!isStandaloneMode && (
+              <button
+                onClick={() => {
+                  setManuallyInstalled(false);
+                  setIsInstalled(false);
+                  try {
+                    localStorage.removeItem("jl_pwa_installed");
+                  } catch {
+                    /* noop */
+                  }
+                }}
+                className="mb-4 text-[11px] text-neutral-500 hover:text-neutral-300 underline underline-offset-2"
+              >
+                Ainda não instalei, voltar ao tutorial
+              </button>
             )}
 
             <section className="w-full rounded-3xl bg-neutral-900/50 border border-neutral-800 p-5 space-y-3">
@@ -570,6 +600,15 @@ export default function Install() {
           >
             <Share className="w-4 h-4" />
             Compartilhar com um amigo
+          </button>
+
+          {/* Already installed shortcut — works on iOS Safari/Chrome where auto-detection isn't possible */}
+          <button
+            onClick={confirmInstalled}
+            className="w-full py-3 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-neutral-200 text-sm font-medium hover:bg-neutral-900 transition-colors inline-flex items-center justify-center gap-2"
+          >
+            <Check className="w-4 h-4 text-primary" strokeWidth={2.4} />
+            Já instalei — abrir o app
           </button>
 
           <div className="flex flex-col gap-2">
