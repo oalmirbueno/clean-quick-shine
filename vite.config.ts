@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     mode !== "development" && VitePWA({
       registerType: "autoUpdate",
+      injectRegister: null,
       includeAssets: [
         "favicon.ico",
         "robots.txt",
@@ -26,9 +27,12 @@ export default defineConfig(({ mode }) => ({
         "apple-splash-*.png",
       ],
       manifest: false,
+      devOptions: {
+        enabled: false,
+      },
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,woff,ttf}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2,woff,ttf}"],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/, /^\/supabase/, /^\/__/, /^\/~oauth/],
         cleanupOutdatedCaches: true,
@@ -70,15 +74,27 @@ export default defineConfig(({ mode }) => ({
               },
             },
           },
-          // Images - Cache First
+          // Hashed build images: aggressive cache is safe because filenames change on deploy.
           {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+            urlPattern: /\/assets\/.*-[A-Za-z0-9_-]{8,}\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
             handler: "CacheFirst",
             options: {
-              cacheName: "images-cache",
+              cacheName: "hashed-images-cache",
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+          // Public icons/screenshots keep the same URL, so revalidate them to avoid stale PWA visuals.
+          {
+            urlPattern: /\/(?:icons\/.*|pwa-.*|apple-touch-icon\.png|favicon\.png)$/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "public-images-cache",
+              expiration: {
+                maxEntries: 80,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
               },
             },
           },

@@ -116,6 +116,18 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+
+  img {
+    height: auto;
+  }
+
   /* Improve focus states */
   *:focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
