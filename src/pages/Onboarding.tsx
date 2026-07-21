@@ -113,7 +113,7 @@ export default function Onboarding() {
 
             {forceInstall && (
               <InfoNote>
-                O Já Limpo funciona melhor como aplicativo instalado — mais
+                O Já Limpo funciona melhor como aplicativo instalado, mais
                 rápido, com notificações e sempre atualizado.
               </InfoNote>
             )}
@@ -182,7 +182,8 @@ export default function Onboarding() {
             onClick={goLogin}
             className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
           >
-            Sou diarista — continuar pelo navegador
+            Sou diarista, continuar pelo navegador
+
           </button>
         </div>
       )}
@@ -274,6 +275,7 @@ function ChoiceCard({
 
 function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
   const [copied, setCopied] = useState(false);
+  const [os, setOs] = useState<"ios" | "android">("ios");
   const url = typeof window !== "undefined" ? window.location.origin + "/" : "";
 
   const copyLink = async () => {
@@ -287,20 +289,35 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
     }
   };
 
+  const steps =
+    os === "ios"
+      ? [
+          { title: "Abra o link no iPhone", body: "Aponte a câmera para o QR ou cole o link no Safari." },
+          { title: "Toque em Compartilhar", body: "Ícone de quadrado com seta na barra inferior do Safari." },
+          { title: "Adicionar à Tela de Início", body: "Role o menu e confirme em Adicionar no canto superior." },
+          { title: "Abra pelo ícone Já Limpo", body: "Faça login ou crie sua conta em segundos." },
+        ]
+      : [
+          { title: "Abra o link no Android", body: "Aponte a câmera para o QR ou cole o link no Chrome." },
+          { title: "Toque no menu do Chrome", body: "Três pontinhos no canto superior direito." },
+          { title: "Instalar aplicativo", body: "Escolha Instalar app ou Adicionar à tela inicial." },
+          { title: "Abra pelo ícone Já Limpo", body: "Faça login ou crie sua conta em segundos." },
+        ];
+
   return (
     <AuthLayout
       eyebrow={
         <>
-          <Sparkles className="w-3 h-3" /> Já Limpo funciona no seu celular
+          <Sparkles className="w-3 h-3" /> Já Limpo é feito para celular
         </>
       }
       title="Abra no seu celular"
-      subtitle="O Já Limpo foi feito para iOS e Android. Aponte a câmera do celular para o QR ou copie o link."
+      subtitle="Escaneie o QR ou copie o link. Depois siga o passo a passo do seu sistema."
       showTrust
     >
       <div className="space-y-5">
         <div className="rounded-3xl border border-border/60 bg-card p-6 flex flex-col items-center gap-4">
-          <div className="rounded-2xl bg-white p-3 shadow-sm">
+          <div className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-border/40">
             <QRCodeSVG
               value={url}
               size={176}
@@ -312,7 +329,7 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <QrCode className="w-3.5 h-3.5 text-primary" />
-            Aponte a câmera do iPhone ou Android para o QR
+            Aponte a câmera do iPhone ou Android
           </div>
         </div>
 
@@ -337,11 +354,32 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
           </button>
         </div>
 
-        <ol className="space-y-2.5 text-sm text-foreground/90">
-          <StepLine n={1} text="Abra o link no celular (QR ou copiar)." />
-          <StepLine n={2} text="Toque em Instalar / Adicionar à tela inicial." />
-          <StepLine n={3} text="Abra o Já Limpo pelo ícone e faça login." />
-        </ol>
+        <div className="rounded-2xl bg-muted/40 border border-border/60 p-1 grid grid-cols-2 gap-1">
+          <OsTab
+            active={os === "ios"}
+            onClick={() => setOs("ios")}
+            icon={AppleIcon}
+            label="iPhone"
+          />
+          <OsTab
+            active={os === "android"}
+            onClick={() => setOs("android")}
+            icon={AndroidIcon}
+            label="Android"
+          />
+        </div>
+
+        <motion.ol
+          key={os}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-2.5"
+        >
+          {steps.map((s, i) => (
+            <StepLine key={i} n={i + 1} title={s.title} body={s.body} />
+          ))}
+        </motion.ol>
 
         <div className="pt-2 text-center">
           <button
@@ -349,7 +387,7 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
             onClick={onProWeb}
             className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
           >
-            Sou diarista — continuar pelo navegador
+            Sou diarista, continuar pelo navegador
           </button>
         </div>
       </div>
@@ -364,13 +402,60 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
   );
 }
 
-function StepLine({ n, text }: { n: number; text: string }) {
+function OsTab({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: (props: { className?: string }) => JSX.Element;
+  label: string;
+}) {
   return (
-    <li className="flex items-start gap-3">
-      <span className="shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        active
+          ? "flex items-center justify-center gap-2 py-2.5 rounded-xl bg-card text-foreground shadow-sm border border-border/60 text-sm font-semibold transition-all"
+          : "flex items-center justify-center gap-2 py-2.5 rounded-xl text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+      }
+    >
+      <Icon className={active ? "w-4 h-4 text-primary" : "w-4 h-4"} />
+      {label}
+    </button>
+  );
+}
+
+function StepLine({ n, title, body }: { n: number; title: string; body: string }) {
+  return (
+    <li className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card/60 p-3">
+      <span className="shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
         {n}
       </span>
-      <span className="leading-relaxed pt-0.5">{text}</span>
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-foreground leading-tight">{title}</div>
+        <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{body}</div>
+      </div>
     </li>
   );
 }
+
+function AppleIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M16.365 12.86c-.02-2.24 1.83-3.32 1.91-3.37-1.04-1.52-2.66-1.73-3.24-1.76-1.38-.14-2.69.81-3.39.81-.7 0-1.78-.79-2.93-.77-1.51.02-2.9.88-3.68 2.23-1.57 2.72-.4 6.74 1.13 8.95.75 1.08 1.64 2.29 2.79 2.24 1.12-.04 1.55-.72 2.9-.72 1.35 0 1.73.72 2.92.7 1.21-.02 1.97-1.09 2.71-2.18.85-1.25 1.2-2.46 1.22-2.52-.03-.01-2.34-.9-2.34-3.61zm-2.23-6.63c.61-.75 1.03-1.79.91-2.83-.88.04-1.96.59-2.6 1.33-.57.66-1.08 1.72-.94 2.74.99.08 2.01-.5 2.63-1.24z" />
+    </svg>
+  );
+}
+
+function AndroidIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M17.6 9.48l1.84-3.18a.4.4 0 10-.69-.4l-1.86 3.23a11.3 11.3 0 00-9.78 0L5.25 5.9a.4.4 0 10-.69.4l1.84 3.18A10.4 10.4 0 001.5 17.5h21a10.4 10.4 0 00-4.9-8.02zM7 15.25a.9.9 0 11.9-.9.9.9 0 01-.9.9zm10 0a.9.9 0 11.9-.9.9.9 0 01-.9.9z" />
+    </svg>
+  );
+}
+
