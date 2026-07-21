@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Logo";
 import appPreview from "@/assets/screenshots/app-preview.png";
+import appPreviewNext from "@/assets/screenshots/app-preview-next.png";
 
 import { useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { useIsMobileDevice, useIsStandalone } from "@/hooks/useIsStandalone";
@@ -604,67 +605,154 @@ function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.4 }}
-      className="relative w-full aspect-[16/11] rounded-3xl overflow-hidden flex items-center justify-center border border-primary/15 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]"
+      className="relative w-full aspect-[16/12] rounded-3xl overflow-hidden flex items-center justify-center"
       style={{
         background:
-          "linear-gradient(135deg, rgba(16,42,67,0.95) 0%, rgba(11,30,48,0.95) 100%)",
-        backdropFilter: "blur(20px) saturate(180%)",
+          "linear-gradient(140deg, rgba(16,42,67,0.85) 0%, rgba(11,30,48,0.9) 55%, rgba(16,42,67,0.75) 100%)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow:
+          "0 30px 80px -30px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.10)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
       }}
     >
-      {/* Mint glow */}
-      <div className="absolute inset-0 opacity-80 bg-[radial-gradient(circle_at_50%_115%,rgba(25,204,151,0.5),transparent_60%)]" />
-      <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_20%_-10%,rgba(255,255,255,0.08),transparent_55%)]" />
-      <div className="pointer-events-none absolute inset-0 rounded-3xl [background:linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0)_45%)]" />
+      {/* Ambient glows — no black surfaces */}
+      <div className="absolute inset-0 opacity-90 bg-[radial-gradient(ellipse_at_50%_120%,rgba(25,204,151,0.55),transparent_60%)]" />
+      <div className="absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_15%_-10%,rgba(255,255,255,0.12),transparent_50%)]" />
+      <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_85%_10%,rgba(25,204,151,0.25),transparent_55%)]" />
 
-      {/* Phone frame */}
+      {/* Grain / edge highlight */}
+      <div className="pointer-events-none absolute inset-0 rounded-3xl [background:linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0)_40%)]" />
+
+      {/* Dual-phone composition */}
+      <div className="relative w-full h-full flex items-center justify-center">
+        {/* Back phone — Pro/next step, tilted, glassy */}
+        <motion.div
+          initial={{ opacity: 0, x: 24, rotate: 10 }}
+          animate={{ opacity: 1, x: 0, rotate: 8 }}
+          transition={{ delay: 0.25, duration: 0.5 }}
+          className="absolute right-[14%] top-[10%]"
+          style={{ transformOrigin: "center" }}
+        >
+          <PhoneFrame
+            src={appPreviewNext}
+            label="Diarista"
+            size="sm"
+            pointerBottom={pointerBottom}
+            os={os}
+          />
+        </motion.div>
+
+        {/* Front phone — Client, main */}
+        <motion.div
+          initial={{ opacity: 0, x: -18, rotate: -6 }}
+          animate={{ opacity: 1, x: 0, rotate: -4 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+          className="absolute left-[14%] bottom-[6%] z-10"
+          style={{ transformOrigin: "center" }}
+        >
+          <PhoneFrame
+            src={appPreview}
+            label="Cliente"
+            size="md"
+            pointerBottom={pointerBottom}
+            os={os}
+            withPointer
+          />
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+function PhoneFrame({
+  src,
+  label,
+  size,
+  pointerBottom,
+  os,
+  withPointer = false,
+}: {
+  src: string;
+  label: string;
+  size: "sm" | "md";
+  pointerBottom: boolean;
+  os: OS;
+  withPointer?: boolean;
+}) {
+  const dim =
+    size === "md"
+      ? { w: 138, h: 230 }
+      : { w: 118, h: 200 };
+
+  return (
+    <div className="relative" style={{ width: dim.w, height: dim.h }}>
+      {/* Halo */}
       <div
-        className="relative w-[150px] h-[230px] rounded-[32px] overflow-hidden"
+        className="absolute -inset-3 rounded-[36px] blur-2xl opacity-60"
+        style={{ background: "radial-gradient(circle,rgba(25,204,151,0.45),transparent 70%)" }}
+      />
+      {/* Frame */}
+      <div
+        className="relative w-full h-full rounded-[30px] overflow-hidden"
         style={{
-          background: "#0B1E30",
-          border: "1px solid rgba(25,204,151,0.35)",
+          background:
+            "linear-gradient(160deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.04) 100%)",
+          border: "1px solid rgba(255,255,255,0.25)",
           boxShadow:
-            "0 12px 40px -8px rgba(0,0,0,0.6), 0 0 0 3px rgba(11,30,48,0.9), inset 0 1px 0 rgba(255,255,255,0.14)",
+            "0 20px 50px -12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.28), 0 0 0 2px rgba(16,42,67,0.55)",
+          backdropFilter: "blur(14px) saturate(180%)",
+          WebkitBackdropFilter: "blur(14px) saturate(180%)",
         }}
       >
         {/* Notch */}
-        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-14 h-3 rounded-full bg-black/70 border border-white/5 z-30" />
+        <div
+          className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-2.5 rounded-full z-30"
+          style={{ background: "rgba(11,30,48,0.85)", border: "1px solid rgba(255,255,255,0.08)" }}
+        />
 
         {/* Screen */}
-        <div className="absolute inset-[6px] rounded-[26px] overflow-hidden bg-white flex flex-col">
+        <div className="absolute inset-[5px] rounded-[24px] overflow-hidden bg-white flex flex-col">
           {/* Top browser bar */}
-          <div className="relative shrink-0 h-6 flex items-center gap-1 px-2 border-b border-primary/25 bg-[#F2FBF7]">
+          <div
+            className="relative shrink-0 h-5 flex items-center gap-1 px-1.5 border-b"
+            style={{ background: "#F2FBF7", borderColor: "rgba(25,204,151,0.22)" }}
+          >
             <div className="w-1 h-1 rounded-full bg-primary/40" />
             <div className="w-1 h-1 rounded-full bg-primary/25" />
             <div className="w-1 h-1 rounded-full bg-primary/25" />
-            <div className="flex-1 mx-1 h-2 rounded-sm bg-primary/10" />
-            {!pointerBottom && (
+            <div className="flex-1 mx-1 h-1.5 rounded-sm bg-primary/10" />
+            {withPointer && !pointerBottom && (
               <motion.div
                 animate={{ scale: [1, 1.15, 1] }}
                 transition={{ duration: 1.6, repeat: Infinity }}
-                className="w-4 h-4 rounded bg-primary/20 border border-primary/70 flex items-center justify-center"
+                className="w-3.5 h-3.5 rounded bg-primary/20 border border-primary/70 flex items-center justify-center"
               >
                 {os === "android" ? (
-                  <MoreVertical className="w-2.5 h-2.5 text-primary" />
+                  <MoreVertical className="w-2 h-2 text-primary" />
                 ) : (
-                  <Download className="w-2.5 h-2.5 text-primary" />
+                  <Download className="w-2 h-2 text-primary" />
                 )}
               </motion.div>
             )}
           </div>
 
-          {/* Real app screenshot — contained, no overlap */}
-          <div className="flex-1 min-h-0 bg-white flex items-start justify-center overflow-hidden">
+          {/* Real screenshot */}
+          <div className="flex-1 min-h-0 bg-white overflow-hidden">
             <img
-              src={appPreview}
-              alt="Prévia real do app Já Limpo"
+              src={src}
+              alt={`Prévia real ${label}`}
               className="w-full h-full object-cover object-top"
               loading="lazy"
             />
           </div>
 
-          {/* iOS bottom bar with pointer */}
-          {pointerBottom && (
-            <div className="relative shrink-0 h-7 flex items-center justify-around px-2 border-t border-primary/25 bg-[#F2FBF7]">
+          {/* iOS bottom bar with share pointer */}
+          {withPointer && pointerBottom && (
+            <div
+              className="relative shrink-0 h-6 flex items-center justify-around px-2 border-t"
+              style={{ background: "#F2FBF7", borderColor: "rgba(25,204,151,0.22)" }}
+            >
               <div className="w-2 h-2 rounded bg-primary/25" />
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
@@ -679,7 +767,20 @@ function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
           )}
         </div>
       </div>
-    </motion.div>
+
+      {/* Label chip */}
+      <div
+        className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full text-[9px] font-semibold tracking-wider uppercase whitespace-nowrap"
+        style={{
+          background: "rgba(11,30,48,0.85)",
+          color: "#19CC97",
+          border: "1px solid rgba(25,204,151,0.4)",
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        {label}
+      </div>
+    </div>
   );
 }
 
