@@ -2,34 +2,78 @@ import { useEffect, useState } from "react";
 import { isNativeApp } from "@/lib/platform";
 import { getResponsiveViewportWidth } from "@/lib/platformDetect";
 
+type NavigatorWithStandalone = Navigator & {
+  standalone?: boolean;
+  getInstalledRelatedApps?: () => Promise<Array<{ platform: string }>>;
+};
+
+/**
+ * Sinal síncrono robusto: verdadeiro se o app está rodando AGORA como
+ * PWA instalado. Combina múltiplos sinais para cobrir iOS Safari, iOS
+ * Chrome, Android Chrome e a casca nativa Capacitor.
+ */
+export function detectInstalledNow(): boolean {
+  if (typeof window === "undefined") return false;
+  if (isNativeApp()) return true;
+  const nav = window.navigator as NavigatorWithStandalone;
+  try {
+    if (window.matchMedia("(display-mode: standalone)").matches) return true;
+    if (window.matchMedia("(display-mode: fullscreen)").matches) return true;
+    if (window.matchMedia("(display-mode: minimal-ui)").matches) return true;
+  } catch {
+    /* noop */
+  }
+  // iOS Safari / iOS Chrome / iOS Edge (todos usam WebKit e expõem esta flag
+  // quando lançados a partir do ícone salvo na tela inicial).
+  if (nav.standalone === true) return true;
+  // Referrer android-app:// indica que o Chrome abriu o PWA como app.
+  if (document.referrer.startsWith("android-app://")) return true;
+  return false;
+}
+
 /**
  * Detecta se o app está rodando como PWA instalado (standalone).
- * Inclui detecção iOS (navigator.standalone), modo display-mode e a casca
- * nativa Capacitor (que conta como "instalado" por definição).
+ * Reavalia em display-mode change, visibilitychange e focus para pegar
+ * o caso de o iOS restaurar a webview em standalone tardiamente.
  */
 export function useIsStandalone() {
-  const [isStandalone, setIsStandalone] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    if (isNativeApp()) return true;
-    try {
-      if (window.matchMedia("(display-mode: standalone)").matches) return true;
-      if ((window.navigator as any).standalone === true) return true;
-    } catch {
-      /* noop */
-    }
-    return false;
-  });
+  const [isStandalone, setIsStandalone] = useState<boolean>(detectInstalledNow);
 
   useEffect(() => {
     if (isNativeApp()) return;
-    const mq = window.matchMedia("(display-mode: standalone)");
-    const handler = (e: MediaQueryListEvent) => setIsStandalone(e.matches);
-    mq.addEventListener?.("change", handler);
-    return () => mq.removeEventListener?.("change", handler);
+    const update = () => setIsStandalone(detectInstalledNow());
+
+    const mqStandalone = window.matchMedia("(display-mode: standalone)");
+    const mqFullscreen = window.matchMedia("(display-mode: fullscreen)");
+    const mqMinimal = window.matchMedia("(display-mode: minimal-ui)");
+    const onVis = () => {
+      if (document.visibilityState === "visible") update();
+    };
+
+    mqStandalone.addEventListener?.("change", update);
+    mqFullscreen.addEventListener?.("change", update);
+    mqMinimal.addEventListener?.("change", update);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", update);
+    window.addEventListener("pageshow", update);
+
+    // Reavalia uma vez após montar (iOS às vezes reporta tarde).
+    const t = window.setTimeout(update, 250);
+
+    return () => {
+      mqStandalone.removeEventListener?.("change", update);
+      mqFullscreen.removeEventListener?.("change", update);
+      mqMinimal.removeEventListener?.("change", update);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("pageshow", update);
+      window.clearTimeout(t);
+    };
   }, []);
 
   return isStandalone;
 }
+
 
 /**
  * Retorna true se for um device mobile OU tablet (iOS/iPadOS/Android).
