@@ -602,68 +602,63 @@ function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.4 }}
-      className="relative w-full aspect-[16/11] rounded-3xl bg-neutral-950 border border-neutral-800 overflow-hidden flex items-center justify-center"
+      className="relative w-full aspect-[16/11] rounded-3xl bg-[#102A43] border border-white/10 overflow-hidden flex items-center justify-center"
     >
-      {/* Subtle mint radial glow, no gradient loudness */}
-      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_50%_120%,rgba(25,204,151,0.35),transparent_65%)]" />
+      {/* Subtle mint radial glow */}
+      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_120%,rgba(25,204,151,0.35),transparent_65%)]" />
+      <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.06),transparent_60%)]" />
 
       {/* Phone frame */}
-      <div className="relative w-[150px] h-[220px] rounded-[28px] bg-black border border-neutral-800 shadow-2xl overflow-hidden">
+      <div className="relative w-[150px] h-[220px] rounded-[28px] bg-[#0B1E30] border border-white/15 shadow-2xl overflow-hidden ring-1 ring-black/40">
         {/* Notch */}
-        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-neutral-900 rounded-full z-10" />
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-black/70 rounded-full z-20" />
 
         {/* Top browser bar */}
-        <div className="absolute inset-x-0 top-0 h-8 bg-neutral-950/90 border-b border-neutral-900 flex items-center gap-1 px-2 pt-3.5">
-          <div className="flex-1 h-2 rounded-sm bg-neutral-800" />
+        <div className="absolute inset-x-0 top-0 h-8 bg-[#0B1E30]/95 border-b border-white/10 flex items-center gap-1 px-2 pt-3.5 z-10">
+          <div className="flex-1 h-2 rounded-sm bg-white/10" />
           {!pointerBottom && (
-            <div className="relative">
-              <motion.div
-                animate={{ scale: [1, 1.15, 1] }}
-                transition={{ duration: 1.6, repeat: Infinity }}
-                className="w-3.5 h-3.5 rounded bg-primary/25 border border-primary/50 flex items-center justify-center"
-              >
-                {os === "android" ? (
-                  <MoreVertical className="w-2 h-2 text-primary" />
-                ) : (
-                  <Download className="w-2 h-2 text-primary" />
-                )}
-              </motion.div>
-            </div>
+            <motion.div
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 1.6, repeat: Infinity }}
+              className="w-3.5 h-3.5 rounded bg-primary/25 border border-primary/60 flex items-center justify-center"
+            >
+              {os === "android" ? (
+                <MoreVertical className="w-2 h-2 text-primary" />
+              ) : (
+                <Download className="w-2 h-2 text-primary" />
+              )}
+            </motion.div>
           )}
         </div>
 
-        {/* Page content */}
-        <div className="absolute inset-x-3 top-11 space-y-1.5">
-          <div className="h-1.5 rounded bg-neutral-800 w-3/4" />
-          <div className="h-1.5 rounded bg-neutral-900 w-1/2" />
-          <div className="mt-2 h-14 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center">
-            <Logo size="sm" />
-          </div>
-          <div className="h-1.5 rounded bg-neutral-900 w-2/3" />
-          <div className="h-1.5 rounded bg-neutral-900 w-1/2" />
-        </div>
+        {/* App screenshot */}
+        <img
+          src="/src/assets/screenshots/client-home.png"
+          alt="Prévia do app Já Limpo"
+          className="absolute inset-x-0 top-8 bottom-8 w-full h-[calc(100%-4rem)] object-cover object-top"
+          loading="lazy"
+        />
 
         {/* iOS bottom bar with pointer */}
         {pointerBottom && (
-          <div className="absolute inset-x-0 bottom-0 h-8 bg-neutral-950/90 border-t border-neutral-900 flex items-center justify-around px-2">
-            <div className="w-2.5 h-2.5 rounded bg-neutral-800" />
-            <div className="relative">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1.6, repeat: Infinity }}
-                className="w-4 h-4 rounded bg-primary/25 border border-primary/60 flex items-center justify-center"
-              >
-                <Share className="w-2.5 h-2.5 text-primary" />
-              </motion.div>
-            </div>
-            <div className="w-2.5 h-2.5 rounded bg-neutral-800" />
-            <div className="w-2.5 h-2.5 rounded bg-neutral-800" />
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-[#0B1E30]/95 border-t border-white/10 flex items-center justify-around px-2 z-10">
+            <div className="w-2.5 h-2.5 rounded bg-white/10" />
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1.6, repeat: Infinity }}
+              className="w-4 h-4 rounded bg-primary/25 border border-primary/60 flex items-center justify-center"
+            >
+              <Share className="w-2.5 h-2.5 text-primary" />
+            </motion.div>
+            <div className="w-2.5 h-2.5 rounded bg-white/10" />
+            <div className="w-2.5 h-2.5 rounded bg-white/10" />
           </div>
         )}
       </div>
     </motion.div>
   );
 }
+
 
 // ============================================================
 // Guide config
