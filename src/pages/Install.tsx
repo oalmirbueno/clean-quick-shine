@@ -523,7 +523,7 @@ export default function Install() {
           </section>
 
           {/* QR code: desktop only */}
-          {isDesktopOs && (
+          {showQr && (
             <section className="rounded-2xl bg-card border border-border/60 p-4 flex items-center gap-4">
               <div className="p-2 rounded-xl bg-white">
                 <QRCodeSVG value={window.location.origin} size={88} level="M" />
