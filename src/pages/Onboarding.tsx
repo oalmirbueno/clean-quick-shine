@@ -112,112 +112,27 @@ export default function Onboarding() {
             <ChoiceCard
               icon={LogIn}
               title="Sim, já tenho conta"
-              description={
-                forceInstall
-                  ? pwaInstalled
-                    ? "Abrir o app instalado"
-                    : "Abrir ou instalar o app"
-                  : "Entrar agora"
-              }
-              onClick={() => {
-                if (forceInstall && !pwaInstalled) setStep("hasAccountYes");
-                else goLogin();
-              }}
+              description={pwaInstalled ? "Abrir o app instalado" : "Entrar agora"}
+              onClick={goLogin}
             />
             <ChoiceCard
               icon={UserPlus}
               title="Não, é minha primeira vez"
-              description={
-                forceInstall
-                  ? pwaInstalled
-                    ? "Abrir o app e criar conta"
-                    : "Instalar o app e criar conta"
-                  : "Criar conta grátis"
-              }
-              onClick={() => {
-                if (forceInstall && !pwaInstalled) setStep("hasAccountNo");
-                else goRegister();
-              }}
+              description={pwaInstalled ? "Abrir o app e criar conta" : "Criar conta grátis"}
+              onClick={goRegister}
               primary
             />
 
             {forceInstall && !pwaInstalled && (
               <InfoNote>
-                O Já Limpo funciona melhor como aplicativo instalado, mais
-                rápido, com notificações e sempre atualizado.
+                Depois de entrar, mostramos como deixar o Já Limpo na sua tela
+                inicial em poucos toques.
               </InfoNote>
             )}
           </motion.div>
         )}
-
-
-        {step === "hasAccountYes" && (
-          <motion.div
-            key="hasAccountYes"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            <ChoiceCard
-              icon={CheckCircle2}
-              title="Sim, já instalei"
-              description="Abrir o app e entrar"
-              onClick={goLogin}
-              primary
-            />
-            <ChoiceCard
-              icon={Download}
-              title="Ainda não instalei"
-              description="Ver como instalar em segundos"
-              onClick={goInstall}
-            />
-
-            <InfoNote>
-              Depois de instalar, abra o Já Limpo pelo ícone na tela inicial.
-              As atualizações são automáticas ao reabrir o app.
-            </InfoNote>
-          </motion.div>
-        )}
-
-        {step === "hasAccountNo" && (
-          <motion.div
-            key="hasAccountNo"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            <ChoiceCard
-              icon={Download}
-              title="Instalar o app agora"
-              description="Rápido, sem loja. Depois criamos sua conta."
-              onClick={goInstall}
-              primary
-            />
-
-            <InfoNote>
-              Instalar deixa o app na tela inicial, com acesso mais rápido e
-              atualizações automáticas.
-            </InfoNote>
-          </motion.div>
-        )}
       </AnimatePresence>
 
-      {forceInstall && step === "welcome" && (
-        <div className="mt-5 text-center">
-          <button
-            type="button"
-            onClick={goLogin}
-            className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
-          >
-            Sou diarista, continuar pelo navegador
-
-          </button>
-        </div>
-      )}
 
       <p className="mt-6 text-[11px] text-center text-muted-foreground leading-relaxed">
         Ao continuar você aceita nossos{" "}
