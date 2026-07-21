@@ -14,6 +14,9 @@ import {
   Check,
   QrCode,
   Rocket,
+  Zap,
+  Wifi,
+  BellRing,
 } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
