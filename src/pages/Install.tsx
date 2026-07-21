@@ -368,18 +368,39 @@ function buildGuide(os: OS, browser: Browser): Guide {
 
   // ===== iOS / iPadOS =====
   if (iosFamily) {
-    if (browser !== "safari") {
+    if (browser === "chrome") {
       return {
-        title: `Instalar no ${deviceName}`,
+        title: `Instalar no ${deviceName} (Chrome)`,
         headerIcon: Smartphone,
-        warning:
-          "No iOS, a instalação só funciona pelo Safari. Copie o link e cole no Safari para instalar.",
         steps: [
-          { icon: Copy, text: "Copie o link do app (botão acima)" },
-          { icon: Share, text: "Abra o Safari e cole o link na barra de endereço" },
-          { icon: Share, text: "Toque no botão Compartilhar (quadrado com seta)" },
+          { icon: Share, text: "Toque no botão Compartilhar (quadrado com seta) na barra do Chrome" },
           { icon: Plus, text: 'Escolha "Adicionar à Tela de Início"' },
-          { icon: Check, text: 'Confirme em "Adicionar"' },
+          { icon: Check, text: 'Toque em "Adicionar" no canto superior direito' },
+          { icon: Smartphone, text: "Abra o Já Limpo pelo ícone na tela inicial" },
+        ],
+      };
+    }
+    if (browser === "edge") {
+      return {
+        title: `Instalar no ${deviceName} (Edge)`,
+        headerIcon: Smartphone,
+        steps: [
+          { icon: MoreVertical, text: "Toque no menu (…) na parte inferior do Edge" },
+          { icon: Plus, text: 'Escolha "Adicionar ao telefone" ou "Adicionar à Tela de Início"' },
+          { icon: Check, text: "Confirme para adicionar" },
+          { icon: Smartphone, text: "Abra o Já Limpo pelo ícone na tela inicial" },
+        ],
+      };
+    }
+    if (browser === "firefox") {
+      return {
+        title: `Instalar no ${deviceName} (Firefox)`,
+        headerIcon: Smartphone,
+        steps: [
+          { icon: MoreVertical, text: "Toque no menu do Firefox" },
+          { icon: Share, text: 'Escolha "Compartilhar"' },
+          { icon: Plus, text: '"Adicionar à Tela de Início"' },
+          { icon: Check, text: "Confirme para adicionar" },
         ],
       };
     }
