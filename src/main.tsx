@@ -3,8 +3,8 @@ import App from "./App.tsx";
 import "./index.css";
 import { isNativeApp } from "@/lib/platform";
 
-const PREVIEW_CACHE_RESET_KEY = "jalimpo_preview_cache_reset_simple_home_v4";
-const PWA_CACHE_RESET_KEY = "jalimpo_pwa_cache_reset_bottom_nav_v2";
+const PREVIEW_CACHE_RESET_KEY = "jalimpo_preview_cache_reset_v3_identity_v5";
+const PWA_CACHE_RESET_KEY = "jalimpo_pwa_cache_reset_v3_identity_v3";
 
 function isLovablePreview() {
   try {
