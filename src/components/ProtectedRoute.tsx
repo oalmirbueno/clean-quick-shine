@@ -25,10 +25,6 @@ export function ProtectedRoute({
   const isMobile = useIsMobileDevice();
   const isStandalone = useIsStandalone();
 
-  if (isMobile && !isStandalone) {
-    return <Navigate to="/install" replace />;
-  }
-
   // Timeout de segurança para evitar loading infinito
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -50,6 +46,10 @@ export function ProtectedRoute({
 
   if (timedOut) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (isMobile && !isStandalone) {
+    return <Navigate to="/install" replace />;
   }
 
   // Show loading while auth or roles are being fetched
