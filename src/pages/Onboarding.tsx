@@ -60,6 +60,13 @@ export default function Onboarding() {
     if (isStandalone) navigate("/login", { replace: true });
   }, [isStandalone, navigate]);
 
+  // Navegador mobile sem PWA instalado: força o /install (com tutorial animado).
+  useEffect(() => {
+    if (forceInstall && !pwaInstalled) {
+      navigate("/install", { replace: true });
+    }
+  }, [forceInstall, pwaInstalled, navigate]);
+
   if (showDesktopHandoff) {
     return <DesktopHandoff onProWeb={goLogin} />;
   }
@@ -100,16 +107,19 @@ export default function Onboarding() {
           onClick={goRegister}
           primary
         />
-
-        {forceInstall && !pwaInstalled && (
-          <InfoNote>
-            Depois de entrar, mostramos como deixar o Já Limpo na sua tela
-            inicial em poucos toques.
-          </InfoNote>
-        )}
       </motion.div>
 
-
+      {!isMobile && (
+        <div className="pt-4 text-center">
+          <button
+            type="button"
+            onClick={goLogin}
+            className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+          >
+            Sou diarista, continuar pelo navegador
+          </button>
+        </div>
+      )}
 
       <p className="mt-6 text-[11px] text-center text-muted-foreground leading-relaxed">
         Ao continuar você aceita nossos{" "}
@@ -120,6 +130,7 @@ export default function Onboarding() {
     </AuthLayout>
   );
 }
+
 
 function InstalledStatusCard({ onOpen }: { onOpen: () => void }) {
   return (

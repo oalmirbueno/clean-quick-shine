@@ -563,16 +563,16 @@ export default function Install() {
 
           <div className="flex flex-col gap-2 pt-1">
             <button
-              onClick={() => navigate("/login")}
-              className="w-full py-3 rounded-2xl bg-card border border-border/60 text-foreground text-sm font-medium hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
+              onClick={() => navigate("/login?web=1")}
+              className="w-full py-2 text-[12px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
             >
-              <LogIn className="w-4 h-4" />
-              Já tenho conta · Entrar
+              Sou diarista, continuar pelo navegador
             </button>
             <p className="text-center text-[11px] text-muted-foreground pb-[env(safe-area-inset-bottom,0px)]">
               Atualizações são automáticas ao abrir o app.
             </p>
           </div>
+
         </div>
       </main>
     </div>
