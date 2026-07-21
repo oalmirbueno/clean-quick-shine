@@ -481,7 +481,8 @@ export default function Install() {
               </div>
             </section>
           )}
-          </section>
+
+
 
 
           <div className="flex flex-col gap-2 pt-1">
