@@ -20,7 +20,7 @@ function shouldSkipServiceWorker(): boolean {
     return true;
   }
 
-  if (new URLSearchParams(window.location.search).has("sw")) return true;
+  if (new URLSearchParams(window.location.search).get("sw") === "off") return true;
 
   const host = window.location.hostname;
   if (
@@ -55,10 +55,8 @@ async function cleanupAppServiceWorker() {
 }
 
 export function useRegisterSW(): UseRegisterSWReturn {
-  const [needRefresh, setNeedRefresh] = useState(false);
   const [offlineReady, setOfflineReady] = useState(false);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
-  const [swVersion, setSwVersion] = useState("");
 
   useEffect(() => {
     // Na casca nativa os assets são servidos localmente pelo Capacitor;
@@ -154,5 +152,5 @@ export function useRegisterSW(): UseRegisterSWReturn {
     registration.waiting.postMessage({ type: "SKIP_WAITING" });
   }, [registration]);
 
-  return { needRefresh, offlineReady, updateServiceWorker, swVersion };
+  return { needRefresh: false, offlineReady, updateServiceWorker, swVersion: "" };
 }
