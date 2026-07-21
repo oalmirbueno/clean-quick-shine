@@ -15,9 +15,13 @@ import {
   Copy,
   Menu,
   LogIn,
+  ChevronRight,
+  RotateCcw,
+  QrCode,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Logo";
 import {
   detectPlatform,
