@@ -619,14 +619,6 @@ export default function Install() {
             Compartilhar com um amigo
           </button>
 
-          {/* Already installed shortcut — works on iOS Safari/Chrome where auto-detection isn't possible */}
-          <button
-            onClick={confirmInstalled}
-            className="w-full py-3 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-neutral-200 text-sm font-medium hover:bg-neutral-900 transition-colors inline-flex items-center justify-center gap-2"
-          >
-            <Check className="w-4 h-4 text-primary" strokeWidth={2.4} />
-            Já instalei — abrir o app
-          </button>
 
           <div className="flex flex-col gap-2">
             {!isMobileViewport && (
