@@ -3,6 +3,26 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Home, ClipboardList, User, Calendar, Wallet } from "lucide-react";
 import { forwardRef } from "react";
 
+const HIDE_ON_PREFIXES = [
+  "/client/checkout",
+  "/client/matching",
+  "/client/offer",
+  "/client/rating",
+  "/client/order-tracking",
+  "/client/schedule",
+  "/client/service",
+  "/client/cancel",
+  "/chat/order",
+  "/pro/order",
+  "/pro/withdraw",
+  "/pro/verification",
+  "/pro/plan",
+  "/pro/support",
+  "/pro/quality",
+  "/pro/availability",
+  "/pro/ranking",
+];
+
 interface NavItem {
   icon: React.ReactNode;
   activeIcon: React.ReactNode;
