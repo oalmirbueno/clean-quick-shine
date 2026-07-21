@@ -123,7 +123,17 @@ export default function Install() {
 
   const guide = useMemo(() => buildGuide(os, browser), [os, browser]);
   const tutorialSteps = useMemo(() => guide.steps.slice(0, 3), [guide]);
-  const storageKey = `jl_install_tutorial:${os}:${browser}:${tutorialSteps.length}`;
+  // Track viewport mode so tutorial progress is stored separately for desktop vs mobile/tablet.
+  const [viewportIsWide, setViewportIsWide] = useState<boolean>(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : true,
+  );
+  useEffect(() => {
+    const onResize = () => setViewportIsWide(window.innerWidth >= 1024);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const viewportMode = viewportIsWide ? "desktop" : "mobile";
+  const storageKey = `jl_install_tutorial:${viewportMode}:${os}:${browser}:${tutorialSteps.length}`;
 
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<boolean[]>(() => tutorialSteps.map(() => false));
@@ -164,17 +174,6 @@ export default function Install() {
   }, [storageKey, completed, activeStep]);
 
   const isDesktopOs = os === "windows" || os === "macos" || os === "linux";
-
-  // Also react to viewport width so the preview device switcher (mobile/tablet)
-  // hides the QR immediately even when UA still reports desktop.
-  const [viewportIsWide, setViewportIsWide] = useState<boolean>(() =>
-    typeof window !== "undefined" ? window.innerWidth >= 1024 : true,
-  );
-  useEffect(() => {
-    const onResize = () => setViewportIsWide(window.innerWidth >= 1024);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
   const showQr = isDesktopOs && viewportIsWide;
 
   const markStepDone = () => {
