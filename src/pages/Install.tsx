@@ -224,7 +224,7 @@ export default function Install() {
 
   const isDesktopOs = os === "windows" || os === "macos" || os === "linux";
   const showQr = isDesktopOs && viewportIsWide;
-  const installedReady = isStandaloneMode || isInstalled || installedPwa;
+  const installedReady = isStandaloneMode || isInstalled || installedPwa || manuallyInstalled;
   const canOpenAuthHere = isStandaloneMode || !isMobileViewport;
 
   useEffect(() => {
