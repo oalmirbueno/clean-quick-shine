@@ -9,7 +9,6 @@ import {
   LogIn,
   UserPlus,
   CheckCircle2,
-  ChevronLeft,
 } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
