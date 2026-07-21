@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -11,71 +11,34 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useIsStandalone, useIsMobileDevice } from "@/hooks/useIsStandalone";
 
-type Step = "welcome" | "installed";
+type Step = "welcome" | "hasAccountYes" | "hasAccountNo";
 
 /**
- * Welcome/entry screen.
- * - PWA já instalado (standalone) → redireciona direto para /login.
- * - Navegador mobile (não instalado) → wizard de 2 passos.
- * - Desktop → CTAs diretos (criar conta / entrar).
+ * Welcome / entry wizard.
+ *
+ * Dinâmica única (funciona em qualquer viewport, adaptando o texto):
+ *  1. "Você já tem cadastro?"
+ *      → Sim: pergunta se já instalou o app (só faz sentido em mobile-browser).
+ *              - Instalado ou desktop/PWA → /login
+ *              - Não instalado (mobile-browser) → /install
+ *      → Não: em mobile-browser manda instalar antes; em desktop/PWA vai direto para /register.
  */
 export default function Onboarding() {
   const navigate = useNavigate();
   const isStandalone = useIsStandalone();
   const isMobile = useIsMobileDevice();
 
-  // PWA aberto standalone → o usuário já instalou, então vai direto para o login.
-  useEffect(() => {
-    if (isStandalone) navigate("/login", { replace: true });
-  }, [isStandalone, navigate]);
-
-  // Wizard "cadastrado? / instalado?" só faz sentido em navegador mobile.
-  const showWizard = useMemo(() => isMobile && !isStandalone, [isMobile, isStandalone]);
+  // Precisa instalar antes? Só se estiver no navegador mobile e ainda não for standalone.
+  const needsInstall = useMemo(() => isMobile && !isStandalone, [isMobile, isStandalone]);
 
   const [step, setStep] = useState<Step>("welcome");
 
+  const goLogin = () => navigate("/login");
+  const goRegister = () => navigate("/register");
+  const goInstall = () => navigate("/install");
 
-
-  if (!showWizard) {
-    return (
-      <AuthLayout
-        eyebrow={
-          <>
-            <Sparkles className="w-3 h-3" /> Bem-vindo ao Já Limpo
-          </>
-        }
-        title="Limpeza profissional, em poucos toques."
-        subtitle="Agende, acompanhe e pague com segurança. Tudo em um só app."
-      >
-        <div className="space-y-3">
-          <PrimaryButton fullWidth size="lg" onClick={() => navigate("/register")} className="group">
-            Criar conta grátis
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-          </PrimaryButton>
-
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate("/login")}
-            className="w-full h-12 rounded-2xl border border-border/60 bg-card text-foreground font-medium hover:bg-muted transition-colors"
-          >
-            Já tenho conta · Entrar
-          </motion.button>
-        </div>
-
-        <p className="mt-5 text-[11px] text-center text-muted-foreground leading-relaxed">
-          Ao continuar você aceita nossos{" "}
-          <a href="/terms" className="text-primary hover:underline">termos</a>{" "}
-          e{" "}
-          <a href="/privacy" className="text-primary hover:underline">política de privacidade</a>.
-        </p>
-      </AuthLayout>
-    );
-  }
-
-  // ===== Wizard mobile-browser =====
   return (
     <AuthLayout
       onBack={step === "welcome" ? undefined : () => setStep("welcome")}
@@ -87,17 +50,23 @@ export default function Onboarding() {
       title={
         step === "welcome"
           ? "Você já tem cadastro?"
-          : "Você já instalou o app?"
+          : step === "hasAccountYes"
+            ? "Já instalou o app?"
+            : "Vamos começar do jeito certo"
       }
       subtitle={
         step === "welcome"
-          ? "Escolha uma opção para continuar."
-          : "Vamos abrir o app do jeito certo."
+          ? "Em poucos toques você agenda sua limpeza."
+          : step === "hasAccountYes"
+            ? "Assim você abre o Já Limpo sempre que precisar."
+            : needsInstall
+              ? "Instale o app antes de criar sua conta."
+              : "Crie sua conta grátis em segundos."
       }
-      showTrust={false}
+      showTrust={step === "welcome"}
     >
       <AnimatePresence mode="wait">
-        {step === "welcome" ? (
+        {step === "welcome" && (
           <motion.div
             key="welcome"
             initial={{ opacity: 0, y: 8 }}
@@ -109,20 +78,28 @@ export default function Onboarding() {
             <ChoiceCard
               icon={LogIn}
               title="Sim, já tenho conta"
-              description="Ver como abrir ou instalar o app"
-              onClick={() => setStep("installed")}
+              description={needsInstall ? "Abrir ou instalar o app" : "Entrar agora"}
+              onClick={() => {
+                if (needsInstall) setStep("hasAccountYes");
+                else goLogin();
+              }}
             />
             <ChoiceCard
               icon={UserPlus}
               title="Não, é minha primeira vez"
-              description="Instale o app e crie sua conta"
-              onClick={() => navigate("/install")}
+              description={needsInstall ? "Instalar o app e criar conta" : "Criar conta grátis"}
+              onClick={() => {
+                if (needsInstall) setStep("hasAccountNo");
+                else goRegister();
+              }}
               primary
             />
           </motion.div>
-        ) : (
+        )}
+
+        {step === "hasAccountYes" && (
           <motion.div
-            key="installed"
+            key="hasAccountYes"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -133,23 +110,50 @@ export default function Onboarding() {
               icon={CheckCircle2}
               title="Sim, já instalei"
               description="Abrir o app e entrar"
-              onClick={() => navigate("/login")}
+              onClick={goLogin}
               primary
             />
             <ChoiceCard
               icon={Download}
               title="Ainda não instalei"
               description="Ver como instalar em segundos"
-              onClick={() => navigate("/install")}
+              onClick={goInstall}
             />
 
-            <div className="mt-4 rounded-2xl bg-muted/40 border border-border/60 p-3.5 flex items-start gap-3">
-              <Smartphone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Depois de instalar, abra o Já Limpo pelo ícone na tela inicial.
-                As atualizações são automáticas ao abrir o app.
-              </p>
-            </div>
+            <InfoNote>
+              Depois de instalar, abra o Já Limpo pelo ícone na tela inicial.
+              As atualizações são automáticas ao reabrir o app.
+            </InfoNote>
+          </motion.div>
+        )}
+
+        {step === "hasAccountNo" && (
+          <motion.div
+            key="hasAccountNo"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-3"
+          >
+            <ChoiceCard
+              icon={Download}
+              title="Instalar o app agora"
+              description="Rápido, sem loja. Depois criamos sua conta."
+              onClick={goInstall}
+              primary
+            />
+            <ChoiceCard
+              icon={UserPlus}
+              title="Prefiro criar conta pelo navegador"
+              description="Você pode instalar depois"
+              onClick={goRegister}
+            />
+
+            <InfoNote>
+              Instalar antes deixa o app na tela inicial, mais rápido e com
+              atualizações automáticas.
+            </InfoNote>
           </motion.div>
         )}
       </AnimatePresence>
@@ -161,6 +165,15 @@ export default function Onboarding() {
         <a href="/privacy" className="text-primary hover:underline">política de privacidade</a>.
       </p>
     </AuthLayout>
+  );
+}
+
+function InfoNote({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mt-4 rounded-2xl bg-muted/40 border border-border/60 p-3.5 flex items-start gap-3">
+      <Smartphone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+      <p className="text-xs text-muted-foreground leading-relaxed">{children}</p>
+    </div>
   );
 }
 
