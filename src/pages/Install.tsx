@@ -26,7 +26,7 @@ import { Logo } from "@/components/ui/Logo";
 import appPreview from "@/assets/screenshots/app-preview.png";
 import appPreviewNext from "@/assets/screenshots/app-preview-next.png";
 
-import { markPwaInstalled, useInstalledPwa } from "@/hooks/useInstalledPwa";
+import { useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { useIsMobileDevice, useIsStandalone } from "@/hooks/useIsStandalone";
 import {
   detectPlatform,
@@ -72,11 +72,6 @@ export default function Install() {
     }
   });
 
-  const confirmInstalled = () => {
-    markPwaInstalled();
-    setManuallyInstalled(true);
-    setIsInstalled(true);
-  };
 
   useEffect(() => {
     const p = detectPlatform();
@@ -281,45 +276,62 @@ export default function Install() {
       <Shell>
         <div className="flex-1 overflow-y-auto">
           <div className="w-full max-w-md mx-auto px-6 py-10 flex flex-col items-center justify-center min-h-full">
-            <motion.div
+            <motion.button
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 16 }}
-              className="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/25 flex items-center justify-center mb-6"
+              transition={{ type: "spring", damping: 14 }}
+              onClick={() => {
+                if (canOpenAuthHere) {
+                  navigate("/");
+                } else {
+                  toast.info("Abra o Já Limpo pelo ícone na sua tela inicial", {
+                    description: "Feche esta aba e toque no ícone instalado.",
+                  });
+                }
+              }}
+              className="relative group mb-6 active:scale-95 transition-transform"
+              aria-label="Abrir o Já Limpo"
             >
-              <Check className="w-10 h-10 text-primary" strokeWidth={2.2} />
-            </motion.div>
+              <div className="absolute -inset-4 rounded-full bg-primary/25 blur-2xl opacity-70 group-hover:opacity-100 transition-opacity" />
+              <div className="relative w-28 h-28 rounded-[32px] bg-white/[0.04] border border-primary/30 flex items-center justify-center shadow-[0_20px_60px_-15px_rgba(25,204,151,0.5)]">
+                <Logo size="md" />
+              </div>
+              <motion.div
+                animate={{ boxShadow: ["0 0 0 0 rgba(25,204,151,0.5)", "0 0 0 16px rgba(25,204,151,0)"] }}
+                transition={{ duration: 1.8, repeat: Infinity }}
+                className="absolute inset-0 rounded-[32px] pointer-events-none"
+              />
+            </motion.button>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary text-[11px] font-semibold uppercase tracking-wider mb-3">
+              <Check className="w-3 h-3" strokeWidth={2.8} />
+              Já instalado neste aparelho
+            </div>
             <h1 className="text-[26px] font-semibold mb-2 text-center tracking-tight">
-              App instalado
+              Bem-vindo de volta
             </h1>
             <p className="text-neutral-400 text-center mb-8 text-sm max-w-xs leading-relaxed">
-              Abra o Já Limpo pelo ícone na tela inicial. Se quiser, convide alguém.
+              {canOpenAuthHere
+                ? "Toque na logo acima para entrar no app."
+                : "Feche esta aba e abra pelo ícone do Já Limpo na sua tela inicial."}
             </p>
 
-            {canOpenAuthHere ? (
+            {canOpenAuthHere && (
               <div className="w-full max-w-xs space-y-2 mb-6">
                 <button
-                  onClick={() => navigate("/register")}
+                  onClick={() => navigate("/login")}
                   className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Entrar
+                </button>
+                <button
+                  onClick={() => navigate("/register")}
+                  className="w-full py-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-white font-medium text-sm hover:bg-neutral-800/60 transition-colors inline-flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4" />
                   Criar conta grátis
                 </button>
-                <button
-                  onClick={() => navigate("/login")}
-                  className="w-full py-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-white font-medium text-sm hover:bg-neutral-800/60 transition-colors inline-flex items-center justify-center gap-2"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Já tenho conta
-                </button>
-              </div>
-            ) : (
-              <div className="w-full max-w-xs mb-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 p-4 text-center">
-                <Smartphone className="w-5 h-5 text-primary mx-auto mb-2" />
-                <p className="text-sm font-semibold">Abra pelo ícone do app</p>
-                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                  Feche esta aba e toque no ícone do Já Limpo na sua tela inicial.
-                </p>
               </div>
             )}
 
@@ -336,7 +348,7 @@ export default function Install() {
                 }}
                 className="mb-4 text-[11px] text-neutral-500 hover:text-neutral-300 underline underline-offset-2"
               >
-                Ainda não instalei, voltar ao tutorial
+                Não é este dispositivo, voltar ao tutorial
               </button>
             )}
 
@@ -602,14 +614,6 @@ export default function Install() {
             Compartilhar com um amigo
           </button>
 
-          {/* Already installed shortcut — works on iOS Safari/Chrome where auto-detection isn't possible */}
-          <button
-            onClick={confirmInstalled}
-            className="w-full py-3 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-neutral-200 text-sm font-medium hover:bg-neutral-900 transition-colors inline-flex items-center justify-center gap-2"
-          >
-            <Check className="w-4 h-4 text-primary" strokeWidth={2.4} />
-            Já instalei — abrir o app
-          </button>
 
           <div className="flex flex-col gap-2">
             {!isMobileViewport && (

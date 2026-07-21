@@ -18,6 +18,10 @@
     { "src": "/icons/icon-256.png", "type": "image/png", "sizes": "256x256", "purpose": "any maskable" },
     { "src": "/icons/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
   ],
+  "prefer_related_applications": false,
+  "related_applications": [
+    { "platform": "webapp", "url": "https://jalimpo.com/manifest.json", "id": "ja-limpo-app" }
+  ],
   "shortcuts": [
     { "name": "Início",       "short_name": "Início",  "url": "/client/home",    "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }] },
     { "name": "Meus Pedidos", "short_name": "Pedidos", "url": "/client/orders",  "icons": [{ "src": "/pwa-96x96.png", "sizes": "96x96" }] },
