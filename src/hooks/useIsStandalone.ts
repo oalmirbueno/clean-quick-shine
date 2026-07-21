@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { isNativeApp } from "@/lib/platform";
+import { getResponsiveViewportWidth } from "@/lib/platformDetect";
 
 /**
  * Detecta se o app está rodando como PWA instalado (standalone).
@@ -39,20 +40,35 @@ export function useIsMobileDevice() {
   const detect = () => {
     if (typeof window === "undefined") return false;
     const ua = window.navigator.userAgent.toLowerCase();
+    const width = getResponsiveViewportWidth();
     if (/iphone|ipad|ipod|android/.test(ua)) return true;
     // iPadOS 13+ reporta como "Macintosh". Detecta via maxTouchPoints.
     const nav = window.navigator as Navigator & { maxTouchPoints?: number };
     if (/macintosh/.test(ua) && (nav.maxTouchPoints ?? 0) > 1) return true;
     // Tablets Android/Windows com touch primário e viewport pequeno-médio.
     const isCoarse = window.matchMedia?.("(pointer: coarse)").matches;
-    if (isCoarse && window.innerWidth <= 1180) return true;
+    if (isCoarse && width <= 1180) return true;
+    // Preview responsivo: o User Agent continua desktop, mas a largura muda.
+    if (width < 1024) return true;
     return false;
   };
 
   const [isMobile, setIsMobile] = useState<boolean>(detect);
 
   useEffect(() => {
-    setIsMobile(detect());
+    const update = () => setIsMobile(detect());
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    window.visualViewport?.addEventListener("resize", update);
+    const mql = window.matchMedia("(max-width: 1023px)");
+    mql.addEventListener?.("change", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+      window.visualViewport?.removeEventListener("resize", update);
+      mql.removeEventListener?.("change", update);
+    };
   }, []);
 
   return isMobile;
