@@ -99,6 +99,24 @@ export default function Install() {
     }
   };
 
+  const shareUrl = async () => {
+    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+    if (nav.share) {
+      try {
+        await nav.share({
+          title: "Já Limpo",
+          text: "Instale o app Já Limpo",
+          url: window.location.origin,
+        });
+        return;
+      } catch {
+        /* user cancelled */
+      }
+    }
+    copyUrl();
+  };
+
+
   const guide = useMemo(() => buildGuide(os, browser), [os, browser]);
 
   // ====== Installed screen ======
