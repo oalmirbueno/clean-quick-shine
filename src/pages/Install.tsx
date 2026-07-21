@@ -9,15 +9,14 @@ import {
   MoreVertical,
   Check,
   ChevronLeft,
-  Sparkles,
   AlertCircle,
   Copy,
   Menu,
   LogIn,
   ChevronRight,
   RotateCcw,
-  QrCode,
   MessageCircle,
+  Sparkles,
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
@@ -35,7 +34,6 @@ import {
   type PlatformInfo,
 } from "@/lib/platformDetect";
 
-
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
@@ -48,9 +46,9 @@ interface Step {
 }
 
 /**
- * PWA install page.
- * Auto-detects OS + browser and shows the correct install path.
- * Users can still switch tabs manually if we misdetected.
+ * PWA install page — Midnight Premium.
+ * Always renders in dark theme regardless of system/app theme.
+ * Users choose the app theme after install.
  */
 export default function Install() {
   const navigate = useNavigate();
@@ -64,7 +62,6 @@ export default function Install() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
 
-  // Initial detect + subscribe to install/uninstall events.
   useEffect(() => {
     const p = detectPlatform();
     setPlatform(p);
@@ -82,7 +79,6 @@ export default function Install() {
     };
     const mq = window.matchMedia("(display-mode: standalone)");
     const handleDisplayChange = () => setIsInstalled(detectStandalone());
-
     const handleVisibility = () => {
       if (document.visibilityState === "visible") handleDisplayChange();
     };
@@ -100,7 +96,6 @@ export default function Install() {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("focus", handleDisplayChange);
     };
-
   }, []);
 
   const handleInstall = async () => {
@@ -145,10 +140,9 @@ export default function Install() {
     window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
   };
 
-
   const guide = useMemo(() => buildGuide(os, browser), [os, browser]);
   const tutorialSteps = useMemo(() => guide.steps.slice(0, 3), [guide]);
-  // Track viewport mode so tutorial progress is stored separately for desktop vs mobile/tablet.
+
   const [viewportIsWide, setViewportIsWide] = useState<boolean>(() =>
     typeof window !== "undefined" ? getResponsiveViewportWidth() >= 1024 : true,
   );
@@ -172,13 +166,13 @@ export default function Install() {
       observer?.disconnect();
     };
   }, []);
+
   const viewportMode = viewportIsWide ? "desktop" : "mobile";
   const storageKey = `jl_install_tutorial:${viewportMode}:${os}:${browser}:${tutorialSteps.length}`;
 
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<boolean[]>(() => tutorialSteps.map(() => false));
 
-  // Hydrate from localStorage when os/browser (and thus storageKey) change.
   useEffect(() => {
     try {
       const raw = localStorage.getItem(storageKey);
@@ -204,7 +198,6 @@ export default function Install() {
     setCompleted(tutorialSteps.map(() => false));
   }, [storageKey, tutorialSteps.length]);
 
-  // Persist on change.
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify({ completed, activeStep }));
@@ -218,8 +211,6 @@ export default function Install() {
   const installedReady = isStandaloneMode || isInstalled || installedPwa;
   const canOpenAuthHere = isStandaloneMode || !isMobileViewport;
 
-  // Auto-mark tutorial as fully completed when we detect the app is installed
-  // (user returned to /install after "Adicionar à Tela de Início" / appinstalled).
   useEffect(() => {
     if (!installedReady) return;
     if (tutorialSteps.length === 0) return;
@@ -235,7 +226,6 @@ export default function Install() {
       /* ignore */
     }
   }, [installedReady, storageKey, tutorialSteps.length]);
-
 
   const markStepDone = () => {
     setCompleted((prev) => {
@@ -262,192 +252,203 @@ export default function Install() {
     (completed.filter(Boolean).length / Math.max(tutorialSteps.length, 1)) * 100,
   );
 
+  // Shared dark shell — this page is always dark regardless of user theme.
+  const Shell = ({ children }: { children: React.ReactNode }) => (
+    <div className="dark h-full bg-[#050505] text-white flex flex-col safe-top overflow-hidden">
+      {children}
+    </div>
+  );
+
   // ====== Installed screen ======
   if (installedReady) {
     return (
-      <div className="h-full bg-background flex flex-col safe-top safe-bottom overflow-y-auto">
-        <div className="w-full max-w-md mx-auto px-6 py-8 flex flex-col items-center justify-center min-h-full">
-          <motion.div
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", damping: 16 }}
-            className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mb-6"
-          >
-            <Check className="w-10 h-10 text-primary" strokeWidth={2.2} />
-          </motion.div>
-          <h1 className="text-2xl font-semibold text-foreground mb-2 text-center tracking-tight">
-            App instalado
-          </h1>
-          <p className="text-muted-foreground text-center mb-6 text-sm max-w-xs leading-relaxed">
-            Abra o Já Limpo pelo ícone na tela inicial. Depois, compartilhe com quem também pode aproveitar essa novidade.
-          </p>
+      <Shell>
+        <div className="flex-1 overflow-y-auto">
+          <div className="w-full max-w-md mx-auto px-6 py-10 flex flex-col items-center justify-center min-h-full">
+            <motion.div
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", damping: 16 }}
+              className="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/25 flex items-center justify-center mb-6"
+            >
+              <Check className="w-10 h-10 text-primary" strokeWidth={2.2} />
+            </motion.div>
+            <h1 className="text-[26px] font-semibold mb-2 text-center tracking-tight">
+              App instalado
+            </h1>
+            <p className="text-neutral-400 text-center mb-8 text-sm max-w-xs leading-relaxed">
+              Abra o Já Limpo pelo ícone na tela inicial. Se quiser, convide alguém.
+            </p>
 
-          {canOpenAuthHere ? (
-            <div className="w-full max-w-xs space-y-2 mb-5">
-              <button
-                onClick={() => navigate("/register")}
-                className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm shadow-primary/20 active:scale-95 transition-transform inline-flex items-center justify-center gap-2"
-              >
-                <Sparkles className="w-4 h-4" />
-                Criar conta grátis
-              </button>
-              <button
-                onClick={() => navigate("/login")}
-                className="w-full py-3 rounded-2xl bg-card border border-border/60 text-foreground font-medium text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
-              >
-                <LogIn className="w-4 h-4" />
-                Já tenho conta
-              </button>
-            </div>
-          ) : (
-            <div className="w-full max-w-xs mb-5 rounded-2xl bg-primary/5 border border-primary/20 p-4 text-center">
-              <Smartphone className="w-5 h-5 text-primary mx-auto mb-2" />
-              <p className="text-sm font-semibold text-foreground">Abra pelo ícone do app</p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                No navegador mobile o acesso fica protegido. Use o ícone do Já Limpo na tela inicial.
-              </p>
-            </div>
-          )}
-
-          <section className="w-full rounded-3xl bg-card border border-border/60 p-4 space-y-3">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide mb-2">
-                <Share className="w-3 h-3" />
-                Compartilhe
+            {canOpenAuthHere ? (
+              <div className="w-full max-w-xs space-y-2 mb-6">
+                <button
+                  onClick={() => navigate("/register")}
+                  className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Criar conta grátis
+                </button>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="w-full py-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-white font-medium text-sm hover:bg-neutral-800/60 transition-colors inline-flex items-center justify-center gap-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Já tenho conta
+                </button>
               </div>
-              <h2 className="text-base font-semibold text-foreground">Compartilhe para mais pessoas</h2>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Conhece alguém que procura diarista ou quer trabalhar com limpeza? Envie o Já Limpo.
-              </p>
-            </div>
-
-            {showQr && (
-              <div className="flex items-center justify-center py-2">
-                <div className="p-3 rounded-2xl bg-white border border-border/40">
-                  <QRCodeSVG value={window.location.origin} size={112} level="M" />
-                </div>
+            ) : (
+              <div className="w-full max-w-xs mb-6 rounded-2xl bg-neutral-900/60 border border-neutral-800 p-4 text-center">
+                <Smartphone className="w-5 h-5 text-primary mx-auto mb-2" />
+                <p className="text-sm font-semibold">Abra pelo ícone do app</p>
+                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  No navegador o acesso fica protegido. Use o ícone do Já Limpo na tela inicial.
+                </p>
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-2">
-              <button
-                onClick={shareWhatsApp}
-                className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm active:scale-95 transition-transform inline-flex items-center justify-center gap-2"
-              >
-                <MessageCircle className="w-4 h-4" />
-                Compartilhar no WhatsApp
-              </button>
-              <button
-                onClick={shareUrl}
-                className="w-full py-3 rounded-2xl bg-background border border-border/60 text-foreground font-medium text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
-              >
-                <Share className="w-4 h-4" />
-                Compartilhar link
-              </button>
-            </div>
-          </section>
+            <section className="w-full rounded-3xl bg-neutral-900/50 border border-neutral-800 p-5 space-y-3">
+              <div className="text-center">
+                <h2 className="text-base font-semibold">Compartilhe com quem precisa</h2>
+                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  Envie o Já Limpo para amigos, familiares ou colegas.
+                </p>
+              </div>
+
+              {showQr && (
+                <div className="flex items-center justify-center py-2">
+                  <div className="p-3 rounded-2xl bg-white">
+                    <QRCodeSVG value={window.location.origin} size={112} level="M" />
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={shareWhatsApp}
+                  className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm active:scale-[0.98] transition-transform inline-flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Compartilhar no WhatsApp
+                </button>
+                <button
+                  onClick={shareUrl}
+                  className="w-full py-3 rounded-2xl bg-neutral-950 border border-neutral-800 text-white font-medium text-sm hover:bg-neutral-900 transition-colors inline-flex items-center justify-center gap-2"
+                >
+                  <Share className="w-4 h-4" />
+                  Compartilhar link
+                </button>
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
+      </Shell>
     );
   }
 
   return (
-    <div className="h-full bg-background flex flex-col safe-top">
+    <Shell>
       {/* Header */}
       <header className="shrink-0 px-5 pt-3 pb-2 flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-2xl bg-card border border-border/60 flex items-center justify-center active:scale-95 transition-transform"
+          className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-white hover:bg-neutral-800/70 active:scale-95 transition"
           aria-label="Voltar"
         >
-          <ChevronLeft className="w-5 h-5 text-foreground" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
-        <Logo size="sm" />
+        <h1 className="text-[15px] font-semibold tracking-tight">Instalar o app</h1>
         <div className="w-10 h-10" />
       </header>
 
       <main className="flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-md mx-auto px-5 pb-8 space-y-5">
-          {/* Hero */}
+        <div className="max-w-md mx-auto px-5 pb-10 space-y-8">
+          {/* Brand + subtitle */}
           <motion.section
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="text-center pt-4 space-y-3"
+            className="pt-3 text-center space-y-4"
           >
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-semibold tracking-wide uppercase">
-              <Sparkles className="w-3 h-3" />
-              Instale em segundos
+            <div className="flex justify-center">
+              <Logo size="md" />
             </div>
-            <h1 className="text-[26px] font-semibold text-foreground leading-tight tracking-tight">
+            <h2 className="text-[24px] font-semibold leading-tight tracking-tight">
               Deixe o Já Limpo<br />na sua tela inicial
-            </h1>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
-              {platform
-                ? `Detectamos ${platform.label} · ${platform.browserLabel}.`
-                : "Rápido, direto e sempre à mão."}
+            </h2>
+            <p className="text-sm text-neutral-400 leading-relaxed max-w-[300px] mx-auto">
+              Acesso rápido, notificações e experiência dedicada. Instale como um app.
             </p>
           </motion.section>
 
-          {/* Animated pointing hint */}
-          <AnimatedInstallHint os={os} browser={browser} />
+          {/* Platform meta — two clean pills */}
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="flex items-center justify-center gap-2"
+          >
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-900/70 border border-neutral-800 text-[11px] font-medium text-neutral-300">
+              <Smartphone className="w-3 h-3 text-neutral-500" />
+              {platform?.label ?? osShortLabel(os)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-900/70 border border-neutral-800 text-[11px] font-medium text-neutral-300">
+              <BrowserGlyph browser={browser} />
+              {labelFor(browser)}
+            </span>
+          </motion.div>
 
-          {/* Native install button (Android Chrome / Desktop Chromium) */}
+          {/* Simplified mockup */}
+          <InstallMockup os={os} browser={browser} />
+
+          {/* Native install button */}
           {deferredPrompt && (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={handleInstall}
               className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm
-                flex items-center justify-center gap-2 shadow-sm shadow-primary/25 active:scale-[0.98] transition-transform"
+                flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
             >
               <Download className="w-4 h-4" />
               Instalar agora
             </motion.button>
           )}
 
-          {/* Warning: unsupported browser */}
+          {/* Warning */}
           {guide.warning && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl bg-warning/10 border border-warning/30 p-3.5 flex items-start gap-3"
+              className="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-3.5 flex items-start gap-3"
             >
-              <AlertCircle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
-              <p className="text-xs text-foreground leading-relaxed">{guide.warning}</p>
+              <AlertCircle className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+              <p className="text-xs text-neutral-200 leading-relaxed">{guide.warning}</p>
             </motion.div>
           )}
 
-
-          {/* Interactive tutorial */}
-          <section className="space-y-3">
-            {/* Header with browser/OS badge */}
-            <div className="flex items-center justify-between gap-2 px-1">
-              <div className="flex items-center gap-2 min-w-0">
-                <guide.headerIcon className="w-4 h-4 text-primary shrink-0" />
-                <h2 className="text-sm font-semibold text-foreground truncate">
-                  {guide.title}
-                </h2>
+          {/* Tutorial — timeline stepper */}
+          <section className="space-y-4">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">
+                  Passo a passo
+                </p>
+                <h3 className="text-[15px] font-semibold mt-0.5">{guide.title}</h3>
               </div>
-              <span className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide">
-                <BrowserGlyph browser={browser} />
-                {labelFor(browser)} · {osShortLabel(os)}
+              <span className="text-[11px] font-semibold text-neutral-400 tabular-nums shrink-0">
+                {completed.filter(Boolean).length}/{tutorialSteps.length}
               </span>
             </div>
 
-            {/* Progress bar */}
-            <div className="flex items-center gap-2 px-1">
-              <div className="flex-1 h-1.5 rounded-full bg-muted/60 overflow-hidden">
-                <motion.div
-                  className="h-full bg-primary"
-                  initial={false}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ type: "spring", damping: 20 }}
-                />
-              </div>
-              <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
-                {completed.filter(Boolean).length}/{tutorialSteps.length}
-              </span>
+            {/* Progress */}
+            <div className="h-1 rounded-full bg-neutral-900 overflow-hidden">
+              <motion.div
+                className="h-full bg-primary"
+                initial={false}
+                animate={{ width: `${progress}%` }}
+                transition={{ type: "spring", damping: 20 }}
+              />
             </div>
 
             <AnimatePresence mode="wait">
@@ -457,75 +458,64 @@ export default function Install() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-2"
+                className="space-y-0"
               >
                 {tutorialSteps.map((step, i) => {
-                  const StepIconEl = step.icon;
                   const isDone = completed[i];
                   const isActive = i === activeStep && !isDone;
+                  const isLast = i === tutorialSteps.length - 1;
+                  const num = String(i + 1).padStart(2, "0");
                   return (
-                    <motion.li
-                      key={i}
-                      layout
-                      animate={{
-                        scale: isActive ? 1 : 0.99,
-                        opacity: isDone ? 0.7 : 1,
-                      }}
-                      className={`relative flex items-center gap-3 p-3.5 rounded-2xl border shadow-sm transition-colors ${
-                        isActive
-                          ? "bg-primary/5 border-primary/40"
-                          : isDone
-                            ? "bg-card border-border/60"
-                            : "bg-card border-border/60"
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.span
-                          className="absolute inset-0 rounded-2xl ring-2 ring-primary/40 pointer-events-none"
-                          animate={{ opacity: [0.4, 1, 0.4] }}
+                    <li key={i} className="flex gap-5">
+                      {/* Rail */}
+                      <div className="flex flex-col items-center">
+                        <motion.div
+                          animate={
+                            isActive
+                              ? { boxShadow: ["0 0 0 0 rgba(25,204,151,0.35)", "0 0 0 8px rgba(25,204,151,0)"] }
+                              : {}
+                          }
                           transition={{ duration: 1.6, repeat: Infinity }}
-                        />
-                      )}
-                      <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-semibold text-sm ${
-                          isDone
-                            ? "bg-primary text-primary-foreground"
-                            : isActive
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-primary/10 text-primary"
-                        }`}
-                      >
-                        {isDone ? <Check className="w-4 h-4" strokeWidth={2.5} /> : i + 1}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 border transition-colors ${
+                            isDone
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : isActive
+                                ? "bg-primary/10 text-primary border-primary/60"
+                                : "bg-neutral-900 text-neutral-400 border-neutral-800"
+                          }`}
+                        >
+                          {isDone ? <Check className="w-4 h-4" strokeWidth={2.6} /> : num}
+                        </motion.div>
+                        {!isLast && <div className="w-px flex-1 bg-neutral-800 my-1 min-h-6" />}
                       </div>
-                      <StepIconEl
-                        className={`w-4 h-4 shrink-0 ${
-                          isActive ? "text-primary" : "text-muted-foreground"
-                        }`}
-                      />
-                      <p
-                        className={`text-sm leading-snug flex-1 ${
-                          isDone ? "text-muted-foreground line-through" : "text-foreground"
-                        }`}
-                      >
-                        {step.text}
-                      </p>
-                    </motion.li>
+
+                      {/* Body */}
+                      <div className={`pt-1 pb-6 flex-1 ${isDone ? "opacity-60" : ""}`}>
+                        <p
+                          className={`text-[14px] leading-relaxed ${
+                            isDone ? "text-neutral-500 line-through" : isActive ? "text-white font-medium" : "text-neutral-300"
+                          }`}
+                        >
+                          {step.text}
+                        </p>
+                      </div>
+                    </li>
                   );
                 })}
               </motion.ol>
             </AnimatePresence>
 
-            {/* Tutorial controls */}
-            <div className="flex items-center gap-2">
+            {/* Controls */}
+            <div className="flex items-center gap-2 pt-1">
               {completed.every(Boolean) ? (
                 <>
-                  <div className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-primary/10 text-primary text-sm font-semibold">
+                  <div className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary/10 text-primary text-sm font-semibold border border-primary/25">
                     <Check className="w-4 h-4" strokeWidth={2.5} />
                     Tutorial concluído
                   </div>
                   <button
                     onClick={resetTutorial}
-                    className="p-3 rounded-2xl bg-card border border-border/60 text-foreground hover:bg-muted transition-colors"
+                    className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white transition-colors"
                     aria-label="Recomeçar tutorial"
                   >
                     <RotateCcw className="w-4 h-4" />
@@ -535,7 +525,7 @@ export default function Install() {
                 <>
                   <button
                     onClick={markStepDone}
-                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold shadow-sm shadow-primary/20 active:scale-[0.98] transition-transform"
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
                   >
                     {activeStep === tutorialSteps.length - 1 ? "Concluir" : "Fiz esse passo"}
                     <ChevronRight className="w-4 h-4" />
@@ -543,7 +533,7 @@ export default function Install() {
                   {completed.some(Boolean) && (
                     <button
                       onClick={resetTutorial}
-                      className="p-3 rounded-2xl bg-card border border-border/60 text-foreground hover:bg-muted transition-colors"
+                      className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white transition-colors"
                       aria-label="Recomeçar tutorial"
                       title="Recomeçar tutorial"
                     >
@@ -555,201 +545,243 @@ export default function Install() {
             </div>
           </section>
 
-          {/* QR code: desktop only */}
+          {/* QR — desktop only */}
           {showQr && (
-            <section className="rounded-2xl bg-card border border-border/60 p-4 flex items-center gap-4">
+            <section className="rounded-2xl bg-neutral-900/50 border border-neutral-800 p-4 flex items-center gap-4">
               <div className="p-2 rounded-xl bg-white">
                 <QRCodeSVG value={window.location.origin} size={88} level="M" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wide mb-1.5">
-                  <QrCode className="w-3 h-3" />
-                  Para celular
-                </div>
-                <p className="text-sm font-semibold text-foreground leading-snug">
-                  Aponte a câmera do celular
-                </p>
-                <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
-                  Abra o Já Limpo no seu iPhone ou Android para instalar em segundos.
+                <p className="text-sm font-semibold leading-snug">Aponte a câmera do celular</p>
+                <p className="text-[11px] text-neutral-500 leading-relaxed mt-0.5">
+                  Continue a instalação no seu iPhone ou Android.
                 </p>
               </div>
             </section>
           )}
 
+          {/* Share footer */}
+          <button
+            onClick={shareUrl}
+            className="w-full py-3 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-neutral-200 text-sm font-medium hover:bg-neutral-900 transition-colors inline-flex items-center justify-center gap-2"
+          >
+            <Share className="w-4 h-4" />
+            Compartilhar com um amigo
+          </button>
 
-
-
-          {/* Share with a friend (subtle, footer) */}
-          <div className="pt-2">
-            <button
-              onClick={shareUrl}
-              className="w-full py-3 rounded-2xl bg-card border border-border/60 text-foreground text-sm font-medium hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
-            >
-              <Share className="w-4 h-4" />
-              Compartilhar com um amigo
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-2 pt-1">
+          <div className="flex flex-col gap-2">
             {!isMobileViewport && (
               <button
                 onClick={() => navigate("/login?web=1")}
-                className="w-full py-2 text-[12px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                className="w-full py-2 text-[12px] text-neutral-500 hover:text-neutral-300 underline underline-offset-2 transition-colors"
               >
                 Sou diarista, continuar pelo navegador
               </button>
             )}
-            <p className="text-center text-[11px] text-muted-foreground pb-[env(safe-area-inset-bottom,0px)]">
-              Atualizações são automáticas ao abrir o app.
+            <p className="text-center text-[11px] text-neutral-600 pb-[env(safe-area-inset-bottom,0px)]">
+              Atualizações automáticas ao abrir o app.
             </p>
           </div>
-
-
         </div>
       </main>
-    </div>
+    </Shell>
   );
 }
 
 // ============================================================
-// Config
+// Simplified install mockup — a single phone, subtle pointer
 // ============================================================
+function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
+  const iosFamily = os === "ios" || os === "ipados";
+  const isSafariIOS = iosFamily && browser === "safari";
+  const chromeIOS = iosFamily && (browser === "chrome" || browser === "edge" || browser === "firefox");
+  const pointerBottom = isSafariIOS || chromeIOS;
 
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1, duration: 0.4 }}
+      className="relative w-full aspect-[16/11] rounded-3xl bg-neutral-950 border border-neutral-800 overflow-hidden flex items-center justify-center"
+    >
+      {/* Subtle mint radial glow, no gradient loudness */}
+      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_50%_120%,rgba(25,204,151,0.35),transparent_65%)]" />
+
+      {/* Phone frame */}
+      <div className="relative w-[150px] h-[220px] rounded-[28px] bg-black border border-neutral-800 shadow-2xl overflow-hidden">
+        {/* Notch */}
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-neutral-900 rounded-full z-10" />
+
+        {/* Top browser bar */}
+        <div className="absolute inset-x-0 top-0 h-8 bg-neutral-950/90 border-b border-neutral-900 flex items-center gap-1 px-2 pt-3.5">
+          <div className="flex-1 h-2 rounded-sm bg-neutral-800" />
+          {!pointerBottom && (
+            <div className="relative">
+              <motion.div
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+                className="w-3.5 h-3.5 rounded bg-primary/25 border border-primary/50 flex items-center justify-center"
+              >
+                {os === "android" ? (
+                  <MoreVertical className="w-2 h-2 text-primary" />
+                ) : (
+                  <Download className="w-2 h-2 text-primary" />
+                )}
+              </motion.div>
+            </div>
+          )}
+        </div>
+
+        {/* Page content */}
+        <div className="absolute inset-x-3 top-11 space-y-1.5">
+          <div className="h-1.5 rounded bg-neutral-800 w-3/4" />
+          <div className="h-1.5 rounded bg-neutral-900 w-1/2" />
+          <div className="mt-2 h-14 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center">
+            <Logo size="sm" />
+          </div>
+          <div className="h-1.5 rounded bg-neutral-900 w-2/3" />
+          <div className="h-1.5 rounded bg-neutral-900 w-1/2" />
+        </div>
+
+        {/* iOS bottom bar with pointer */}
+        {pointerBottom && (
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-neutral-950/90 border-t border-neutral-900 flex items-center justify-around px-2">
+            <div className="w-2.5 h-2.5 rounded bg-neutral-800" />
+            <div className="relative">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+                className="w-4 h-4 rounded bg-primary/25 border border-primary/60 flex items-center justify-center"
+              >
+                <Share className="w-2.5 h-2.5 text-primary" />
+              </motion.div>
+            </div>
+            <div className="w-2.5 h-2.5 rounded bg-neutral-800" />
+            <div className="w-2.5 h-2.5 rounded bg-neutral-800" />
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================================
+// Guide config
+// ============================================================
 interface Guide {
   title: string;
-  headerIcon: typeof Smartphone;
   steps: Step[];
   warning?: string;
 }
 
-
 function buildGuide(os: OS, browser: Browser): Guide {
   const iosFamily = os === "ios" || os === "ipados";
-  const deviceName = os === "ipados" ? "iPad" : os === "ios" ? "iPhone" : os === "android" ? "Android" : os === "macos" ? "Mac" : "computador";
+  const deviceName =
+    os === "ipados" ? "iPad" :
+    os === "ios" ? "iPhone" :
+    os === "android" ? "Android" :
+    os === "macos" ? "Mac" : "computador";
 
-  // ===== iOS / iPadOS =====
   if (iosFamily) {
     if (browser === "chrome") {
       return {
-        title: `Instalar no ${deviceName} (Chrome)`,
-        headerIcon: Smartphone,
+        title: `${deviceName} · Chrome`,
         steps: [
-          { icon: Share, text: "Toque no botão Compartilhar (quadrado com seta) na barra do Chrome" },
-          { icon: Plus, text: 'Escolha "Adicionar à Tela de Início"' },
-          { icon: Check, text: 'Toque em "Adicionar" no canto superior direito' },
-          { icon: Smartphone, text: "Abra o Já Limpo pelo ícone na tela inicial" },
+          { icon: Share, text: "Toque no botão Compartilhar (quadrado com seta) na barra do Chrome." },
+          { icon: Plus, text: 'Escolha "Adicionar à Tela de Início".' },
+          { icon: Check, text: 'Toque em "Adicionar" no canto superior direito.' },
         ],
       };
     }
     if (browser === "edge") {
       return {
-        title: `Instalar no ${deviceName} (Edge)`,
-        headerIcon: Smartphone,
+        title: `${deviceName} · Edge`,
         steps: [
-          { icon: MoreVertical, text: "Toque no menu (…) na parte inferior do Edge" },
-          { icon: Plus, text: 'Escolha "Adicionar ao telefone" ou "Adicionar à Tela de Início"' },
-          { icon: Check, text: "Confirme para adicionar" },
-          { icon: Smartphone, text: "Abra o Já Limpo pelo ícone na tela inicial" },
+          { icon: MoreVertical, text: "Toque no menu (…) na parte inferior do Edge." },
+          { icon: Plus, text: 'Escolha "Adicionar ao telefone" ou "Adicionar à Tela de Início".' },
+          { icon: Check, text: "Confirme para adicionar." },
         ],
       };
     }
     if (browser === "firefox") {
       return {
-        title: `Instalar no ${deviceName} (Firefox)`,
-        headerIcon: Smartphone,
+        title: `${deviceName} · Firefox`,
         steps: [
-          { icon: MoreVertical, text: "Toque no menu do Firefox" },
-          { icon: Share, text: 'Escolha "Compartilhar"' },
-          { icon: Plus, text: '"Adicionar à Tela de Início"' },
-          { icon: Check, text: "Confirme para adicionar" },
+          { icon: MoreVertical, text: "Toque no menu do Firefox." },
+          { icon: Share, text: 'Escolha "Compartilhar" e depois "Adicionar à Tela de Início".' },
+          { icon: Check, text: "Confirme para adicionar." },
         ],
       };
     }
     return {
-      title: `Instalar no ${deviceName} (Safari)`,
-      headerIcon: Smartphone,
+      title: `${deviceName} · Safari`,
       steps: [
-        { icon: Share, text: "Toque no botão Compartilhar (quadrado com seta) na barra do Safari" },
-        { icon: Plus, text: 'Role e toque em "Adicionar à Tela de Início"' },
-        { icon: Check, text: 'Toque em "Adicionar" no canto superior direito' },
-        { icon: Smartphone, text: "Abra o Já Limpo pelo ícone na tela inicial" },
+        { icon: Share, text: "Toque no botão Compartilhar (quadrado com seta) na barra do Safari." },
+        { icon: Plus, text: 'Role e toque em "Adicionar à Tela de Início".' },
+        { icon: Check, text: 'Toque em "Adicionar" no canto superior direito.' },
       ],
     };
   }
 
-  // ===== Android =====
   if (os === "android") {
     if (browser === "firefox") {
       return {
-        title: "Instalar no Android (Firefox)",
-        headerIcon: Smartphone,
+        title: "Android · Firefox",
         steps: [
-          { icon: MoreVertical, text: "Toque no menu (⋮) do Firefox" },
-          { icon: Plus, text: 'Escolha "Instalar" ou "Adicionar à tela inicial"' },
-          { icon: Check, text: "Confirme para adicionar" },
+          { icon: MoreVertical, text: "Toque no menu (⋮) do Firefox." },
+          { icon: Plus, text: 'Escolha "Instalar" ou "Adicionar à tela inicial".' },
+          { icon: Check, text: "Confirme para adicionar." },
         ],
       };
     }
     if (browser === "samsung") {
       return {
-        title: "Instalar no Samsung Internet",
-        headerIcon: Smartphone,
+        title: "Samsung Internet",
         steps: [
-          { icon: Menu, text: "Toque no menu (☰) na parte inferior" },
-          { icon: Plus, text: 'Escolha "Adicionar página a" → "Tela inicial"' },
-          { icon: Check, text: "Confirme para instalar" },
+          { icon: Menu, text: "Toque no menu (☰) na parte inferior." },
+          { icon: Plus, text: 'Escolha "Adicionar página a" e depois "Tela inicial".' },
+          { icon: Check, text: "Confirme para instalar." },
         ],
       };
     }
-    // Chrome / Edge / Brave / Opera
     return {
-      title: `Instalar no Android (${labelFor(browser)})`,
-      headerIcon: Smartphone,
+      title: `Android · ${labelFor(browser)}`,
       steps: [
-        { icon: Download, text: 'Se aparecer o botão "Instalar agora" acima, toque nele' },
-        { icon: MoreVertical, text: "Ou abra o menu (⋮) do navegador" },
-        { icon: Plus, text: 'Escolha "Instalar app" ou "Adicionar à tela inicial"' },
-        { icon: Check, text: 'Confirme em "Instalar"' },
+        { icon: Download, text: 'Se aparecer o botão "Instalar agora" acima, toque nele.' },
+        { icon: MoreVertical, text: 'Ou abra o menu (⋮) e escolha "Instalar app".' },
+        { icon: Check, text: 'Confirme em "Instalar".' },
       ],
     };
   }
 
-  // ===== Desktop =====
   if (browser === "firefox") {
     return {
-      title: "Firefox no desktop",
-      headerIcon: Monitor,
+      title: "Desktop · Firefox",
       warning:
-        "O Firefox no desktop ainda não instala aplicativos web. Use Chrome, Edge, Brave ou Opera para instalar o Já Limpo.",
+        "O Firefox no desktop ainda não instala aplicativos web. Use Chrome, Edge, Brave ou Opera.",
       steps: [
-        { icon: Copy, text: "Copie o link do app (botão acima)" },
-        { icon: Monitor, text: "Abra o Chrome, Edge, Brave ou Opera" },
-        { icon: Download, text: 'Clique no ícone de instalar na barra de endereço' },
-        { icon: Check, text: 'Confirme em "Instalar"' },
+        { icon: Copy, text: "Copie o link do app." },
+        { icon: Monitor, text: "Abra o Chrome, Edge, Brave ou Opera." },
+        { icon: Download, text: 'Clique no ícone de instalar e confirme em "Instalar".' },
       ],
     };
   }
   if (os === "macos" && browser === "safari") {
     return {
-      title: "Instalar no Mac (Safari 17+)",
-      headerIcon: Monitor,
+      title: "Mac · Safari 17+",
       steps: [
-        { icon: Share, text: "Clique no menu Arquivo do Safari" },
-        { icon: Plus, text: 'Escolha "Adicionar ao Dock"' },
-        { icon: Check, text: 'Confirme em "Adicionar"' },
-        { icon: Monitor, text: "Abra o Já Limpo pelo Dock" },
+        { icon: Share, text: "Clique no menu Arquivo do Safari." },
+        { icon: Plus, text: 'Escolha "Adicionar ao Dock".' },
+        { icon: Check, text: 'Confirme em "Adicionar" e abra pelo Dock.' },
       ],
     };
   }
-  // Chrome / Edge / Brave / Opera desktop
   return {
-    title: `Instalar no desktop (${labelFor(browser)})`,
-    headerIcon: Monitor,
+    title: `Desktop · ${labelFor(browser)}`,
     steps: [
-      { icon: Download, text: 'Se aparecer o botão "Instalar agora" acima, clique nele' },
-      { icon: Download, text: "Ou clique no ícone de instalar (📥) na barra de endereço, à direita" },
-      { icon: Check, text: 'Confirme em "Instalar"' },
-      { icon: Monitor, text: "O Já Limpo abre em uma janela dedicada" },
+      { icon: Download, text: 'Se aparecer o botão "Instalar agora" acima, clique nele.' },
+      { icon: Download, text: "Ou clique no ícone de instalar na barra de endereço, à direita." },
+      { icon: Check, text: 'Confirme em "Instalar".' },
     ],
   };
 }
@@ -760,10 +792,10 @@ function labelFor(b: Browser): string {
     chrome: "Chrome",
     edge: "Edge",
     firefox: "Firefox",
-    samsung: "Samsung Internet",
+    samsung: "Samsung",
     opera: "Opera",
     brave: "Brave",
-    other: "navegador",
+    other: "Navegador",
   };
   return map[b];
 }
@@ -782,7 +814,6 @@ function osShortLabel(os: OS): string {
 }
 
 function BrowserGlyph({ browser }: { browser: Browser }) {
-  // Small colored dot per browser for the badge; keeps bundle light without extra SVGs.
   const color: Record<Browser, string> = {
     safari: "#0FB5EE",
     chrome: "#F4B400",
@@ -791,191 +822,13 @@ function BrowserGlyph({ browser }: { browser: Browser }) {
     samsung: "#1428A0",
     opera: "#FF1B2D",
     brave: "#FB542B",
-    other: "hsl(var(--muted-foreground))",
+    other: "#71717A",
   };
   return (
     <span
       aria-hidden
-      className="inline-block w-1.5 h-1.5 rounded-full"
+      className="inline-block w-2 h-2 rounded-full"
       style={{ background: color[browser] }}
     />
   );
 }
-
-// ============================================================
-// Animated pointing hint
-// ============================================================
-function AnimatedInstallHint({ os, browser }: { os: OS; browser: Browser }) {
-  const iosFamily = os === "ios" || os === "ipados";
-  const isSafariIOS = iosFamily && browser === "safari";
-  const chromeIOS = iosFamily && (browser === "chrome" || browser === "edge" || browser === "firefox");
-  const bottom = isSafariIOS || chromeIOS;
-
-  const label = isSafariIOS || chromeIOS
-    ? "Toque em Compartilhar"
-    : os === "android"
-      ? "Abra o menu do navegador"
-      : "Clique em Instalar na barra de endereço";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="rounded-3xl bg-gradient-to-b from-primary/8 via-primary/[0.03] to-transparent border border-border/60 p-5"
-    >
-      <div className="flex items-center justify-center gap-4">
-        {/* Phone 1: browser with pointer */}
-        <PhoneBrowser os={os} browser={browser} bottom={bottom} />
-
-        {/* Flow arrow */}
-        <motion.div
-          animate={{ x: [0, 4, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-          className="text-primary shrink-0"
-          aria-hidden
-        >
-          <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
-        </motion.div>
-
-        {/* Phone 2: home screen with Já Limpo icon */}
-        <PhoneHomeScreen />
-      </div>
-      <p className="text-center text-xs font-semibold text-foreground mt-4">
-        {label}
-      </p>
-      <p className="text-center text-[11px] text-muted-foreground mt-0.5">
-        E o Já Limpo aparece na sua tela inicial.
-      </p>
-    </motion.div>
-  );
-}
-
-function PhoneBrowser({
-  os,
-  browser,
-  bottom,
-}: {
-  os: OS;
-  browser: Browser;
-  bottom: boolean;
-}) {
-  return (
-    <div className="relative w-[104px] h-[172px] rounded-[22px] bg-card border border-border shadow-sm overflow-hidden shrink-0">
-      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-9 h-2 bg-foreground/70 rounded-b-lg z-10" />
-      {/* Top browser bar */}
-      <div className="absolute inset-x-0 top-0 h-6 bg-muted/60 border-b border-border/40 flex items-center gap-1 px-1.5 pt-1.5">
-        <div className="flex-1 h-2 rounded-sm bg-background/70" />
-        {!bottom && (
-          <div className="relative">
-            <div className="w-3 h-3 rounded bg-primary/25 flex items-center justify-center">
-              {os === "android" ? (
-                <MoreVertical className="w-2 h-2 text-primary" />
-              ) : (
-                <Download className="w-2 h-2 text-primary" />
-              )}
-            </div>
-            <PingArrow direction="up" />
-          </div>
-        )}
-      </div>
-      {/* Page content */}
-      <div className="absolute inset-x-2 top-8 space-y-1">
-        <div className="h-1.5 rounded bg-muted/70 w-3/4" />
-        <div className="h-1.5 rounded bg-muted/50 w-1/2" />
-        <div className="mt-1.5 h-9 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-          <Logo size="sm" />
-        </div>
-        <div className="h-1.5 rounded bg-muted/50 w-2/3" />
-      </div>
-      {/* iOS bottom bar */}
-      {bottom && (
-        <div className="absolute inset-x-0 bottom-0 h-7 bg-muted/60 border-t border-border/40 flex items-center justify-around px-2">
-          <div className="w-2.5 h-2.5 rounded bg-foreground/20" />
-          <div className="relative">
-            <div className="w-3 h-3 rounded bg-primary/25 flex items-center justify-center">
-              <Share className="w-2 h-2 text-primary" />
-            </div>
-            <PingArrow direction="down" />
-          </div>
-          <div className="w-2.5 h-2.5 rounded bg-foreground/20" />
-          <div className="w-2.5 h-2.5 rounded bg-foreground/20" />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PhoneHomeScreen() {
-  return (
-    <div className="relative w-[104px] h-[172px] rounded-[22px] bg-gradient-to-b from-slate-900 to-slate-800 border border-border shadow-sm overflow-hidden shrink-0">
-      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-9 h-2 bg-black/80 rounded-b-lg z-10" />
-      {/* Status bar */}
-      <div className="absolute inset-x-0 top-0 h-5 flex items-center justify-between px-2">
-        <span className="text-[7px] font-semibold text-white/80">9:41</span>
-        <div className="flex gap-0.5">
-          <div className="w-1 h-1 rounded-full bg-white/70" />
-          <div className="w-1 h-1 rounded-full bg-white/70" />
-        </div>
-      </div>
-      {/* Grid of app icons */}
-      <div className="absolute inset-x-2.5 top-7 grid grid-cols-3 gap-1.5">
-        <div className="aspect-square rounded-md bg-white/10" />
-        <div className="aspect-square rounded-md bg-white/10" />
-        <div className="aspect-square rounded-md bg-white/10" />
-        <div className="aspect-square rounded-md bg-white/10" />
-        {/* Já Limpo icon: highlighted */}
-        <motion.div
-          animate={{ scale: [0.85, 1.08, 1], opacity: [0, 1, 1] }}
-          transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 0.4, ease: "easeOut" }}
-          className="relative aspect-square rounded-md bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/40"
-        >
-          <span className="text-[10px] font-bold text-primary-foreground">J</span>
-          <motion.span
-            className="absolute inset-0 rounded-md ring-2 ring-primary/50"
-            animate={{ opacity: [0, 0.8, 0], scale: [1, 1.35, 1.5] }}
-            transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 0.4 }}
-            aria-hidden
-          />
-        </motion.div>
-        <div className="aspect-square rounded-md bg-white/10" />
-      </div>
-      {/* Já Limpo label */}
-      <p className="absolute inset-x-0 bottom-8 text-center text-[7px] font-semibold text-white/90">
-        Já Limpo
-      </p>
-      {/* Dock */}
-      <div className="absolute inset-x-2 bottom-1.5 h-6 rounded-lg bg-white/10 backdrop-blur flex items-center justify-around px-1">
-        <div className="w-3 h-3 rounded bg-white/30" />
-        <div className="w-3 h-3 rounded bg-white/30" />
-        <div className="w-3 h-3 rounded bg-white/30" />
-      </div>
-    </div>
-  );
-}
-
-
-function PingArrow({ direction }: { direction: "up" | "down" }) {
-  const isUp = direction === "up";
-  return (
-    <motion.div
-      initial={{ y: 0, opacity: 0.4 }}
-      animate={{ y: isUp ? [-2, -8, -2] : [2, 8, 2], opacity: [0.4, 1, 0.4] }}
-      transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-      className={
-        isUp
-          ? "absolute -top-4 left-1/2 -translate-x-1/2 text-primary"
-          : "absolute -bottom-5 left-1/2 -translate-x-1/2 text-primary"
-      }
-    >
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
-        {isUp ? (
-          <path d="M6 1l5 6H7v4H5V7H1z" />
-        ) : (
-          <path d="M6 11l5-6H7V1H5v4H1z" />
-        )}
-      </svg>
-    </motion.div>
-  );
-}
-
