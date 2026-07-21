@@ -135,7 +135,7 @@ export default function Install() {
     window.addEventListener("orientationchange", onResize);
     window.visualViewport?.addEventListener("resize", onResize);
     const mql = window.matchMedia("(min-width: 1024px)");
-    const onMql = () => setViewportIsWide(mql.matches);
+    const onMql = () => onResize();
     mql.addEventListener?.("change", onMql);
     const root = document.getElementById("root");
     const observer = root && "ResizeObserver" in window ? new ResizeObserver(onResize) : null;
