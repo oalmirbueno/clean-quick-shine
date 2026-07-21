@@ -12,8 +12,10 @@ import { InputField } from "@/components/ui/InputField";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
+import { useForceInstallGate } from "@/hooks/useForceInstallGate";
 
 type UserType = "client" | "pro";
+
 
 const weekdays = [
   { id: "mon", label: "Seg" },
