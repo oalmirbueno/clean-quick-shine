@@ -487,13 +487,25 @@ export default function Install() {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={markStepDone}
-                  className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold shadow-sm shadow-primary/20 active:scale-[0.98] transition-transform"
-                >
-                  {activeStep === tutorialSteps.length - 1 ? "Concluir" : "Fiz esse passo"}
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+                <>
+                  <button
+                    onClick={markStepDone}
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold shadow-sm shadow-primary/20 active:scale-[0.98] transition-transform"
+                  >
+                    {activeStep === tutorialSteps.length - 1 ? "Concluir" : "Fiz esse passo"}
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  {completed.some(Boolean) && (
+                    <button
+                      onClick={resetTutorial}
+                      className="p-3 rounded-2xl bg-card border border-border/60 text-foreground hover:bg-muted transition-colors"
+                      aria-label="Recomeçar tutorial"
+                      title="Recomeçar tutorial"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </section>
