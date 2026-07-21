@@ -26,7 +26,7 @@ import { Logo } from "@/components/ui/Logo";
 import appPreview from "@/assets/screenshots/app-preview.png";
 import appPreviewNext from "@/assets/screenshots/app-preview-next.png";
 
-import { markPwaInstalled, useInstalledPwa } from "@/hooks/useInstalledPwa";
+import { useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { useIsMobileDevice, useIsStandalone } from "@/hooks/useIsStandalone";
 import {
   detectPlatform,
