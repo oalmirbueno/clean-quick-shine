@@ -54,8 +54,10 @@ async function resetInstalledPwaCacheOnce() {
     : [];
   const cacheNames = "caches" in window ? await caches.keys() : [];
 
+  // Full purge: unregister SWs and drop every cache so the next load
+  // fetches the freshest HTML/JS/CSS bundle from the network.
   await Promise.all([
-    ...registrations.map((registration) => registration.update()),
+    ...registrations.map((registration) => registration.unregister()),
     ...cacheNames.map((cacheName) => caches.delete(cacheName)),
   ]);
 
