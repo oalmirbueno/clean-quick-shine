@@ -521,3 +521,110 @@ function labelFor(b: Browser): string {
   };
   return map[b];
 }
+
+// ============================================================
+// Animated pointing hint
+// ============================================================
+function AnimatedInstallHint({ os, browser }: { os: OS; browser: Browser }) {
+  const iosFamily = os === "ios" || os === "ipados";
+  const isSafariIOS = iosFamily && browser === "safari";
+  const isBottomBar = isSafariIOS; // Safari iOS: share is bottom
+  // Chrome iOS: share is bottom-right too. Android: menu top-right. Desktop: install icon top-right (address bar).
+  const chromeIOS = iosFamily && (browser === "chrome" || browser === "edge" || browser === "firefox");
+  const bottom = isSafariIOS || chromeIOS;
+
+  const label = isSafariIOS
+    ? "Toque em Compartilhar"
+    : chromeIOS
+      ? "Toque em Compartilhar"
+      : os === "android"
+        ? "Abra o menu do navegador"
+        : "Clique em Instalar na barra de endereço";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="rounded-3xl bg-gradient-to-b from-primary/5 to-transparent border border-border/60 p-4"
+    >
+      <div className="relative mx-auto w-[220px] h-[300px] rounded-[32px] bg-card border border-border shadow-sm overflow-hidden">
+        {/* Phone notch */}
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-16 h-4 bg-foreground/80 rounded-b-2xl z-10" />
+        {/* Browser chrome */}
+        <div className="absolute inset-x-0 top-0 h-9 bg-muted/60 border-b border-border/40 flex items-center gap-1.5 px-3 pt-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
+          <div className="w-1.5 h-1.5 rounded-full bg-foreground/20" />
+          <div className="flex-1 h-3.5 rounded-md bg-background/70 mx-1" />
+          {!bottom && (
+            <div className="relative">
+              <div className="w-4 h-4 rounded bg-primary/20 flex items-center justify-center">
+                {os === "android" ? (
+                  <MoreVertical className="w-3 h-3 text-primary" />
+                ) : (
+                  <Download className="w-3 h-3 text-primary" />
+                )}
+              </div>
+              <PingArrow direction="up" />
+            </div>
+          )}
+        </div>
+        {/* Page content stub */}
+        <div className="absolute inset-x-3 top-12 space-y-1.5">
+          <div className="h-2 rounded bg-muted/70 w-3/4" />
+          <div className="h-2 rounded bg-muted/50 w-1/2" />
+          <div className="mt-3 h-16 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Logo size="sm" />
+          </div>
+          <div className="h-2 rounded bg-muted/50 w-2/3" />
+          <div className="h-2 rounded bg-muted/40 w-1/2" />
+        </div>
+        {/* Bottom bar (iOS) */}
+        {bottom && (
+          <div className="absolute inset-x-0 bottom-0 h-10 bg-muted/60 border-t border-border/40 flex items-center justify-around px-4">
+            <div className="w-4 h-4 rounded bg-foreground/20" />
+            <div className="relative">
+              <div className="w-4 h-4 rounded bg-primary/20 flex items-center justify-center">
+                <Share className="w-3 h-3 text-primary" />
+              </div>
+              <PingArrow direction="down" />
+            </div>
+            <div className="w-4 h-4 rounded bg-foreground/20" />
+            <div className="w-4 h-4 rounded bg-foreground/20" />
+          </div>
+        )}
+      </div>
+      <p className="text-center text-xs font-semibold text-foreground mt-3">
+        {label}
+      </p>
+      <p className="text-center text-[11px] text-muted-foreground mt-0.5">
+        Siga os passos abaixo para adicionar à tela inicial.
+      </p>
+    </motion.div>
+  );
+}
+
+function PingArrow({ direction }: { direction: "up" | "down" }) {
+  const isUp = direction === "up";
+  return (
+    <motion.div
+      initial={{ y: 0, opacity: 0.4 }}
+      animate={{ y: isUp ? [-2, -8, -2] : [2, 8, 2], opacity: [0.4, 1, 0.4] }}
+      transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+      className={
+        isUp
+          ? "absolute -top-4 left-1/2 -translate-x-1/2 text-primary"
+          : "absolute -bottom-5 left-1/2 -translate-x-1/2 text-primary"
+      }
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden>
+        {isUp ? (
+          <path d="M6 1l5 6H7v4H5V7H1z" />
+        ) : (
+          <path d="M6 11l5-6H7V1H5v4H1z" />
+        )}
+      </svg>
+    </motion.div>
+  );
+}
+
