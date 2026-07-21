@@ -76,43 +76,38 @@ export default function Onboarding() {
       showTrust
     >
 
-      <AnimatePresence mode="wait">
-        {step === "welcome" && (
-          <motion.div
-            key="welcome"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3"
-          >
-            {forceInstall && pwaInstalled && (
-              <InstalledStatusCard onOpen={goLogin} />
-            )}
-
-            <ChoiceCard
-              icon={LogIn}
-              title="Sim, já tenho conta"
-              description={pwaInstalled ? "Abrir o app instalado" : "Entrar agora"}
-              onClick={goLogin}
-            />
-            <ChoiceCard
-              icon={UserPlus}
-              title="Não, é minha primeira vez"
-              description={pwaInstalled ? "Abrir o app e criar conta" : "Criar conta grátis"}
-              onClick={goRegister}
-              primary
-            />
-
-            {forceInstall && !pwaInstalled && (
-              <InfoNote>
-                Depois de entrar, mostramos como deixar o Já Limpo na sua tela
-                inicial em poucos toques.
-              </InfoNote>
-            )}
-          </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="space-y-3"
+      >
+        {forceInstall && pwaInstalled && (
+          <InstalledStatusCard onOpen={goLogin} />
         )}
-      </AnimatePresence>
+
+        <ChoiceCard
+          icon={LogIn}
+          title="Sim, já tenho conta"
+          description={pwaInstalled ? "Abrir o app instalado" : "Entrar agora"}
+          onClick={goLogin}
+        />
+        <ChoiceCard
+          icon={UserPlus}
+          title="Não, é minha primeira vez"
+          description={pwaInstalled ? "Abrir o app e criar conta" : "Criar conta grátis"}
+          onClick={goRegister}
+          primary
+        />
+
+        {forceInstall && !pwaInstalled && (
+          <InfoNote>
+            Depois de entrar, mostramos como deixar o Já Limpo na sua tela
+            inicial em poucos toques.
+          </InfoNote>
+        )}
+      </motion.div>
+
 
 
       <p className="mt-6 text-[11px] text-center text-muted-foreground leading-relaxed">
