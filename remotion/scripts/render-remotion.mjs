@@ -16,21 +16,29 @@ const browser = await openBrowser("chrome", {
   chromeMode: "chrome-for-testing",
 });
 
-const composition = await selectComposition({
-  serveUrl: bundled,
-  id: "main",
-  puppeteerInstance: browser,
-});
+const targets = [
+  { id: "ios", out: "/mnt/documents/instalar-ja-limpo-iphone.mp4" },
+  { id: "android", out: "/mnt/documents/instalar-ja-limpo-android.mp4" },
+];
 
-await renderMedia({
-  composition,
-  serveUrl: bundled,
-  codec: "h264",
-  outputLocation: "/mnt/documents/instalar-ja-limpo.mp4",
-  puppeteerInstance: browser,
-  muted: true,
-  concurrency: 1,
-});
+for (const t of targets) {
+  console.log(`Rendering ${t.id}...`);
+  const composition = await selectComposition({
+    serveUrl: bundled,
+    id: t.id,
+    puppeteerInstance: browser,
+  });
+  await renderMedia({
+    composition,
+    serveUrl: bundled,
+    codec: "h264",
+    outputLocation: t.out,
+    puppeteerInstance: browser,
+    muted: true,
+    concurrency: 1,
+  });
+  console.log(`  -> ${t.out}`);
+}
 
 await browser.close({ silent: false });
 console.log("done");
