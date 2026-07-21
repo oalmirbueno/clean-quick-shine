@@ -604,25 +604,41 @@ function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.4 }}
-      className="relative w-full aspect-[16/11] rounded-3xl bg-[#102A43] border border-white/10 overflow-hidden flex items-center justify-center"
+      className="relative w-full aspect-[16/11] rounded-3xl overflow-hidden flex items-center justify-center border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]"
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(16,42,67,0.95) 0%, rgba(11,30,48,0.95) 100%)",
+        backdropFilter: "blur(20px) saturate(180%)",
+      }}
     >
-      {/* Subtle mint radial glow */}
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_50%_120%,rgba(25,204,151,0.35),transparent_65%)]" />
-      <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_50%_-20%,rgba(255,255,255,0.06),transparent_60%)]" />
+      {/* Mint glow */}
+      <div className="absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_50%_115%,rgba(25,204,151,0.45),transparent_60%)]" />
+      <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_20%_-10%,rgba(255,255,255,0.08),transparent_55%)]" />
+      {/* Highlight edge */}
+      <div className="pointer-events-none absolute inset-0 rounded-3xl [background:linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0)_45%)]" />
 
       {/* Phone frame */}
-      <div className="relative w-[150px] h-[220px] rounded-[28px] bg-[#0B1E30] border border-white/15 shadow-2xl overflow-hidden ring-1 ring-black/40">
+      <div
+        className="relative w-[152px] h-[224px] rounded-[30px] overflow-hidden shadow-2xl"
+        style={{
+          background:
+            "linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 100%)",
+          border: "1px solid rgba(255,255,255,0.22)",
+          boxShadow:
+            "0 10px 40px -8px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.18)",
+        }}
+      >
         {/* Notch */}
-        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-black/70 rounded-full z-20" />
+        <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-2.5 rounded-full bg-white/15 border border-white/10 z-20" />
 
-        {/* Top browser bar */}
-        <div className="absolute inset-x-0 top-0 h-8 bg-[#0B1E30]/95 border-b border-white/10 flex items-center gap-1 px-2 pt-3.5 z-10">
-          <div className="flex-1 h-2 rounded-sm bg-white/10" />
+        {/* Top browser bar (glass) */}
+        <div className="absolute inset-x-0 top-0 h-8 z-10 flex items-center gap-1 px-2 pt-3.5 border-b border-white/10 backdrop-blur-md bg-white/5">
+          <div className="flex-1 h-2 rounded-sm bg-white/15" />
           {!pointerBottom && (
             <motion.div
               animate={{ scale: [1, 1.15, 1] }}
               transition={{ duration: 1.6, repeat: Infinity }}
-              className="w-3.5 h-3.5 rounded bg-primary/25 border border-primary/60 flex items-center justify-center"
+              className="w-3.5 h-3.5 rounded bg-primary/30 border border-primary/70 flex items-center justify-center"
             >
               {os === "android" ? (
                 <MoreVertical className="w-2 h-2 text-primary" />
@@ -633,33 +649,34 @@ function InstallMockup({ os, browser }: { os: OS; browser: Browser }) {
           )}
         </div>
 
-        {/* App screenshot */}
+        {/* Real app screenshot */}
         <img
           src={appPreview}
-          alt="Prévia do app Já Limpo"
+          alt="Prévia real do app Já Limpo"
           className="absolute inset-x-0 top-8 bottom-8 w-full h-[calc(100%-4rem)] object-cover object-top"
           loading="lazy"
         />
 
         {/* iOS bottom bar with pointer */}
         {pointerBottom && (
-          <div className="absolute inset-x-0 bottom-0 h-8 bg-[#0B1E30]/95 border-t border-white/10 flex items-center justify-around px-2 z-10">
-            <div className="w-2.5 h-2.5 rounded bg-white/10" />
+          <div className="absolute inset-x-0 bottom-0 h-8 z-10 flex items-center justify-around px-2 border-t border-white/10 backdrop-blur-md bg-white/5">
+            <div className="w-2.5 h-2.5 rounded bg-white/15" />
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 1.6, repeat: Infinity }}
-              className="w-4 h-4 rounded bg-primary/25 border border-primary/60 flex items-center justify-center"
+              className="w-4 h-4 rounded bg-primary/30 border border-primary/70 flex items-center justify-center"
             >
               <Share className="w-2.5 h-2.5 text-primary" />
             </motion.div>
-            <div className="w-2.5 h-2.5 rounded bg-white/10" />
-            <div className="w-2.5 h-2.5 rounded bg-white/10" />
+            <div className="w-2.5 h-2.5 rounded bg-white/15" />
+            <div className="w-2.5 h-2.5 rounded bg-white/15" />
           </div>
         )}
       </div>
     </motion.div>
   );
 }
+
 
 
 // ============================================================
