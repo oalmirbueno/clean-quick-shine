@@ -271,3 +271,106 @@ function ChoiceCard({
     </motion.button>
   );
 }
+
+function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const url = typeof window !== "undefined" ? window.location.origin + "/" : "";
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success("Link copiado");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar");
+    }
+  };
+
+  return (
+    <AuthLayout
+      eyebrow={
+        <>
+          <Sparkles className="w-3 h-3" /> Já Limpo funciona no seu celular
+        </>
+      }
+      title="Abra no seu celular"
+      subtitle="O Já Limpo foi feito para iOS e Android. Aponte a câmera do celular para o QR ou copie o link."
+      showTrust
+    >
+      <div className="space-y-5">
+        <div className="rounded-3xl border border-border/60 bg-card p-6 flex flex-col items-center gap-4">
+          <div className="rounded-2xl bg-white p-3 shadow-sm">
+            <QRCodeSVG
+              value={url}
+              size={176}
+              level="M"
+              bgColor="#ffffff"
+              fgColor="#0b1c2c"
+              includeMargin={false}
+            />
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <QrCode className="w-3.5 h-3.5 text-primary" />
+            Aponte a câmera do iPhone ou Android para o QR
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border/60 bg-muted/30 p-3 flex items-center gap-2">
+          <div className="flex-1 min-w-0 text-xs font-mono truncate text-foreground/80">
+            {url}
+          </div>
+          <button
+            type="button"
+            onClick={copyLink}
+            className="shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5" /> Copiado
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5" /> Copiar
+              </>
+            )}
+          </button>
+        </div>
+
+        <ol className="space-y-2.5 text-sm text-foreground/90">
+          <StepLine n={1} text="Abra o link no celular (QR ou copiar)." />
+          <StepLine n={2} text="Toque em Instalar / Adicionar à tela inicial." />
+          <StepLine n={3} text="Abra o Já Limpo pelo ícone e faça login." />
+        </ol>
+
+        <div className="pt-2 text-center">
+          <button
+            type="button"
+            onClick={onProWeb}
+            className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+          >
+            Sou diarista — continuar pelo navegador
+          </button>
+        </div>
+      </div>
+
+      <p className="mt-6 text-[11px] text-center text-muted-foreground leading-relaxed">
+        Ao continuar você aceita nossos{" "}
+        <a href="/terms" className="text-primary hover:underline">termos</a>{" "}
+        e{" "}
+        <a href="/privacy" className="text-primary hover:underline">política de privacidade</a>.
+      </p>
+    </AuthLayout>
+  );
+}
+
+function StepLine({ n, text }: { n: number; text: string }) {
+  return (
+    <li className="flex items-start gap-3">
+      <span className="shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
+        {n}
+      </span>
+      <span className="leading-relaxed pt-0.5">{text}</span>
+    </li>
+  );
+}
