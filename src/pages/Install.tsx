@@ -23,6 +23,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { Logo } from "@/components/ui/Logo";
+import appPreview from "@/assets/screenshots/client-home.png";
+
 import { useInstalledPwa } from "@/hooks/useInstalledPwa";
 import { useIsMobileDevice, useIsStandalone } from "@/hooks/useIsStandalone";
 import {
