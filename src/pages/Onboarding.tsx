@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
+import { getPublicOrigin } from "@/lib/platform";
 import {
   Sparkles,
   ArrowRight,
@@ -256,7 +257,7 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
   const [showQr, setShowQr] = useState(() =>
     typeof window !== "undefined" ? getResponsiveViewportWidth() >= 1024 : true,
   );
-  const url = typeof window !== "undefined" ? window.location.origin + "/" : "";
+  const url = getPublicOrigin() + "/";
 
   useEffect(() => {
     const update = () => setShowQr(getResponsiveViewportWidth() >= 1024);

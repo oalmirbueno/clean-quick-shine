@@ -22,6 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
+import { getPublicOrigin } from "@/lib/platform";
 import { Logo } from "@/components/ui/Logo";
 import appPreview from "@/assets/screenshots/app-preview.png";
 import appPreviewNext from "@/assets/screenshots/app-preview-next.png";
@@ -119,7 +120,7 @@ export default function Install() {
 
   const copyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.origin);
+      await navigator.clipboard.writeText(getPublicOrigin());
       toast.success("Link copiado", { description: window.location.host });
     } catch {
       toast.error("Não foi possível copiar");
@@ -134,7 +135,7 @@ export default function Install() {
         await nav.share({
           title: "Já Limpo",
           text: shareText,
-          url: window.location.origin,
+          url: getPublicOrigin(),
         });
         return;
       } catch {
@@ -146,7 +147,7 @@ export default function Install() {
 
   const shareWhatsApp = () => {
     const text = encodeURIComponent(
-      `Conhece alguém que pode aproveitar o Já Limpo? Acesse e instale o app: ${window.location.origin}`,
+      `Conhece alguém que pode aproveitar o Já Limpo? Acesse e instale o app: ${getPublicOrigin()}`,
     );
     window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
   };
@@ -380,7 +381,7 @@ export default function Install() {
               {showQr && (
                 <div className="flex items-center justify-center py-2">
                   <div className="p-3 rounded-2xl bg-white">
-                    <QRCodeSVG value={window.location.origin} size={112} level="M" />
+                    <QRCodeSVG value={getPublicOrigin()} size={112} level="M" />
                   </div>
                 </div>
               )}
@@ -611,7 +612,7 @@ export default function Install() {
           {showQr && (
             <section className="rounded-2xl bg-neutral-900/50 border border-neutral-800 p-4 flex items-center gap-4">
               <div className="p-2 rounded-xl bg-white">
-                <QRCodeSVG value={window.location.origin} size={88} level="M" />
+                <QRCodeSVG value={getPublicOrigin()} size={88} level="M" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold leading-snug">Aponte a câmera do celular</p>

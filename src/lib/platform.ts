@@ -23,7 +23,14 @@ export const PUBLIC_ORIGIN = "https://jalimpo.com";
 export function getPublicOrigin(): string {
   if (isNativeApp()) return PUBLIC_ORIGIN;
   try {
-    return window.location.origin;
+    // Só confia no origin quando é o domínio real de produção. Preview do
+    // Lovable (*.lovableproject.com), localhost etc. geravam QR codes e links
+    // de compartilhamento apontando para fora do produto.
+    const host = window.location.hostname;
+    if (host === "jalimpo.com" || host === "www.jalimpo.com") {
+      return window.location.origin;
+    }
+    return PUBLIC_ORIGIN;
   } catch {
     return PUBLIC_ORIGIN;
   }
