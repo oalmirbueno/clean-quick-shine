@@ -36,12 +36,12 @@ export default function AdminOrders() {
       // precisam de tratamento diferente para incluir o dia inteiro.
       if (dateRange.from) {
         query = dateField === "created_at"
-          ? query.gte("created_at", `${dateRange.from}T00:00:00`)
+          ? query.gte("created_at", new Date(`${dateRange.from}T00:00:00`).toISOString())
           : query.gte("scheduled_date", dateRange.from);
       }
       if (dateRange.to) {
         query = dateField === "created_at"
-          ? query.lte("created_at", `${dateRange.to}T23:59:59.999`)
+          ? query.lte("created_at", new Date(`${dateRange.to}T23:59:59.999`).toISOString())
           : query.lte("scheduled_date", dateRange.to);
       }
       const { data, error } = await query;

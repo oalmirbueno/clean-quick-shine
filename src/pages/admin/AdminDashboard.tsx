@@ -15,16 +15,20 @@ import {
   ArrowDownToLine,
   Star,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminDateFilter, presetToRange, type DatePreset, type DateRange } from "@/components/admin/AdminDateFilter";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const now = new Date();
-  const today = now.toISOString().split("T")[0];
+  // Limites no fuso LOCAL convertidos para instantes UTC — usar a data ISO
+  // crua ("YYYY-MM-DD") contra timestamptz deslocava o dia em 3h no Brasil.
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const today = startOfToday.toISOString();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
 
@@ -33,16 +37,35 @@ export default function AdminDashboard() {
   const [datePreset, setDatePreset] = useState<DatePreset>("tudo");
   const [dateRange, setDateRange] = useState<DateRange>(presetToRange("tudo"));
 
-  // Aplica o período sobre uma coluna timestamptz
+  // Aplica o período sobre uma coluna timestamptz respeitando o dia local
+  // (T00:00:00/T23:59:59.999 sem offset seriam lidos como UTC pelo Postgres)
   const applyCreatedRange = <T extends { gte: (c: string, v: string) => T; lte: (c: string, v: string) => T }>(q: T): T => {
     let out = q;
-    if (dateRange.from) out = out.gte("created_at", `${dateRange.from}T00:00:00`);
-    if (dateRange.to) out = out.lte("created_at", `${dateRange.to}T23:59:59.999`);
+    if (dateRange.from) out = out.gte("created_at", new Date(`${dateRange.from}T00:00:00`).toISOString());
+    if (dateRange.to) out = out.lte("created_at", new Date(`${dateRange.to}T23:59:59.999`).toISOString());
     return out;
   };
 
+  // Tempo real: mudanças em pedidos/pagamentos/saques atualizam o dashboard
+  // na hora; refetch periódico de 30s como retaguarda.
+  useEffect(() => {
+    const invalidate = () => {
+      queryClient.invalidateQueries({ predicate: (q) => String(q.queryKey[0]).startsWith("admin_") });
+    };
+    const channel = supabase
+      .channel("admin-dashboard-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdrawals" }, invalidate)
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   const { data: ordersToday = 0 } = useQuery({
     queryKey: ["admin_orders_today", today],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { count, error } = await supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", today);
       if (error) console.error("admin_orders_today error:", error);
@@ -52,6 +75,7 @@ export default function AdminDashboard() {
 
   const { data: ordersMonth = 0 } = useQuery({
     queryKey: ["admin_orders_month"],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { count, error } = await supabase.from("orders").select("*", { count: "exact", head: true }).gte("created_at", monthStart);
       if (error) console.error("admin_orders_month error:", error);
@@ -62,6 +86,7 @@ export default function AdminDashboard() {
   // Financial data from non-cancelled orders (respeita o período selecionado)
   const { data: financials = { gmv: 0, commission: 0, avgTicket: 0, totalOrders: 0 } } = useQuery({
     queryKey: ["admin_financials", dateRange.from, dateRange.to],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { data, error } = await applyCreatedRange(
         supabase
@@ -82,6 +107,7 @@ export default function AdminDashboard() {
   // Payments data
   const { data: paymentsData = { total: 0, confirmed: 0, pending: 0 } } = useQuery({
     queryKey: ["admin_payments_summary", dateRange.from, dateRange.to],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { data, error } = await applyCreatedRange(
         supabase.from("payments").select("amount, status, asaas_status")
@@ -97,6 +123,7 @@ export default function AdminDashboard() {
   // Withdrawals data
   const { data: withdrawalsData = { total: 0, pending: 0, processed: 0 } } = useQuery({
     queryKey: ["admin_withdrawals_summary", dateRange.from, dateRange.to],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { data, error } = await applyCreatedRange(
         supabase.from("withdrawals").select("amount, status")
@@ -112,6 +139,7 @@ export default function AdminDashboard() {
   // Entregas: serviços concluídos com data agendada dentro do período
   const { data: deliveredInRange = 0 } = useQuery({
     queryKey: ["admin_delivered_range", dateRange.from, dateRange.to],
+    refetchInterval: 30000,
     queryFn: async () => {
       let query = supabase
         .from("orders")
@@ -127,6 +155,7 @@ export default function AdminDashboard() {
 
   const { data: cancelRate = 0 } = useQuery({
     queryKey: ["admin_cancel_rate", dateRange.from, dateRange.to],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { count: total } = await applyCreatedRange(
         supabase.from("orders").select("*", { count: "exact", head: true })
@@ -140,6 +169,7 @@ export default function AdminDashboard() {
 
   const { data: newPros7d = 0 } = useQuery({
     queryKey: ["admin_new_pros_7d"],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { count } = await supabase.from("pro_profiles").select("*", { count: "exact", head: true }).gte("created_at", weekAgo);
       return count || 0;
@@ -148,6 +178,7 @@ export default function AdminDashboard() {
 
   const { data: activeClients = 0 } = useQuery({
     queryKey: ["admin_active_clients"],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { count } = await supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "client");
       return count || 0;
@@ -156,6 +187,7 @@ export default function AdminDashboard() {
 
   const { data: totalPros = 0 } = useQuery({
     queryKey: ["admin_total_pros"],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { count } = await supabase.from("pro_profiles").select("*", { count: "exact", head: true });
       return count || 0;
@@ -164,6 +196,7 @@ export default function AdminDashboard() {
 
   const { data: recentOrders = [] } = useQuery({
     queryKey: ["admin_recent_orders"],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { data: orders } = await supabase
         .from("orders")
@@ -187,6 +220,7 @@ export default function AdminDashboard() {
   // Recent payments
   const { data: recentPayments = [] } = useQuery({
     queryKey: ["admin_recent_payments"],
+    refetchInterval: 30000,
     queryFn: async () => {
       const { data } = await supabase
         .from("payments")
