@@ -125,7 +125,9 @@ export function useCreateOrder() {
           discount: discount,
           total_price: totalPrice,
           duration_hours: Number(service.duration_hours),
-          status: input.proId ? "confirmed" : "draft",
+          // Todo pedido nasce draft (não pago). Após o pagamento, as edge
+          // functions promovem para confirmed (com diarista) ou scheduled.
+          status: "draft",
           notes: input.notes || null,
         })
         .select("id")

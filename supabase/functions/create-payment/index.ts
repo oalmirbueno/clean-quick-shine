@@ -205,11 +205,14 @@ serve(async (req) => {
     }
 
     // Cartão confirmado na hora: promove o pedido com service role
-    // (o trigger C1 não permite mais que o cliente faça draft->scheduled)
+    // (o trigger C1 não permite mais que o cliente faça draft->scheduled).
+    // Com diarista já atribuída vai direto para "confirmed"; sem diarista
+    // vai para "scheduled" (mural).
     if (isConfirmed) {
+      const targetStatus = order.pro_id ? "confirmed" : "scheduled";
       const { error: promoteError } = await supabaseAdmin
         .from("orders")
-        .update({ status: "scheduled", updated_at: new Date().toISOString() })
+        .update({ status: targetStatus, updated_at: new Date().toISOString() })
         .eq("id", order.id)
         .eq("status", "draft");
       if (promoteError) {

@@ -94,10 +94,19 @@ serve(async (req) => {
     }
 
     if (paymentRecord?.order_id && (payment.status === "CONFIRMED" || payment.status === "RECEIVED")) {
+      const { data: order } = await supabaseAdmin
+        .from("orders")
+        .select("client_id, pro_id, service:services(name)")
+        .eq("id", paymentRecord.order_id)
+        .maybeSingle();
+
+      // Com diarista já atribuída (fluxo de oferta) vira "confirmed";
+      // sem diarista vira "scheduled" e entra no mural.
+      const targetStatus = order?.pro_id ? "confirmed" : "scheduled";
       const { error: orderError } = await supabaseAdmin
         .from("orders")
         .update({
-          status: "scheduled",
+          status: targetStatus,
           updated_at: new Date().toISOString(),
         })
         .eq("id", paymentRecord.order_id)
@@ -107,17 +116,13 @@ serve(async (req) => {
         console.error("Erro ao atualizar order:", orderError);
       }
 
-      const { data: order } = await supabaseAdmin
-        .from("orders")
-        .select("client_id, service:services(name)")
-        .eq("id", paymentRecord.order_id)
-        .maybeSingle();
-
       if (order?.client_id) {
         await supabaseAdmin.from("notifications").insert({
           user_id: order.client_id,
           title: "Pagamento confirmado! ✅",
-          message: `Seu pagamento para ${(order as any).service?.name || "serviço de limpeza"} foi confirmado. Estamos buscando uma profissional para você.`,
+          message: order?.pro_id
+            ? `Seu pagamento para ${(order as any).service?.name || "serviço de limpeza"} foi confirmado. Sua profissional já está reservada para o serviço.`
+            : `Seu pagamento para ${(order as any).service?.name || "serviço de limpeza"} foi confirmado. Estamos buscando uma profissional para você.`,
           type: "payment",
           read: false,
         });
