@@ -60,5 +60,24 @@ export function useGeocode() {
     setSuggestions([]);
   }, []);
 
-  return { suggestions, loading, searchAddress, reverseGeocode, clearSuggestions };
+  // Geocodificação direta (endereço → lat/lng) usada como fallback quando o
+  // usuário digita o endereço sem selecionar no mapa/busca.
+  const forwardGeocode = useCallback(async (query: string): Promise<{ lat: number; lng: number } | null> => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q=${encodeURIComponent(query)}`,
+        { headers: { "Accept-Language": "pt-BR" } }
+      );
+      const data = await res.json();
+      if (Array.isArray(data) && data[0]?.lat && data[0]?.lon) {
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      }
+      return null;
+    } catch (error) {
+      console.error("Forward geocoding error:", error);
+      return null;
+    }
+  }, []);
+
+  return { suggestions, loading, searchAddress, reverseGeocode, forwardGeocode, clearSuggestions };
 }

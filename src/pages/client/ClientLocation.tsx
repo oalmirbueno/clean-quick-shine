@@ -26,7 +26,7 @@ export default function ClientLocation() {
   const createAddress = useCreateAddress();
   const deleteAddress = useDeleteAddress();
   const setDefaultAddress = useSetDefaultAddress();
-  const { reverseGeocode } = useGeocode();
+  const { reverseGeocode, forwardGeocode } = useGeocode();
 
   const [mapCenter, setMapCenter] = useState({ lat: -25.4284, lng: -49.2733 });
   const [markerPos, setMarkerPos] = useState<{ lat: number; lng: number } | null>(null);
@@ -94,6 +94,24 @@ export default function ClientLocation() {
     }
 
     try {
+      // Endereço digitado sem seleção no mapa: geocodifica automaticamente
+      // para o matching de profissionais funcionar (exige coordenadas).
+      let { lat, lng } = formData;
+      if (lat == null || lng == null) {
+        const geo =
+          (await forwardGeocode(
+            `${formData.street}, ${formData.number}, ${formData.city}, ${formData.state}`
+          )) ??
+          (await forwardGeocode(`${formData.zip_code}, ${formData.city}, Brasil`));
+        if (geo) {
+          lat = geo.lat;
+          lng = geo.lng;
+        } else {
+          toast.error("Não achamos esse endereço no mapa. Toque no mapa para marcar o local.");
+          return;
+        }
+      }
+
       const result = await createAddress.mutateAsync({
         label,
         street: formData.street,
@@ -103,8 +121,8 @@ export default function ClientLocation() {
         city: formData.city,
         state: formData.state,
         zip_code: formData.zip_code,
-        lat: formData.lat,
-        lng: formData.lng,
+        lat,
+        lng,
       });
       toast.success("Endereço salvo!");
 
