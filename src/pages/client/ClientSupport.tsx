@@ -60,7 +60,7 @@ export default function ClientSupport() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="size-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="size-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
@@ -112,7 +112,7 @@ export default function ClientSupport() {
 
             {tickets.length === 0 ? (
               <div className="p-8 bg-card rounded-2xl border border-border/60 flex flex-col items-center text-center">
-                <div className="size-14 rounded-full bg-secondary flex items-center justify-center mb-3">
+                <div className="size-14 rounded-full bg-accent flex items-center justify-center mb-3">
                   <LifeBuoy className="w-7 h-7 text-muted-foreground" />
                 </div>
                 <p className="font-medium text-foreground">Nenhum ticket ainda</p>
@@ -151,9 +151,9 @@ export default function ClientSupport() {
           {/* FAQ hint */}
           <button
             onClick={() => navigate("/client/help")}
-            className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-secondary/60 transition-colors active:scale-[0.99]"
+            className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-accent/60 transition-colors active:scale-[0.99]"
           >
-            <div className="size-9 rounded-full bg-secondary flex items-center justify-center">
+            <div className="size-9 rounded-full bg-accent flex items-center justify-center">
               <HelpCircle className="w-4.5 h-4.5 text-muted-foreground" />
             </div>
             <div className="flex-1 text-left">
@@ -186,7 +186,7 @@ export default function ClientSupport() {
               </div>
               <button
                 onClick={() => setShowNewTicket(false)}
-                className="size-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+                className="size-9 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
               >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>

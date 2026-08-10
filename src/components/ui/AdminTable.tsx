@@ -85,7 +85,7 @@ export function AdminTable<T extends Record<string, any>>({
                 key={String(item[keyField])}
                 onClick={() => onRowClick?.(item)}
                 className={cn(
-                  "border-b border-border last:border-0 hover:bg-secondary/50 transition-colors",
+                  "border-b border-border last:border-0 hover:bg-accent/50 transition-colors",
                   onRowClick && "cursor-pointer"
                 )}
               >
@@ -119,14 +119,14 @@ export function TablePagination({ currentPage, totalPages, onPageChange }: Pagin
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="p-2 rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="p-2 rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="p-2 rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

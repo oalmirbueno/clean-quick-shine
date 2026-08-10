@@ -126,7 +126,7 @@ export default function OrderChatPage() {
       <header className="bg-card/95 backdrop-blur-sm border-b border-border/60 px-3 py-2.5 flex items-center gap-3 z-10">
         <button
           onClick={() => navigate(backTo)}
-          className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors -ml-1"
+          className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-accent transition-colors -ml-1"
           aria-label="Voltar"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -279,7 +279,7 @@ export default function OrderChatPage() {
         <div className="flex items-end gap-2">
           <button
             onClick={() => inputRef.current?.click()}
-            className="w-10 h-10 rounded-full bg-secondary/70 hover:bg-secondary flex items-center justify-center transition-colors flex-shrink-0"
+            className="w-10 h-10 rounded-full bg-accent/70 hover:bg-accent flex items-center justify-center transition-colors flex-shrink-0"
             aria-label="Anexar imagem"
           >
             <ImageIcon className="w-[18px] h-[18px] text-muted-foreground" />

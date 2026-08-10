@@ -115,7 +115,7 @@ export default function ClientOrderDetail() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
             >
               <ChevronLeft className="w-6 h-6 text-foreground" />
             </button>
@@ -139,7 +139,7 @@ export default function ClientOrderDetail() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="size-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="size-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
@@ -205,7 +205,7 @@ export default function ClientOrderDetail() {
           {/* Date & Address */}
           <section className="p-4 bg-card rounded-2xl border border-border/60 shadow-sm space-y-4">
             <div className="flex items-start gap-3">
-              <div className="size-9 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+              <div className="size-9 rounded-lg bg-accent flex items-center justify-center shrink-0">
                 <Calendar className="w-4.5 h-4.5 text-muted-foreground" />
               </div>
               <div className="flex-1">
@@ -215,7 +215,7 @@ export default function ClientOrderDetail() {
               </div>
             </div>
             <div className="flex items-start gap-3 pt-3 border-t border-border/50">
-              <div className="size-9 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+              <div className="size-9 rounded-lg bg-accent flex items-center justify-center shrink-0">
                 <MapPin className="w-4.5 h-4.5 text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">
@@ -308,9 +308,9 @@ export default function ClientOrderDetail() {
           {/* Support */}
           <button
             onClick={() => navigate("/client/support")}
-            className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-secondary/60 transition-colors active:scale-[0.99]"
+            className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-accent/60 transition-colors active:scale-[0.99]"
           >
-            <div className="size-9 rounded-full bg-secondary flex items-center justify-center">
+            <div className="size-9 rounded-full bg-accent flex items-center justify-center">
               <HelpCircle className="w-4.5 h-4.5 text-muted-foreground" />
             </div>
             <span className="font-medium text-foreground text-sm flex-1 text-left">Preciso de ajuda</span>

@@ -556,7 +556,7 @@ export default function ClientCheckout() {
                   if (step === "payment") setStep("cpf");
                   else navigate(-1);
                 }}
-                className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
+                className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-accent transition-colors shadow-sm"
                 aria-label="Voltar"
               >
                 <ArrowLeft className="w-5 h-5" />

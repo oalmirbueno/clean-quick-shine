@@ -103,7 +103,7 @@ export default function ClientOrders() {
       {/* Segmented control */}
       <div className="shrink-0 px-5">
         <div className="mx-auto max-w-lg">
-          <div className="relative flex p-1 rounded-2xl bg-secondary/60 border border-border/60">
+          <div className="relative flex p-1 rounded-2xl bg-accent/60 border border-border/60">
             {(["upcoming", "completed"] as const).map((tab) => {
               const active = activeTab === tab;
               const count = tab === "upcoming" ? upcomingOrders.length : completedOrders.length;
@@ -158,7 +158,7 @@ export default function ClientOrders() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar serviço ou endereço"
               maxLength={100}
-              className="w-full h-10 pl-9 pr-9 text-[13px] rounded-2xl bg-secondary/60 border border-border/60 outline-none placeholder:text-muted-foreground text-foreground focus:border-primary/40 focus:ring-2 focus:ring-primary/15 transition"
+              className="w-full h-10 pl-9 pr-9 text-[13px] rounded-2xl bg-accent/60 border border-border/60 outline-none placeholder:text-muted-foreground text-foreground focus:border-primary/40 focus:ring-2 focus:ring-primary/15 transition"
             />
             {search && (
               <button
@@ -243,7 +243,7 @@ export default function ClientOrders() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center py-16 px-4"
             >
-              <div className="w-20 h-20 rounded-3xl bg-secondary/60 border border-border/60 flex items-center justify-center mx-auto mb-5">
+              <div className="w-20 h-20 rounded-3xl bg-accent/60 border border-border/60 flex items-center justify-center mx-auto mb-5">
                 <ClipboardList className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
               </div>
               <h3 className="text-[15px] font-semibold text-foreground mb-1">

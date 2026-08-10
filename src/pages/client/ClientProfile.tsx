@@ -213,11 +213,11 @@ export default function ClientProfile() {
                     whileTap={{ scale: 0.99 }}
                     onClick={() => item.path.startsWith("/") && navigate(item.path)}
                     className={cn(
-                      "w-full px-4 py-3.5 flex items-center gap-3 text-left hover:bg-secondary/50 transition-colors",
+                      "w-full px-4 py-3.5 flex items-center gap-3 text-left hover:bg-accent/50 transition-colors",
                       idx !== section.items.length - 1 && "border-b border-border/60",
                     )}
                   >
-                    <div className="w-9 h-9 rounded-xl bg-secondary/70 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-accent/70 flex items-center justify-center shrink-0">
                       <item.icon className="w-[17px] h-[17px] text-foreground/70" strokeWidth={2} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -264,7 +264,7 @@ export default function ClientProfile() {
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl bg-secondary/50 border border-border/60 px-3 py-2.5 text-center">
+    <div className="rounded-xl bg-accent/50 border border-border/60 px-3 py-2.5 text-center">
       <p className="text-[16px] font-semibold text-foreground leading-none tracking-tight">
         {value}
       </p>

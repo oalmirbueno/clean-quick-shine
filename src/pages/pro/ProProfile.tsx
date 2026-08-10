@@ -327,7 +327,7 @@ export default function ProProfile() {
           <section className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             <button
               onClick={() => setEditSection(editSection === "personal" ? null : "personal")}
-              className="w-full p-4 flex items-center gap-3 hover:bg-secondary/50 transition-colors"
+              className="w-full p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors"
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <User className="w-5 h-5 text-primary" />
@@ -381,7 +381,7 @@ export default function ProProfile() {
           <section className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
             <button
               onClick={() => setEditSection(editSection === "bio" ? null : "bio")}
-              className="w-full p-4 flex items-center gap-3 hover:bg-secondary/50 transition-colors"
+              className="w-full p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors"
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <StarIcon className="w-5 h-5 text-primary" />
@@ -444,7 +444,7 @@ export default function ProProfile() {
               <span className="flex-1 font-medium text-foreground">Endereços</span>
               <button
                 onClick={openNewAddress}
-                className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                className="p-2 rounded-lg hover:bg-accent transition-colors"
               >
                 <Plus className="w-5 h-5 text-primary" />
               </button>
@@ -457,7 +457,7 @@ export default function ProProfile() {
                   <button
                     key={addr.id}
                     onClick={() => openAddressEdit(addr)}
-                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-secondary/50 transition-colors border-b border-border last:border-b-0"
+                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-accent/50 transition-colors border-b border-border last:border-b-0"
                   >
                     <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1 text-left min-w-0">
@@ -559,7 +559,7 @@ export default function ProProfile() {
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className={`w-full p-4 flex items-center gap-4 hover:bg-secondary/50 transition-colors
+                className={`w-full p-4 flex items-center gap-4 hover:bg-accent/50 transition-colors
                   ${index !== navItems.length - 1 ? "border-b border-border/60" : ""}`}
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">

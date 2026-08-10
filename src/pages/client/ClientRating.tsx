@@ -75,7 +75,7 @@ export default function ClientRating() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/client/orders")}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
             >
               <ChevronLeft className="w-6 h-6 text-foreground" />
             </button>
@@ -99,7 +99,7 @@ export default function ClientRating() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/client/orders")}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
             >
               <ChevronLeft className="w-6 h-6 text-foreground" />
             </button>
@@ -147,7 +147,7 @@ export default function ClientRating() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="size-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="size-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>

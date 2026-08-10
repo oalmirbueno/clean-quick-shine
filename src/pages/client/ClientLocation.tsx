@@ -182,7 +182,7 @@ export default function ClientLocation() {
         <div className="mx-auto max-w-lg flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
+            className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-accent transition-colors shadow-sm"
             aria-label="Voltar"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -319,7 +319,7 @@ export default function ClientLocation() {
               >
                 <div className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
-                  address.is_default ? "bg-primary" : "bg-secondary"
+                  address.is_default ? "bg-primary" : "bg-accent"
                 )}>
                   <MapPin className={cn(
                     "w-5 h-5",
@@ -341,7 +341,7 @@ export default function ClientLocation() {
                   {!address.is_default && (
                     <button
                       onClick={e => { e.stopPropagation(); handleSetDefault(address.id); }}
-                      className="p-2 hover:bg-secondary rounded-lg"
+                      className="p-2 hover:bg-accent rounded-lg"
                     >
                       <Star className="w-4 h-4 text-muted-foreground" />
                     </button>

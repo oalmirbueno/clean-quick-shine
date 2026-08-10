@@ -36,7 +36,7 @@ export function MapMock({
     <div
       onClick={onClick}
       className={cn(
-        "relative w-full bg-secondary/30 rounded-xl overflow-hidden border border-border",
+        "relative w-full bg-accent/30 rounded-xl overflow-hidden border border-border",
         "cursor-pointer hover:border-primary/30 transition-colors",
         !height && "aspect-[16/10]",
         className
@@ -123,16 +123,16 @@ export function MapMock({
 
       {/* Map controls mock */}
       <div className="absolute top-3 right-3 flex flex-col gap-2">
-        <button className="w-8 h-8 bg-card rounded-lg shadow-md flex items-center justify-center hover:bg-secondary transition-colors">
+        <button className="w-8 h-8 bg-card rounded-lg shadow-md flex items-center justify-center hover:bg-accent transition-colors">
           <span className="text-lg font-medium">+</span>
         </button>
-        <button className="w-8 h-8 bg-card rounded-lg shadow-md flex items-center justify-center hover:bg-secondary transition-colors">
+        <button className="w-8 h-8 bg-card rounded-lg shadow-md flex items-center justify-center hover:bg-accent transition-colors">
           <span className="text-lg font-medium">−</span>
         </button>
       </div>
 
       {/* Current location button */}
-      <button className="absolute bottom-3 right-3 w-10 h-10 bg-card rounded-lg shadow-md flex items-center justify-center hover:bg-secondary transition-colors">
+      <button className="absolute bottom-3 right-3 w-10 h-10 bg-card rounded-lg shadow-md flex items-center justify-center hover:bg-accent transition-colors">
         <Navigation className="w-5 h-5 text-primary" />
       </button>
 

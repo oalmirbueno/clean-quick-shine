@@ -36,7 +36,7 @@ export function NotificationsDropdown() {
       <motion.button
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full hover:bg-secondary transition-colors"
+        className="relative p-2 rounded-full hover:bg-accent transition-colors"
       >
         <Bell className="w-5 h-5 text-muted-foreground" />
         {unreadCount > 0 && (
@@ -86,7 +86,7 @@ export function NotificationsDropdown() {
                       )}
                       <button
                         onClick={() => setIsOpen(false)}
-                        className="p-1.5 rounded-lg hover:bg-secondary"
+                        className="p-1.5 rounded-lg hover:bg-accent"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -113,7 +113,7 @@ export function NotificationsDropdown() {
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
                             className={cn(
-                              "w-full p-4 flex gap-3 text-left hover:bg-secondary/50 transition-colors border-b border-border last:border-0",
+                              "w-full p-4 flex gap-3 text-left hover:bg-accent/50 transition-colors border-b border-border last:border-0",
                               !notification.read && "bg-accent/30"
                             )}
                           >

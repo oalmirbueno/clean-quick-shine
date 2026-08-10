@@ -89,11 +89,16 @@ export default function ProHome() {
     return () => clearInterval(iv);
   }, [isAvailable, user?.id]);
 
+  // Clientes disponíveis no mapa (estilo Uber): a view segura não expõe o
+  // endereço real antes do aceite, então plotamos o CENTRO DA ZONA com um
+  // deslocamento determinístico por pedido para não sobrepor marcadores.
   const orderMarkers = availableOrders
-    ?.filter((o: any) => o.address?.lat && o.address?.lng)
-    .map((o: any) => ({
-      lat: Number(o.address.lat), lng: Number(o.address.lng), color: "orange" as const,
-      popup: `${o.serviceName || "Serviço"} - R$ ${o.proEarning?.toFixed(2).replace(".", ",")}`,
+    ?.filter((o) => o.zoneCenterLat != null && o.zoneCenterLng != null)
+    .map((o, i) => ({
+      lat: o.zoneCenterLat! + (((i * 37) % 11) - 5) * 0.0012,
+      lng: o.zoneCenterLng! + (((i * 53) % 11) - 5) * 0.0012,
+      color: "orange" as const,
+      popup: `<b>${o.serviceName || "Serviço"}</b><br/>${o.neighborhood || o.city || ""} · ${o.date} ${o.time}<br/>Você recebe R$ ${o.proEarning?.toFixed(2).replace(".", ",")}`,
     })) || [];
 
   const mapCenter = proLocation || {
@@ -303,7 +308,12 @@ export default function ProHome() {
                 >
                   <span className="flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5" />
-                    {showMap ? "Ocultar mapa" : "Ver mapa de pedidos"}
+                    {showMap ? "Ocultar mapa" : "Ver clientes disponíveis no mapa"}
+                    {orderMarkers.length > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
+                        {orderMarkers.length}
+                      </span>
+                    )}
                   </span>
                   <ChevronRight className={cn("w-4 h-4 transition-transform", showMap && "rotate-90")} />
                 </button>
@@ -316,8 +326,17 @@ export default function ProHome() {
                     <MapView
                       center={mapCenter} zoom={13}
                       markers={[{ lat: mapCenter.lat, lng: mapCenter.lng, color: "blue" as const, popup: "Você" }, ...orderMarkers]}
-                      showUserLocation height="180px"
+                      showUserLocation height="220px"
                     />
+                    <div className="px-3 py-2 bg-card text-[11px] text-muted-foreground flex items-center justify-between border-t border-border/60">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-orange-500 inline-block" />
+                        {orderMarkers.length === 1
+                          ? "1 cliente disponível perto de você"
+                          : `${orderMarkers.length} clientes disponíveis perto de você`}
+                      </span>
+                      <span className="text-[10px]">Localização aproximada por zona</span>
+                    </div>
                   </motion.div>
                 )}
               </motion.div>

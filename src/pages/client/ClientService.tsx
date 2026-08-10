@@ -39,7 +39,7 @@ export default function ClientService() {
         <div className="mx-auto max-w-lg flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
+            className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-accent transition-colors shadow-sm"
             aria-label="Voltar"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -112,7 +112,7 @@ export default function ClientService() {
                       <div
                         className={cn(
                           "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors",
-                          isSelected ? "bg-primary/15" : "bg-secondary/70",
+                          isSelected ? "bg-primary/15" : "bg-accent/70",
                         )}
                       >
                         <IconComp
@@ -148,7 +148,7 @@ export default function ClientService() {
                         )}
 
                         <div className="flex items-center justify-between mt-3">
-                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-secondary/60 text-[11px] text-muted-foreground font-medium">
+                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-accent/60 text-[11px] text-muted-foreground font-medium">
                             <Clock className="w-3 h-3" />
                             {service.duration_hours}h
                           </div>

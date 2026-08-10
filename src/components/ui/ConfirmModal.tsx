@@ -45,7 +45,7 @@ export function ConfirmModal({
       <div className="relative bg-card rounded-xl border border-border p-6 w-full max-w-md card-shadow animate-scale-in">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 rounded-lg hover:bg-secondary transition-colors"
+          className="absolute top-4 right-4 p-1 rounded-lg hover:bg-accent transition-colors"
         >
           <X className="w-5 h-5 text-muted-foreground" />
         </button>

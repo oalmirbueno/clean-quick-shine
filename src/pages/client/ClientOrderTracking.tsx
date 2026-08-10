@@ -142,7 +142,7 @@ export default function ClientOrderTracking() {
       <div className="min-h-screen bg-background flex flex-col">
         <header className="bg-card border-b border-border p-4">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/client/orders")} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors">
+            <button onClick={() => navigate("/client/orders")} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors">
               <ChevronLeft className="w-6 h-6 text-foreground" />
             </button>
             <h1 className="text-lg font-semibold text-foreground">Pedido não encontrado</h1>
@@ -182,7 +182,7 @@ export default function ClientOrderTracking() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/client/orders")}
-            className="size-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="size-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
@@ -292,13 +292,13 @@ export default function ClientOrderTracking() {
           <section className="p-4 bg-card rounded-2xl border border-border/60 shadow-sm space-y-3">
             <h3 className="text-sm font-semibold text-foreground">Detalhes do serviço</h3>
             <div className="flex items-center gap-3 text-sm">
-              <div className="size-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+              <div className="size-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
                 <Clock className="w-4 h-4 text-muted-foreground" />
               </div>
               <span className="text-muted-foreground">Duração <span className="text-foreground font-medium">{order.duration_hours}h</span></span>
             </div>
             <div className="flex items-center gap-3 text-sm">
-              <div className="size-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+              <div className="size-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
                 <Calendar className="w-4 h-4 text-muted-foreground" />
               </div>
               <span className="text-foreground">
@@ -307,7 +307,7 @@ export default function ClientOrderTracking() {
             </div>
             {formatAddress() && (
               <div className="flex items-start gap-3 text-sm">
-                <div className="size-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                <div className="size-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
                   <MapPin className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <span className="text-foreground leading-relaxed">{formatAddress()}</span>
@@ -323,7 +323,7 @@ export default function ClientOrderTracking() {
           <section className="space-y-2">
             <button
               onClick={() => navigate(`/chat/order/${order.id}?as=client`)}
-              className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-secondary/60 transition-colors active:scale-[0.99]"
+              className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-accent/60 transition-colors active:scale-[0.99]"
             >
               <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center">
                 <MessageCircle className="w-4.5 h-4.5 text-primary" />
@@ -337,9 +337,9 @@ export default function ClientOrderTracking() {
             </button>
             <button
               onClick={() => navigate("/client/support")}
-              className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-secondary/60 transition-colors active:scale-[0.99]"
+              className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-accent/60 transition-colors active:scale-[0.99]"
             >
-              <div className="size-9 rounded-full bg-secondary flex items-center justify-center">
+              <div className="size-9 rounded-full bg-accent flex items-center justify-center">
                 <HelpCircle className="w-4.5 h-4.5 text-muted-foreground" />
               </div>
               <span className="font-medium text-foreground text-sm flex-1 text-left">Suporte</span>

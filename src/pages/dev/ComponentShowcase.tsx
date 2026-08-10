@@ -127,7 +127,7 @@ export default function ComponentShowcase() {
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
                 {[
                   { name: "Primary", class: "bg-primary" },
-                  { name: "Secondary", class: "bg-secondary" },
+                  { name: "Secondary", class: "bg-accent" },
                   { name: "Accent", class: "bg-accent" },
                   { name: "Muted", class: "bg-muted" },
                   { name: "Success", class: "bg-success" },

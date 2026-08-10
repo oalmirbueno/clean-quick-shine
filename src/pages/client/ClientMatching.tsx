@@ -242,7 +242,7 @@ export default function ClientMatching() {
               </p>
 
               <div className="w-56 mx-auto">
-                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                <div className="h-1.5 bg-accent rounded-full overflow-hidden">
                   <motion.div
                     className="h-full bg-primary rounded-full"
                     initial={{ width: 0 }}

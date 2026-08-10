@@ -87,7 +87,7 @@ export default function ProOrderDetail() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="size-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="size-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
@@ -136,7 +136,7 @@ export default function ProOrderDetail() {
                           ? "bg-primary text-primary-foreground scale-110"
                           : isActive
                           ? "bg-primary/15 text-primary"
-                          : "bg-secondary text-muted-foreground"
+                          : "bg-accent text-muted-foreground"
                       )}>
                         <Icon className="w-4 h-4" />
                       </div>
@@ -179,7 +179,7 @@ export default function ProOrderDetail() {
               {order.pro_profile?.phone && (
                 <a
                   href={`tel:${order.pro_profile.phone}`}
-                  className="size-10 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/70 transition-colors"
+                  className="size-10 rounded-full bg-accent flex items-center justify-center hover:bg-accent/70 transition-colors"
                   aria-label="Ligar"
                 >
                   <Phone className="w-5 h-5 text-foreground" />
@@ -211,7 +211,7 @@ export default function ProOrderDetail() {
           {/* Date & Address */}
           <section className="p-4 bg-card rounded-2xl border border-border/60 shadow-sm space-y-4">
             <div className="flex items-start gap-3">
-              <div className="size-9 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+              <div className="size-9 rounded-lg bg-accent flex items-center justify-center shrink-0">
                 <Calendar className="w-4.5 h-4.5 text-muted-foreground" />
               </div>
               <div className="flex-1">
@@ -221,7 +221,7 @@ export default function ProOrderDetail() {
               </div>
             </div>
             <div className="flex items-start gap-3 pt-3 border-t border-border/50">
-              <div className="size-9 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+              <div className="size-9 rounded-lg bg-accent flex items-center justify-center shrink-0">
                 <MapPin className="w-4.5 h-4.5 text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">
@@ -245,7 +245,7 @@ export default function ProOrderDetail() {
           {/* Actions */}
           <button
             onClick={() => navigate(`/chat/order/${order.id}?as=pro`)}
-            className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-secondary/60 transition-colors active:scale-[0.99]"
+            className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-accent/60 transition-colors active:scale-[0.99]"
           >
             <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center">
               <MessageCircle className="w-4.5 h-4.5 text-primary" />
@@ -255,9 +255,9 @@ export default function ProOrderDetail() {
           </button>
           <button
             onClick={() => navigate("/pro/support")}
-            className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-secondary/60 transition-colors active:scale-[0.99]"
+            className="w-full p-4 rounded-2xl border border-border/60 bg-card flex items-center gap-3 hover:bg-accent/60 transition-colors active:scale-[0.99]"
           >
-            <div className="size-9 rounded-full bg-secondary flex items-center justify-center">
+            <div className="size-9 rounded-full bg-accent flex items-center justify-center">
               <HelpCircle className="w-4.5 h-4.5 text-muted-foreground" />
             </div>
             <span className="font-medium text-foreground text-sm flex-1 text-left">Precisa de ajuda?</span>

@@ -250,7 +250,7 @@ export default function ClientDemo() {
                 Profissionais verificadas próximas a você
               </p>
               <div className="w-56">
-                <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                <div className="h-2 bg-accent rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-100"
                     style={{ width: `${progress}%` }}

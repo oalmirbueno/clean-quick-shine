@@ -148,7 +148,7 @@ export default function ClientOffer() {
           <div className="mx-auto max-w-lg flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
+              className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-accent transition-colors shadow-sm"
               aria-label="Voltar"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -297,7 +297,7 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-10 h-10 rounded-xl bg-secondary/70 flex items-center justify-center shrink-0">
+      <div className="w-10 h-10 rounded-xl bg-accent/70 flex items-center justify-center shrink-0">
         <Icon className="w-4 h-4 text-foreground/70" strokeWidth={2} />
       </div>
       <div className="min-w-0">

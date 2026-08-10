@@ -97,7 +97,7 @@ export default function ClientSchedule() {
         <div className="mx-auto max-w-lg flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-secondary transition-colors shadow-sm"
+            className="w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-foreground hover:bg-accent transition-colors shadow-sm"
             aria-label="Voltar"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -120,7 +120,7 @@ export default function ClientSchedule() {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-border/60 bg-secondary/40 px-4 py-3 flex items-center justify-between"
+              className="rounded-2xl border border-border/60 bg-accent/40 px-4 py-3 flex items-center justify-between"
             >
               <div className="min-w-0">
                 <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-0.5">
@@ -233,7 +233,7 @@ export default function ClientSchedule() {
                       <div
                         className={cn(
                           "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                          active ? "bg-primary/15" : "bg-secondary/70",
+                          active ? "bg-primary/15" : "bg-accent/70",
                         )}
                       >
                         <MapPin

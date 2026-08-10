@@ -45,7 +45,7 @@ export default function ClientReferral() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="size-10 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+            className="size-10 rounded-full flex items-center justify-center hover:bg-accent transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
@@ -114,7 +114,7 @@ export default function ClientReferral() {
                     transition={{ delay: i * 0.04 }}
                     className="p-4 bg-card rounded-2xl border border-border/60 flex items-center gap-3"
                   >
-                    <div className="size-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                    <div className="size-10 rounded-full bg-accent flex items-center justify-center shrink-0">
                       <Users className="w-4.5 h-4.5 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -126,7 +126,7 @@ export default function ClientReferral() {
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                       ref.status === "completed"
                         ? "bg-primary/10 text-primary"
-                        : "bg-secondary text-muted-foreground"
+                        : "bg-accent text-muted-foreground"
                     }`}>
                       {ref.status === "completed" ? "Concluída" : "Pendente"}
                     </span>
@@ -136,7 +136,7 @@ export default function ClientReferral() {
             </section>
           ) : (
             <section className="p-6 bg-card rounded-2xl border border-border/60 border-dashed flex flex-col items-center text-center">
-              <div className="size-12 rounded-full bg-secondary flex items-center justify-center mb-3">
+              <div className="size-12 rounded-full bg-accent flex items-center justify-center mb-3">
                 <Users className="w-6 h-6 text-muted-foreground" />
               </div>
               <p className="font-medium text-foreground text-sm">Nenhuma indicação ainda</p>

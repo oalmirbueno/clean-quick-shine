@@ -57,7 +57,7 @@ export function PlanCard({
       <div className="flex items-center gap-3 mb-4">
         <div className={cn(
           "w-10 h-10 rounded-full flex items-center justify-center",
-          popular ? "bg-primary/20" : "bg-secondary"
+          popular ? "bg-primary/20" : "bg-accent"
         )}>
           <Icon className={cn("w-5 h-5", popular ? "text-primary" : "text-muted-foreground")} />
         </div>
@@ -91,7 +91,7 @@ export function PlanCard({
             ? "bg-muted text-muted-foreground cursor-not-allowed"
             : popular
             ? "bg-primary text-primary-foreground hover:opacity-90"
-            : "bg-secondary text-foreground hover:bg-secondary/80"
+            : "bg-accent text-foreground hover:bg-accent/80"
         )}
       >
         {current ? "Plano atual" : price === 0 ? "Continuar grátis" : "Assinar agora"}

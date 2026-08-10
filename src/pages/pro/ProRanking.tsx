@@ -151,7 +151,7 @@ export default function ProRanking() {
                 </div>
                 <span className="text-xs font-bold text-primary">{progress.toFixed(0)}%</span>
               </div>
-              <div className="h-2.5 bg-secondary rounded-full overflow-hidden">
+              <div className="h-2.5 bg-accent rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-primary rounded-full"
                   initial={{ width: 0 }}

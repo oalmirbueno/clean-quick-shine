@@ -34,7 +34,7 @@ export function TimelineStepper({ steps, currentStep, className }: TimelineStepp
               <div className={cn(
                 "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10",
                 "transition-all duration-300",
-                isComplete ? "bg-primary" : isCurrent ? "bg-primary animate-pulse" : "bg-secondary border-2 border-border"
+                isComplete ? "bg-primary" : isCurrent ? "bg-primary animate-pulse" : "bg-accent border-2 border-border"
               )}>
                 {isComplete ? (
                   <Check className="w-4 h-4 text-primary-foreground" />

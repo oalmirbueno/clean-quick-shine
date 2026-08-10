@@ -48,7 +48,7 @@ export function SubscriptionCard({ subscription, plan, onManage, className }: Su
             {subscription.creditsUsed}/{subscription.creditsTotal} usados
           </span>
         </div>
-        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+        <div className="h-2 bg-accent rounded-full overflow-hidden">
           <div
             className="h-full bg-primary rounded-full transition-all"
             style={{ width: `${(subscription.creditsUsed / subscription.creditsTotal) * 100}%` }}
@@ -60,7 +60,7 @@ export function SubscriptionCard({ subscription, plan, onManage, className }: Su
       </div>
 
       {/* Benefits */}
-      <div className="p-3 bg-secondary/50 rounded-lg mb-4">
+      <div className="p-3 bg-accent/50 rounded-lg mb-4">
         <p className="text-xs text-muted-foreground mb-2">Benefícios ativos:</p>
         <div className="flex flex-wrap gap-2">
           <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">

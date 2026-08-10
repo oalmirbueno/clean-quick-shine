@@ -45,21 +45,21 @@ export function ZoneCard({ zone, rule, prosOnline = 0, onClick, className }: Zon
       </div>
 
       <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="p-2 bg-secondary/50 rounded-lg">
+        <div className="p-2 bg-accent/50 rounded-lg">
           <Users className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
           <p className={cn("text-sm font-medium", hasCapacity ? "text-success" : "text-destructive")}>
             {prosOnline}
           </p>
           <p className="text-xs text-muted-foreground">Online</p>
         </div>
-        <div className="p-2 bg-secondary/50 rounded-lg">
+        <div className="p-2 bg-accent/50 rounded-lg">
           <TrendingUp className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
           <p className="text-sm font-medium text-foreground">
             {rule?.surgeMultiplier ? `${rule.surgeMultiplier}x` : "1x"}
           </p>
           <p className="text-xs text-muted-foreground">Surge</p>
         </div>
-        <div className="p-2 bg-secondary/50 rounded-lg">
+        <div className="p-2 bg-accent/50 rounded-lg">
           <Settings className="w-4 h-4 mx-auto text-muted-foreground mb-1" />
           <p className="text-sm font-medium text-foreground">
             +R$ {(zone.feeExtra || 0).toFixed(0)}
