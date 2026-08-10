@@ -91,6 +91,7 @@ import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminAuditLog from "./pages/admin/AdminAuditLog";
 import AdminNotificationLogs from "./pages/admin/AdminNotificationLogs";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminMap from "./pages/admin/AdminMap";
 
 // Company Pages
 import CompanyOnboarding from "./pages/company/CompanyOnboarding";
@@ -216,6 +217,7 @@ const App = () => {
                 <Route path="/admin/notification-logs" element={<ProtectedRoute requiredRole="admin"><AdminNotificationLogs /></ProtectedRoute>} />
                 <Route path="/admin/audit" element={<ProtectedRoute requiredRole="admin"><AdminAuditLog /></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><AdminUsers /></ProtectedRoute>} />
+                <Route path="/admin/map" element={<ProtectedRoute requiredRole="admin"><AdminMap /></ProtectedRoute>} />
 
                 {/* Company Routes */}
                 <Route path="/company/onboarding" element={<CompanyOnboarding />} />

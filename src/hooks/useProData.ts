@@ -162,6 +162,9 @@ export interface AvailableOrder {
   eliteOnly: boolean;
   scheduledDate: string;
   scheduledTime: string;
+  zoneName: string | null;
+  zoneCenterLat: number | null;
+  zoneCenterLng: number | null;
 }
 
 export function useAvailableOrdersForPro() {
@@ -204,6 +207,9 @@ export function useAvailableOrdersForPro() {
         city: string | null;
         neighborhood: string | null;
         zone_id: string | null;
+        zone_name?: string | null;
+        zone_center_lat?: number | null;
+        zone_center_lng?: number | null;
       };
 
       const { data: viewRows, error } = await supabase
@@ -287,6 +293,9 @@ export function useAvailableOrdersForPro() {
           eliteOnly: isProOnly,
           scheduledDate: order.scheduled_date,
           scheduledTime: order.scheduled_time,
+          zoneName: order.zone_name ?? null,
+          zoneCenterLat: order.zone_center_lat != null ? Number(order.zone_center_lat) : null,
+          zoneCenterLng: order.zone_center_lng != null ? Number(order.zone_center_lng) : null,
         };
       }).filter(order => {
         // Filter out pro-plan-only orders if pro doesn't have a paid plan
