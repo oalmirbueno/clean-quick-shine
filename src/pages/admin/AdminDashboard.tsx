@@ -18,6 +18,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { AdminDateFilter, presetToRange, type DatePreset, type DateRange } from "@/components/admin/AdminDateFilter";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -25,6 +27,19 @@ export default function AdminDashboard() {
   const today = now.toISOString().split("T")[0];
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const weekAgo = new Date(now.getTime() - 7 * 86400000).toISOString();
+
+  // Filtro de período: escopa as métricas de pedidos, financeiro,
+  // pagamentos, saques e entregas (dia a dia ou intervalo custom).
+  const [datePreset, setDatePreset] = useState<DatePreset>("tudo");
+  const [dateRange, setDateRange] = useState<DateRange>(presetToRange("tudo"));
+
+  // Aplica o período sobre uma coluna timestamptz
+  const applyCreatedRange = <T extends { gte: (c: string, v: string) => T; lte: (c: string, v: string) => T }>(q: T): T => {
+    let out = q;
+    if (dateRange.from) out = out.gte("created_at", `${dateRange.from}T00:00:00`);
+    if (dateRange.to) out = out.lte("created_at", `${dateRange.to}T23:59:59.999`);
+    return out;
+  };
 
   const { data: ordersToday = 0 } = useQuery({
     queryKey: ["admin_orders_today", today],
@@ -44,15 +59,17 @@ export default function AdminDashboard() {
     },
   });
 
-  // Financial data from ALL non-cancelled orders
+  // Financial data from non-cancelled orders (respeita o período selecionado)
   const { data: financials = { gmv: 0, commission: 0, avgTicket: 0, totalOrders: 0 } } = useQuery({
-    queryKey: ["admin_financials"],
+    queryKey: ["admin_financials", dateRange.from, dateRange.to],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("total_price, status")
-        .neq("status", "cancelled")
-        .neq("status", "draft");
+      const { data, error } = await applyCreatedRange(
+        supabase
+          .from("orders")
+          .select("total_price, status")
+          .neq("status", "cancelled")
+          .neq("status", "draft")
+      );
       if (error) console.error("admin_financials error:", error);
       const gmv = data?.reduce((sum, o) => sum + Number(o.total_price), 0) || 0;
       const commission = gmv * 0.2;
@@ -64,9 +81,11 @@ export default function AdminDashboard() {
 
   // Payments data
   const { data: paymentsData = { total: 0, confirmed: 0, pending: 0 } } = useQuery({
-    queryKey: ["admin_payments_summary"],
+    queryKey: ["admin_payments_summary", dateRange.from, dateRange.to],
     queryFn: async () => {
-      const { data, error } = await supabase.from("payments").select("amount, status, asaas_status");
+      const { data, error } = await applyCreatedRange(
+        supabase.from("payments").select("amount, status, asaas_status")
+      );
       if (error) console.error("admin_payments error:", error);
       const total = data?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
       const confirmed = data?.filter(p => p.status === "confirmed" || p.asaas_status === "RECEIVED" || p.asaas_status === "CONFIRMED").reduce((sum, p) => sum + Number(p.amount), 0) || 0;
@@ -77,9 +96,11 @@ export default function AdminDashboard() {
 
   // Withdrawals data
   const { data: withdrawalsData = { total: 0, pending: 0, processed: 0 } } = useQuery({
-    queryKey: ["admin_withdrawals_summary"],
+    queryKey: ["admin_withdrawals_summary", dateRange.from, dateRange.to],
     queryFn: async () => {
-      const { data, error } = await supabase.from("withdrawals").select("amount, status");
+      const { data, error } = await applyCreatedRange(
+        supabase.from("withdrawals").select("amount, status")
+      );
       if (error) console.error("admin_withdrawals error:", error);
       const total = data?.reduce((sum, w) => sum + Number(w.amount), 0) || 0;
       const pending = data?.filter(w => w.status === "pending").reduce((sum, w) => sum + Number(w.amount), 0) || 0;
@@ -88,11 +109,31 @@ export default function AdminDashboard() {
     },
   });
 
-  const { data: cancelRate = 0 } = useQuery({
-    queryKey: ["admin_cancel_rate"],
+  // Entregas: serviços concluídos com data agendada dentro do período
+  const { data: deliveredInRange = 0 } = useQuery({
+    queryKey: ["admin_delivered_range", dateRange.from, dateRange.to],
     queryFn: async () => {
-      const { count: total } = await supabase.from("orders").select("*", { count: "exact", head: true });
-      const { count: cancelled } = await supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "cancelled");
+      let query = supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["completed", "paid_out"]);
+      if (dateRange.from) query = query.gte("scheduled_date", dateRange.from);
+      if (dateRange.to) query = query.lte("scheduled_date", dateRange.to);
+      const { count, error } = await query;
+      if (error) console.error("admin_delivered_range error:", error);
+      return count || 0;
+    },
+  });
+
+  const { data: cancelRate = 0 } = useQuery({
+    queryKey: ["admin_cancel_rate", dateRange.from, dateRange.to],
+    queryFn: async () => {
+      const { count: total } = await applyCreatedRange(
+        supabase.from("orders").select("*", { count: "exact", head: true })
+      );
+      const { count: cancelled } = await applyCreatedRange(
+        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "cancelled")
+      );
       return total && total > 0 ? ((cancelled || 0) / total * 100) : 0;
     },
   });
@@ -180,6 +221,16 @@ export default function AdminDashboard() {
         <ThemeToggle />
       </motion.div>
 
+      {/* Filtro por período — escopa pedidos, financeiro, pagamentos, saques e entregas */}
+      <AdminDateFilter
+        preset={datePreset}
+        range={dateRange}
+        onChange={(p, r) => {
+          setDatePreset(p);
+          setDateRange(r);
+        }}
+      />
+
       {/* Métricas de Pedidos */}
       <AnimatedSection delay={1}>
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Pedidos</h3>
@@ -191,7 +242,10 @@ export default function AdminDashboard() {
             <MetricCard title="Pedidos no mês" value={ordersMonth} icon={ClipboardList} />
           </AnimatedListItem>
           <AnimatedListItem>
-            <MetricCard title="Total de pedidos" value={financials.totalOrders} icon={ClipboardList} />
+            <MetricCard title="Pedidos no período" value={financials.totalOrders} icon={ClipboardList} />
+          </AnimatedListItem>
+          <AnimatedListItem>
+            <MetricCard title="Entregas no período" value={deliveredInRange} icon={ClipboardList} />
           </AnimatedListItem>
           <AnimatedListItem>
             <MetricCard title="Taxa Cancelamento" value={cancelRate} format="percent" />
