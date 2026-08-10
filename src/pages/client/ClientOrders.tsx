@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { OrderCard } from "@/components/ui/OrderCard";
 import { cn } from "@/lib/utils";
+import { parseLocalDate } from "@/lib/utils";
 import { useFlatClientOrders } from "@/hooks/useOrders";
 import { useClientOrdersRealtime } from "@/hooks/useOrderRealtime";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,7 +48,7 @@ export default function ClientOrders() {
 
     return orders.filter((o) => {
       if (!statuses.includes(o.status || "")) return false;
-      if (cutoff && !isAfter(new Date(o.scheduled_date), cutoff)) return false;
+      if (cutoff && !isAfter(parseLocalDate(o.scheduled_date), cutoff)) return false;
       if (!q) return true;
       const serviceName = (o.service?.name || "").toLowerCase();
       const addr = o.address
@@ -63,7 +64,7 @@ export default function ClientOrders() {
 
   const formatOrderDate = (dateStr: string) => {
     try {
-      return format(new Date(dateStr), "dd 'de' MMM", { locale: ptBR });
+      return format(parseLocalDate(dateStr), "dd 'de' MMM", { locale: ptBR });
     } catch {
       return dateStr;
     }

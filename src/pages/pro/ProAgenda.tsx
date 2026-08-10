@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/ui/BottomNav";
 import { ProPageHeader } from "@/components/ui/ProPageHeader";
 import { ChevronLeft, ChevronRight, MapPin, Clock, Loader2, Radio, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseLocalDate } from "@/lib/utils";
 import { useFlatProOrders } from "@/hooks/useOrders";
 import { useProOrdersRealtime } from "@/hooks/useOrderRealtime";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,7 +36,7 @@ export default function ProAgenda() {
 
     if (period !== "all") {
       const cutoff = startOfDay(subDays(new Date(), period === "week" ? 7 : 30));
-      filtered = filtered.filter(o => isAfter(new Date(o.scheduled_date), cutoff));
+      filtered = filtered.filter(o => isAfter(parseLocalDate(o.scheduled_date), cutoff));
     }
 
     const q = search.trim().toLowerCase();
@@ -79,7 +80,7 @@ export default function ProAgenda() {
   const selectedDay = currentDate.getDate();
   const ordersForDay = useMemo(() => {
     return activeOrders.filter(order => {
-      const orderDate = new Date(order.scheduled_date);
+      const orderDate = parseLocalDate(order.scheduled_date);
       return (
         orderDate.getDate() === selectedDay &&
         orderDate.getMonth() === currentDate.getMonth() &&
@@ -94,13 +95,13 @@ export default function ProAgenda() {
   const daysWithOrders = useMemo(() => {
     return activeOrders
       .filter(order => {
-        const orderDate = new Date(order.scheduled_date);
+        const orderDate = parseLocalDate(order.scheduled_date);
         return (
           orderDate.getMonth() === currentDate.getMonth() &&
           orderDate.getFullYear() === currentDate.getFullYear()
         );
       })
-      .map(order => new Date(order.scheduled_date).getDate());
+      .map(order => parseLocalDate(order.scheduled_date).getDate());
   }, [activeOrders, currentDate]);
 
   const formatTime = (time: string) => {

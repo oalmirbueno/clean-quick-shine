@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { parseLocalDate } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, format, subWeeks, eachDayOfInterval, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -104,14 +105,14 @@ export function useProEarnings() {
 
       // Calculate this week's total
       const thisWeekOrders = orders.filter(o => {
-        const completedDate = o.completed_at ? new Date(o.completed_at) : new Date(o.scheduled_date);
+        const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
         return completedDate >= weekStart && completedDate <= weekEnd;
       });
       const weekTotal = thisWeekOrders.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
 
       // Calculate last week's total for comparison
       const lastWeekOrders = orders.filter(o => {
-        const completedDate = o.completed_at ? new Date(o.completed_at) : new Date(o.scheduled_date);
+        const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
         return completedDate >= lastWeekStart && completedDate <= lastWeekEnd;
       });
       const lastWeekTotal = lastWeekOrders.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
@@ -119,7 +120,7 @@ export function useProEarnings() {
 
       // Calculate this month's total
       const thisMonthOrders = orders.filter(o => {
-        const completedDate = o.completed_at ? new Date(o.completed_at) : new Date(o.scheduled_date);
+        const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
         return completedDate >= monthStart && completedDate <= monthEnd;
       });
       const monthTotal = thisMonthOrders.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
@@ -128,7 +129,7 @@ export function useProEarnings() {
       const daysOfWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
       const weeklyData = daysOfWeek.map(date => {
         const dayOrders = orders.filter(o => {
-          const completedDate = o.completed_at ? new Date(o.completed_at) : new Date(o.scheduled_date);
+          const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
           return isSameDay(completedDate, date);
         });
         const dayTotal = dayOrders.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
@@ -143,7 +144,7 @@ export function useProEarnings() {
 
       // Build transactions list (recent 20)
       const transactions = orders.slice(0, 20).map(o => {
-        const completedDate = o.completed_at ? new Date(o.completed_at) : new Date(o.scheduled_date);
+        const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
         const serviceName = (o.services as any)?.name || "Serviço";
         
         let status: "completed" | "pending" | "paid_out" = "completed";

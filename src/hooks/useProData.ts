@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { parseLocalDate } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 import { toast } from "sonner";
@@ -117,7 +118,7 @@ export function useAssignedOrders() {
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       return orders.map(order => {
-        const scheduledDate = new Date(order.scheduled_date);
+        const scheduledDate = parseLocalDate(order.scheduled_date);
         let dateLabel = scheduledDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
         if (scheduledDate.toDateString() === today.toDateString()) dateLabel = "Hoje";
         else if (scheduledDate.toDateString() === tomorrow.toDateString()) dateLabel = "Amanhã";
@@ -255,7 +256,7 @@ export function useAvailableOrdersForPro() {
         const service = services.find(s => s.id === order.service_id);
         const address = { city: order.city ?? "", neighborhood: order.neighborhood ?? "" };
 
-        const scheduledDate = new Date(order.scheduled_date);
+        const scheduledDate = parseLocalDate(order.scheduled_date);
         let dateLabel = scheduledDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
         
         if (scheduledDate.toDateString() === today.toDateString()) {

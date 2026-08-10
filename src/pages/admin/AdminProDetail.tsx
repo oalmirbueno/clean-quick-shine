@@ -8,6 +8,7 @@ import { ChevronLeft, Star, MapPin, Phone, FileText, CheckCircle2, XCircle, Aler
 import { toast } from "sonner";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { parseLocalDate } from "@/lib/utils";
 import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
 import { logAdminAction } from "@/lib/auditLog";
 import { proTemplates, adminCustomMessage } from "@/lib/adminNotificationTemplates";
@@ -390,7 +391,7 @@ export default function AdminProDetail() {
                   >
                     <div className="min-w-0">
                       <p className="font-medium text-sm text-foreground truncate">#{order.id.slice(0, 8)} • {order.services?.name || "Serviço"}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(order.scheduled_date).toLocaleDateString("pt-BR")}</p>
+                      <p className="text-xs text-muted-foreground">{parseLocalDate(order.scheduled_date).toLocaleDateString("pt-BR")}</p>
                     </div>
                     <StatusBadge status={order.status || "draft"} />
                   </button>

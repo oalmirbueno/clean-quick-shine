@@ -6,6 +6,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { ChevronLeft, Phone, Mail, Calendar, Ban, ShieldCheck, MessageSquareWarning, ShoppingBag } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { parseLocalDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { useState } from "react";
 import { adminKeys, useAdminInvalidate, beginMutation, isLatestMutation, mutationScopes } from "@/hooks/useAdminQueryKeys";
@@ -303,7 +304,7 @@ export default function AdminClientDetail() {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">#{o.id.slice(0, 8)} • {o.services?.name || "Serviço"}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(o.scheduled_date).toLocaleDateString("pt-BR")}</p>
+                    <p className="text-xs text-muted-foreground">{parseLocalDate(o.scheduled_date).toLocaleDateString("pt-BR")}</p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-semibold">{fmt(Number(o.total_price))}</p>
