@@ -5,6 +5,8 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
 import { useService } from "@/hooks/useServices";
 import { useCreateOrder } from "@/hooks/useCreateOrder";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   Star,
@@ -36,6 +38,34 @@ export default function ClientOffer() {
 
   const { data: service } = useService(state?.serviceId || null);
   const createOrder = useCreateOrder();
+
+  // Taxa de zona + surge do endereço — mesmo cálculo do servidor (trigger C1),
+  // para o valor exibido bater com o valor cobrado.
+  const { data: zonePricing } = useQuery({
+    queryKey: ["offer_zone_pricing", state?.addressId],
+    enabled: !!state?.addressId,
+    queryFn: async () => {
+      const { data: address } = await supabase
+        .from("addresses")
+        .select("zone_id")
+        .eq("id", state!.addressId)
+        .maybeSingle();
+      if (!address?.zone_id) return { zoneFee: 0, surge: 1 };
+      const [{ data: zone }, { data: rule }] = await Promise.all([
+        supabase.from("zones").select("fee_extra").eq("id", address.zone_id).maybeSingle(),
+        supabase
+          .from("zone_rules")
+          .select("surge_multiplier")
+          .eq("zone_id", address.zone_id)
+          .eq("active", true)
+          .maybeSingle(),
+      ]);
+      return {
+        zoneFee: Number(zone?.fee_extra || 0),
+        surge: Number(rule?.surge_multiplier || 1),
+      };
+    },
+  });
 
   if (!state?.serviceId || !state?.proId) {
     return (
@@ -92,7 +122,10 @@ export default function ClientOffer() {
     }
   };
 
-  const totalPrice = Number(service?.base_price) || 0;
+  const basePrice = Number(service?.base_price) || 0;
+  const zoneFee = zonePricing?.zoneFee ?? 0;
+  const surge = zonePricing?.surge ?? 1;
+  const totalPrice = Math.max(0, (basePrice + zoneFee) * surge);
 
   return (
     <PageTransition>
@@ -210,6 +243,11 @@ export default function ClientOffer() {
                 <p className="text-[13px] text-muted-foreground">
                   {service?.name || "Serviço"}
                 </p>
+                {zoneFee > 0 && (
+                  <p className="text-[11.5px] text-muted-foreground mt-0.5">
+                    Inclui taxa de zona · R$ {zoneFee.toFixed(2).replace(".", ",")}
+                  </p>
+                )}
               </div>
               <p className="text-[26px] font-bold text-foreground tracking-tight">
                 R$ {totalPrice.toFixed(2).replace(".", ",")}
