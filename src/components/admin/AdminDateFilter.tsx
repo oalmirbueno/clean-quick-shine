@@ -62,21 +62,24 @@ export function AdminDateFilter({ preset, range, onChange, className }: AdminDat
   const today = useMemo(() => toISODate(new Date()), []);
 
   return (
-    <div className={`flex flex-wrap items-center gap-2 ${className || ""}`}>
-      {PRESETS.map((p) => (
-        <button
-          key={p.key}
-          type="button"
-          onClick={() => onChange(p.key, presetToRange(p.key))}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
-            preset === p.key
-              ? "bg-primary text-primary-foreground border-primary"
-              : "bg-background text-muted-foreground border-input hover:text-foreground"
-          }`}
-        >
-          {p.label}
-        </button>
-      ))}
+    <div className={`flex flex-col gap-2 ${className || ""}`}>
+      {/* Chips roláveis no mobile (sem quebrar linha) */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 -mb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {PRESETS.map((p) => (
+          <button
+            key={p.key}
+            type="button"
+            onClick={() => onChange(p.key, presetToRange(p.key))}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+              preset === p.key
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-muted-foreground border-input hover:text-foreground"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
       <div className="flex items-center gap-1.5">
         <input
           type="date"
@@ -84,16 +87,16 @@ export function AdminDateFilter({ preset, range, onChange, className }: AdminDat
           max={range.to || today}
           value={range.from || ""}
           onChange={(e) => onChange("custom", { from: e.target.value || null, to: range.to })}
-          className={inputCls}
+          className={`${inputCls} flex-1 min-w-0`}
         />
-        <span className="text-muted-foreground text-sm">até</span>
+        <span className="text-muted-foreground text-sm shrink-0">até</span>
         <input
           type="date"
           aria-label="Até"
           min={range.from || undefined}
           value={range.to || ""}
           onChange={(e) => onChange("custom", { from: range.from, to: e.target.value || null })}
-          className={inputCls}
+          className={`${inputCls} flex-1 min-w-0`}
         />
       </div>
     </div>

@@ -18,8 +18,64 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AdminDateFilter, presetToRange, type DatePreset, type DateRange } from "@/components/admin/AdminDateFilter";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip } from "recharts";
+
+type DailyPoint = { day: string; label: string; pedidos: number; faturamento: number };
+
+interface RangeAgg {
+  totalOrders: number;
+  gmv: number;
+  commission: number;
+  avgTicket: number;
+  cancelRate: number;
+  daily: DailyPoint[];
+}
+
+const EMPTY_AGG: RangeAgg = { totalOrders: 0, gmv: 0, commission: 0, avgTicket: 0, cancelRate: 0, daily: [] };
+
+function aggregateOrders(rows: { status: string; total_price: number; created_at: string }[]): RangeAgg {
+  const valid = rows.filter((o) => o.status !== "cancelled" && o.status !== "draft");
+  const gmv = valid.reduce((s, o) => s + Number(o.total_price), 0);
+  const cancelled = rows.filter((o) => o.status === "cancelled").length;
+  const byDay = new Map<string, DailyPoint>();
+  for (const o of valid) {
+    const d = new Date(o.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const point =
+      byDay.get(key) ||
+      ({ day: key, label: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }), pedidos: 0, faturamento: 0 } as DailyPoint);
+    point.pedidos += 1;
+    point.faturamento += Number(o.total_price);
+    byDay.set(key, point);
+  }
+  return {
+    totalOrders: valid.length,
+    gmv,
+    commission: gmv * 0.2,
+    avgTicket: valid.length ? gmv / valid.length : 0,
+    cancelRate: rows.length ? (cancelled / rows.length) * 100 : 0,
+    daily: [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day)),
+  };
+}
+
+// Uma única query traz status/valor/data e o resto é derivado localmente —
+// métricas, taxa de cancelamento e a série diária dos gráficos.
+async function fetchRangeOrders(from: string | null, to: string | null): Promise<RangeAgg> {
+  let q = supabase.from("orders").select("status, total_price, created_at").limit(10000);
+  if (from) q = q.gte("created_at", new Date(`${from}T00:00:00`).toISOString());
+  if (to) q = q.lte("created_at", new Date(`${to}T23:59:59.999`).toISOString());
+  const { data, error } = await q;
+  if (error) {
+    console.error("admin_range_orders error:", error);
+    return EMPTY_AGG;
+  }
+  return aggregateOrders((data as { status: string; total_price: number; created_at: string }[]) || []);
+}
+
+const isoDay = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -83,26 +139,49 @@ export default function AdminDashboard() {
     },
   });
 
-  // Financial data from non-cancelled orders (respeita o período selecionado)
-  const { data: financials = { gmv: 0, commission: 0, avgTicket: 0, totalOrders: 0 } } = useQuery({
+  // ---- Período anterior de mesmo tamanho (para os comparativos) ----
+  const bounded = !!(dateRange.from && dateRange.to);
+  const prevRange = useMemo(() => {
+    if (!bounded) return null;
+    const from = new Date(`${dateRange.from}T00:00:00`);
+    const to = new Date(`${dateRange.to}T00:00:00`);
+    const days = Math.round((to.getTime() - from.getTime()) / 86400000) + 1;
+    return {
+      from: isoDay(new Date(from.getTime() - days * 86400000)),
+      to: isoDay(new Date(from.getTime() - 86400000)),
+      days,
+    };
+  }, [bounded, dateRange.from, dateRange.to]);
+
+  // Métricas do período em UMA query (status/valor/data → derivação local)
+  const { data: financials = EMPTY_AGG } = useQuery({
     queryKey: ["admin_financials", dateRange.from, dateRange.to],
     refetchInterval: 30000,
-    queryFn: async () => {
-      const { data, error } = await applyCreatedRange(
-        supabase
-          .from("orders")
-          .select("total_price, status")
-          .neq("status", "cancelled")
-          .neq("status", "draft")
-      );
-      if (error) console.error("admin_financials error:", error);
-      const gmv = data?.reduce((sum, o) => sum + Number(o.total_price), 0) || 0;
-      const commission = gmv * 0.2;
-      const totalOrders = data?.length || 0;
-      const avgTicket = totalOrders > 0 ? gmv / totalOrders : 0;
-      return { gmv, commission, avgTicket, totalOrders };
+    queryFn: () => fetchRangeOrders(dateRange.from, dateRange.to),
+  });
+
+  const { data: prevFinancials } = useQuery({
+    enabled: !!prevRange,
+    queryKey: ["admin_financials_prev", prevRange?.from, prevRange?.to],
+    refetchInterval: 30000,
+    queryFn: () => fetchRangeOrders(prevRange!.from, prevRange!.to),
+  });
+
+  // Série dos gráficos: com "Tudo" selecionado mostra os últimos 30 dias
+  const { data: chartAgg } = useQuery({
+    enabled: !bounded,
+    queryKey: ["admin_chart_30d"],
+    refetchInterval: 30000,
+    queryFn: () => {
+      const r = presetToRange("30d");
+      return fetchRangeOrders(r.from, r.to);
     },
   });
+  const dailySeries = bounded ? financials.daily : chartAgg?.daily || [];
+
+  // Variação % vs período anterior (undefined esconde o badge)
+  const delta = (cur: number, prev?: number | null): number | undefined =>
+    prev == null || prev === 0 ? undefined : Math.round(((cur - prev) / prev) * 100);
 
   // Payments data
   const { data: paymentsData = { total: 0, confirmed: 0, pending: 0 } } = useQuery({
@@ -153,19 +232,24 @@ export default function AdminDashboard() {
     },
   });
 
-  const { data: cancelRate = 0 } = useQuery({
-    queryKey: ["admin_cancel_rate", dateRange.from, dateRange.to],
+  // Entregas do período anterior (comparativo)
+  const { data: prevDelivered = 0 } = useQuery({
+    enabled: !!prevRange,
+    queryKey: ["admin_delivered_prev", prevRange?.from, prevRange?.to],
     refetchInterval: 30000,
     queryFn: async () => {
-      const { count: total } = await applyCreatedRange(
-        supabase.from("orders").select("*", { count: "exact", head: true })
-      );
-      const { count: cancelled } = await applyCreatedRange(
-        supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "cancelled")
-      );
-      return total && total > 0 ? ((cancelled || 0) / total * 100) : 0;
+      const { count, error } = await supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .in("status", ["completed", "paid_out"])
+        .gte("scheduled_date", prevRange!.from)
+        .lte("scheduled_date", prevRange!.to);
+      if (error) console.error("admin_delivered_prev error:", error);
+      return count || 0;
     },
   });
+
+  const cancelRate = financials.cancelRate;
 
   const { data: newPros7d = 0 } = useQuery({
     queryKey: ["admin_new_pros_7d"],
@@ -268,7 +352,7 @@ export default function AdminDashboard() {
       {/* Métricas de Pedidos */}
       <AnimatedSection delay={1}>
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Pedidos</h3>
-        <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <AnimatedListItem>
             <MetricCard title="Pedidos hoje" value={ordersToday} icon={ClipboardList} />
           </AnimatedListItem>
@@ -276,10 +360,22 @@ export default function AdminDashboard() {
             <MetricCard title="Pedidos no mês" value={ordersMonth} icon={ClipboardList} />
           </AnimatedListItem>
           <AnimatedListItem>
-            <MetricCard title="Pedidos no período" value={financials.totalOrders} icon={ClipboardList} />
+            <MetricCard
+              title="Pedidos no período"
+              value={financials.totalOrders}
+              icon={ClipboardList}
+              trend={delta(financials.totalOrders, prevFinancials?.totalOrders)}
+              trendLabel="vs anterior"
+            />
           </AnimatedListItem>
           <AnimatedListItem>
-            <MetricCard title="Entregas no período" value={deliveredInRange} icon={ClipboardList} />
+            <MetricCard
+              title="Entregas no período"
+              value={deliveredInRange}
+              icon={ClipboardList}
+              trend={delta(deliveredInRange, prevRange ? prevDelivered : null)}
+              trendLabel="vs anterior"
+            />
           </AnimatedListItem>
           <AnimatedListItem>
             <MetricCard title="Taxa Cancelamento" value={cancelRate} format="percent" />
@@ -287,18 +383,79 @@ export default function AdminDashboard() {
         </AnimatedList>
       </AnimatedSection>
 
+      {/* Comparativo dia a dia */}
+      {dailySeries.length > 0 && (
+        <AnimatedSection delay={2}>
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+            Dia a dia {!bounded && "(últimos 30 dias)"}
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Pedidos por dia</p>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={dailySeries} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
+                  <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} />
+                  <ChartTooltip
+                    cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12, color: "hsl(var(--foreground))" }}
+                    formatter={(v: number) => [v, "Pedidos"]}
+                  />
+                  <Bar dataKey="pedidos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="bg-card rounded-2xl border border-border p-4 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Faturamento por dia</p>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={dailySeries} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
+                  <XAxis dataKey="label" tick={{ fontSize: 10 }} interval="preserveStartEnd" stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" tickLine={false} axisLine={false} tickFormatter={(v: number) => `R$${v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`} />
+                  <ChartTooltip
+                    cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12, color: "hsl(var(--foreground))" }}
+                    formatter={(v: number) => [`R$ ${Number(v).toFixed(2).replace(".", ",")}`, "Faturamento"]}
+                  />
+                  <Bar dataKey="faturamento" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </AnimatedSection>
+      )}
+
       {/* Métricas Financeiras */}
       <AnimatedSection delay={2}>
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Financeiro</h3>
-        <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <AnimatedListItem>
-            <MetricCard title="GMV Total" value={financials.gmv} icon={DollarSign} format="currency" />
+            <MetricCard
+              title="GMV no período"
+              value={financials.gmv}
+              icon={DollarSign}
+              format="currency"
+              trend={delta(financials.gmv, prevFinancials?.gmv)}
+              trendLabel="vs anterior"
+            />
           </AnimatedListItem>
           <AnimatedListItem>
-            <MetricCard title="Receita (20%)" value={financials.commission} icon={TrendingUp} format="currency" />
+            <MetricCard
+              title="Receita (20%)"
+              value={financials.commission}
+              icon={TrendingUp}
+              format="currency"
+              trend={delta(financials.commission, prevFinancials?.commission)}
+              trendLabel="vs anterior"
+            />
           </AnimatedListItem>
           <AnimatedListItem>
-            <MetricCard title="Ticket Médio" value={financials.avgTicket} format="currency" />
+            <MetricCard
+              title="Ticket Médio"
+              value={financials.avgTicket}
+              format="currency"
+              trend={delta(financials.avgTicket, prevFinancials?.avgTicket)}
+              trendLabel="vs anterior"
+            />
           </AnimatedListItem>
           <AnimatedListItem>
             <MetricCard title="Pgtos Confirmados" value={paymentsData.confirmed} icon={CreditCard} format="currency" />
@@ -309,7 +466,7 @@ export default function AdminDashboard() {
       {/* Pagamentos & Saques */}
       <AnimatedSection delay={3}>
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Pagamentos & Saques</h3>
-        <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <AnimatedList className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <AnimatedListItem>
             <MetricCard title="Pgtos Pendentes" value={paymentsData.pending} icon={CreditCard} format="currency" />
           </AnimatedListItem>
@@ -328,7 +485,7 @@ export default function AdminDashboard() {
       {/* Usuários */}
       <AnimatedSection delay={4}>
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Usuários</h3>
-        <AnimatedList className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <AnimatedList className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <AnimatedListItem>
             <MetricCard title="Clientes Ativos" value={activeClients} icon={Users} />
           </AnimatedListItem>
