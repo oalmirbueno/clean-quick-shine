@@ -1,4 +1,4 @@
-import { } from "react";
+import { lazy, Suspense } from "react";
 import { useViewportHeight } from "@/hooks/useViewportHeight";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -14,96 +14,99 @@ import { InstallBanner } from "@/components/ui/InstallBanner";
 import { MobilePwaGate } from "@/components/MobilePwaGate";
 import { PersistentBottomNav } from "@/components/ui/BottomNav";
 
+// Code splitting por rota: cada perfil (cliente/diarista/admin) baixa só o
+// próprio código; gráficos e mapas ficam em chunks separados sob demanda.
+const Register = lazy(() => import("./pages/Register"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AccessDenied = lazy(() => import("./pages/AccessDenied"));
+const ConfirmEmail = lazy(() => import("./pages/ConfirmEmail"));
+const TermsOfUse = lazy(() => import("./pages/TermsOfUse"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const Support = lazy(() => import("./pages/Support"));
+const AccountDeletion = lazy(() => import("./pages/AccountDeletion"));
+const ClientHome = lazy(() => import("./pages/client/ClientHome"));
+const ClientService = lazy(() => import("./pages/client/ClientService"));
+const ClientSchedule = lazy(() => import("./pages/client/ClientSchedule"));
+const ClientMatching = lazy(() => import("./pages/client/ClientMatching"));
+const ClientOffer = lazy(() => import("./pages/client/ClientOffer"));
+const ClientCheckout = lazy(() => import("./pages/client/ClientCheckout"));
+const ClientOrderTracking = lazy(() => import("./pages/client/ClientOrderTracking"));
+const ClientRating = lazy(() => import("./pages/client/ClientRating"));
+const ClientOrders = lazy(() => import("./pages/client/ClientOrders"));
+const ClientOrderDetail = lazy(() => import("./pages/client/ClientOrderDetail"));
+const ClientProfile = lazy(() => import("./pages/client/ClientProfile"));
+const ClientSupport = lazy(() => import("./pages/client/ClientSupport"));
+const ClientCancel = lazy(() => import("./pages/client/ClientCancel"));
+const ClientLocation = lazy(() => import("./pages/client/ClientLocation"));
+const ClientSubscription = lazy(() => import("./pages/client/ClientSubscription"));
+const ClientReferral = lazy(() => import("./pages/client/ClientReferral"));
+const ClientDemo = lazy(() => import("./pages/client/ClientDemo"));
+const ProHome = lazy(() => import("./pages/pro/ProHome"));
+const ProOrderDetail = lazy(() => import("./pages/pro/ProOrderDetail"));
+const OrderChatPage = lazy(() => import("./pages/OrderChatPage"));
+const ProAgenda = lazy(() => import("./pages/pro/ProAgenda"));
+const ProEarnings = lazy(() => import("./pages/pro/ProEarnings"));
+const ProRanking = lazy(() => import("./pages/pro/ProRanking"));
+const ProProfile = lazy(() => import("./pages/pro/ProProfile"));
+const ProVerification = lazy(() => import("./pages/pro/ProVerification"));
+const ProPlan = lazy(() => import("./pages/pro/ProPlan"));
+const ProWithdraw = lazy(() => import("./pages/pro/ProWithdraw"));
+const ProSupport = lazy(() => import("./pages/pro/ProSupport"));
+const ProQuality = lazy(() => import("./pages/pro/ProQuality"));
+const ProAvailability = lazy(() => import("./pages/pro/ProAvailability"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminOrderDetail = lazy(() => import("./pages/admin/AdminOrderDetail"));
+const AdminPros = lazy(() => import("./pages/admin/AdminPros"));
+const AdminProDetail = lazy(() => import("./pages/admin/AdminProDetail"));
+const AdminClients = lazy(() => import("./pages/admin/AdminClients"));
+const AdminClientDetail = lazy(() => import("./pages/admin/AdminClientDetail"));
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
+const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
+const AdminSupportDetail = lazy(() => import("./pages/admin/AdminSupportDetail"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminZones = lazy(() => import("./pages/admin/AdminZones"));
+const AdminRisk = lazy(() => import("./pages/admin/AdminRisk"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminFunnel = lazy(() => import("./pages/admin/AdminFunnel"));
+const AdminCohorts = lazy(() => import("./pages/admin/AdminCohorts"));
+const AdminMatchingDebug = lazy(() => import("./pages/admin/AdminMatchingDebug"));
+const AdminQuotes = lazy(() => import("./pages/admin/AdminQuotes"));
+const AdminDocuments = lazy(() => import("./pages/admin/AdminDocuments"));
+const AdminVerifications = lazy(() => import("./pages/admin/AdminVerifications"));
+const AdminWithdrawals = lazy(() => import("./pages/admin/AdminWithdrawals"));
+const AdminWithdrawalDetail = lazy(() => import("./pages/admin/AdminWithdrawalDetail"));
+const AdminServices = lazy(() => import("./pages/admin/AdminServices"));
+const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
+const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
+const AdminNotificationLogs = lazy(() => import("./pages/admin/AdminNotificationLogs"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminMap = lazy(() => import("./pages/admin/AdminMap"));
+const CompanyOnboarding = lazy(() => import("./pages/company/CompanyOnboarding"));
+const CompanyRequestQuote = lazy(() => import("./pages/company/CompanyRequestQuote"));
+const ComponentShowcase = lazy(() => import("./pages/dev/ComponentShowcase"));
+const ProjectDocumentation = lazy(() => import("./pages/dev/ProjectDocumentation"));
+const Install = lazy(() => import("./pages/Install"));
+const AppSettings = lazy(() => import("./pages/AppSettings"));
+const Offline = lazy(() => import("./pages/Offline"));
+const HelpDocs = lazy(() => import("./pages/HelpDocs"));
+
 // Pages
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Onboarding from "./pages/Onboarding";
-import NotFound from "./pages/NotFound";
-import AccessDenied from "./pages/AccessDenied";
-import ConfirmEmail from "./pages/ConfirmEmail";
-import TermsOfUse from "./pages/TermsOfUse";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Support from "./pages/Support";
-import AccountDeletion from "./pages/AccountDeletion";
 
 // Client Pages
-import ClientHome from "./pages/client/ClientHome";
-import ClientService from "./pages/client/ClientService";
-import ClientSchedule from "./pages/client/ClientSchedule";
-import ClientMatching from "./pages/client/ClientMatching";
-import ClientOffer from "./pages/client/ClientOffer";
-import ClientCheckout from "./pages/client/ClientCheckout";
-import ClientOrderTracking from "./pages/client/ClientOrderTracking";
-import ClientRating from "./pages/client/ClientRating";
-import ClientOrders from "./pages/client/ClientOrders";
-import ClientOrderDetail from "./pages/client/ClientOrderDetail";
-import ClientProfile from "./pages/client/ClientProfile";
-import ClientSupport from "./pages/client/ClientSupport";
-import ClientCancel from "./pages/client/ClientCancel";
-import ClientLocation from "./pages/client/ClientLocation";
-import ClientSubscription from "./pages/client/ClientSubscription";
-import ClientReferral from "./pages/client/ClientReferral";
-import ClientDemo from "./pages/client/ClientDemo";
 
 // Pro Pages
-import ProHome from "./pages/pro/ProHome";
-import ProOrderDetail from "./pages/pro/ProOrderDetail";
-import OrderChatPage from "./pages/OrderChatPage";
-import ProAgenda from "./pages/pro/ProAgenda";
-import ProEarnings from "./pages/pro/ProEarnings";
-import ProRanking from "./pages/pro/ProRanking";
-import ProProfile from "./pages/pro/ProProfile";
-import ProVerification from "./pages/pro/ProVerification";
-import ProPlan from "./pages/pro/ProPlan";
-import ProWithdraw from "./pages/pro/ProWithdraw";
-import ProSupport from "./pages/pro/ProSupport";
-import ProQuality from "./pages/pro/ProQuality";
-import ProAvailability from "./pages/pro/ProAvailability";
 
 // Admin Pages
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
-import AdminPros from "./pages/admin/AdminPros";
-import AdminProDetail from "./pages/admin/AdminProDetail";
-import AdminClients from "./pages/admin/AdminClients";
-import AdminClientDetail from "./pages/admin/AdminClientDetail";
-import AdminCoupons from "./pages/admin/AdminCoupons";
-import AdminSupport from "./pages/admin/AdminSupport";
-import AdminSupportDetail from "./pages/admin/AdminSupportDetail";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminZones from "./pages/admin/AdminZones";
-import AdminRisk from "./pages/admin/AdminRisk";
-import AdminAnalytics from "./pages/admin/AdminAnalytics";
-import AdminFunnel from "./pages/admin/AdminFunnel";
-import AdminCohorts from "./pages/admin/AdminCohorts";
-import AdminMatchingDebug from "./pages/admin/AdminMatchingDebug";
-import AdminQuotes from "./pages/admin/AdminQuotes";
-import AdminDocuments from "./pages/admin/AdminDocuments";
-import AdminVerifications from "./pages/admin/AdminVerifications";
-import AdminWithdrawals from "./pages/admin/AdminWithdrawals";
-import AdminWithdrawalDetail from "./pages/admin/AdminWithdrawalDetail";
-import AdminServices from "./pages/admin/AdminServices";
-import AdminNotifications from "./pages/admin/AdminNotifications";
-import AdminAuditLog from "./pages/admin/AdminAuditLog";
-import AdminNotificationLogs from "./pages/admin/AdminNotificationLogs";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminMap from "./pages/admin/AdminMap";
 
 // Company Pages
-import CompanyOnboarding from "./pages/company/CompanyOnboarding";
-import CompanyRequestQuote from "./pages/company/CompanyRequestQuote";
 
 // Dev Pages
-import ComponentShowcase from "./pages/dev/ComponentShowcase";
-import ProjectDocumentation from "./pages/dev/ProjectDocumentation";
-import Install from "./pages/Install";
-import AppSettings from "./pages/AppSettings";
-import Offline from "./pages/Offline";
-import HelpDocs from "./pages/HelpDocs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -116,6 +119,12 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+const RouteFallback = () => (
+  <div className="h-full flex items-center justify-center bg-background">
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" aria-label="Carregando" />
+  </div>
+);
 
 const App = () => {
   useViewportHeight();
@@ -131,6 +140,7 @@ const App = () => {
             <UpdatePrompt />
             <BrowserRouter>
               <InstallBanner />
+              <Suspense fallback={<RouteFallback />}>
               <Routes>
                 {/* Splash & Auth */}
                 <Route path="/" element={<Index />} />
@@ -241,6 +251,7 @@ const App = () => {
                 {/* Catch all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
               <PersistentBottomNav />
             </BrowserRouter>
           </TooltipProvider>
