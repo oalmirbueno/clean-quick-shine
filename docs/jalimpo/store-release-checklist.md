@@ -49,6 +49,13 @@ processo (rollback vivo). Publicação é aditiva.
 - [ ] Revisão da Apple costuma exigir conta de teste — preparar credenciais de demonstração (cliente e diarista)
 - [ ] TestFlight para beta antes da produção
 
+## Preparos técnicos concluídos em 2026-08-10
+
+- [x] Bundle dividido por rota (2,8 MB → 700 KB no primeiro carregamento; admin/gráficos/mapas/PDF em chunks sob demanda)
+- [x] `PrivacyInfo.xcprivacy` criado e registrado no projeto Xcode (exigência da App Store para APIs de required reason; declara coleta de nome/e-mail/telefone/endereço/localização/fotos sem tracking)
+- [x] Web assets sincronizados nas cascas nativas (`npx cap copy` — android e ios)
+- [x] Segurança auditada (RLS, edge functions, webhook Asaas) e fluxo E2E cliente→matching→oferta→checkout validado em produção
+
 ## Pendências de produto antes do release
 
 - [x] Ícone/splash nativos gerados (beta, upscale da marca 384px) — **pendente: arte final 1024×1024 nativa** e regerar
