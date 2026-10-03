@@ -22,7 +22,7 @@ export function MetricCard({
 }: MetricCardProps) {
   const formatValue = () => {
     if (format === "currency") {
-      return `R$ ${Number(value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+      return `R$ ${Number(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     if (format === "percent") {
       return `${Number(value).toFixed(1)}%`;
