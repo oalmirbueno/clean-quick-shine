@@ -2,7 +2,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 
-const SUPPORT_EMAIL = "suporte@jalimpo.com";
+import { EMPRESA, identificacaoEmpresa } from "@/lib/empresa";
+
+const SUPPORT_EMAIL = EMPRESA.emailSuporte;
 
 /**
  * Página pública de exclusão de conta — URL exigida pelo Google Play
@@ -94,6 +96,7 @@ export default function AccountDeletion() {
             </Link>
             .
           </p>
+          <p className="pt-4 text-xs text-muted-foreground/80">{identificacaoEmpresa()}</p>
         </div>
       </main>
     </div>

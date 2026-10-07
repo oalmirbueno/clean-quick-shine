@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ChevronLeft, Send, ImageIcon, Loader2, X, Check, CheckCheck, User, Sparkles } from "lucide-react";
+import { ChevronLeft, Send, ImageIcon, Loader2, X, Check, CheckCheck, User, Sparkles, Flag } from "lucide-react";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOrderChat, type ChatRole, type OrderMessage } from "@/hooks/useOrderChat";
 import { useOrder } from "@/hooks/useOrders";
@@ -62,6 +66,9 @@ export default function OrderChatPage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [denunciaAberta, setDenunciaAberta] = useState(false);
+  const [motivo, setMotivo] = useState("");
+  const [denunciando, setDenunciando] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -117,6 +124,29 @@ export default function OrderChatPage() {
       ? `/client/order-tracking?orderId=${orderId}`
       : `/pro/order/${orderId}`;
 
+  // Denúncia: vira chamado prioritário no suporte com o pedido vinculado
+  const enviarDenuncia = async () => {
+    if (!user?.id || !orderId || motivo.trim().length < 5 || denunciando) return;
+    setDenunciando(true);
+    const { error } = await supabase.from("support_tickets").insert({
+      user_id: user.id,
+      order_id: orderId,
+      priority: "high",
+      subject: `Denúncia no chat do pedido #${orderId.slice(0, 6)}`,
+      description: `Denúncia contra ${counterpart.label.toLowerCase()} (${counterpart.name}):
+
+${motivo.trim()}`,
+    });
+    setDenunciando(false);
+    if (error) {
+      toast.error("Não foi possível enviar a denúncia. Tente de novo.");
+      return;
+    }
+    setDenunciaAberta(false);
+    setMotivo("");
+    toast.success("Denúncia enviada. Nossa equipe vai analisar em até 24 horas.");
+  };
+
   // Group by day
   const groups = useMemo(() => groupByDay(messages), [messages]);
 
@@ -154,7 +184,39 @@ export default function OrderChatPage() {
         >
           {activeRole === "client" ? "Você: Cliente" : "Você: Diarista"}
         </span>
+
+        <button
+          onClick={() => setDenunciaAberta(true)}
+          className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-destructive transition-colors -mr-1"
+          aria-label="Denunciar conversa"
+        >
+          <Flag className="w-4 h-4" />
+        </button>
       </header>
+
+      <Dialog open={denunciaAberta} onOpenChange={setDenunciaAberta}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Denunciar conversa</DialogTitle>
+            <DialogDescription>
+              Conte o que aconteceu. A equipe do Já Limpo recebe a denúncia com o histórico do pedido e responde em até 24 horas.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            placeholder="Ex.: mensagem ofensiva, pedido de pagamento por fora, assédio"
+            rows={4}
+            maxLength={1000}
+          />
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDenunciaAberta(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={enviarDenuncia} disabled={motivo.trim().length < 5 || denunciando}>
+              {denunciando ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar denúncia"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Messages */}
       <div

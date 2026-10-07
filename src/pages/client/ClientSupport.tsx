@@ -1,3 +1,4 @@
+import { linkWhatsappSuporte } from "@/lib/empresa";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -87,8 +88,9 @@ export default function ClientSupport() {
               <p className="font-semibold text-sm">Novo ticket</p>
               <p className="text-xs opacity-80 mt-0.5">Fale com o time</p>
             </button>
+            {linkWhatsappSuporte() && (
             <a
-              href="https://wa.me/5541999999999"
+              href={linkWhatsappSuporte()}
               target="_blank"
               rel="noopener noreferrer"
               className="p-4 rounded-2xl bg-card border border-border/60 shadow-sm active:scale-[0.98] transition-all"
@@ -99,6 +101,7 @@ export default function ClientSupport() {
               <p className="font-semibold text-sm text-foreground">WhatsApp</p>
               <p className="text-xs text-muted-foreground mt-0.5">Resposta rápida</p>
             </a>
+            )}
           </section>
 
           {/* Tickets */}

@@ -2,7 +2,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Mail, MessageCircle, FileText, ShieldCheck, UserX } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 
-const SUPPORT_EMAIL = "suporte@jalimpo.com";
+import { EMPRESA, identificacaoEmpresa, linkWhatsappSuporte } from "@/lib/empresa";
+
+const SUPPORT_EMAIL = EMPRESA.emailSuporte;
 
 /**
  * Página pública de suporte — URL exigida pelas lojas (Google Play / App Store).
@@ -70,6 +72,23 @@ export default function Support() {
             </div>
           </div>
 
+          {linkWhatsappSuporte() && (
+            <a
+              href={linkWhatsappSuporte()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-muted/40 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <MessageCircle className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">WhatsApp</p>
+                <p className="text-xs text-muted-foreground">Atendimento em horário comercial</p>
+              </div>
+            </a>
+          )}
+
           <div className="pt-2 space-y-2">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               Links úteis
@@ -84,6 +103,8 @@ export default function Support() {
               <UserX className="w-4 h-4" /> Como excluir minha conta
             </Link>
           </div>
+
+          <p className="pt-4 text-xs text-muted-foreground/80 leading-relaxed">{identificacaoEmpresa()}</p>
         </div>
       </main>
     </div>

@@ -10,7 +10,11 @@
  * Accuracy: ~90-95%. Rare false positives possible between identical
  * devices behind the same NAT with same locale/screen — acceptable
  * tradeoff for the UX gain.
+ *
+ * Nunca roda no app das lojas: a Apple proíbe fingerprint de aparelho
+ * (diretriz 5.1.2) e lá não existe PWA para detectar.
  */
+import { isNativeApp } from "@/lib/platform";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -49,6 +53,7 @@ export function computeDeviceFingerprint(): Promise<string> {
 }
 
 async function callFn(action: "mark" | "check", extra?: Record<string, unknown>) {
+  if (isNativeApp()) throw new Error("pwa-device-track desligado no app nativo");
   const fingerprint = await computeDeviceFingerprint();
   const res = await fetch(FN_URL, {
     method: "POST",

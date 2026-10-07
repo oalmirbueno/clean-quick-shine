@@ -1,9 +1,9 @@
 /**
  * Conteúdo legal oficial Já Limpo — validado juridicamente.
- * Última atualização: 20 de abril de 2026
+ * Última atualização: 7 de outubro de 2026
  */
 
-export const LEGAL_LAST_UPDATE = "20 de abril de 2026";
+export const LEGAL_LAST_UPDATE = "7 de outubro de 2026";
 
 export interface LegalSection {
   title: string;
@@ -25,7 +25,7 @@ export const TERMS_PLATFORM: LegalDocument = {
     {
       title: "1. Apresentação e Aceite",
       paragraphs: [
-        "O presente Termo de Uso regula o acesso e a utilização da plataforma digital denominada Já Limpo, de titularidade de JÁLIMPO TECNOLOGIA E INTERMEDIAÇÃO DE SERVIÇOS LTDA, estabelecendo as condições aplicáveis aos usuários, sejam eles contratantes de serviços ou profissionais autônomos cadastrados.",
+        "O presente Termo de Uso regula o acesso e a utilização da plataforma digital denominada Já Limpo, de titularidade de JÁ LIMPO LTDA, inscrita no CNPJ sob o nº 69.485.100/0001-51, com sede em Brusque/SC, estabelecendo as condições aplicáveis aos usuários, sejam eles contratantes de serviços ou profissionais autônomos cadastrados.",
         "Ao realizar cadastro, acessar ou utilizar a plataforma, o usuário declara ter lido, compreendido e aceitado integralmente as disposições aqui previstas, bem como das políticas complementares a este instrumento vinculadas.",
         "O aceite eletrônico possui plena validade jurídica, produzindo efeitos equivalentes aos de assinatura física, nos termos da legislação vigente.",
       ],
@@ -175,7 +175,7 @@ export const TERMS_PLATFORM: LegalDocument = {
       title: "16. Mediação de Conflitos e Foro",
       paragraphs: [
         "Os usuários comprometem-se a envidar esforços para resolução amigável de quaisquer divergências, priorizando o diálogo e a preservação da boa relação na Plataforma.",
-        "Fica eleito o foro da Comarca da sede da Plataforma para dirimir quaisquer questões decorrentes destes Termos de Uso, com renúncia expressa a qualquer outro, por mais privilegiado que seja.",
+        "Fica eleito o foro da Comarca de Brusque/SC, sede da Plataforma, ressalvado o direito do consumidor de demandar no foro de seu domicílio, para dirimir quaisquer questões decorrentes destes Termos de Uso, com renúncia expressa a qualquer outro, por mais privilegiado que seja.",
       ],
     },
     {
@@ -323,7 +323,7 @@ export const TERMS_CLIENT: LegalDocument = {
     {
       title: "15. Disposições Finais",
       paragraphs: [
-        "Fica eleito o foro da Comarca da sede da Plataforma para dirimir quaisquer questões decorrentes destes Termos de Uso, com renúncia expressa a qualquer outro, por mais privilegiado que seja.",
+        "Fica eleito o foro da Comarca de Brusque/SC, sede da Plataforma, ressalvado o direito do consumidor de demandar no foro de seu domicílio, para dirimir quaisquer questões decorrentes destes Termos de Uso, com renúncia expressa a qualquer outro, por mais privilegiado que seja.",
       ],
     },
   ],
@@ -447,7 +447,7 @@ export const TERMS_PRO: LegalDocument = {
     {
       title: "13. Disposições Finais",
       paragraphs: [
-        "Fica eleito o foro da Comarca da sede da Plataforma para dirimir quaisquer questões decorrentes destes Termos de Uso.",
+        "Fica eleito o foro da Comarca de Brusque/SC, sede da Plataforma, ressalvado o direito do consumidor de demandar no foro de seu domicílio, para dirimir quaisquer questões decorrentes destes Termos de Uso.",
       ],
     },
   ],
@@ -560,7 +560,7 @@ export const PRIVACY_POLICY: LegalDocument = {
       title: "1. Disposições Gerais e Finalidade",
       paragraphs: [
         "A presente Política de Privacidade tem por finalidade estabelecer as diretrizes relativas ao tratamento de dados pessoais dos usuários da plataforma Já Limpo, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 - LGPD).",
-        "A controladora dos dados pessoais é a JÁLIMPO TECNOLOGIA E INTERMEDIAÇÃO DE SERVIÇOS LTDA. A JáLimpo nomeou um Encarregado pelo Tratamento de Dados Pessoais (DPO), que pode ser contatado pelos canais oficiais da plataforma.",
+        "A controladora dos dados pessoais é a JÁ LIMPO LTDA, inscrita no CNPJ sob o nº 69.485.100/0001-51, com sede em Brusque/SC. O Encarregado pelo Tratamento de Dados Pessoais (DPO) pode ser contatado pelo e-mail suporte@jalimpo.com.",
       ],
     },
     {
@@ -698,7 +698,7 @@ export const PRIVACY_POLICY: LegalDocument = {
     {
       title: "13. Contato",
       paragraphs: [
-        "O usuário poderá entrar em contato com a plataforma para esclarecimentos, solicitações ou exercício de direitos relacionados à proteção de dados pessoais por meio dos canais oficiais disponibilizados.",
+        "O usuário poderá entrar em contato com a plataforma para esclarecimentos, solicitações ou exercício de direitos relacionados à proteção de dados pessoais pelo e-mail suporte@jalimpo.com ou pela área de Suporte do aplicativo. Controladora: JÁ LIMPO LTDA, CNPJ 69.485.100/0001-51, Brusque/SC.",
       ],
     },
   ],
