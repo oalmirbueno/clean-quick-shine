@@ -30,3 +30,6 @@ verify_jwt = false
 verify_jwt = false
 
 
+
+[functions.push-dispatch]
+verify_jwt = false

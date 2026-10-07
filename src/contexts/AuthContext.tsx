@@ -3,6 +3,7 @@ import { User, Session, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { getPublicOrigin } from "@/lib/platform";
+import { unregisterNativePush } from "@/lib/pushNative";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -156,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    await unregisterNativePush();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
