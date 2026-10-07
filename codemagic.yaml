@@ -1,0 +1,101 @@
+# Publicação do Já Limpo nas lojas pelo Codemagic (build na nuvem, inclusive iOS
+# sem Mac). Passo a passo de configuração: docs/lojas/GUIA-PUBLICACAO.md
+#
+# Grupos de variáveis criados no Codemagic (User/Team settings → Global variables):
+#   jalimpo_play      GCLOUD_SERVICE_ACCOUNT_CREDENTIALS  (JSON da conta de serviço do Play Console)
+#   jalimpo_firebase  GOOGLE_SERVICES_JSON                (google-services.json em base64, opcional)
+# Chave de assinatura Android: Codemagic → Code signing identities → Android
+#   keystores → referência "jalimpo_upload".
+# Integração Apple: Team settings → Integrations → App Store Connect →
+#   nome "jalimpo_asc" (chave de API com acesso App Manager).
+
+definitions:
+  scripts:
+    - &deps
+      name: Dependências
+      script: npm ci
+    - &push
+      name: Push nativo no Android (liga só se o Firebase estiver configurado)
+      script: |
+        if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
+          echo "VITE_NATIVE_PUSH=1" >> $CM_ENV
+        fi
+    - &build_web
+      name: Build web
+      script: npm run build
+
+workflows:
+  android-release:
+    name: Android → Google Play (teste interno)
+    instance_type: mac_mini_m2   # a máquina do plano grátis (500 min/mês)
+    max_build_duration: 60
+    environment:
+      groups:
+        - jalimpo_play
+        - jalimpo_firebase
+      android_signing:
+        - jalimpo_upload
+      node: 22
+      java: 21
+      vars:
+        PACKAGE_NAME: br.com.jalimpo.app
+    scripts:
+      - *deps
+      - *push
+      - *build_web
+      - name: Sincronizar Capacitor
+        script: npx cap sync android
+      - name: Número da versão (sempre maior que o último enviado)
+        script: |
+          ULTIMO=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks internal 2>/dev/null || echo 0)
+          echo "BUILD_NUMBER=$((ULTIMO + 1))" >> $CM_ENV
+      - name: Gerar AAB assinado
+        script: cd android && ./gradlew bundleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/mapping/**/mapping.txt
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+
+  ios-release:
+    name: iOS → TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 90
+    integrations:
+      app_store_connect: jalimpo_asc
+    environment:
+      groups:
+        - jalimpo_firebase
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: br.com.jalimpo.app
+      node: 22
+      xcode: latest
+      vars:
+        BUNDLE_ID: br.com.jalimpo.app
+        VITE_NATIVE_PUSH: "1"   # iPhone usa APNs direto, sem Firebase
+    scripts:
+      - *deps
+      - *build_web
+      - name: Sincronizar Capacitor (regenera o Package.swift no Mac)
+        script: npx cap sync ios
+      - name: Perfis de assinatura
+        script: xcode-project use-profiles
+      - name: Número da versão (último do TestFlight + 1)
+        script: |
+          APP_ID=$(app-store-connect apps list --bundle-id-identifier "$BUNDLE_ID" --strict-match-identifier --json | python3 -c "import sys,json;print(json.load(sys.stdin)[0]['id'])")
+          ULTIMO=$(app-store-connect get-latest-build-number "$APP_ID" 2>/dev/null || echo 0)
+          cd ios/App && agvtool new-version -all $((ULTIMO + 1))
+      - name: Gerar IPA
+        script: xcode-project build-ipa --project ios/App/App.xcodeproj --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
