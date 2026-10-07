@@ -34,7 +34,7 @@ export default function ClientService() {
       {/* Header */}
       <header
         className="relative shrink-0 px-5 pt-3 pb-4 z-10"
-        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+        style={{ paddingTop: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 12px)" }}
       >
         <div className="mx-auto max-w-lg flex items-center gap-3">
           <button
@@ -169,7 +169,7 @@ export default function ClientService() {
       {/* Sticky bottom CTA with selected summary */}
       <div
         className="shrink-0 px-5 pt-3 pb-5 bg-card/95 backdrop-blur border-t border-border/60"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 20px)" }}
+        style={{ paddingBottom: "max(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)), 20px)" }}
       >
         <div className="mx-auto max-w-lg">
           {selected && (

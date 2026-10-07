@@ -49,8 +49,8 @@ export function AuthLayout({
     <div
       className="h-full bg-background flex overflow-hidden"
       style={{
-        paddingTop: "max(env(safe-area-inset-top, 0px), 0px)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        paddingTop: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 0px)",
+        paddingBottom: "var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))",
       }}
     >
       {/* ====== Marketing column (desktop only) ====== */}

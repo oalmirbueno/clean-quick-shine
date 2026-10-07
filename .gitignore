@@ -28,3 +28,7 @@ docs/prompts-lovable-refinados-*.md
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase iOS / chaves locais
+ios/App/App/GoogleService-Info.plist
+*.p8

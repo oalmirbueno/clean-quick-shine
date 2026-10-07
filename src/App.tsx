@@ -13,6 +13,7 @@ import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { InstallBanner } from "@/components/ui/InstallBanner";
 import { MobilePwaGate } from "@/components/MobilePwaGate";
 import { PersistentBottomNav } from "@/components/ui/BottomNav";
+import { NativeBridge } from "@/components/NativeBridge";
 
 // Code splitting por rota: cada perfil (cliente/diarista/admin) baixa só o
 // próprio código; gráficos e mapas ficam em chunks separados sob demanda.
@@ -139,6 +140,7 @@ const App = () => {
             <OfflineBanner />
             <UpdatePrompt />
             <BrowserRouter>
+              <NativeBridge />
               <InstallBanner />
               <Suspense fallback={<RouteFallback />}>
               <Routes>

@@ -152,7 +152,7 @@ export default function ClientProfile() {
       {/* Header */}
       <header
         className="relative shrink-0 px-5 pt-3 pb-4 z-10"
-        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+        style={{ paddingTop: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 12px)" }}
       >
         <div className="mx-auto max-w-lg">
           <p className="text-[12px] text-muted-foreground leading-none mb-1.5">

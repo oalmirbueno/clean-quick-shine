@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { getPosition } from "@/lib/nativeApi";
 
 // Fix default marker icons (Leaflet bug with bundlers)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -136,9 +137,10 @@ export function MapView({
   useEffect(() => {
     if (!showUserLocation || !mapInstance.current) return;
 
-    navigator.geolocation.getCurrentPosition(
+    getPosition({ enableHighAccuracy: true }).then(
       (pos) => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const loc = { lat: pos.lat, lng: pos.lng };
+        if (!mapInstance.current) return;
         setUserLocation(loc);
 
         if (userMarker.current) {
@@ -155,7 +157,6 @@ export function MapView({
         }
       },
       (err) => console.warn("Geolocation error:", err),
-      { enableHighAccuracy: true }
     );
   }, [showUserLocation]);
 

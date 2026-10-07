@@ -149,8 +149,8 @@ export function AppTutorial({ variant, onComplete, userId }: AppTutorialProps) {
             height: "var(--app-height, 100dvh)",
             maxHeight: "var(--app-height, 100dvh)",
             gridTemplateRows: "auto auto minmax(0, 1fr) auto",
-            paddingTop: "max(env(safe-area-inset-top, 0px), 8px)",
-            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+            paddingTop: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 8px)",
+            paddingBottom: "max(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)), 8px)",
             willChange: "opacity",
           }}
         >
@@ -309,7 +309,7 @@ function SlideContent({ step, direction, isPro, onSwipeNext, onSwipePrev }: Slid
     >
       <div
         className="min-h-full px-6 pt-2 max-w-md mx-auto w-full flex flex-col justify-center"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}
+        style={{ paddingBottom: "calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 24px)" }}
       >
         {/* Icon */}
         <div

@@ -106,7 +106,7 @@ export default function ClientDemo() {
   return (
     <div
       className="h-full flex flex-col bg-background overflow-hidden"
-      style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+      style={{ paddingTop: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 12px)" }}
     >
       {/* Top bar */}
       <header className="shrink-0 px-4 pt-2 pb-3 flex items-center gap-2 z-10">

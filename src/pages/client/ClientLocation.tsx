@@ -177,7 +177,7 @@ export default function ClientLocation() {
       {/* Header */}
       <header
         className="shrink-0 px-5 pt-3 pb-4"
-        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+        style={{ paddingTop: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 12px)" }}
       >
         <div className="mx-auto max-w-lg flex items-center gap-3">
           <button

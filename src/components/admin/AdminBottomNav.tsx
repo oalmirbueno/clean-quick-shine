@@ -77,7 +77,7 @@ export function AdminBottomNav() {
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div
             className="absolute bottom-0 left-0 right-0 liquid-glass liquid-glass-sheet p-5 animate-slide-in-from-bottom"
-            style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+            style={{ paddingBottom: "calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 1rem)" }}
           >
             <div className="flex items-center justify-between mb-4">
               <Logo size="sm" />

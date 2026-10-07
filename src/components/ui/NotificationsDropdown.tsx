@@ -70,7 +70,7 @@ export function NotificationsDropdown() {
                   transition={{ type: "spring", damping: 26, stiffness: 280 }}
                   className="fixed top-0 right-0 w-full max-w-sm h-full bg-card border-l border-border shadow-2xl rounded-l-2xl overflow-hidden flex flex-col z-[101]"
                   style={{
-                    paddingTop: "max(env(safe-area-inset-top, 0px), 16px)",
+                    paddingTop: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 16px)",
                   }}
                 >
                   <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">

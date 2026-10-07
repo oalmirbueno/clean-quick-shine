@@ -1,5 +1,20 @@
 apply plugin: 'com.android.application'
 
+// Assinatura de release: Codemagic injeta CM_KEYSTORE_* ; localmente use
+// android/keystore.properties (fora do git). Sem nenhum dos dois, o build de
+// release sai sem assinatura (útil para testar a compilação).
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+def ksPath = System.getenv('CM_KEYSTORE_PATH') ?: keystoreProps['storeFile']
+def ksPass = System.getenv('CM_KEYSTORE_PASSWORD') ?: keystoreProps['storePassword']
+def ksAlias = System.getenv('CM_KEY_ALIAS') ?: keystoreProps['keyAlias']
+def ksKeyPass = System.getenv('CM_KEY_PASSWORD') ?: keystoreProps['keyPassword']
+def temAssinatura = ksPath && ksPass && ksAlias && ksKeyPass
+def buildNumber = (System.getenv('BUILD_NUMBER') ?: '1') as Integer
+
 android {
     namespace = "br.com.jalimpo.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +22,8 @@ android {
         applicationId "br.com.jalimpo.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode buildNumber
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +31,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (temAssinatura) {
+            release {
+                storeFile file(ksPath)
+                storePassword ksPass
+                keyAlias ksAlias
+                keyPassword ksKeyPass
+            }
+        }
+    }
     buildTypes {
         release {
+            if (temAssinatura) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -642,7 +642,7 @@ export default function Install() {
                 Sou diarista, continuar pelo navegador
               </button>
             )}
-            <p className="text-center text-[11px] text-neutral-600 pb-[env(safe-area-inset-bottom,0px)]">
+            <p className="text-center text-[11px] text-neutral-600 pb-[var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px))]">
               Atualizações automáticas ao abrir o app.
             </p>
           </div>

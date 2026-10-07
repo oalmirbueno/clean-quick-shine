@@ -13,7 +13,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <main
         className="app-scroll-container lg:ml-64 flex-1 h-full min-h-0"
         style={{
-          paddingTop: "env(safe-area-inset-top, 0px)",
+          paddingTop: "var(--safe-area-inset-top, env(safe-area-inset-top, 0px))",
           paddingBottom: "var(--bottom-nav-height, 56px)",
           WebkitOverflowScrolling: "touch",
         }}

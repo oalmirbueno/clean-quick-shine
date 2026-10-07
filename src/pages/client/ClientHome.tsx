@@ -104,7 +104,7 @@ export default function ClientHome() {
 
       <div
         className="h-full flex flex-col relative overflow-hidden bg-background"
-        style={{ paddingTop: "max(env(safe-area-inset-top, 0px), 12px)" }}
+        style={{ paddingTop: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 12px)" }}
       >
         {/* Glow sutil de fundo */}
         <div

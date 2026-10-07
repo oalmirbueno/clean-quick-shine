@@ -176,7 +176,7 @@ export default function ClientMatching() {
           <button
             onClick={() => navigate("/client/home")}
             className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-card border border-border/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm"
-            style={{ top: "max(env(safe-area-inset-top, 0px), 16px)" }}
+            style={{ top: "max(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)), 16px)" }}
             aria-label="Cancelar busca"
           >
             <X className="w-5 h-5" />

@@ -13,6 +13,7 @@ import {
   Radio, Loader2, ChevronRight, Wallet, Activity, TrendingUp, Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getPosition } from "@/lib/nativeApi";
 import { toast } from "sonner";
 import {
   useCurrentProData, useAvailableOrdersForPro, useAssignedOrders,
@@ -72,16 +73,15 @@ export default function ProHome() {
   useEffect(() => {
     if (!isAvailable || !user?.id) return;
     const update = () => {
-      navigator.geolocation.getCurrentPosition(
+      getPosition({ enableHighAccuracy: true }).then(
         async (pos) => {
-          const { latitude, longitude } = pos.coords;
+          const { lat: latitude, lng: longitude } = pos;
           setProLocation({ lat: latitude, lng: longitude });
           await supabase.from("pro_profiles").update({
             current_lat: latitude, current_lng: longitude, updated_at: new Date().toISOString(),
           }).eq("user_id", user.id);
         },
         (err) => console.warn("Geo error:", err),
-        { enableHighAccuracy: true },
       );
     };
     update();

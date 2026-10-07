@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getPosition, watchPosition } from "@/lib/nativeApi";
+
+type Fix = { lat: number; lng: number; accuracy?: number; heading?: number | null; speed?: number | null };
 
 /**
  * Tracks the pro's GPS location and pushes it to `pro_locations` every 30s
@@ -15,16 +18,12 @@ export function useProLocationTracking(params: {
 }) {
   const { enabled, userId, orderId } = params;
   const lastSentRef = useRef<number>(0);
-  const watchIdRef = useRef<number | null>(null);
+  const stopWatchRef = useRef<(() => void) | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const latestPositionRef = useRef<GeolocationPosition | null>(null);
+  const latestPositionRef = useRef<Fix | null>(null);
 
   useEffect(() => {
     if (!enabled || !userId) return;
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      console.warn("[GPS] Geolocation not supported");
-      return;
-    }
 
     const persist = async () => {
       const pos = latestPositionRef.current;
@@ -33,7 +32,7 @@ export function useProLocationTracking(params: {
       if (now - lastSentRef.current < 25_000) return; // safety throttle
       lastSentRef.current = now;
 
-      const { latitude, longitude, accuracy, heading, speed } = pos.coords;
+      const { lat: latitude, lng: longitude, accuracy, heading, speed } = pos;
 
       // Insert tracking sample (visible to client in realtime)
       const { error: insertErr } = await supabase.from("pro_locations").insert({
@@ -42,8 +41,8 @@ export function useProLocationTracking(params: {
         lat: latitude,
         lng: longitude,
         accuracy: accuracy ?? null,
-        heading: Number.isFinite(heading) ? heading : null,
-        speed: Number.isFinite(speed) ? speed : null,
+        heading: Number.isFinite(heading as number) ? heading : null,
+        speed: Number.isFinite(speed as number) ? speed : null,
       });
       if (insertErr) console.warn("[GPS] insert error", insertErr.message);
 
@@ -55,30 +54,29 @@ export function useProLocationTracking(params: {
     };
 
     // Continuous watch for accuracy; we only persist every 30s.
-    watchIdRef.current = navigator.geolocation.watchPosition(
+    stopWatchRef.current = watchPosition(
       (pos) => {
         latestPositionRef.current = pos;
       },
-      (err) => console.warn("[GPS] watch error", err.message),
+      (err) => console.warn("[GPS] watch error", err),
       { enableHighAccuracy: true, maximumAge: 10_000, timeout: 20_000 }
     );
 
     // Also request a fast first fix.
-    navigator.geolocation.getCurrentPosition(
+    getPosition({ enableHighAccuracy: true, timeout: 15_000 }).then(
       (pos) => {
         latestPositionRef.current = pos;
         persist();
       },
-      () => {},
-      { enableHighAccuracy: true, timeout: 15_000 }
+      () => {}
     );
 
     intervalRef.current = setInterval(persist, 30_000);
 
     return () => {
-      if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+      stopWatchRef.current?.();
       if (intervalRef.current) clearInterval(intervalRef.current);
-      watchIdRef.current = null;
+      stopWatchRef.current = null;
       intervalRef.current = null;
     };
   }, [enabled, userId, orderId]);
