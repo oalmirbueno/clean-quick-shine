@@ -116,7 +116,9 @@ export default function AppSettings() {
         await Promise.all(cacheNames.map(name => caches.delete(name)));
       }
       // Preserve auth + tutorial-completion flags across cache clear
-      const authData = localStorage.getItem('sb-mdgiviynypoyixpskmpu-auth-token');
+      // chave da sessão do supabase-js: sb-<ref do projeto>-auth-token
+      const authKey = `sb-${new URL(import.meta.env.VITE_SUPABASE_URL).hostname.split(".")[0]}-auth-token`;
+      const authData = localStorage.getItem(authKey);
       const preserved: Record<string, string> = {};
       const tutorialKeyPrefixes = TUTORIAL_PRESERVE_KEYS;
       for (let i = 0; i < localStorage.length; i++) {
@@ -129,7 +131,7 @@ export default function AppSettings() {
       }
       localStorage.clear();
       if (authData) {
-        localStorage.setItem('sb-mdgiviynypoyixpskmpu-auth-token', authData);
+        localStorage.setItem(authKey, authData);
       }
       Object.entries(preserved).forEach(([k, v]) => localStorage.setItem(k, v));
       setCleared(true);
