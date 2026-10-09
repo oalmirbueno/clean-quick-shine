@@ -100,6 +100,10 @@ abrem.
   funções, regras RLS, gatilhos, índices, permissões e publicações de tempo real.
 - Dados copiados direto de banco para banco: 47 tabelas, 41 usuários com as
   mesmas senhas, chave de criptografia idêntica. Conferido por impressão digital.
-- Documentos das diaristas (bucket `pro-documents`, 51 arquivos): cópia em
-  andamento. As pastas baixadas ficam em `Documents/JaLimpo-Lojas/migracao/documentos/`.
+- Documentos das diaristas (bucket `pro-documents`): 51 de 51 arquivos copiados,
+  com nomes e tamanhos idênticos. Uma cópia local fica em
+  `Documents/JaLimpo-Lojas/migracao/documentos/` (fora do Git, dados pessoais).
+- Domínio: jalimpo.com passou da Hostinger para o DNS do Cloudflare. Os registros
+  antigos, que apontavam para o Lovable, foram apagados, e o Worker assumiu
+  jalimpo.com e www.
 - O projeto no Lovable fica só como histórico. Não publicar mais por lá.
