@@ -32,3 +32,6 @@ docs/prompts-lovable-refinados-*.md
 # Firebase iOS / chaves locais
 ios/App/App/GoogleService-Info.plist
 *.p8
+
+# Supabase CLI (estado local do link)
+supabase/.temp/
