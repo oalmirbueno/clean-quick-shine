@@ -1,4 +1,18 @@
-project_id = "mdgiviynypoyixpskmpu"
+project_id = "grqwwpxpmcwailkxbbbj"
+
+[auth]
+site_url = "https://jalimpo.com"
+additional_redirect_urls = [
+  "https://jalimpo.com/**",
+  "https://www.jalimpo.com/**",
+  "https://jalimpo.almirbarrosbueno.workers.dev/**",
+  "https://localhost/**",
+  "capacitor://localhost/**",
+]
+
+[auth.email]
+# como no Lovable Cloud: conta entra direto, sem confirmar e-mail
+enable_confirmations = false
 
 [functions.asaas-webhook]
 verify_jwt = false

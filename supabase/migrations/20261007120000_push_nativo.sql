@@ -63,7 +63,7 @@ AS $$
 BEGIN
   BEGIN
     PERFORM net.http_post(
-      url := 'https://mdgiviynypoyixpskmpu.supabase.co/functions/v1/push-dispatch',
+      url := 'https://grqwwpxpmcwailkxbbbj.supabase.co/functions/v1/push-dispatch',
       body := jsonb_build_object('notification_id', NEW.id),
       headers := '{"Content-Type": "application/json"}'::jsonb
     );
