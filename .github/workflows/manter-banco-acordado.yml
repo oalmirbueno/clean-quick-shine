@@ -1,0 +1,22 @@
+# O plano grátis do Supabase pausa o projeto depois de 7 dias sem uso.
+# Uma consulta pública por dia mantém o banco acordado mesmo sem movimento.
+name: Manter banco acordado
+
+on:
+  schedule:
+    - cron: "17 9 * * *" # todo dia, 06:17 em Brasília
+  workflow_dispatch:
+
+jobs:
+  pingar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Consulta pública no banco
+        run: |
+          set -a; . ./.env; set +a
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$VITE_SUPABASE_URL/rest/v1/services?select=id&limit=1" \
+            -H "apikey: $VITE_SUPABASE_PUBLISHABLE_KEY")
+          echo "Supabase respondeu $status"
+          test "$status" = "200"

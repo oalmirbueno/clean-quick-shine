@@ -196,10 +196,10 @@ O workflow **ios-release** manda cada build para o TestFlight. Com o build lá:
 Sem esta etapa o app funciona normalmente, só não toca notificação com o app
 fechado.
 
-### 3.1 Banco: rodar a migração
-Lovable → Cloud → SQL Editor → cole o conteúdo de
-`supabase/migrations/20261007120000_push_nativo.sql` → Run. Esperado:
-*Success*. Ela cria a tabela dos aparelhos, o gatilho e liga o pg_net.
+### 3.1 Banco: já pronto
+A migração `supabase/migrations/20261007120000_push_nativo.sql` já foi aplicada
+no banco próprio (Supabase `jalimpo`, ref `grqwwpxpmcwailkxbbbj`) em 09/10/2026:
+tabela dos aparelhos, gatilho e pg_net ligados. Nada a fazer aqui.
 
 Conferir depois:
 ```sql
@@ -222,7 +222,10 @@ select tgname from pg_trigger where tgname = 'trg_disparar_push';
    chave privada → baixa um JSON.
 
 ### 3.3 Segredos da função push-dispatch
-Lovable → Cloud → **Secrets** (são os segredos das Edge Functions):
+Pelo terminal, na pasta do projeto (um por vez):
+`npx supabase secrets set --project-ref grqwwpxpmcwailkxbbbj NOME=valor`
+ou no painel: supabase.com/dashboard → projeto **jalimpo** → Edge Functions →
+**Secrets**.
 
 | Nome | Valor |
 |---|---|
@@ -231,8 +234,7 @@ Lovable → Cloud → **Secrets** (são os segredos das Edge Functions):
 | `APNS_KEY_ID` | Key ID da chave de push (10 caracteres) |
 | `APNS_TEAM_ID` | Team ID da conta Apple |
 
-A função `push-dispatch` sobe junto com o código. Confirme no Lovable (Cloud →
-Edge Functions) que ela aparece na lista.
+A função `push-dispatch` já está publicada no projeto jalimpo.
 
 ### 3.4 Testar
 1. Instale o build do teste interno/TestFlight, entre com a conta de diarista,
