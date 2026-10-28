@@ -381,7 +381,7 @@ export default function Install() {
               {showQr && (
                 <div className="flex items-center justify-center py-2">
                   <div className="p-3 rounded-2xl bg-white">
-                    <QRCodeSVG value={getPublicOrigin()} size={112} level="M" />
+                    <QRCodeSVG value={`${getPublicOrigin()}/app`} size={112} level="M" />
                   </div>
                 </div>
               )}
@@ -612,7 +612,7 @@ export default function Install() {
           {showQr && (
             <section className="rounded-2xl bg-neutral-900/50 border border-neutral-800 p-4 flex items-center gap-4">
               <div className="p-2 rounded-xl bg-white">
-                <QRCodeSVG value={getPublicOrigin()} size={88} level="M" />
+                <QRCodeSVG value={`${getPublicOrigin()}/app`} size={88} level="M" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold leading-snug">Aponte a câmera do celular</p>

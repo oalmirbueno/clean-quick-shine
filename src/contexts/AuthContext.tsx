@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
-        emailRedirectTo: getPublicOrigin(),
+        emailRedirectTo: `${getPublicOrigin()}/app`,
         data: {
           full_name: fullName,
           // Passado para o trigger handle_new_user garantir a role no servidor

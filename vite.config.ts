@@ -32,7 +32,8 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2,woff,ttf}"],
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api/, /^\/supabase/, /^\/__/, /^\/~oauth/],
+        // "/" e "/site/" são a landing (servida pelo Worker), não o app
+        navigateFallbackDenylist: [/^\/(\?.*)?$/, /^\/site\//, /^\/api/, /^\/supabase/, /^\/__/, /^\/~oauth/],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,

@@ -146,6 +146,8 @@ const App = () => {
               <Routes>
                 {/* Splash & Auth */}
                 <Route path="/" element={<Index />} />
+                {/* Na web, jalimpo.com/ é a landing (worker/index.js); o app abre em /app */}
+                <Route path="/app" element={<Index />} />
                 <Route path="/login" element={<MobilePwaGate><Login /></MobilePwaGate>} />
                 <Route path="/register" element={<MobilePwaGate><Register /></MobilePwaGate>} />
                 <Route path="/forgot-password" element={<MobilePwaGate><ForgotPassword /></MobilePwaGate>} />

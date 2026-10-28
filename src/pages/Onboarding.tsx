@@ -248,7 +248,7 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
   const [showQr, setShowQr] = useState(() =>
     typeof window !== "undefined" ? getResponsiveViewportWidth() >= 1024 : true,
   );
-  const url = getPublicOrigin() + "/";
+  const url = getPublicOrigin() + "/app";
 
   useEffect(() => {
     const update = () => setShowQr(getResponsiveViewportWidth() >= 1024);
