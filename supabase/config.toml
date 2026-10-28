@@ -14,6 +14,16 @@ additional_redirect_urls = [
 # como no Lovable Cloud: conta entra direto, sem confirmar e-mail
 enable_confirmations = false
 
+# E-mails do login (esqueci a senha) saem pelo Resend com o domínio jalimpo.com.
+# O SMTP foi ligado pela integração Resend → Supabase (conta jalimpooficial no
+# Resend) e fica de propósito FORA deste arquivo: `config push` só mexe no que
+# está declarado aqui, então não apaga a senha que a integração gravou.
+[auth.email.template.recovery]
+subject = "Criar nova senha no Já Limpo"
+content_path = "./supabase/templates/recovery.html"
+# limite de e-mails/hora (25 com SMTP próprio) fica no painel: Auth → Rate Limits;
+# o `config push` não gerencia esse campo
+
 [functions.asaas-webhook]
 verify_jwt = false
 
