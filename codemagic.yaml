@@ -1,7 +1,8 @@
 # Publicação do Já Limpo nas lojas pelo Codemagic (build na nuvem, inclusive iOS
 # sem Mac). Passo a passo de configuração: docs/lojas/GUIA-PUBLICACAO.md
 #
-# Grupos de variáveis criados no Codemagic (User/Team settings → Global variables):
+# Grupos de variáveis criados no Codemagic (app → Settings → Environment variables;
+# conta pessoal não tem variáveis globais):
 #   jalimpo_play      GCLOUD_SERVICE_ACCOUNT_CREDENTIALS  (JSON da conta de serviço do Play Console)
 #   jalimpo_firebase  GOOGLE_SERVICES_JSON                (google-services.json em base64, opcional)
 # Chave de assinatura Android: Codemagic → Code signing identities → Android
@@ -33,17 +34,20 @@ workflows:
     instance_type: mac_mini_m2
     max_build_duration: 60
     environment:
+      groups:
+        - jalimpo_firebase
       android_signing:
         - jalimpo_upload
       node: 22
       java: 21
     scripts:
       - *deps
+      - *push
       - *build_web
       - name: Sincronizar Capacitor
         script: npx cap sync android
       - name: Gerar AAB assinado
-        script: cd android && ./gradlew bundleRelease
+        script: cd android && chmod +x gradlew && ./gradlew bundleRelease
     artifacts:
       - android/app/build/outputs/**/*.aab
       - android/app/build/outputs/mapping/**/mapping.txt
@@ -73,7 +77,7 @@ workflows:
           ULTIMO=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks internal 2>/dev/null || echo 0)
           echo "BUILD_NUMBER=$((ULTIMO + 1))" >> $CM_ENV
       - name: Gerar AAB assinado
-        script: cd android && ./gradlew bundleRelease
+        script: cd android && chmod +x gradlew && ./gradlew bundleRelease
     artifacts:
       - android/app/build/outputs/**/*.aab
       - android/app/build/outputs/mapping/**/mapping.txt
