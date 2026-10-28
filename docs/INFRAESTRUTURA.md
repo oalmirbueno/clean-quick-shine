@@ -27,7 +27,9 @@ Faz `vite build` e `wrangler deploy`. A configuração está em `wrangler.jsonc`
 Os cabeçalhos de cache estão em `public/_headers`. O wrangler desta máquina já
 está logado na conta Cloudflare do dono.
 
-Endereço de teste, que serve a mesma versão: https://jalimpo.almirbarrosbueno.workers.dev
+Sem endereço *.workers.dev (desligado em 28/10/2026): o app só responde em
+jalimpo.com e www. A raiz "/" e "/site/*" são a landing (Worker `jalimpo-site`,
+pasta `../landing`), repassada por `worker/index.js`; o app abre em `/app`.
 
 ## Banco de dados
 

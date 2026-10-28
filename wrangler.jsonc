@@ -15,7 +15,7 @@
     "run_worker_first": ["/", "/site/*"]
   },
   "services": [{ "binding": "SITE", "service": "jalimpo-site" }],
-  "workers_dev": true,
+  "workers_dev": false,
   "routes": [
     { "pattern": "jalimpo.com", "custom_domain": true },
     { "pattern": "www.jalimpo.com", "custom_domain": true }
