@@ -30,12 +30,11 @@ import { toast } from "sonner";
 /**
  * Welcome / entry wizard.
  *
- * Prioridade: SEMPRE empurrar o usuário para o app (PWA).
- *  - Desktop/Tablet-browser: mostra QR + link para abrir no celular.
- *  - Mobile-browser (não standalone):
- *      • Se o PWA já está instalado neste device, exibe status "App instalado"
- *        com CTA para abrir pelo ícone.
- *      • Caso contrário, força fluxo de instalação antes de login/cadastro.
+ * Entrar e criar conta funcionam em qualquer navegador (inclusive o do
+ * Instagram/WhatsApp, onde não dá para instalar). Instalar é convite:
+ *  - Desktop/Tablet-browser: QR + link para abrir no celular, com saída
+ *    "Usar pelo navegador".
+ *  - Mobile-browser com o PWA já instalado: aviso "App instalado".
  *  - Já dentro do PWA: pula direto para /login.
  */
 export default function Onboarding() {
@@ -60,14 +59,6 @@ export default function Onboarding() {
   useEffect(() => {
     if (isStandalone) navigate("/login", { replace: true });
   }, [isStandalone, navigate]);
-
-  // Navegador mobile/tablet sempre passa pelo /install.
-  // Se já instalou, o /install mostra a tela de app instalado + compartilhamento.
-  useEffect(() => {
-    if (forceInstall) {
-      navigate("/install", { replace: true });
-    }
-  }, [forceInstall, navigate]);
 
   if (showDesktopHandoff) {
     return <DesktopHandoff onProWeb={goLogin} />;
@@ -118,7 +109,7 @@ export default function Onboarding() {
             onClick={goLogin}
             className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
           >
-            Sou diarista, continuar pelo navegador
+            Usar pelo navegador
           </button>
         </div>
       )}
@@ -409,7 +400,7 @@ function DesktopHandoff({ onProWeb }: { onProWeb: () => void }) {
             onClick={onProWeb}
             className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
           >
-            Sou diarista, continuar pelo navegador
+            Usar pelo navegador
           </button>
         </div>
       </div>

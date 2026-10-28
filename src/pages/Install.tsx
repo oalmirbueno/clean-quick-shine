@@ -634,14 +634,12 @@ export default function Install() {
 
 
           <div className="flex flex-col gap-2">
-            {!isMobileViewport && (
-              <button
-                onClick={() => navigate("/login?web=1")}
-                className="w-full py-2 text-[12px] text-neutral-500 hover:text-neutral-300 underline underline-offset-2 transition-colors"
-              >
-                Sou diarista, continuar pelo navegador
-              </button>
-            )}
+            <button
+              onClick={() => navigate("/login?web=1")}
+              className="w-full py-2 text-[13px] text-neutral-400 hover:text-neutral-200 underline underline-offset-2 transition-colors"
+            >
+              Continuar pelo navegador
+            </button>
             <p className="text-center text-[11px] text-neutral-600 pb-[var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px))]">
               Atualizações automáticas ao abrir o app.
             </p>

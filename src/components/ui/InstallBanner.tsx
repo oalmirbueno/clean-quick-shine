@@ -16,8 +16,10 @@ export function InstallBanner() {
     // No app nativo não existe "instalar o PWA"
     if (isNativeApp()) return;
 
-    // Never show on the install page itself or auth pages where it'd overlap
-    if (location.pathname.startsWith("/install")) return;
+    // Nunca na página de instalar nem nas telas de entrada (lá ele cobriria o
+    // formulário); aparece depois que a pessoa já entrou.
+    const p = location.pathname;
+    if (p === "/" || p.startsWith("/install") || ["/login", "/register", "/forgot-password", "/reset-password", "/onboarding"].some((r) => p.startsWith(r))) return;
 
     // Never show in standalone/PWA mode
     if (window.matchMedia("(display-mode: standalone)").matches) return;
@@ -29,12 +31,6 @@ export function InstallBanner() {
     } catch {
       return;
     }
-
-    // On mobile the user is already routed to /install via MobilePwaGate,
-    // so this banner is only a hint for desktop browsers.
-    const ua = window.navigator.userAgent.toLowerCase();
-    const isMobile = /iphone|ipad|ipod|android/.test(ua);
-    if (isMobile) return;
 
     // Check cooldown
     const dismissed = localStorage.getItem(DISMISS_KEY);

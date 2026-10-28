@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AuthLoading } from "@/components/ui/AuthLoading";
 import { AdminBackBanner } from "@/components/ui/AdminBackBanner";
 import type { Database } from "@/integrations/supabase/types";
-import { useIsMobileDevice, useIsStandalone } from "@/hooks/useIsStandalone";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -22,8 +21,6 @@ export function ProtectedRoute({
   const { user, loading, hasRole, rolesLoaded, roles } = useAuth();
   const location = useLocation();
   const [timedOut, setTimedOut] = useState(false);
-  const isMobile = useIsMobileDevice();
-  const isStandalone = useIsStandalone();
 
   // Timeout de segurança para evitar loading infinito
   useEffect(() => {
@@ -46,10 +43,6 @@ export function ProtectedRoute({
 
   if (timedOut) {
     return <Navigate to="/login" replace />;
-  }
-
-  if (isMobile && !isStandalone) {
-    return <Navigate to="/install" replace />;
   }
 
   // Show loading while auth or roles are being fetched

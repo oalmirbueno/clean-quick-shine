@@ -7,10 +7,8 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { InputField } from "@/components/ui/InputField";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { PrimaryButton } from "@/components/ui/PrimaryButton";
-import { useForceInstallGate } from "@/hooks/useForceInstallGate";
 
 export default function Login() {
-  useForceInstallGate();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signIn } = useAuth();
