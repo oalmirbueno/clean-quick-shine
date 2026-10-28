@@ -26,6 +26,28 @@ definitions:
       script: npm run build
 
 workflows:
+  # Só gera o AAB assinado para baixar (primeiro envio manual ao Play Console,
+  # antes de existir a conta de serviço). Não publica em lugar nenhum.
+  android-aab:
+    name: Android → só gerar o AAB (sem publicar)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      android_signing:
+        - jalimpo_upload
+      node: 22
+      java: 21
+    scripts:
+      - *deps
+      - *build_web
+      - name: Sincronizar Capacitor
+        script: npx cap sync android
+      - name: Gerar AAB assinado
+        script: cd android && ./gradlew bundleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/mapping/**/mapping.txt
+
   android-release:
     name: Android → Google Play (teste interno)
     instance_type: mac_mini_m2   # a máquina do plano grátis (500 min/mês)
