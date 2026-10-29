@@ -1,6 +1,6 @@
 // Site do Já Limpo publicado como Worker com arquivos estáticos (Cloudflare).
 // Publicar: npm run publicar  (build + landing + wrangler deploy)
-// A raiz "/" e "/site/*" são a landing (pasta ../landing/public, copiada para
+// A raiz "/" e "/site/*" são a landing (pasta landing/public, copiada para
 // dist/site por scripts/juntar-landing.mjs); o app abre em /app e no resto.
 {
   "$schema": "node_modules/wrangler/config-schema.json",

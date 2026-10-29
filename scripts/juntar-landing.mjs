@@ -1,10 +1,10 @@
-// Copia a landing (../landing/public) para dist/site/ antes do deploy da web.
+// Copia a landing (landing/public, fora do git) para dist/site/ antes do deploy da web.
 // Fica fora do git e fora do app nativo: o Codemagic roda só `vite build`.
 // O Worker (worker/index.js) serve dist/site/index.html na raiz "/".
 import { cpSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const landing = fileURLToPath(new URL("../../landing/public/", import.meta.url));
+const landing = fileURLToPath(new URL("../landing/public/", import.meta.url));
 const dist = fileURLToPath(new URL("../dist/", import.meta.url));
 
 if (!existsSync(landing + "index.html")) {
