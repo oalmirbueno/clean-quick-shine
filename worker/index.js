@@ -1,10 +1,10 @@
-// jalimpo.com: a landing (Worker "jalimpo-site") mora na raiz e em /site/*;
-// todo o resto é o app (arquivos de ./dist). Só "/" e "/site/*" passam por
-// aqui (assets.run_worker_first), então o app continua servido direto.
+// jalimpo.com: a raiz "/" mostra a landing (dist/site/index.html, copiada de
+// ../landing por scripts/juntar-landing.mjs); todo o resto é o app. Só "/"
+// passa por aqui (assets.run_worker_first), o resto é servido direto.
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
-    if (pathname === "/" || pathname.startsWith("/site/")) return env.SITE.fetch(request);
+    if (pathname === "/") return env.ASSETS.fetch(new Request(new URL("/site/", request.url), request));
     return env.ASSETS.fetch(request);
   },
 };

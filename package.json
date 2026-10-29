@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "publicar": "vite build && npx wrangler@4 deploy",
+    "publicar": "vite build && node scripts/juntar-landing.mjs && npx wrangler@4 deploy",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

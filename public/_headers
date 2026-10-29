@@ -7,6 +7,18 @@
 /index.html
   Cache-Control: no-cache
 
+/site/
+  Cache-Control: no-cache
+
+/site/img/*
+  Cache-Control: public, max-age=2592000, immutable
+
+/site/video/*
+  Cache-Control: public, max-age=2592000
+
+/site/assets/*
+  Cache-Control: public, max-age=3600
+
 /sw.js
   Cache-Control: no-cache
 

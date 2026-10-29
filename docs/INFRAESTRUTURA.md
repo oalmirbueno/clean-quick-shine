@@ -28,8 +28,11 @@ Os cabeçalhos de cache estão em `public/_headers`. O wrangler desta máquina j
 está logado na conta Cloudflare do dono.
 
 Sem endereço *.workers.dev (desligado em 28/10/2026): o app só responde em
-jalimpo.com e www. A raiz "/" e "/site/*" são a landing (Worker `jalimpo-site`,
-pasta `../landing`), repassada por `worker/index.js`; o app abre em `/app`.
+jalimpo.com e www. A raiz "/" e "/site/*" são a landing: `npm run publicar`
+copia `../landing/public` para `dist/site` (scripts/juntar-landing.mjs) e
+`worker/index.js` serve `dist/site/index.html` na raiz; o app abre em `/app`.
+A landing fica fora do git e fora do app nativo (o Codemagic roda só `vite build`).
+Para mexer na landing: editar `../landing/public` e rodar `npm run publicar` aqui.
 
 ## Banco de dados
 

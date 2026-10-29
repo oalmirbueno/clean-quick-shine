@@ -1,7 +1,7 @@
 // Site do Já Limpo publicado como Worker com arquivos estáticos (Cloudflare).
-// Publicar: npm run publicar  (build + wrangler deploy)
-// A raiz "/" e "/site/*" são a landing (Worker "jalimpo-site", pasta ../landing),
-// repassadas por worker/index.js; o app abre em /app e em todas as outras rotas.
+// Publicar: npm run publicar  (build + landing + wrangler deploy)
+// A raiz "/" e "/site/*" são a landing (pasta ../landing/public, copiada para
+// dist/site por scripts/juntar-landing.mjs); o app abre em /app e no resto.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "jalimpo",
@@ -12,9 +12,8 @@
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     "html_handling": "auto-trailing-slash",
-    "run_worker_first": ["/", "/site/*"]
+    "run_worker_first": ["/"]
   },
-  "services": [{ "binding": "SITE", "service": "jalimpo-site" }],
   "workers_dev": false,
   "routes": [
     { "pattern": "jalimpo.com", "custom_domain": true },
