@@ -1,3 +1,4 @@
+import { ganhoDiarista } from "@/lib/ganhoDiarista";
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -139,7 +140,7 @@ export function useProOrdersRealtime(userId: string | null) {
             .maybeSingle();
           
           toast.success(
-            `🎉 Novo pedido atribuído! ${service?.name || "Serviço"} - R$ ${(Number(newOrder.total_price) * 0.8).toFixed(2).replace(".", ",")}`,
+            `🎉 Novo pedido atribuído! ${service?.name || "Serviço"} - R$ ${ganhoDiarista(newOrder).toFixed(2).replace(".", ",")}`,
             {
               duration: 8000,
               action: {
@@ -180,7 +181,7 @@ export function useProOrdersRealtime(userId: string | null) {
               .maybeSingle();
             
             toast.success(
-              `🎉 Novo pedido atribuído! ${service?.name || "Serviço"} - R$ ${(Number(newOrder.total_price) * 0.8).toFixed(2).replace(".", ",")}`,
+              `🎉 Novo pedido atribuído! ${service?.name || "Serviço"} - R$ ${ganhoDiarista(newOrder).toFixed(2).replace(".", ",")}`,
               {
                 duration: 8000,
                 action: {
@@ -245,7 +246,7 @@ export function useGlobalProNotifications(userId: string | null, isPro: boolean)
               `🎉 Novo pedido! ${service?.name || "Serviço"}`,
               {
                 duration: 8000,
-                description: `Ganho: R$ ${(Number(newOrder.total_price) * 0.8).toFixed(2).replace(".", ",")}`,
+                description: `Ganho: R$ ${ganhoDiarista(newOrder).toFixed(2).replace(".", ",")}`,
                 action: {
                   label: "Ver detalhes",
                   onClick: () => {

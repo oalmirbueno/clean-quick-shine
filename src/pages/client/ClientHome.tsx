@@ -1,3 +1,4 @@
+import { INDICACAO_ATIVA } from "@/lib/empresa";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -299,7 +300,7 @@ export default function ClientHome() {
             </motion.div>
 
             {/* Ações rápidas */}
-            <motion.div variants={item} className="grid grid-cols-2 gap-2.5 shrink-0">
+            <motion.div variants={item} className={`grid gap-2.5 shrink-0 ${INDICACAO_ATIVA ? "grid-cols-2" : "grid-cols-1"}`}>
               <button
                 onClick={() => navigate("/client/orders")}
                 className="flex items-center gap-3 p-3.5 rounded-2xl border border-border/60 bg-card text-left shadow-sm hover:border-primary/40 transition-colors"
@@ -313,7 +314,7 @@ export default function ClientHome() {
                 </div>
               </button>
 
-              <button
+              {INDICACAO_ATIVA && <button
                 onClick={() => navigate("/client/referral")}
                 className="flex items-center gap-3 p-3.5 rounded-2xl border border-border/60 bg-card text-left shadow-sm hover:border-primary/40 transition-colors"
               >
@@ -324,7 +325,7 @@ export default function ClientHome() {
                   <p className="text-[13px] font-semibold text-foreground leading-tight">Indique</p>
                   <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">Ganhe créditos</p>
                 </div>
-              </button>
+              </button>}
             </motion.div>
 
             {/* Modo demo (apenas admin) */}

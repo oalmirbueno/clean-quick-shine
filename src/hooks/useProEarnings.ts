@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { parseLocalDate } from "@/lib/utils";
+import { ganhoDiarista, saldoLiberado } from "@/lib/ganhoDiarista";
 import { useAuth } from "@/contexts/AuthContext";
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, format, subWeeks, eachDayOfInterval, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-// Commission rate: pro receives 80% of total price
-const PRO_COMMISSION_RATE = 0.8;
 
 export interface EarningsSummary {
   availableBalance: number;
@@ -57,6 +55,7 @@ export function useProEarnings() {
         .select(`
           id,
           total_price,
+          discount,
           status,
           completed_at,
           scheduled_date,
@@ -90,32 +89,29 @@ export function useProEarnings() {
         };
       }
 
-      // Calculate earnings (pro receives 80% of total)
-      const calculateProEarning = (totalPrice: number) => Number(totalPrice) * PRO_COMMISSION_RATE;
-
-      // Calculate available balance (rated orders not yet paid out)
+      // Saldo livre: avaliado ou concluído há 48 h
       const availableBalance = orders
-        .filter(o => o.status === "rated" || o.status === "completed")
-        .reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
+        .filter(o => saldoLiberado(o))
+        .reduce((sum, o) => sum + ganhoDiarista(o), 0);
 
-      // Calculate pending balance (completed but not yet rated)
+      // Saldo a liberar: concluído há menos de 48 h e sem avaliação
       const pendingBalance = orders
-        .filter(o => o.status === "completed")
-        .reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
+        .filter(o => o.status === "completed" && !saldoLiberado(o))
+        .reduce((sum, o) => sum + ganhoDiarista(o), 0);
 
       // Calculate this week's total
       const thisWeekOrders = orders.filter(o => {
         const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
         return completedDate >= weekStart && completedDate <= weekEnd;
       });
-      const weekTotal = thisWeekOrders.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
+      const weekTotal = thisWeekOrders.reduce((sum, o) => sum + ganhoDiarista(o), 0);
 
       // Calculate last week's total for comparison
       const lastWeekOrders = orders.filter(o => {
         const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
         return completedDate >= lastWeekStart && completedDate <= lastWeekEnd;
       });
-      const lastWeekTotal = lastWeekOrders.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
+      const lastWeekTotal = lastWeekOrders.reduce((sum, o) => sum + ganhoDiarista(o), 0);
       const weekChange = lastWeekTotal > 0 ? ((weekTotal - lastWeekTotal) / lastWeekTotal) * 100 : 0;
 
       // Calculate this month's total
@@ -123,7 +119,7 @@ export function useProEarnings() {
         const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
         return completedDate >= monthStart && completedDate <= monthEnd;
       });
-      const monthTotal = thisMonthOrders.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
+      const monthTotal = thisMonthOrders.reduce((sum, o) => sum + ganhoDiarista(o), 0);
 
       // Build weekly chart data
       const daysOfWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
@@ -132,7 +128,7 @@ export function useProEarnings() {
           const completedDate = o.completed_at ? new Date(o.completed_at) : parseLocalDate(o.scheduled_date);
           return isSameDay(completedDate, date);
         });
-        const dayTotal = dayOrders.reduce((sum, o) => sum + calculateProEarning(o.total_price), 0);
+        const dayTotal = dayOrders.reduce((sum, o) => sum + ganhoDiarista(o), 0);
 
         return {
           day: format(date, "EEE", { locale: ptBR }).replace(".", "").charAt(0).toUpperCase() + 
@@ -149,13 +145,13 @@ export function useProEarnings() {
         
         let status: "completed" | "pending" | "paid_out" = "completed";
         if (o.status === "paid_out") status = "paid_out";
-        else if (o.status === "completed") status = "pending";
+        else if (!saldoLiberado(o)) status = "pending";
 
         return {
           id: o.id,
           date: format(completedDate, "dd/MM", { locale: ptBR }),
           service: serviceName,
-          value: calculateProEarning(o.total_price),
+          value: ganhoDiarista(o),
           status,
           orderId: o.id,
         };

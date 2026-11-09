@@ -79,7 +79,7 @@ serve(async (req) => {
     if (order.pro_id && (order.status === "rated" || order.status === "completed")) {
       // Check if pro has enough balance to cover this order's portion (i.e., not yet withdrawn)
       const { data: balance } = await supabaseAdmin.rpc("calculate_pro_available_balance", { p_user_id: order.pro_id });
-      const proPortion = Number(order.total_price) * 0.8;
+      const proPortion = (Number(order.total_price) + Number(order.discount || 0)) * 0.8;
       if (Number(balance ?? 0) < proPortion) {
         return new Response(JSON.stringify({
           error: `Saldo da diarista (R$ ${Number(balance ?? 0).toFixed(2)}) é insuficiente para cobrir o repasse deste pedido (R$ ${proPortion.toFixed(2)}). Verifique se já houve saque.`,

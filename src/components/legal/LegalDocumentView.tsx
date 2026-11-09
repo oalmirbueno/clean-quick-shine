@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import type { LegalDocument } from "@/lib/legalContent";
+import { identificacaoEmpresa } from "@/lib/empresa";
 
 interface Props {
   document: LegalDocument;
@@ -19,7 +20,7 @@ export function LegalDocumentView({ document }: Props) {
           {document.title}
         </h2>
         <p className="text-xs text-muted-foreground/80">
-          JÁLIMPO Tecnologia e Intermediação de Serviços LTDA
+          {identificacaoEmpresa()}
         </p>
       </header>
 

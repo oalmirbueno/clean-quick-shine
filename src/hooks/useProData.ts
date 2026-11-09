@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ganhoDiarista } from "@/lib/ganhoDiarista";
 import { parseLocalDate } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
@@ -37,7 +38,7 @@ export function useCurrentProData() {
         supabase.from("pro_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("pro_metrics").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("pro_subscriptions").select("*, plan:pro_plans(*)").eq("user_id", user.id).eq("status", "active").maybeSingle(),
-        supabase.from("orders").select("total_price").eq("pro_id", user.id).in("status", ["completed", "rated"]),
+        supabase.from("orders").select("total_price, discount").eq("pro_id", user.id).in("status", ["completed", "rated"]),
       ]);
 
       const profile = profileRes.data;
@@ -48,7 +49,7 @@ export function useCurrentProData() {
 
       // Pro typically gets ~80% of order value (simplified calculation)
       const balance = completedOrders?.reduce((sum, order) => {
-        return sum + (Number(order.total_price) * 0.8);
+        return sum + ganhoDiarista(order);
       }, 0) || 0;
 
       return {
@@ -92,7 +93,7 @@ export function useAssignedOrders() {
       const { data: orders, error } = await supabase
         .from("orders")
         .select(`
-          id, total_price, status, scheduled_date, scheduled_time,
+          id, total_price, discount, status, scheduled_date, scheduled_time,
           client_id,
           services:service_id (name),
           addresses:address_id (city, neighborhood, street, number, lat, lng)
@@ -135,7 +136,7 @@ export function useAssignedOrders() {
           time: order.scheduled_time.slice(0, 5),
           status: order.status || "confirmed",
           totalPrice: Number(order.total_price),
-          proEarning: Number(order.total_price) * 0.8,
+          proEarning: ganhoDiarista(order),
           scheduledDate: order.scheduled_date,
           scheduledTime: order.scheduled_time,
           address: {
@@ -203,6 +204,7 @@ export function useAvailableOrdersForPro() {
         scheduled_time: string;
         duration_hours: number;
         total_price: number;
+        discount?: number | null;
         status: string;
         city: string | null;
         neighborhood: string | null;
@@ -272,7 +274,7 @@ export function useAvailableOrdersForPro() {
         }
 
         // Pro earns ~80% of total price
-        const proEarning = Number(order.total_price) * 0.8;
+        const proEarning = ganhoDiarista(order);
 
         // Check if this service requires a paid pro plan
         const isProOnly = !!(service as any)?.requires_pro_plan;

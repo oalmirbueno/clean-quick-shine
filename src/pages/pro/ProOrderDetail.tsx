@@ -11,6 +11,7 @@ import { useUpdateOrderStatus } from "@/hooks/useUpdateOrderStatus";
 import { useProLocationTracking } from "@/hooks/useProLocationTracking";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { ganhoDiarista } from "@/lib/ganhoDiarista";
 
 export default function ProOrderDetail() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function ProOrderDetail() {
     userId: user?.id,
     orderId: order?.id,
   });
-  const proEarning = Number(order?.total_price || 0) * 0.8;
+  const proEarning = ganhoDiarista(order);
 
   const handleUpdateStatus = async (newStatus: "en_route" | "in_progress" | "completed") => {
     if (!order?.id) return;

@@ -70,6 +70,22 @@ export default function ClientMatching() {
     return () => clearInterval(rotate);
   }, [status]);
 
+  const registrarSemDiarista = async (motivo: string, cidade?: string | null, uf?: string | null) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("pedidos_sem_diarista" as never).insert({
+        user_id: user.id,
+        address_id: state!.addressId,
+        city: cidade ?? null,
+        state: uf ?? null,
+        motivo,
+      } as never);
+    } catch (e) {
+      console.warn("[matching] registro sem diarista:", e);
+    }
+  };
+
   const searchPro = async () => {
     try {
       const { data: address, error: addrErr } = await supabase
@@ -86,6 +102,7 @@ export default function ClientMatching() {
       }
 
       if (address.lat == null || address.lng == null) {
+        void registrarSemDiarista("endereco_sem_coordenada", address.city, address.state);
         setReason(
           "Seu endereço não tem coordenadas. Edite-o e selecione no mapa.",
         );
@@ -120,6 +137,7 @@ export default function ClientMatching() {
       const candidates = (pros as any[]) || [];
 
       if (candidates.length === 0) {
+        void registrarSemDiarista("sem_diarista_no_raio", address.city, address.state);
         setReason(
           `Nenhuma profissional disponível em ${address.city}/${address.state} no momento.`,
         );

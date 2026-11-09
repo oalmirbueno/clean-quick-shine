@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, MapPin, Clock, Loader2, Radio, Search, X } f
 import { cn } from "@/lib/utils";
 import { parseLocalDate } from "@/lib/utils";
 import { useFlatProOrders } from "@/hooks/useOrders";
+import { ganhoDiarista } from "@/lib/ganhoDiarista";
 import { useProOrdersRealtime } from "@/hooks/useOrderRealtime";
 import { useAuth } from "@/contexts/AuthContext";
 import { subDays, isAfter, startOfDay } from "date-fns";
@@ -288,7 +289,7 @@ export default function ProAgenda() {
             ) : (
               <div className="space-y-2">
                 {ordersForDay.map((order) => {
-                  const proEarning = Number(order.total_price) * 0.8;
+                  const proEarning = ganhoDiarista(order);
                   return (
                     <motion.button
                       key={order.id}

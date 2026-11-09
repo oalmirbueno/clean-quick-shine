@@ -44,6 +44,7 @@ export default function Register() {
   const [phoneDisplay, setPhoneDisplay] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [comoConheceu, setComoConheceu] = useState("");
   const [city, setCity] = useState("");
   const [radius, setRadius] = useState("10");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -122,6 +123,13 @@ export default function Register() {
             : error.message
         );
         return;
+      }
+
+      if (comoConheceu) {
+        const { data: { user: novoUsuario } } = await supabase.auth.getUser();
+        if (novoUsuario) {
+          await supabase.from("profiles").update({ como_conheceu: comoConheceu } as never).eq("user_id", novoUsuario.id);
+        }
       }
 
       if (userType === "pro") {
@@ -250,6 +258,27 @@ export default function Register() {
               <PasswordStrengthMeter password={password} />
             </div>
 
+            <div className="space-y-1.5">
+              <label htmlFor="como-conheceu" className="block text-sm font-medium text-foreground">
+                Como conheceu o Já Limpo? (opcional)
+              </label>
+              <select
+                id="como-conheceu"
+                value={comoConheceu}
+                onChange={(e) => setComoConheceu(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-border/50 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              >
+                <option value="">Selecione</option>
+                <option value="instagram">Instagram</option>
+                <option value="facebook">Facebook</option>
+                <option value="google">Google</option>
+                <option value="indicacao">Indicação de alguém</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="parceiro">Cartaz ou parceiro</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+
             <label className="flex items-start gap-3 pt-1 cursor-pointer select-none">
               <button
                 type="button"
@@ -304,7 +333,7 @@ export default function Register() {
           >
             <InputField
               label="Cidade"
-              placeholder="São Paulo"
+              placeholder="Brusque"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               required

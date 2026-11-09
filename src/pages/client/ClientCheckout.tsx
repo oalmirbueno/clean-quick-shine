@@ -1,3 +1,4 @@
+import { CARTAO_ATIVO } from "@/lib/empresa";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { PageTransition } from "@/components/ui/PageTransition";
@@ -160,7 +161,7 @@ function PaymentStep({
     { id: "PIX" as PaymentMethod, icon: QrCode, label: "Pix", desc: "Aprovação instantânea" },
     { id: "CREDIT_CARD" as PaymentMethod, icon: CreditCard, label: "Cartão de Crédito", desc: "Aprovação imediata" },
     { id: "BOLETO" as PaymentMethod, icon: FileText, label: "Boleto", desc: "Até 2 dias úteis" },
-  ];
+  ].filter((m) => m.id !== "CREDIT_CARD" || CARTAO_ATIVO);
 
   return (
     <div className="flex flex-col gap-6 p-6">

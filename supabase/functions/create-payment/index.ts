@@ -46,6 +46,11 @@ serve(async (req) => {
       return json({ error: "orderId e billingType são obrigatórios" }, 400);
     }
 
+    // Cartão fica desligado até os dados não passarem mais por este servidor.
+    if (billingType === "CREDIT_CARD") {
+      return json({ error: "Pagamento com cartão indisponível no momento. Use Pix ou boleto." }, 400);
+    }
+
     const ASAAS_API_KEY = Deno.env.get("ASAAS_API_KEY");
     const ASAAS_ENV = Deno.env.get("ASAAS_ENVIRONMENT");
     if (!ASAAS_API_KEY) return json({ error: "ASAAS_API_KEY não configurada" }, 500);
