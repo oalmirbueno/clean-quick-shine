@@ -10,7 +10,7 @@ export const EMPRESA = {
   cidade: "Brusque/SC",
   emailSuporte: "suporte@jalimpo.com",
   /** WhatsApp do suporte só com DDI+DDD, ex.: "5547999999999". Vazio esconde o botão. */
-  whatsappSuporte: "",
+  whatsappSuporte: "554791163677",
   site: "https://jalimpo.com",
 } as const;
 
