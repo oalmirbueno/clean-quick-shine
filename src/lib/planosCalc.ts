@@ -1,7 +1,7 @@
 // Contas da calculadora de planos (Admin → Calculadora de planos).
 // Preços e comissões decididos na reunião de 14/11/2026; clube da cliente,
 // fidelidade e indicação ainda são proposta. O plano PREMIUM foi aprovado
-// pelo Almir em 14/11, depois da reunião.
+// pelo Almir e pela Marli em 14/11, depois da reunião.
 // Taxas do Asaas: asaas.com/precos-e-taxas (lidas em 14/11/2026).
 
 export interface PlanoDiarista {
@@ -17,7 +17,7 @@ export interface ConfigCalc {
   precoMeio: number;
   precoEmergencia: number;
   planos: PlanoDiarista[];
-  /** PREMIUM: custo do uniforme + kit a cada 3 meses, por diarista. */
+  /** PREMIUM: custo do kit entregue a cada 3 meses, por diarista. */
   custoKitTrimestre: number;
   clubeCasa: number;
   clubeEmpresa: number;
@@ -41,7 +41,7 @@ export const CONFIG_PADRAO: ConfigCalc = {
     { id: "livre", nome: "Sem plano", mensalidade: 0, comissao: 20 },
     { id: "pro", nome: "PRO", mensalidade: 49.9, comissao: 15 },
     { id: "elite", nome: "ELITE", mensalidade: 99.9, comissao: 10 },
-    { id: "premium", nome: "PREMIUM", mensalidade: 149.9, comissao: 10, extras: "Uniforme, crachá e kit de produtos a cada 3 meses" },
+    { id: "premium", nome: "PREMIUM", mensalidade: 149.9, comissao: 10, extras: "Uniforme e crachá na entrada. Kit de produtos a cada 3 meses" },
   ],
   custoKitTrimestre: 0,
   clubeCasa: 19.9,

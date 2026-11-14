@@ -231,7 +231,7 @@ export default function AdminCalculator() {
                 </table>
               </div>
               <p className="text-xs text-muted-foreground mt-3">
-                O PREMIUM tem a mesma comissão do ELITE. A diferença de mensalidade paga o uniforme, o crachá e o kit.
+                O PREMIUM tem a mesma comissão do ELITE. A diferença de mensalidade paga o uniforme e o crachá (entregues uma vez) e o kit a cada 3 meses.
               </p>
             </Bloco>
           </>
@@ -304,7 +304,7 @@ export default function AdminCalculator() {
                     <Linha rotulo="Mensalidades das diaristas" valor={brl(res.mensalidadesDiaristas)} />
                     <Linha rotulo="Mensalidades das clientes" valor={brl(res.mensalidadesClientes)} />
                     <Linha rotulo="Descontos (clube, fidelidade, indicação)" valor={`− ${brl(res.descontoClube + res.descontoFidelidade + res.descontoIndicacao)}`} />
-                    <Linha rotulo="Uniforme e kit do PREMIUM" valor={`− ${brl(res.kits)}`} />
+                    <Linha rotulo="Kits do PREMIUM" valor={`− ${brl(res.kits)}`} />
                     <Linha rotulo="Taxas do Asaas" valor={`− ${brl(res.taxasPedidos + res.taxasMensalidades)}`} />
                     <Linha rotulo="Repasse Pix às diaristas" valor={`− ${brl(res.repasse)}`} />
                     <Linha rotulo="Imposto informado" valor={`− ${brl(res.imposto)}`} />
@@ -382,7 +382,7 @@ export default function AdminCalculator() {
                   ))}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
-                  <Ajuste rotulo="PREMIUM: custo do uniforme + kit a cada 3 meses (R$)" valor={config.custoKitTrimestre} onChange={(v) => mudar({ custoKitTrimestre: v })} />
+                  <Ajuste rotulo="PREMIUM: custo do kit a cada 3 meses (R$)" valor={config.custoKitTrimestre} onChange={(v) => mudar({ custoKitTrimestre: v })} />
                 </div>
               </div>
               <div>
