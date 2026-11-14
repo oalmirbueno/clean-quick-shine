@@ -28,7 +28,7 @@ export default function ClientLocation() {
   const setDefaultAddress = useSetDefaultAddress();
   const { reverseGeocode, forwardGeocode } = useGeocode();
 
-  const [mapCenter, setMapCenter] = useState({ lat: -25.4284, lng: -49.2733 });
+  const [mapCenter, setMapCenter] = useState({ lat: -27.0977, lng: -48.9107 });
   const [markerPos, setMarkerPos] = useState<{ lat: number; lng: number } | null>(null);
   const [customLabel, setCustomLabel] = useState("");
   const [formData, setFormData] = useState({
@@ -114,13 +114,13 @@ export default function ClientLocation() {
 
       const result = await createAddress.mutateAsync({
         label,
-        street: formData.street,
-        number: formData.number,
+        street: formData.street.trim(),
+        number: formData.number.trim(),
         complement: formData.complement,
-        neighborhood: formData.neighborhood,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zip_code,
+        neighborhood: formData.neighborhood.trim(),
+        city: formData.city.trim(),
+        state: formData.state.trim(),
+        zip_code: formData.zip_code.trim(),
         lat,
         lng,
       });

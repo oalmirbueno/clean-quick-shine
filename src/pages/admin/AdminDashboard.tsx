@@ -509,7 +509,7 @@ export default function AdminDashboard() {
             Ver todos
           </button>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-auto max-h-[420px] overscroll-contain">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
@@ -552,7 +552,7 @@ export default function AdminDashboard() {
         <div className="p-4 border-b border-border">
           <h3 className="font-semibold text-foreground">Pagamentos recentes</h3>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-auto max-h-[420px] overscroll-contain">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">

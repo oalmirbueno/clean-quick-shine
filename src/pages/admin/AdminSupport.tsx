@@ -36,7 +36,7 @@ export default function AdminSupport() {
   ];
 
   return (
-    <AdminLayout>
+    <AdminLayout fixo>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Suporte</h1>
         <p className="text-muted-foreground">Central de tickets e mediação</p>
@@ -54,6 +54,7 @@ export default function AdminSupport() {
         ))}
       </div>
 
+      <div className="admin-rolagem">
       {filteredTickets.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">Nenhum ticket encontrado</div>
       ) : (
@@ -74,6 +75,7 @@ export default function AdminSupport() {
           ))}
         </div>
       )}
+      </div>
     </AdminLayout>
   );
 }

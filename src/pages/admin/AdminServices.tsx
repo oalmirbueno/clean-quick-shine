@@ -54,6 +54,9 @@ export default function AdminServices() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      if (form.active && !(Number(form.base_price) > 0)) {
+        throw new Error("Defina o preço antes de ativar o serviço");
+      }
       const payload = {
         name: form.name,
         description: form.description || null,
@@ -109,6 +112,10 @@ export default function AdminServices() {
   };
 
   const toggleActive = async (s: ServiceRow) => {
+    if (!s.active && !(Number(s.base_price) > 0)) {
+      toast.error("Defina o preço antes de ativar o serviço");
+      return;
+    }
     const { error } = await supabase.from("services").update({ active: !s.active }).eq("id", s.id);
     if (error) {
       toast.error("Erro ao alterar status");

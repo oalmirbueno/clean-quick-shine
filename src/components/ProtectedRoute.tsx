@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthLoading } from "@/components/ui/AuthLoading";
 import { AdminBackBanner } from "@/components/ui/AdminBackBanner";
+import { useGrupo } from "@/hooks/useGrupo";
 import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
@@ -21,6 +22,7 @@ export function ProtectedRoute({
   const { user, loading, hasRole, rolesLoaded, roles } = useAuth();
   const location = useLocation();
   const [timedOut, setTimedOut] = useState(false);
+  const grupo = useGrupo();
 
   // Timeout de segurança para evitar loading infinito
   useEffect(() => {
@@ -62,6 +64,13 @@ export function ProtectedRoute({
   // Admins can access any role's routes
   if (requiredRole && !hasRole(requiredRole) && !hasRole("admin")) {
     return <Navigate to="/access-denied" state={{ roles }} replace />;
+  }
+
+  // Grupo de WhatsApp obrigatório (cliente e diarista) antes de usar o app.
+  // Se a consulta falhar, não trava ninguém.
+  if (requiredRole !== "admin" && !hasRole("admin")) {
+    if (grupo.isLoading) return <AuthLoading message="Verificando acesso..." />;
+    if (grupo.data?.obrigatorio) return <Navigate to="/grupo" replace />;
   }
 
   const showAdminBanner = hasRole("admin") && requiredRole && requiredRole !== "admin";

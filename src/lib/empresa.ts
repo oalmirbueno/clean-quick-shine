@@ -14,8 +14,6 @@ export const EMPRESA = {
   site: "https://jalimpo.com",
 } as const;
 
-/** Ligar depois que o cartão não passar mais pelo nosso servidor. */
-export const CARTAO_ATIVO = false;
 /** Ligar quando o código de indicação for gerado e o valor do bônus decidido. */
 export const INDICACAO_ATIVA = false;
 

@@ -164,7 +164,7 @@ export default function AdminUsers() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout fixo>
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Usuários</h1>
@@ -222,6 +222,7 @@ export default function AdminUsers() {
       </div>
 
       {/* List */}
+      <div className="admin-rolagem">
       {isLoading ? (
         <div className="p-8 text-center text-muted-foreground bg-card rounded-2xl border border-border/60">
           <Loader2 className="w-5 h-5 animate-spin mx-auto" />
@@ -319,6 +320,7 @@ export default function AdminUsers() {
           })}
         </div>
       )}
+      </div>
 
       {/* Password Dialog */}
       <Dialog open={!!pwdTarget} onOpenChange={(o) => { if (!o) { setPwdTarget(null); setPwdValue(""); } }}>

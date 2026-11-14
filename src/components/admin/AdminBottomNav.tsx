@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { useAuth } from "@/contexts/AuthContext";
-import { Eye, FileCheck, Tag, Wrench, Building2, HeadphonesIcon, BarChart3, Shield, ShieldCheck, Settings, LogOut, X, Bell, Map } from "lucide-react";
+import { Eye, FileCheck, Tag, Wrench, Building2, HeadphonesIcon, BarChart3, Shield, ShieldCheck, Settings, LogOut, X, Bell, Map, MessageCircle, CreditCard, Target, Calculator } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const primary = [
@@ -17,6 +17,10 @@ const primary = [
 
 const moreItems = [
   { icon: Map, label: "Mapa da operação", path: "/admin/map" },
+  { icon: MessageCircle, label: "Grupos WhatsApp", path: "/admin/groups" },
+  { icon: Target, label: "Metas", path: "/admin/goals" },
+  { icon: CreditCard, label: "Planos", path: "/admin/plans" },
+  { icon: Calculator, label: "Calculadora de planos", path: "/admin/calculator" },
   { icon: ShieldCheck, label: "Verificações", path: "/admin/verifications" },
   { icon: FileCheck, label: "Documentos", path: "/admin/documents" },
   { icon: Tag, label: "Cupons", path: "/admin/coupons" },
@@ -76,7 +80,7 @@ export function AdminBottomNav() {
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div
-            className="absolute bottom-0 left-0 right-0 liquid-glass liquid-glass-sheet p-5 animate-slide-in-from-bottom"
+            className="absolute bottom-0 left-0 right-0 max-h-[88%] overflow-y-auto overscroll-contain liquid-glass liquid-glass-sheet p-5 animate-slide-in-from-bottom"
             style={{ paddingBottom: "calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 1rem)" }}
           >
             <div className="flex items-center justify-between mb-4">

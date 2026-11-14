@@ -88,7 +88,7 @@ export default function AdminPros() {
   ];
 
   return (
-    <AdminLayout>
+    <AdminLayout fixo>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Diaristas</h1>
         <p className="text-muted-foreground">Gerenciar profissionais cadastradas</p>
@@ -122,7 +122,7 @@ export default function AdminPros() {
           Carregando diaristas...
         </div>
       ) : (
-        <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
+        <div className="admin-rolagem bg-card rounded-xl border border-border card-shadow">
           <AdminTable
             columns={columns}
             data={filteredPros}

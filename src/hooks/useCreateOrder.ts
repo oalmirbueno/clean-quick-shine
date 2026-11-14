@@ -109,6 +109,31 @@ export function useCreateOrder() {
       const subtotal = (basePrice + zoneFee) * surgeMultiplier;
       const totalPrice = Math.max(0, subtotal - discount);
 
+      const pricing = {
+        basePrice,
+        durationHours: Number(service.duration_hours),
+        zoneFee,
+        surgeMultiplier,
+        discount,
+        totalPrice,
+      };
+
+      // Mesmo pedido ainda não pago (toque repetido ou voltou e tentou de novo):
+      // reaproveita o rascunho em vez de criar outro igual.
+      let igual = supabase
+        .from("orders")
+        .select("id")
+        .eq("client_id", user.id)
+        .eq("status", "draft")
+        .eq("service_id", input.serviceId)
+        .eq("address_id", input.addressId)
+        .eq("scheduled_date", input.scheduledDate)
+        .eq("scheduled_time", input.scheduledTime)
+        .eq("total_price", totalPrice);
+      igual = input.proId ? igual.eq("pro_id", input.proId) : igual.is("pro_id", null);
+      const { data: rascunho } = await igual.order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (rascunho) return { orderId: rascunho.id, pricing };
+
       // 6. Create order
       const { data: order, error: orderError } = await supabase
         .from("orders")
@@ -160,17 +185,7 @@ export function useCreateOrder() {
         }
       }
 
-      return {
-        orderId: order.id,
-        pricing: {
-          basePrice,
-          durationHours: Number(service.duration_hours),
-          zoneFee,
-          surgeMultiplier,
-          discount,
-          totalPrice,
-        },
-      };
+      return { orderId: order.id, pricing };
     },
     onSuccess: () => {
       toast.success("Pedido criado com sucesso!");

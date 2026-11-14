@@ -59,7 +59,7 @@ PARA QUEM QUER A CASA LIMPA
 • Agende em menos de 1 minuto: escolha o tipo de limpeza, a data e o horário que cabem na sua rotina.
 • Profissionais verificadas: cada diarista passa por análise de documentos antes de atender.
 • Preço fechado antes de confirmar: sem surpresa na porta, sem negociação.
-• Pagamento protegido no app: Pix, cartão ou boleto. A diarista só recebe depois que o serviço é feito.
+• Pagamento protegido no app: Pix ou cartão. A diarista só recebe depois que o serviço é feito.
 • Acompanhe em tempo real: veja quando a profissional está a caminho e quando chegou.
 • Chat com a diarista dentro do pedido, sem precisar passar seu número.
 • Avalie cada atendimento e ajude a manter a qualidade da plataforma.

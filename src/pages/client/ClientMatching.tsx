@@ -1,3 +1,5 @@
+import { EMPRESA } from "@/lib/empresa";
+import { useGeocode } from "@/hooks/useGeocode";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,6 +42,7 @@ export default function ClientMatching() {
   const [status, setStatus] = useState<"searching" | "found" | "not_found">(
     "searching",
   );
+  const { forwardGeocode } = useGeocode();
   const [foundPro, setFoundPro] = useState<FoundPro | null>(null);
   const [progress, setProgress] = useState(0);
   const [reason, setReason] = useState<string>("");
@@ -90,9 +93,27 @@ export default function ClientMatching() {
     try {
       const { data: address, error: addrErr } = await supabase
         .from("addresses")
-        .select("id, lat, lng, zone_id, city, state")
+        .select("id, lat, lng, zone_id, city, state, street, number, zip_code")
         .eq("id", state!.addressId)
         .maybeSingle();
+
+      // Endereço antigo, salvo sem ponto no mapa: tenta localizar agora e
+      // grava (o banco atribui a zona sozinho) antes de desistir.
+      if (address && (address.lat == null || address.lng == null)) {
+        const cidade = (address.city || "").trim();
+        const geo =
+          (await forwardGeocode(`${address.street}, ${address.number}, ${cidade}, ${address.state}`)) ??
+          (await forwardGeocode(`${address.zip_code}, ${cidade}, Brasil`));
+        if (geo) {
+          const { data: corrigido } = await supabase
+            .from("addresses")
+            .update({ lat: geo.lat, lng: geo.lng, city: cidade })
+            .eq("id", address.id)
+            .select("lat, lng, zone_id")
+            .maybeSingle();
+          if (corrigido) Object.assign(address, corrigido);
+        }
+      }
 
       if (addrErr || !address) {
         setReason("Endereço inválido.");
@@ -105,6 +126,33 @@ export default function ClientMatching() {
         void registrarSemDiarista("endereco_sem_coordenada", address.city, address.state);
         setReason(
           "Seu endereço não tem coordenadas. Edite-o e selecione no mapa.",
+        );
+        setProgress(100);
+        setTimeout(() => setStatus("not_found"), 400);
+        return;
+      }
+
+      // Fora das praças ativas (hoje só Brusque): avisa com clareza e guarda o interesse.
+      const { data: pracas } = await supabase
+        .from("zones")
+        .select("center_lat, center_lng, radius_km")
+        .eq("active", true);
+      const dentro = (pracas || []).some((z) => {
+        if (z.center_lat == null || z.center_lng == null) return false;
+        const rad = Math.PI / 180;
+        const dLat = (Number(address.lat) - Number(z.center_lat)) * rad;
+        const dLng = (Number(address.lng) - Number(z.center_lng)) * rad;
+        const h =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(Number(z.center_lat) * rad) * Math.cos(Number(address.lat) * rad) * Math.sin(dLng / 2) ** 2;
+        const km = 6371 * 2 * Math.asin(Math.sqrt(h));
+        return km <= Number(z.radius_km || 15) + 5; // 5 km de folga na borda
+      });
+      if (pracas && pracas.length > 0 && !dentro) {
+        const cidade = (address.city || "").trim();
+        void registrarSemDiarista("fora_da_area", cidade, address.state);
+        setReason(
+          `Por enquanto o Já Limpo atende só em ${EMPRESA.cidade}. Guardamos o seu interesse em ${cidade}/${address.state} e avisaremos quando chegarmos aí.`,
         );
         setProgress(100);
         setTimeout(() => setStatus("not_found"), 400);
@@ -138,8 +186,12 @@ export default function ClientMatching() {
 
       if (candidates.length === 0) {
         void registrarSemDiarista("sem_diarista_no_raio", address.city, address.state);
+        const cidade = (address.city || "").trim();
+        const naPraca = cidade.toLowerCase() === EMPRESA.cidade.split("/")[0].toLowerCase();
         setReason(
-          `Nenhuma profissional disponível em ${address.city}/${address.state} no momento.`,
+          naPraca
+            ? `Nenhuma profissional disponível em ${cidade}/${address.state} no momento. Tente outro dia ou horário.`
+            : `Por enquanto o Já Limpo atende só em ${EMPRESA.cidade}. Guardamos o seu interesse em ${cidade}/${address.state} e avisaremos quando chegarmos aí.`,
         );
         setProgress(100);
         setTimeout(() => setStatus("not_found"), 400);

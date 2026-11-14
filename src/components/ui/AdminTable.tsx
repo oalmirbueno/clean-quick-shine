@@ -72,7 +72,7 @@ export function AdminTable<T extends Record<string, any>>({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={cn("px-4 py-3 text-left text-sm font-medium text-muted-foreground", col.className)}
+                  className={cn("sticky top-0 z-10 bg-card px-4 py-3 text-left text-sm font-medium text-muted-foreground", col.className)}
                 >
                   {col.header}
                 </th>

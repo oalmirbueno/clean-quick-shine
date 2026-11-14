@@ -487,3 +487,34 @@ html.app-standalone .app-scroll-container,
     user-select: auto;
   }
 }
+
+/* Admin: no computador cada lista rola dentro da própria área */
+@media (min-width: 1024px) {
+  .app-scroll-container.admin-fixo,
+  html.app-standalone .app-scroll-container.admin-fixo {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0 !important;
+  }
+  .admin-fixo-conteudo {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .admin-fixo-conteudo > * {
+    flex-shrink: 0;
+  }
+  .admin-fixo-conteudo > .admin-rolagem {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+  /* a tabela rola junto com a área, para o cabeçalho ficar parado no topo */
+  .admin-fixo-conteudo > .admin-rolagem > .overflow-x-auto {
+    overflow: visible;
+  }
+}

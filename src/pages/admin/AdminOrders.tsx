@@ -125,7 +125,7 @@ export default function AdminOrders() {
   ];
 
   return (
-    <AdminLayout>
+    <AdminLayout fixo>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
         <p className="text-muted-foreground">Gerenciar todos os pedidos</p>
@@ -202,7 +202,7 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
+      <div className="admin-rolagem bg-card rounded-xl border border-border card-shadow">
         <AdminTable
           columns={columns}
           data={filteredOrders}

@@ -24,28 +24,63 @@ import {
   Activity,
   UserCog,
   ShieldCheck,
+  Map,
+  CreditCard,
+  MessageCircle,
+  Target,
+  Calculator,
 } from "lucide-react";
 import { useState } from "react";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
-  { icon: ClipboardList, label: "Pedidos", path: "/admin/orders" },
-  { icon: UserCheck, label: "Diaristas", path: "/admin/pros" },
-  { icon: ShieldCheck, label: "Verificações", path: "/admin/verifications" },
-  { icon: FileCheck, label: "Documentos", path: "/admin/documents" },
-  { icon: Users, label: "Clientes", path: "/admin/clients" },
-  { icon: UserCog, label: "Usuários", path: "/admin/users" },
-  { icon: Tag, label: "Cupons", path: "/admin/coupons" },
-  { icon: ArrowDownToLine, label: "Saques", path: "/admin/withdrawals" },
-  { icon: Wrench, label: "Serviços", path: "/admin/services" },
-  { icon: Building2, label: "Orçamentos", path: "/admin/quotes" },
-  { icon: HeadphonesIcon, label: "Suporte", path: "/admin/support" },
-  { icon: Bell, label: "Notificações", path: "/admin/notifications" },
-  { icon: Activity, label: "Logs de envio", path: "/admin/notification-logs" },
-  { icon: Shield, label: "Auditoria", path: "/admin/audit" },
-  { icon: BarChart3, label: "Analytics", path: "/admin/analytics" },
-  { icon: Shield, label: "Risco", path: "/admin/risk" },
-  { icon: Settings, label: "Configurações", path: "/admin/settings" },
+const menuGroups = [
+  {
+    title: "Operação",
+    items: [
+      { icon: LayoutDashboard, label: "Início", path: "/admin/dashboard" },
+      { icon: ClipboardList, label: "Pedidos", path: "/admin/orders" },
+      { icon: Map, label: "Mapa", path: "/admin/map" },
+      { icon: HeadphonesIcon, label: "Suporte", path: "/admin/support" },
+    ],
+  },
+  {
+    title: "Pessoas",
+    items: [
+      { icon: UserCheck, label: "Diaristas", path: "/admin/pros" },
+      { icon: Users, label: "Clientes", path: "/admin/clients" },
+      { icon: ShieldCheck, label: "Verificações", path: "/admin/verifications" },
+      { icon: FileCheck, label: "Documentos", path: "/admin/documents" },
+      { icon: UserCog, label: "Usuários", path: "/admin/users" },
+    ],
+  },
+  {
+    title: "Dinheiro",
+    items: [
+      { icon: ArrowDownToLine, label: "Saques", path: "/admin/withdrawals" },
+      { icon: Target, label: "Metas", path: "/admin/goals" },
+      { icon: CreditCard, label: "Planos", path: "/admin/plans" },
+      { icon: Calculator, label: "Calculadora de planos", path: "/admin/calculator" },
+      { icon: Tag, label: "Cupons", path: "/admin/coupons" },
+      { icon: Wrench, label: "Serviços e preços", path: "/admin/services" },
+      { icon: Building2, label: "Orçamentos", path: "/admin/quotes" },
+    ],
+  },
+  {
+    title: "Comunicação",
+    items: [
+      { icon: MessageCircle, label: "Grupos WhatsApp", path: "/admin/groups" },
+      { icon: Bell, label: "Notificações", path: "/admin/notifications" },
+      { icon: Activity, label: "Logs de envio", path: "/admin/notification-logs" },
+    ],
+  },
+  {
+    title: "Controle",
+    items: [
+      { icon: BarChart3, label: "Analytics", path: "/admin/analytics" },
+      { icon: Shield, label: "Risco", path: "/admin/risk" },
+      { icon: Eye, label: "Auditoria", path: "/admin/audit" },
+      { icon: Settings, label: "Configurações", path: "/admin/settings" },
+    ],
+  },
 ];
 
 export function AdminSidebar() {
@@ -63,26 +98,31 @@ export function AdminSidebar() {
         <Logo size="sm" />
       </div>
 
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {menuItems.map((item) => {
-          const isActive = location.pathname.startsWith(item.path);
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm",
-                isActive 
-                  ? "bg-primary text-primary-foreground font-semibold" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <item.icon className="w-5 h-5 shrink-0" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
+      <nav className="flex-1 min-h-0 p-3 space-y-4 overflow-y-auto overscroll-contain">
+        {menuGroups.map((group) => (
+          <div key={group.title} className="space-y-0.5">
+            <p className="px-3 pb-1 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{group.title}</p>
+            {group.items.map((item) => {
+              const isActive = location.pathname.startsWith(item.path);
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-sm",
+                    isActive
+                      ? "bg-primary text-primary-foreground font-semibold"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <item.icon className="w-[18px] h-[18px] shrink-0" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className="p-3 border-t border-border space-y-1">

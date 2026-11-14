@@ -1,8 +1,8 @@
 {
   "id": "ja-limpo-app",
-  "name": "jálimpo — Limpeza Profissional",
-  "short_name": "jálimpo",
-  "description": "Precisa de limpeza? Baixa o jálimpo.",
+  "name": "Já Limpo: diarista e faxina",
+  "short_name": "Já Limpo",
+  "description": "Precisa de limpeza? Baixe o Já Limpo.",
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",

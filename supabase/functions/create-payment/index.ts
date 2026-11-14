@@ -40,15 +40,16 @@ serve(async (req) => {
       return json({ error: "Não autorizado" }, 401);
     }
 
-    const { orderId, billingType, creditCard, creditCardHolderInfo } = await req.json();
+    const { orderId, billingType } = await req.json();
 
     if (!orderId || !billingType) {
       return json({ error: "orderId e billingType são obrigatórios" }, 400);
     }
 
-    // Cartão fica desligado até os dados não passarem mais por este servidor.
-    if (billingType === "CREDIT_CARD") {
-      return json({ error: "Pagamento com cartão indisponível no momento. Use Pix ou boleto." }, 400);
+    // Só Pix ou cartão (boleto saiu em 14/11/2026). No cartão, os dados são
+    // digitados na página segura do Asaas (invoiceUrl): nunca passam por aqui.
+    if (billingType !== "PIX" && billingType !== "CREDIT_CARD") {
+      return json({ error: "Forma de pagamento indisponível. Use Pix ou cartão." }, 400);
     }
 
     const ASAAS_API_KEY = Deno.env.get("ASAAS_API_KEY");
@@ -104,7 +105,6 @@ serve(async (req) => {
           billingType,
           value: samePending.amount,
           invoiceUrl: samePending.invoice_url || null,
-          bankSlipUrl: samePending.boleto_url || null,
           pixQrCode: samePending.pix_qr_code || null,
           pixCopyPaste: samePending.pix_copy_paste || null,
         },
@@ -154,19 +154,35 @@ serve(async (req) => {
       externalReference: order.id,
     };
 
-    if (billingType === "CREDIT_CARD" && creditCard) {
-      paymentPayload.creditCard = creditCard;
-      paymentPayload.creditCardHolderInfo = creditCardHolderInfo;
-    }
+    const criarCobranca = (payload: Record<string, unknown>) =>
+      fetch(`${baseUrl}/payments`, {
+        method: "POST",
+        headers: {
+          "access_token": ASAAS_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    const paymentRes = await fetch(`${baseUrl}/payments`, {
-      method: "POST",
-      headers: {
-        "access_token": ASAAS_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(paymentPayload),
-    });
+    // No cartão, depois de pagar a pessoa volta sozinha para o pedido.
+    // O Asaas só aceita o retorno se o domínio estiver no cadastro da conta;
+    // se recusar, a cobrança é criada sem o retorno automático.
+    let paymentRes: Response;
+    if (billingType === "CREDIT_CARD") {
+      paymentRes = await criarCobranca({
+        ...paymentPayload,
+        callback: {
+          successUrl: `https://jalimpo.com/client/checkout?orderId=${order.id}`,
+          autoRedirect: true,
+        },
+      });
+      if (!paymentRes.ok) {
+        console.warn("Asaas recusou com callback, tentando sem:", await paymentRes.text());
+        paymentRes = await criarCobranca(paymentPayload);
+      }
+    } else {
+      paymentRes = await criarCobranca(paymentPayload);
+    }
 
     const paymentData = await paymentRes.json();
 
@@ -201,7 +217,6 @@ serve(async (req) => {
         asaas_status: paymentData.status,
         pix_qr_code: pixData?.encodedImage || null,
         pix_copy_paste: pixData?.payload || null,
-        boleto_url: paymentData.bankSlipUrl || null,
         invoice_url: paymentData.invoiceUrl || null,
       });
 
@@ -234,7 +249,6 @@ serve(async (req) => {
         billingType: paymentData.billingType,
         value: paymentData.value,
         invoiceUrl: paymentData.invoiceUrl,
-        bankSlipUrl: paymentData.bankSlipUrl,
         pixQrCode: pixData?.encodedImage || null,
         pixCopyPaste: pixData?.payload || null,
       },

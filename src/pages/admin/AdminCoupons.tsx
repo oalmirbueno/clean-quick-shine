@@ -60,7 +60,7 @@ export default function AdminCoupons() {
   ];
 
   return (
-    <AdminLayout>
+    <AdminLayout fixo>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Cupons</h1>
@@ -68,7 +68,7 @@ export default function AdminCoupons() {
         </div>
         <PrimaryButton onClick={() => setShowCreateModal(true)}><Plus className="w-4 h-4 mr-2" />Novo cupom</PrimaryButton>
       </div>
-      <div className="bg-card rounded-xl border border-border card-shadow overflow-hidden">
+      <div className="admin-rolagem bg-card rounded-xl border border-border card-shadow">
         <AdminTable columns={columns} data={coupons} keyField="id" />
       </div>
 

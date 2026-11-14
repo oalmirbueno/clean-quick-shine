@@ -90,6 +90,12 @@ const CompanyOnboarding = lazy(() => import("./pages/company/CompanyOnboarding")
 const CompanyRequestQuote = lazy(() => import("./pages/company/CompanyRequestQuote"));
 const ComponentShowcase = lazy(() => import("./pages/dev/ComponentShowcase"));
 const ProjectDocumentation = lazy(() => import("./pages/dev/ProjectDocumentation"));
+const EntrarNoGrupo = lazy(() => import("./pages/EntrarNoGrupo"));
+const GrupoPublico = lazy(() => import("./pages/GrupoPublico"));
+const AdminGroups = lazy(() => import("./pages/admin/AdminGroups"));
+const AdminPlans = lazy(() => import("./pages/admin/AdminPlans"));
+const AdminCalculator = lazy(() => import("./pages/admin/AdminCalculator"));
+const AdminGoals = lazy(() => import("./pages/admin/AdminGoals"));
 const Install = lazy(() => import("./pages/Install"));
 const AppSettings = lazy(() => import("./pages/AppSettings"));
 const Offline = lazy(() => import("./pages/Offline"));
@@ -161,6 +167,9 @@ const App = () => {
                 <Route path="/support" element={<Support />} />
                 <Route path="/account-deletion" element={<AccountDeletion />} />
 
+                <Route path="/grupo" element={<EntrarNoGrupo />} />
+                <Route path="/grupo/:tipo" element={<GrupoPublico />} />
+
                 {/* Client Routes */}
                 <Route path="/client/home" element={<ProtectedRoute requiredRole="client"><ClientHome /></ProtectedRoute>} />
                 <Route path="/client/service" element={<ProtectedRoute requiredRole="client"><ClientService /></ProtectedRoute>} />
@@ -231,6 +240,10 @@ const App = () => {
                 <Route path="/admin/notification-logs" element={<ProtectedRoute requiredRole="admin"><AdminNotificationLogs /></ProtectedRoute>} />
                 <Route path="/admin/audit" element={<ProtectedRoute requiredRole="admin"><AdminAuditLog /></ProtectedRoute>} />
                 <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><AdminUsers /></ProtectedRoute>} />
+                <Route path="/admin/groups" element={<ProtectedRoute requiredRole="admin"><AdminGroups /></ProtectedRoute>} />
+                <Route path="/admin/plans" element={<ProtectedRoute requiredRole="admin"><AdminPlans /></ProtectedRoute>} />
+                <Route path="/admin/calculator" element={<ProtectedRoute requiredRole="admin"><AdminCalculator /></ProtectedRoute>} />
+                <Route path="/admin/goals" element={<ProtectedRoute requiredRole="admin"><AdminGoals /></ProtectedRoute>} />
                 <Route path="/admin/map" element={<ProtectedRoute requiredRole="admin"><AdminMap /></ProtectedRoute>} />
 
                 {/* Company Routes */}

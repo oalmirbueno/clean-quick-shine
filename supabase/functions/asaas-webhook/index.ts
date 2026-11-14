@@ -13,6 +13,98 @@ function timingSafeEqual(a: string, b: string): boolean {
   return out === 0;
 }
 
+// deno-lint-ignore no-explicit-any
+async function tratarCobrancaDePlano(db: any, event: string, payment: any): Promise<boolean> {
+  let checkout = null;
+  if (payment.checkoutSession) {
+    const { data } = await db.from("plan_checkouts").select("*")
+      .eq("asaas_checkout_id", payment.checkoutSession).maybeSingle();
+    checkout = data;
+  }
+
+  let table: string | null = null;
+  // deno-lint-ignore no-explicit-any
+  let sub: any = null;
+  if (payment.subscription) {
+    for (const t of ["client_subscriptions", "pro_subscriptions"]) {
+      const { data } = await db.from(t).select("*")
+        .eq("asaas_subscription_id", payment.subscription)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (data) { table = t; sub = data; break; }
+    }
+  }
+  if (!checkout && !sub) return false;
+  if (!table) table = checkout.kind === "pro" ? "pro_subscriptions" : "client_subscriptions";
+  const userId = sub?.user_id ?? checkout.user_id;
+  const agora = new Date();
+
+  if (payment.status === "CONFIRMED" || payment.status === "RECEIVED") {
+    // CONFIRMED e RECEIVED chegam para a mesma cobrança: só a primeira conta.
+    const jaContou = sub?.last_payment_at &&
+      agora.getTime() - new Date(sub.last_payment_at).getTime() < 24 * 3600 * 1000;
+    const renova = new Date(agora);
+    renova.setMonth(renova.getMonth() + 1);
+
+    if (sub) {
+      if (!jaContou || sub.status !== "active") {
+        await db.from(table).update({
+          status: "active",
+          renew_at: renova.toISOString(),
+          last_payment_at: agora.toISOString(),
+          cancelled_at: null,
+        }).eq("id", sub.id);
+      }
+    } else {
+      // Primeiro pagamento: a assinatura nasce aqui. Planos antigos da pessoa saem.
+      await db.from(table)
+        .update({ status: "cancelled", cancelled_at: agora.toISOString() })
+        .eq("user_id", userId).eq("status", "active");
+      const { error } = await db.from(table).insert({
+        user_id: userId,
+        plan_id: checkout.plan_id,
+        status: "active",
+        start_at: agora.toISOString(),
+        renew_at: renova.toISOString(),
+        last_payment_at: agora.toISOString(),
+        asaas_subscription_id: payment.subscription ?? null,
+      });
+      if (error) console.error("Erro ao criar assinatura:", error);
+      await db.from("notifications").insert({
+        user_id: userId,
+        title: "Plano ativado",
+        message: "Recebemos o pagamento e o seu plano Já Limpo já está valendo. A renovação é automática no cartão.",
+        type: "payment",
+        read: false,
+      });
+    }
+    if (checkout && checkout.status !== "paid") {
+      await db.from("plan_checkouts").update({
+        status: "paid",
+        asaas_subscription_id: payment.subscription ?? null,
+        updated_at: agora.toISOString(),
+      }).eq("id", checkout.id);
+    }
+    return true;
+  }
+
+  if (sub && sub.status === "active" && event === "PAYMENT_OVERDUE") {
+    await db.from(table).update({ status: "paused" }).eq("id", sub.id);
+    await db.from("notifications").insert({
+      user_id: userId,
+      title: "Não conseguimos cobrar seu plano",
+      message: "A mensalidade do plano Já Limpo não passou no cartão. O plano fica pausado até o pagamento.",
+      type: "payment",
+      read: false,
+    });
+  }
+  if (sub && sub.status === "active" && payment.status === "REFUNDED") {
+    await db.from(table)
+      .update({ status: "cancelled", cancelled_at: agora.toISOString() })
+      .eq("id", sub.id);
+  }
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -38,6 +130,31 @@ serve(async (req) => {
     console.log("Webhook Asaas recebido:", JSON.stringify(body));
 
     const { event, payment } = body;
+    const ok = (extra: Record<string, unknown>) =>
+      new Response(JSON.stringify({ received: true, ...extra }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+
+    // ── Mensalidade: assinatura encerrada no Asaas ──
+    if (
+      (event === "SUBSCRIPTION_DELETED" || event === "SUBSCRIPTION_INACTIVATED") &&
+      body.subscription?.id
+    ) {
+      for (const table of ["client_subscriptions", "pro_subscriptions"]) {
+        await supabaseAdmin
+          .from(table)
+          .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+          .eq("asaas_subscription_id", body.subscription.id)
+          .eq("status", "active");
+      }
+      return ok({ message: "Subscription closed" });
+    }
+
+    // ── Mensalidade: cobrança de um plano (1ª pelo checkout, as seguintes pela assinatura) ──
+    if (payment?.id && (payment.subscription || payment.checkoutSession)) {
+      const handled = await tratarCobrancaDePlano(supabaseAdmin, event, payment);
+      if (handled) return ok({ message: "Plan payment" });
+    }
 
     if (!payment || !payment.id) {
       return new Response(JSON.stringify({ received: true, message: "No payment data" }), {

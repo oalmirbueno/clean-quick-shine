@@ -93,7 +93,7 @@ export default function AdminClients() {
   ];
 
   return (
-    <AdminLayout>
+    <AdminLayout fixo>
       <div>
         <h1 className="text-xl lg:text-2xl font-bold text-foreground">Clientes</h1>
         <p className="text-sm text-muted-foreground">{clients.length} cadastrados • {clients.filter((c: any) => c.blocked).length} bloqueados</p>
@@ -126,7 +126,7 @@ export default function AdminClients() {
           Carregando…
         </div>
       ) : (
-        <div className="md:bg-card md:rounded-2xl md:border md:border-border/60 md:shadow-sm md:overflow-hidden">
+        <div className="admin-rolagem md:bg-card md:rounded-2xl md:border md:border-border/60 md:shadow-sm">
           <AdminTable
             columns={columns}
             data={filtered}

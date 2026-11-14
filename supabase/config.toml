@@ -57,3 +57,6 @@ verify_jwt = false
 
 [functions.push-dispatch]
 verify_jwt = false
+
+[functions.plan-subscription]
+verify_jwt = false

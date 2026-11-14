@@ -1,4 +1,3 @@
-import { CARTAO_ATIVO } from "@/lib/empresa";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { PageTransition } from "@/components/ui/PageTransition";
@@ -9,14 +8,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOrder } from "@/hooks/useOrders";
 import {
   useCreateAsaasCustomer,
+  cpfValido,
   useCreatePayment,
   usePaymentByOrder,
   useHasAsaasCustomer,
 } from "@/hooks/usePayments";
-import { ArrowLeft, CreditCard, QrCode, FileText, Copy, Check, Loader2, ShieldCheck, Clock } from "lucide-react";
+import { ArrowLeft, CreditCard, QrCode, Copy, Check, Loader2, ShieldCheck, Lock } from "lucide-react";
 import { toast } from "sonner";
 
-type PaymentMethod = "PIX" | "CREDIT_CARD" | "BOLETO";
+type PaymentMethod = "PIX" | "CREDIT_CARD";
 
 // Etapa 1: Cadastro CPF
 function CpfStep({ onComplete }: { onComplete: () => void }) {
@@ -35,8 +35,8 @@ function CpfStep({ onComplete }: { onComplete: () => void }) {
 
   const handleSubmit = async () => {
     const cleanCpf = cpf.replace(/\D/g, "");
-    if (cleanCpf.length !== 11) {
-      toast.error("CPF deve ter 11 dígitos");
+    if (!cpfValido(cleanCpf)) {
+      toast.error("CPF inválido. Confira os números.");
       return;
     }
     if (!name.trim()) {
@@ -44,11 +44,15 @@ function CpfStep({ onComplete }: { onComplete: () => void }) {
       return;
     }
 
-    await createCustomer.mutateAsync({
-      name: name.trim(),
-      email: user?.email || "",
-      cpfCnpj: cleanCpf,
-    });
+    try {
+      await createCustomer.mutateAsync({
+        name: name.trim(),
+        email: user?.email || "",
+        cpfCnpj: cleanCpf,
+      });
+    } catch {
+      return; // o aviso já apareceu; a pessoa continua nesta etapa
+    }
 
     onComplete();
   };
@@ -108,60 +112,20 @@ function PaymentStep({
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const createPayment = useCreatePayment();
 
-  const [cardData, setCardData] = useState({
-    holderName: "",
-    number: "",
-    expiryMonth: "",
-    expiryYear: "",
-    ccv: "",
-  });
-  const [holderInfo, setHolderInfo] = useState({
-    name: "",
-    email: "",
-    cpfCnpj: "",
-    postalCode: "",
-    addressNumber: "",
-    phone: "",
-  });
-
-  const formatCardNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 16);
-    return numbers.replace(/(\d{4})(?=\d)/g, "$1 ");
-  };
-
   const handlePay = async () => {
     if (!method) return;
-
-    const payload: any = {
-      orderId,
-      billingType: method,
-    };
-
-    if (method === "CREDIT_CARD") {
-      if (!cardData.holderName || !cardData.number || !cardData.expiryMonth || !cardData.expiryYear || !cardData.ccv) {
-        toast.error("Preencha todos os dados do cartão");
-        return;
-      }
-      if (!holderInfo.name || !holderInfo.cpfCnpj || !holderInfo.postalCode || !holderInfo.addressNumber || !holderInfo.phone) {
-        toast.error("Preencha todos os dados do titular");
-        return;
-      }
-      payload.creditCard = {
-        ...cardData,
-        number: cardData.number.replace(/\s/g, ""),
-      };
-      payload.creditCardHolderInfo = holderInfo;
+    const result = await createPayment.mutateAsync({ orderId, billingType: method });
+    // Cartão: os dados são digitados na página segura do Asaas, nunca no app.
+    if (method === "CREDIT_CARD" && result?.payment?.invoiceUrl) {
+      window.open(result.payment.invoiceUrl, "_blank");
     }
-
-    const result = await createPayment.mutateAsync(payload);
     onPaymentCreated(result);
   };
 
   const methods = [
     { id: "PIX" as PaymentMethod, icon: QrCode, label: "Pix", desc: "Aprovação instantânea" },
-    { id: "CREDIT_CARD" as PaymentMethod, icon: CreditCard, label: "Cartão de Crédito", desc: "Aprovação imediata" },
-    { id: "BOLETO" as PaymentMethod, icon: FileText, label: "Boleto", desc: "Até 2 dias úteis" },
-  ].filter((m) => m.id !== "CREDIT_CARD" || CARTAO_ATIVO);
+    { id: "CREDIT_CARD" as PaymentMethod, icon: CreditCard, label: "Cartão", desc: "Crédito ou débito, em página segura" },
+  ];
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -207,91 +171,13 @@ function PaymentStep({
         ))}
       </div>
 
-      {/* Formulário de Cartão */}
       {method === "CREDIT_CARD" && (
-        <div className="space-y-4">
-          <h3 className="font-medium text-foreground">Dados do cartão</h3>
-          <InputField
-            label="Nome no cartão"
-            placeholder="Como impresso no cartão"
-            value={cardData.holderName}
-            onChange={(e) => setCardData({ ...cardData, holderName: e.target.value.toUpperCase() })}
-          />
-          <InputField
-            label="Número do cartão"
-            placeholder="0000 0000 0000 0000"
-            value={cardData.number}
-            onChange={(e) => setCardData({ ...cardData, number: formatCardNumber(e.target.value) })}
-            inputMode="numeric"
-          />
-          <div className="grid grid-cols-3 gap-3">
-            <InputField
-              label="Mês"
-              placeholder="MM"
-              value={cardData.expiryMonth}
-              onChange={(e) => setCardData({ ...cardData, expiryMonth: e.target.value.replace(/\D/g, "").slice(0, 2) })}
-              inputMode="numeric"
-            />
-            <InputField
-              label="Ano"
-              placeholder="AAAA"
-              value={cardData.expiryYear}
-              onChange={(e) => setCardData({ ...cardData, expiryYear: e.target.value.replace(/\D/g, "").slice(0, 4) })}
-              inputMode="numeric"
-            />
-            <InputField
-              label="CVV"
-              placeholder="***"
-              value={cardData.ccv}
-              onChange={(e) => setCardData({ ...cardData, ccv: e.target.value.replace(/\D/g, "").slice(0, 4) })}
-              inputMode="numeric"
-              type="password"
-            />
-          </div>
-
-          <h3 className="font-medium text-foreground pt-2">Dados do titular</h3>
-          <InputField
-            label="Nome completo"
-            placeholder="Nome do titular"
-            value={holderInfo.name}
-            onChange={(e) => setHolderInfo({ ...holderInfo, name: e.target.value })}
-          />
-          <InputField
-            label="CPF"
-            placeholder="Somente números"
-            value={holderInfo.cpfCnpj}
-            onChange={(e) => setHolderInfo({ ...holderInfo, cpfCnpj: e.target.value.replace(/\D/g, "").slice(0, 11) })}
-            inputMode="numeric"
-          />
-          <InputField
-            label="Telefone"
-            placeholder="DDD + número"
-            value={holderInfo.phone}
-            onChange={(e) => setHolderInfo({ ...holderInfo, phone: e.target.value.replace(/\D/g, "").slice(0, 11) })}
-            inputMode="numeric"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <InputField
-              label="CEP"
-              placeholder="00000000"
-              value={holderInfo.postalCode}
-              onChange={(e) => setHolderInfo({ ...holderInfo, postalCode: e.target.value.replace(/\D/g, "").slice(0, 8) })}
-              inputMode="numeric"
-            />
-            <InputField
-              label="Nº endereço"
-              placeholder="123"
-              value={holderInfo.addressNumber}
-              onChange={(e) => setHolderInfo({ ...holderInfo, addressNumber: e.target.value })}
-            />
-          </div>
-          <InputField
-            label="E-mail"
-            placeholder="seu@exemplo.com"
-            value={holderInfo.email}
-            onChange={(e) => setHolderInfo({ ...holderInfo, email: e.target.value })}
-            type="email"
-          />
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-accent/60 border border-border/60">
+          <Lock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+          <p className="text-sm text-muted-foreground">
+            Você digita o cartão na página segura do Asaas, nosso parceiro de pagamentos.
+            O Já Limpo não guarda o número do seu cartão.
+          </p>
         </div>
       )}
 
@@ -304,8 +190,7 @@ function PaymentStep({
           onClick={handlePay}
         >
           {method === "PIX" && "Gerar QR Code Pix"}
-          {method === "CREDIT_CARD" && `Pagar R$ ${orderTotal.toFixed(2).replace(".", ",")}`}
-          {method === "BOLETO" && "Gerar Boleto"}
+          {method === "CREDIT_CARD" && `Pagar R$ ${orderTotal.toFixed(2).replace(".", ",")} no cartão`}
         </PrimaryButton>
       )}
     </div>
@@ -313,7 +198,7 @@ function PaymentStep({
 }
 
 // Etapa 3: Confirmação / Aguardando pagamento
-function ConfirmationStep({ orderId, paymentResult }: { orderId: string; paymentResult?: any }) {
+function ConfirmationStep({ orderId, paymentResult, onTrocar }: { orderId: string; paymentResult?: any; onTrocar?: () => void }) {
   const navigate = useNavigate();
   const { data: payment, isLoading } = usePaymentByOrder(orderId);
   const [copied, setCopied] = useState(false);
@@ -334,7 +219,6 @@ function ConfirmationStep({ orderId, paymentResult }: { orderId: string; payment
   const pixCopyPaste = payment?.pix_copy_paste || paymentResult?.payment?.pixCopyPaste;
   const paymentStatus = payment?.status;
   const paymentMethod = payment?.method || paymentResult?.payment?.billingType?.toLowerCase();
-  const boletoUrl = payment?.boleto_url || paymentResult?.payment?.bankSlipUrl;
   const invoiceUrl = payment?.invoice_url || paymentResult?.payment?.invoiceUrl;
   const isPixWithQr = paymentMethod === "pix" && pixQrCode;
 
@@ -450,43 +334,35 @@ function ConfirmationStep({ orderId, paymentResult }: { orderId: string; payment
 
   // (PIX QR Code case already handled by isPixWithQr above)
 
-  // Boleto
-  if (paymentMethod === "boleto" && (boletoUrl || invoiceUrl)) {
-    return (
-      <div className="flex flex-col gap-6 p-6">
-        <div className="flex flex-col items-center text-center gap-2">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <FileText className="w-8 h-8 text-primary" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground">Boleto gerado!</h2>
-          <p className="text-sm text-muted-foreground">
-            O pagamento será confirmado em até 2 dias úteis após o pagamento.
-          </p>
-        </div>
-
-        <PrimaryButton
-          fullWidth
-          onClick={() => window.open(boletoUrl || invoiceUrl || "", "_blank")}
-        >
-          Abrir Boleto
-        </PrimaryButton>
-
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Clock className="w-4 h-4" />
-          Aguardando pagamento do boleto...
-        </div>
-      </div>
-    );
-  }
-
-  // Cartão pendente
+  // Cartão: aguardando a pessoa concluir na página segura
   return (
-    <div className="flex flex-col items-center justify-center p-12 gap-4">
-      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      <h2 className="text-lg font-semibold text-foreground">Processando pagamento...</h2>
-      <p className="text-sm text-muted-foreground text-center">
-        Aguarde enquanto confirmamos seu pagamento.
-      </p>
+    <div className="flex flex-col gap-6 p-6">
+      <div className="flex flex-col items-center text-center gap-2">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <CreditCard className="w-8 h-8 text-primary" />
+        </div>
+        <h2 className="text-xl font-semibold text-foreground">Pague com cartão</h2>
+        <p className="text-sm text-muted-foreground max-w-xs">
+          Conclua o pagamento na página segura. Assim que ele for aprovado, esta tela avança sozinha.
+        </p>
+      </div>
+
+      {invoiceUrl && (
+        <PrimaryButton fullWidth onClick={() => window.open(invoiceUrl, "_blank")}>
+          Abrir página do cartão
+        </PrimaryButton>
+      )}
+
+      <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        Aguardando pagamento...
+      </div>
+
+      {onTrocar && (
+        <button onClick={onTrocar} className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+          Prefiro pagar com Pix
+        </button>
+      )}
     </div>
   );
 }
@@ -503,19 +379,20 @@ export default function ClientCheckout() {
 
   const [step, setStep] = useState<"cpf" | "payment" | "confirmation">("cpf");
   const [paymentResult, setPaymentResult] = useState<any>(null);
+  const [escolherDeNovo, setEscolherDeNovo] = useState(false);
 
   // Definir step inicial baseado no estado
   useEffect(() => {
-    if (customerLoading) return;
+    if (customerLoading || escolherDeNovo) return;
 
-    if (existingPayment) {
+    if (existingPayment && existingPayment.status !== "cancelled") {
       setStep("confirmation");
     } else if (hasCustomer) {
       setStep("payment");
     } else {
       setStep("cpf");
     }
-  }, [hasCustomer, customerLoading, existingPayment]);
+  }, [hasCustomer, customerLoading, existingPayment, escolherDeNovo]);
 
   if (!orderId) {
     return (
@@ -605,13 +482,18 @@ export default function ClientCheckout() {
               serviceName={(order as any).service?.name || "Serviço de limpeza"}
               onPaymentCreated={(result) => {
                 setPaymentResult(result);
+                setEscolherDeNovo(false);
                 setStep("confirmation");
               }}
             />
           )}
 
           {step === "confirmation" && orderId && (
-            <ConfirmationStep orderId={orderId} paymentResult={paymentResult} />
+            <ConfirmationStep
+              orderId={orderId}
+              paymentResult={paymentResult}
+              onTrocar={() => { setEscolherDeNovo(true); setPaymentResult(null); setStep("payment"); }}
+            />
           )}
         </main>
 
